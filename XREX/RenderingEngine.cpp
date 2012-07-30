@@ -13,11 +13,6 @@ RenderingEngine::~RenderingEngine()
 {
 }
 
-RenderingEngine& RenderingEngine::GetInstance()
-{
-	static RenderingEngine engine;
-	return engine;
-}
 
 void RenderingEngine::Update()
 {

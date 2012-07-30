@@ -7,35 +7,6 @@
 namespace MathHelper
 {
 
-// 	template <typename T, uint32 N>
-// 	struct max_minimize_helper
-// 	{
-// 		static void DoMax(T out[N], T const lhs[N], T const rhs[N])
-// 		{
-// 			out[0] = std::max<T>(lhs[0], rhs[0]);
-// 			max_minimize_helper<T, N - 1>::DoMax(out + 1, lhs + 1, rhs + 1);
-// 		}
-// 
-// 		static void DoMin(T out[N], T const lhs[N], T const rhs[N])
-// 		{
-// 			out[0] = std::min<T>(lhs[0], rhs[0]);
-// 			max_minimize_helper<T, N - 1>::DoMin(out + 1, lhs + 1, rhs + 1);
-// 		}
-// 	};
-// 	template <typename T>
-// 	struct max_minimize_helper<T, 1>
-// 	{
-// 		static void DoMax(T out[1], T const lhs[1], T const rhs[1])
-// 		{
-// 			out[0] = std::max<T>(lhs[0], rhs[0]);
-// 		}
-// 
-// 		static void DoMin(T out[1], T const lhs[1], T const rhs[1])
-// 		{
-// 			out[0] = std::min<T>(lhs[0], rhs[0]);
-// 		}
-// 	};
-
 	template <typename T, uint32 N>
 	struct TransformHelper
 	{
@@ -301,13 +272,13 @@ namespace MathHelper
 				_3344_4334 = m33 * m44 - m43 * m34;
 
 			T determinant = (_1122_2112 * _3344_4334 - _1132_3112 * _2344_4324 + _1142_4112 * _2334_3324 + _2132_3122 * _1344_4314 - _2142_4122 * _1334_3314 + _3142_4132 * _1324_2314);
-			T inverseDeterminant;
 
 			// non-invertable
 			if (std::numeric_limits<T>::epsilon() >= determinant) {
 				return false;
 			}
 
+			T inverseDeterminant;
 			inverseDeterminant = T(1) / determinant;
 
 			out[0] = (m22 * _3344_4334 - m32 * _2344_4324 + m42 * _2334_3324) * inverseDeterminant;

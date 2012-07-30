@@ -24,9 +24,9 @@ float ReciprocalSqrt(float number)
 }
 
 template <typename T, uint32 N>
-Vector<T, N> Transform(Matrix4<T>& matrix, Vector<T, N>& vector, T lastComponent)
+VectorT<T, N> Transform(Matrix4T<T>& matrix, VectorT<T, N>& vector, T lastComponent)
 {
-	Vector<T, N> temp;
+	VectorT<T, N> temp;
 	MathHelper::TransformHelper<T, N>::Do(const_cast<T*>(&temp[0]), &matrix[0], &vector[0], lastComponent);
 	return temp;
 }
@@ -35,7 +35,7 @@ template floatV3 Transform(floatM44& matrix, floatV3& vector, float lastComponen
 template floatV4 Transform(floatM44& matrix, floatV4& vector, float lastComponent);
 
 template <typename T, uint32 N>
-Vector<T, N> TransformNormal(Matrix4<T>& matrix, Vector<T, N>& vector)
+VectorT<T, N> TransformNormal(Matrix4T<T>& matrix, VectorT<T, N>& vector)
 {
 	return Transform(matrix, vector, T(0));
 }
@@ -45,9 +45,9 @@ template floatV4 TransformNormal(floatM44& matrix, floatV4& vector);
 
 
 template <typename T>
-Matrix4<T> Translation(T const & x, T const & y, T const & z)
+Matrix4T<T> Translation(T const & x, T const & y, T const & z)
 {
-	return Matrix4<T>(
+	return Matrix4T<T>(
 		1, 0, 0, 0,
 		0, 1, 0, 0,
 		0, 0, 1, 0,
@@ -56,23 +56,23 @@ Matrix4<T> Translation(T const & x, T const & y, T const & z)
 template floatM44 Translation(float const & x, float const & y, float const & z);
 
 template <typename T>
-Matrix4<T> Translation(Vector<T, 3> const & v)
+Matrix4T<T> Translation(VectorT<T, 3> const & v)
 {
 	return Translation(v.X(), v.Y(), v.Z());
 }
 template floatM44 Translation(floatV3 const & v);
 
 template <typename T>
-Matrix4<T> Scaling(T const & s)
+Matrix4T<T> Scaling(T const & s)
 {
 	return Scaling(s, s, s);
 }
 template floatM44 Scaling(float const & s);
 
 template <typename T>
-Matrix4<T> Scaling(T const & sx, T const & sy, T const & sz)
+Matrix4T<T> Scaling(T const & sx, T const & sy, T const & sz)
 {
-	return Matrix4<T>(
+	return Matrix4T<T>(
 		sx, 0, 0, 0,
 		0, sy, 0, 0,
 		0, 0, sz, 0,
@@ -81,18 +81,18 @@ Matrix4<T> Scaling(T const & sx, T const & sy, T const & sz)
 template floatM44 Scaling(float const & sx, float const & sy, float const & sz);
 
 template <typename T>
-Matrix4<T> Scaling(Vector<T, 3> const & s)
+Matrix4T<T> Scaling(VectorT<T, 3> const & s)
 {
 	return Scaling(s.X(), s.Y(), s.Z());
 }
 template floatM44 Scaling(floatV3 const & s);
 
 template <typename T>
-Matrix4<T> RotationX(T const & angleX)
+Matrix4T<T> RotationX(T const & angleX)
 {
 	float sx = std::sin(angleX);
 	float cx = std::cos(angleX);
-	return Matrix4<T>(
+	return Matrix4T<T>(
 		1, 0, 0, 0,
 		0, cx, -sx, 0,
 		0, sx, cx, 0,
@@ -101,11 +101,11 @@ Matrix4<T> RotationX(T const & angleX)
 template floatM44 RotationX(float const & angleX);
 
 template <typename T>
-Matrix4<T> RotationY(T const & angleY)
+Matrix4T<T> RotationY(T const & angleY)
 {
 	float sy = std::sin(angleY);
 	float cy = std::cos(angleY);
-	return Matrix4<T>(
+	return Matrix4T<T>(
 		cy, 0, sy, 0,
 		0, 1, 0, 0,
 		-sy, 0, cy, 0,
@@ -114,11 +114,11 @@ Matrix4<T> RotationY(T const & angleY)
 template floatM44 RotationY(float const & angleY);
 
 template <typename T>
-Matrix4<T> RotationZ(T const & angleZ)
+Matrix4T<T> RotationZ(T const & angleZ)
 {
 	float sz = std::sin(angleZ);
 	float cz = std::cos(angleZ);
-	return Matrix4<T>(
+	return Matrix4T<T>(
 		cz, -sz, 0, 0,
 		sz, cz, 0, 0,
 		0, 0, 1, 0,
@@ -127,26 +127,26 @@ Matrix4<T> RotationZ(T const & angleZ)
 template floatM44 RotationZ(float const & angleZ);
 
 template <typename T>
-Matrix4<T> Rotation(T const & angle, T const & x, T const & y, T const & z)
+Matrix4T<T> Rotation(T const & angle, T const & x, T const & y, T const & z)
 {
-	return Rotation(angle, Vector<T, 3>(x, y, z));
+	return Rotation(angle, VectorT<T, 3>(x, y, z));
 }
 template floatM44 Rotation(float const & angle, float const & x, float const & y, float const & z);
 
 template <typename T>
-Matrix4<T> Rotation(T const & angle, Vector<T, 3> const & axis)
+Matrix4T<T> Rotation(T const & angle, VectorT<T, 3> const & axis)
 {
 	// 0 vector
 	if (axis.LengthSquared() == 0)
 	{
-		return Matrix4<T>::Zero();
+		return Matrix4T<T>::Zero;
 	}
-	Vector<T, 3> naxis = axis.Normalize();
+	VectorT<T, 3> naxis = axis.Normalize();
 	T ux = naxis.X();
 	T uy = naxis.Y();
 	T uz = naxis.Z();
 
-	Matrix4<T> temp;
+	Matrix4T<T> temp;
 	T* resultArray = const_cast<T*>(temp.GetArray());
 
 	// Rotation matrix, see http://en.wikipedia.org/wiki/Rotation_matrix#Rotation_matrix_from_axis_and_angle
@@ -180,15 +180,15 @@ Matrix4<T> Rotation(T const & angle, Vector<T, 3> const & axis)
 template floatM44 Rotation(float const & angle, floatV3 const & axis);
 
 template <typename T>
-Matrix4<T> RotationFromTo(Vector<T, 3> const & from, Vector<T, 3> const & to)
+Matrix4T<T> RotationFromTo(VectorT<T, 3> const & from, VectorT<T, 3> const & to)
 {
 	// 0 vector
 	if (from.LengthSquared() == 0 || to.LengthSquared() == 0)
 	{
-		return Matrix4<T>::Zero();
+		return Matrix4T<T>::Zero;
 	}
-	Vector<T, 3> ufrom = from.Normalize();
-	Vector<T, 3> uto = to.Normalize();
+	VectorT<T, 3> ufrom = from.Normalize();
+	VectorT<T, 3> uto = to.Normalize();
 	T fx = ufrom.X();
 	T fy = ufrom.Y();
 	T fz = ufrom.Z();
@@ -197,10 +197,10 @@ Matrix4<T> RotationFromTo(Vector<T, 3> const & from, Vector<T, 3> const & to)
 	T ty = uto.Y();
 	T tz = uto.Z();
 
-	Matrix4<T> temp;
+	Matrix4T<T> temp;
 	T* resultArray = const_cast<T*>(temp.GetArray());
 
-	// Rotation matrix build from to vectors, see 'Real-time Rendering, 3rd', 4.3.2, 'Rotation from One Vector to Another'
+	// Rotation matrix build from to vectors, see 'Real-time Rendering, 3rd', 4.3.2, 'Rotation from One VectorT to Another'
 	T vx = fy * tz - fz * ty, vy = fz * tx - fx * tz, vz = fx * ty - fy * tx;
 	T e = fx * tx + fy * ty + fz * tz;
 	T h = T(1) / (T(1) + e);
@@ -230,7 +230,7 @@ Matrix4<T> RotationFromTo(Vector<T, 3> const & from, Vector<T, 3> const & to)
 template floatM44 RotationFromTo(floatV3 const & from, floatV3 const & to);
 
 template <typename T>
-Matrix4<T> Frustum(T const & fieldOfView, T const & aspectRatio, T const & near, T const & far)
+Matrix4T<T> Frustum(T const & fieldOfView, T const & aspectRatio, T const & near, T const & far)
 {
 	T top = std::tan(fieldOfView * T(0.5)) * near;
 	T bottom = -top;
@@ -241,9 +241,9 @@ Matrix4<T> Frustum(T const & fieldOfView, T const & aspectRatio, T const & near,
 template floatM44 Frustum(float const & fieldOfView, float const & aspectRatio, float const & near, float const & far);
 
 template <typename T>
-Matrix4<T> Frustum(T const & top, T const & bottom, T const & left, T const & right, T const & near, T const & far)
+Matrix4T<T> Frustum(T const & top, T const & bottom, T const & left, T const & right, T const & near, T const & far)
 {
-	Matrix4<T> temp;
+	Matrix4T<T> temp;
 	T* resultArray = const_cast<T*>(temp.GetArray());
 
 	// for details, see 'Real-time Rendering, 3rd', 4.6.2
@@ -270,24 +270,63 @@ Matrix4<T> Frustum(T const & top, T const & bottom, T const & left, T const & ri
 };
 template floatM44 Frustum(float const & top, float const & bottom, float const & left, float const & right, float const & near, float const & far);
 
-
 template <typename T>
-Matrix4<T> LookAt(Vector<T, 3> const & eye, Vector<T, 3> const & at, Vector<T, 3> const & up)
+Matrix4T<T> FaceTo(VectorT<T, 3> const & self, VectorT<T, 3> const & to, VectorT<T, 3> const & up)
 {
-	Vector<T, 3> zAxis((eye - at).Normalize());
-	Vector<T, 3> xAxis(Cross(up, zAxis).Normalize());
-	Vector<T, 3> yAxis(Cross(zAxis, xAxis));
+	VectorT<T, 3> zAxis((self - to).Normalize());
+	VectorT<T, 3> xAxis(Cross(up, zAxis).Normalize());
+	VectorT<T, 3> yAxis(Cross(zAxis, xAxis));
 
-	if (eye == at)
+	if (self == to)
 	{
-		return Matrix4<T>::Identity();
+		return Matrix4T<T>::Identity;
 	}
 	if (up.LengthSquared() == 0)
 	{
-		return Matrix4<T>::Identity();
+		return Matrix4T<T>::Identity;
 	}
 
-	Matrix4<T> temp;
+	Matrix4T<T> temp;
+	T* resultArray = const_cast<T*>(temp.GetArray());
+
+	resultArray[0] = xAxis.X();
+	resultArray[1] = xAxis.Y();
+	resultArray[2] = xAxis.Z();
+	resultArray[3] = 0;
+	resultArray[4] = yAxis.X();
+	resultArray[5] = yAxis.Y();
+	resultArray[6] = yAxis.X();
+	resultArray[7] = 0;
+	resultArray[8] = zAxis.X();
+	resultArray[9] = zAxis.Y();
+	resultArray[10] = zAxis.Z();
+	resultArray[11] = 0;
+	resultArray[12] = self.X();
+	resultArray[13] = self.Y();
+	resultArray[14] = self.Z();
+	resultArray[15] = 1;
+
+	return temp;
+}
+template floatM44 FaceTo(floatV3 const & self, floatV3 const & to, floatV3 const & up);
+
+template <typename T>
+Matrix4T<T> LookAt(VectorT<T, 3> const & eye, VectorT<T, 3> const & at, VectorT<T, 3> const & up)
+{
+	VectorT<T, 3> zAxis((eye - at).Normalize());
+	VectorT<T, 3> xAxis(Cross(up, zAxis).Normalize());
+	VectorT<T, 3> yAxis(Cross(zAxis, xAxis));
+
+	if (eye == at)
+	{
+		return Matrix4T<T>::Identity;
+	}
+	if (up.LengthSquared() == 0)
+	{
+		return Matrix4T<T>::Identity;
+	}
+
+	Matrix4T<T> temp;
 	T* resultArray = const_cast<T*>(temp.GetArray());
 
 	resultArray[0] = xAxis.X();
