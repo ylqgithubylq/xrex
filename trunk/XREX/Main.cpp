@@ -1,7 +1,7 @@
 #include "XREX.hpp"
 
 
-#include "RenderingSettings.hpp"
+#include "Settings.hpp"
 #include "GLWindow.hpp"
 #include "LocalResourceLoader.hpp"
 #include "Shader.hpp"
@@ -10,6 +10,9 @@
 #include "RenderingLayout.hpp"
 #include "Mesh.hpp"
 #include "GLUtil.hpp"
+#include "SceneObject.hpp"
+#include "Transformation.hpp"
+#include "Camera.hpp"
 
 #include <CoreGL.hpp>
 //#include "CoreGL.h"
@@ -28,7 +31,9 @@
 
 
 
-using namespace gl;
+
+
+
 
 using namespace std;
 
@@ -39,13 +44,14 @@ using namespace std;
 struct Scene
 {
 	StaticMeshSP mesh_;
+	SceneObjectSP cube_;
 
 	void InitializeScene()
 	{
 		//gl::Enable(gl::GL_DEPTH_TEST);
 		//gl::Enable(gl::GL_BLEND);
-		gl::PolygonMode(gl::GL_FRONT, gl::GL_LINE);
-		gl::Enable(GL_CULL_FACE);
+		gl::PolygonMode(gl::GL_FRONT_AND_BACK, gl::GL_FILL);
+		gl::Enable(gl::GL_CULL_FACE);
 
 		ProgramObjectSP program = MakeSP<ProgramObject>();
 		string shaderString;
@@ -148,24 +154,16 @@ struct Scene
 		mesh_ = MakeSP<StaticMesh>(move(meshLayout));
 		mesh_->SetEffect("cube", effect);
 
-// 		gl::GenBuffers(1, &vertexBuffer);
-// 		gl::GenBuffers(1, &indexBuffer);
-// 		gl::BindBuffer(gl::GL_ARRAY_BUFFER, vertexBuffer);
-// 		gl::BufferData(gl::GL_ARRAY_BUFFER, vertexData.size() * sizeof(floatV3), vertexData.data(), gl::GL_STATIC_DRAW);
-// 		gl::BindBuffer(gl::GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-// 		gl::BufferData(gl::GL_ELEMENT_ARRAY_BUFFER, indexData.size() * sizeof(uint16), indexData.data(), gl::GL_STATIC_DRAW);
+
+		cube_ = MakeSP<SceneObject>("cube");
+		cube_->SetComponent(mesh_);
 	}
 
-// 	vector<floatV3> vertexData;
-// 	vector<uint16> indexData;
-// 
-// 	uint32 vertexBuffer;
-// 	uint32 indexBuffer;
 
 	void Render(double delta)
 	{
-		ClearColor(0.4f, 0.6f, 0.9f, 1);
-		Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+		gl::ClearColor(0.4f, 0.6f, 0.9f, 1);
+		gl::Clear(gl::GL_COLOR_BUFFER_BIT | gl::GL_DEPTH_BUFFER_BIT | gl::GL_STENCIL_BUFFER_BIT);
 
 
 		RenderingEffectSP effect = mesh_->GetEffect("cube");
@@ -176,11 +174,31 @@ struct Scene
 		EffectParameterSP vMatrix = effect->GetParameterByName("vMatrix");
 		EffectParameterSP pMatrix = effect->GetParameterByName("pMatrix");
 
-		floatM44 translate = Translation(floatV3(0, 0, -5));
-		floatM44 rotation = Rotation(0 *PI / 4, floatV3(0.5, 0.5, 0.5));
-		floatM44 view = LookAt(floatV3(0.0, 0.0, 1.0), floatV3(-0.1, 0.0, -1.0), floatV3(0.2, 1.0, 0.0));
+		TransformationSP transform = cube_->GetComponent<Transformation>();
+		CameraSP camera = cube_->GetComponent<Camera>();
+
+		floatV3 position = floatV3(0, 0, -5);
+		transform->SetPosition(position);
+		transform->SetScaling(2);
+		floatM44 orientation = Rotation(PI / 8, 0.0f, 1.0f, 0.0f);
+		transform->SetOrientation(orientation);
+
+		//transform->Rotate(PI / 4096, 1.0f, 0.5f, 0.25f);
+
+// 		floatM44 translate = Translation(floatV3(0, 0, -5));
+// 		floatM44 rotation = Rotation(0 * PI / 4, floatV3(0.5, 0.5, 0.5));
+		floatV3 eye = floatV3(0.5, 1.0, 0.0);
+		floatV3 at = position;
+		floatV3 up = floatV3(0.0, 1.0, 0.0);
+		floatM44 view = LookAt(eye, at, up);
+		//view = Translation(eye) * RotationFromTo(floatV3(0, 0, -1), (at - eye)).Inverse() * Translation(-eye);
 		floatM44 projection = Frustum(PI / 4, 6.0f / 5.0f, 1.0f, 10.0f);
-		wMatrix->SetValue(translate * rotation);
+// 		wMatrix->SetValue(translate * rotation);
+		transform->Update();
+		floatM44 model = transform->GetModelMatrix();
+		floatV3 temp = Transform(orientation, floatV3(0, 0, -1));
+		model = FaceTo(position, temp + position, up) * Scaling(transform->GetScaling()); // TODO finish this, seems not correct. how to do FaceTo?
+		wMatrix->SetValue(model);
 		vMatrix->SetValue(view);
 		pMatrix->SetValue(projection);
 
@@ -190,13 +208,6 @@ struct Scene
 		vector<Renderable::LayoutAndEffect> const & layouts = mesh_->GetLayoutsAndEffects();
 		layouts[0].layout->BindToProgram(*effect->GetPass(0)->GetProgram());
 
-
-// 		gl::EnableVertexAttribArray(0);
-// 		gl::BindBuffer(gl::GL_ARRAY_BUFFER, vertexBuffer);
-// 		gl::VertexAttribPointer(0, floatV3::Dimension, gl::GL_FLOAT, false, 0, 0);
-// 		gl::BindBuffer(gl::GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-// 		gl::DrawElements(gl::GL_TRIANGLES, indexData.size(), gl::GL_UNSIGNED_SHORT, reinterpret_cast<void const *>(0));
-// 		gl::DrawArrays(gl::GL_TRIANGLES, 0, vertexData.size());
 
 		int32 count = layouts[0].layout->GetElementCount();
 		ElementType elementType = layouts[0].layout->GetIndexElementType();
@@ -219,7 +230,7 @@ void TestMath()
 {
 	floatV4 f40(1, 2, 3, 4);
 	floatV4	f41(4, 3, 2, 1);
-	Vector<uint8, 4> ui40(1, 2, 3, 4);
+	VectorT<uint8, 4> ui40(1, 2, 3, 4);
 	floatV4 f42(1, 2, 3, 4);
 	auto resultA = static_cast<floatV4>(ui40) + f40;
 	auto resultM = static_cast<floatV4>(ui40) * f40;
@@ -238,13 +249,14 @@ void TestMath()
 	{
 		f42 = f40;
 	}
+	newV0 = newV1;
 
 	floatM44 m0;
 	floatM44 m1(0.5, 0.5, 0, 0,
 		-0.5, 0.5, 0, 0,
 		0, 0, 1, 0,
 		0, 0, 0, 1);
-	m0 = floatM44::Identity();
+	m0 = floatM44::Identity;
 	floatM44 m2 = m1.Transpose();
 	floatM44 m3 = m1.Inverse();
 	floatM44 m4 = m1 * m1;
@@ -285,30 +297,30 @@ void TestMath()
 
 void Main() 
 {
-	RenderingSettings settings;
-	settings.colorBits = 32;
-	settings.depthBits = 24;
-	settings.stencilBits = 8;
-	settings.sampleCount = 4;
+	Settings settings;
+	settings.windowTitle = L"TestMath GL4 window";
 
-	settings.left = 400;
-	settings.top = 300;
-	settings.width = 600;
-	settings.height = 500;
+	settings.renderingSettings.colorBits = 32;
+	settings.renderingSettings.depthBits = 24;
+	settings.renderingSettings.stencilBits = 8;
+	settings.renderingSettings.sampleCount = 4;
+
+	settings.renderingSettings.left = 400;
+	settings.renderingSettings.top = 300;
+	settings.renderingSettings.width = 600;
+	settings.renderingSettings.height = 500;
 
 
-	GLWindow window(L"TestMath GL4 window", settings);
+	Context::GetInstance().Initialize(settings);
 
 	Scene s;
 	s.InitializeScene();
 
-	RenderingEngine::GetInstance().SetRenderingFunction(function<void(double)>(s));
+	Context::GetInstance().GetRenderingEngine().SetRenderingFunction(function<void(double)>(s));
 
 
 
-	/*window.SwapBuffers();*/
-
-	window.StartHandlingMessages();
+	Context::GetInstance().Start();
 }
 
 

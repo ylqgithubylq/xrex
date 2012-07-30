@@ -1,10 +1,13 @@
 #pragma once
 #include "Declare.hpp"
 
-#include "window.hpp"
+#include "Window.hpp"
+
+#include "Context.hpp"
 #include "RenderingEngine.hpp"
 
 #include <memory>
+
 
 
 
@@ -31,14 +34,14 @@ public:
 protected:
 	virtual void OnMessageIdle() override
 	{
-		RenderingEngine::GetInstance().Update();
+		Context::GetInstance().GetRenderingEngine().Update();
 		SwapBuffers();
 	}
 
 private:
 	// used to hide windows.h to the cpp file
 	struct GLHideWindows_;
-	std::unique_ptr<GLHideWindows_, CheckedDeleter<GLHideWindows_>> glHideWindows_;
+	std::unique_ptr<GLHideWindows_> glHideWindows_;
 
 	int32 majorVersion_;
 	int32 minorVersion_;

@@ -137,14 +137,14 @@ public:
 	{
 		return parameters_;
 	}
-	void AddParameter(EffectParameterSP& parameter)
+	void AddParameter(EffectParameterSP const & parameter)
 	{
 		parameters_.push_back(parameter);
 	}
 	/*
 	 *	@return null pointer if not exist.
 	 */
-	EffectParameterSP GetParameterByName(std::string const & name) const;
+	EffectParameterSP const & GetParameterByName(std::string const & name) const;
 
 	uint32 GetPassCount() const
 	{

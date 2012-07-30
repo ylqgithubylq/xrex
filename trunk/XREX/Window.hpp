@@ -15,8 +15,6 @@ public:
 	Window(std::wstring const & name, int32 left, int32 top, int32 width, int32 height);
 	virtual ~Window();
 
-	bool DestoryRenderingWindow();
-
 	void StartHandlingMessages();
 
 	bool IsRendering() const
@@ -58,7 +56,7 @@ private:
 protected:
 	 // used to hide windows.h to the cpp file
 	struct HideWindows_;
-	std::unique_ptr<HideWindows_, CheckedDeleter<HideWindows_>> hideWindows_;
+	std::unique_ptr<HideWindows_> hideWindows_;
 
 	bool active_;
 	bool running_;

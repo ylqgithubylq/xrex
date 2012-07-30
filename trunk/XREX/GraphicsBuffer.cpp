@@ -69,7 +69,7 @@ void GraphicsBuffer::Bind()
 void GraphicsBuffer::BindToProgram(ProgramObject const & program)
 {
 	Bind();
-	for (int i = 0; i < description_.channelLayouts_.size(); ++i)
+	for (uint32 i = 0; i < description_.channelLayouts_.size(); ++i)
 	{
 		DataDescription::ElementLayoutDescription& channelLayout = description_.channelLayouts_[i];
 		lastAttributeLocations_[i] = program.GetAttributeLocation(channelLayout.channel);
@@ -84,7 +84,7 @@ void GraphicsBuffer::BindToProgram(ProgramObject const & program)
 
 void GraphicsBuffer::Unbind()
 {
-	for (int i = 0; i < description_.channelLayouts_.size(); ++i)
+	for (uint32 i = 0; i < description_.channelLayouts_.size(); ++i)
 	{
 		gl::DisableVertexAttribArray(lastAttributeLocations_[i]);
 	}

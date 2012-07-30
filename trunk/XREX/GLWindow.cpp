@@ -2,7 +2,7 @@
 
 #include "GLWindow.hpp"
 
-#include "RenderingSettings.hpp"
+#include "Settings.hpp"
 
 #include <sstream>
 #include <iostream>

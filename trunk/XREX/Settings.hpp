@@ -1,11 +1,14 @@
 #pragma once
+
 #include "Declare.hpp"
+
+#include <string>
+
+
 
 struct RenderingSettings
 {
 public:
-	RenderingSettings();
-	~RenderingSettings();
 
 	bool fullScreen;
 
@@ -20,5 +23,11 @@ public:
 
 	uint32 sampleCount;
 
+};
+
+struct Settings
+{
+	RenderingSettings renderingSettings;
+	std::wstring windowTitle;
 };
 

@@ -38,7 +38,7 @@ template <class T>
 inline void CheckedDelete(T * x)
 {
 	// intentionally complex - simplification causes regressions
-	typedef char TypeMustBeComplete[ sizeof(T)? 1: -1 ];
+	typedef char TypeMustBeComplete[sizeof(T) ? 1 : -1];
 	(void) sizeof(TypeMustBeComplete);
 	delete x;
 }
@@ -51,65 +51,71 @@ struct CheckedDeleter
 	{
 		CheckedDelete(x);
 	}
+
 };
 
 
-template<class T, class A0>
-std::unique_ptr<T, CheckedDeleter<T>> MakeUP(A0&& a0)
+template<typename T>
+std::unique_ptr<T> MakeUP()
 {
-	return std::move(std::unique_ptr<T, CheckedDeleter<T>>(new T(std::forward<A0>(a0))));
+	return std::move(std::unique_ptr<T>(new T()));
+}
+template<typename T, typename A0>
+std::unique_ptr<T> MakeUP(A0&& a0)
+{
+	return std::move(std::unique_ptr<T>(new T(std::forward<A0>(a0))));
 }
 template <typename T, typename A0, typename A1>
-inline std::unique_ptr<T, CheckedDeleter<T>> MakeUP(A0&& a0, A1&& a1)
+inline std::unique_ptr<T> MakeUP(A0&& a0, A1&& a1)
 {
-	return std::move(std::unique_ptr<T, CheckedDeleter<T>>(new T(std::forward<A0>(a0), std::forward<A1>(a1))));
+	return std::move(std::unique_ptr<T>(new T(std::forward<A0>(a0), std::forward<A1>(a1))));
 }
 template <typename T, typename A0, typename A1, typename A2>
-inline std::unique_ptr<T, CheckedDeleter<T>> MakeUP(A0&& a0, A1&& a1, A2&& a2)
+inline std::unique_ptr<T> MakeUP(A0&& a0, A1&& a1, A2&& a2)
 {
-	return std::move(std::unique_ptr<T, CheckedDeleter<T>>(new T(std::forward<A0>(a0), std::forward<A1>(a1), std::forward<A2>(a2))));
+	return std::move(std::unique_ptr<T>(new T(std::forward<A0>(a0), std::forward<A1>(a1), std::forward<A2>(a2))));
 }
 template <typename T, typename A0, typename A1, typename A2, typename A3>
-inline std::unique_ptr<T, CheckedDeleter<T>> MakeUP(A0&& a0, A1&& a1, A2&& a2, A3&& a3)
+inline std::unique_ptr<T> MakeUP(A0&& a0, A1&& a1, A2&& a2, A3&& a3)
 {
-	return std::move(std::unique_ptr<T, CheckedDeleter<T>>(new T(std::forward<A0>(a0), std::forward<A1>(a1), std::forward<A2>(a2), std::forward<A3>(a3))));
+	return std::move(std::unique_ptr<T>(new T(std::forward<A0>(a0), std::forward<A1>(a1), std::forward<A2>(a2), std::forward<A3>(a3))));
 }
 template <typename T, typename A0, typename A1, typename A2, typename A3, typename A4>
-inline std::unique_ptr<T, CheckedDeleter<T>> MakeUP(A0&& a0, A1&& a1, A2&& a2, A3&& a3, A4&& a4)
+inline std::unique_ptr<T> MakeUP(A0&& a0, A1&& a1, A2&& a2, A3&& a3, A4&& a4)
 {
-	return std::move(std::unique_ptr<T, CheckedDeleter<T>>(new T(std::forward<A0>(a0), std::forward<A1>(a1), std::forward<A2>(a2), std::forward<A3>(a3), std::forward<A4>(a4))));
+	return std::move(std::unique_ptr<T>(new T(std::forward<A0>(a0), std::forward<A1>(a1), std::forward<A2>(a2), std::forward<A3>(a3), std::forward<A4>(a4))));
 }
 
 
 template <typename T>
 inline std::shared_ptr<T> MakeSP()
 {
-	return std::shared_ptr<T>(new T, CheckedDeleter<T>());
+	return std::move(std::shared_ptr<T>(new T, CheckedDeleter<T>()));
 }
 template <typename T, typename A0>
 inline std::shared_ptr<T> MakeSP(A0&& a0)
 {
-	return std::shared_ptr<T>(new T(std::forward<A0>(a0)), CheckedDeleter<T>());
+	return std::move(std::shared_ptr<T>(new T(std::forward<A0>(a0)), CheckedDeleter<T>()));
 }
 template <typename T, typename A0, typename A1>
 inline std::shared_ptr<T> MakeSP(A0&& a0, A1&& a1)
 {
-	return std::shared_ptr<T>(new T(std::forward<A0>(a0), std::forward<A1>(a1)), CheckedDeleter<T>());
+	return std::move(std::shared_ptr<T>(new T(std::forward<A0>(a0), std::forward<A1>(a1)), CheckedDeleter<T>()));
 }
 template <typename T, typename A0, typename A1, typename A2>
 inline std::shared_ptr<T> MakeSP(A0&& a0, A1&& a1, A2&& a2)
 {
-	return std::shared_ptr<T>(new T(std::forward<A0>(a0), std::forward<A1>(a1), std::forward<A2>(a2)), CheckedDeleter<T>());
+	return std::move(std::shared_ptr<T>(new T(std::forward<A0>(a0), std::forward<A1>(a1), std::forward<A2>(a2)), CheckedDeleter<T>()));
 }
 template <typename T, typename A0, typename A1, typename A2, typename A3>
 inline std::shared_ptr<T> MakeSP(A0&& a0, A1&& a1, A2&& a2, A3&& a3)
 {
-	return std::shared_ptr<T>(new T(std::forward<A0>(a0), std::forward<A1>(a1), std::forward<A2>(a2), std::forward<A3>(a3)), CheckedDeleter<T>());
+	return std::move(std::shared_ptr<T>(new T(std::forward<A0>(a0), std::forward<A1>(a1), std::forward<A2>(a2), std::forward<A3>(a3)), CheckedDeleter<T>()));
 }
 template <typename T, typename A0, typename A1, typename A2, typename A3, typename A4>
 inline std::shared_ptr<T> MakeUP(A0&& a0, A1&& a1, A2&& a2, A3&& a3, A4&& a4)
 {
-	return std::shared_ptr<T>(new T(std::forward<A0>(a0), std::forward<A1>(a1), std::forward<A2>(a2), std::forward<A3>(a3), std::forward<A4>(a4)), CheckedDeleter<T>());
+	return std::move(std::shared_ptr<T>(new T(std::forward<A0>(a0), std::forward<A1>(a1), std::forward<A2>(a2), std::forward<A3>(a3), std::forward<A4>(a4)), CheckedDeleter<T>()));
 }
 
 

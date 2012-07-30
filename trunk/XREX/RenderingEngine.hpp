@@ -3,14 +3,16 @@
 #include "Declare.hpp"
 
 #include <functional>
+#include <vector>
 
 class RenderingEngine
 	: Noncopyable
 {
-public:
-	static RenderingEngine& GetInstance();
 
 public:
+	RenderingEngine();
+	~RenderingEngine();
+
 	void Update();
 
 	// Temp function for convenience
@@ -19,12 +21,10 @@ public:
 		renderingFunction_ = renderingFunction;
 	}
 
-private:
-	RenderingEngine();
-	~RenderingEngine();
 
 private:
 	std::function<void(double delta)> renderingFunction_;
-
+	std::vector<CameraSP> cameras_;
+	CameraSP currentCamera_;
 };
 

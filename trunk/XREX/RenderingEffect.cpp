@@ -67,6 +67,8 @@ void EffectParameter::SetValue(floatM44 const & value)
 // 	void EffectParameter::SetValue(std::vector<floatV4> const & value) { assert(false); }
 // 	void EffectParameter::SetValue(std::vector<floatM44> const & value) { assert(false); }
 
+#pragma warning(push)
+#pragma warning(disable: 4172) // return address of local variable
 
 EffectParameter::ParameterValueAutoConverter::operator bool const &() const
 {
@@ -116,7 +118,7 @@ auto EffectParameter::GetValue() const -> ParameterValueAutoConverter const &
 	return ParameterValueAutoConverter();
 }
 
-
+#pragma warning(pop)
 
 
 
@@ -139,7 +141,7 @@ void RenderingEffect::Initialize(std::vector<RenderingPassSP> const & passes)
 	initialized = true;
 }
 
-EffectParameterSP RenderingEffect::GetParameterByName(string const & name) const
+EffectParameterSP const & RenderingEffect::GetParameterByName(string const & name) const
 {
 	auto i = std::find_if(parameters_.begin(), parameters_.end(), [&name] (EffectParameterSP const & parameter)
 	{
