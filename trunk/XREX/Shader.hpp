@@ -53,13 +53,13 @@ public:
 
 private:
 
-	static std::string const VERSION_MACRO;
+	static std::string const VersionMacro;
 
 	static std::vector<std::string> InitializeShaderMacros();
-	static std::vector<std::string> const SHADER_DEFINE_MACROS;
+	static std::vector<std::string> const ShaderDefineMacros;
 
 	static std::vector<uint32> InitializeGLShaderTypeMapping();
-	static std::vector<uint32> const SHADER_TYPE_TO_GL_SHADER_TYPE;
+	static std::vector<uint32> const ShaderTypeToGLShaderType;
 
 
 private:

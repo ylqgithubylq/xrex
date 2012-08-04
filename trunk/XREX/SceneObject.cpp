@@ -5,6 +5,9 @@
 #include "Transformation.hpp"
 
 
+SceneObjectSP const SceneObject::NullSceneObject = nullptr;
+
+
 SceneObject::SceneObject()
 	: components_(static_cast<uint32>(Component::ComponentType::ComponentTypeCount))
 {
@@ -21,3 +24,5 @@ SceneObject::SceneObject(std::string const & name)
 SceneObject::~SceneObject()
 {
 }
+
+

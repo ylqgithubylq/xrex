@@ -43,6 +43,12 @@ public:
 	}
 
 
+	void Draw();
+
+private:
+	static std::vector<uint32> InitializeGLDrawTypeMapping();
+	static std::vector<uint32> const DrawTypeToGLDrawType;
+
 private:
 	std::vector<GraphicsBufferSP> buffers_;
 	GraphicsBufferSP indexBuffer_;

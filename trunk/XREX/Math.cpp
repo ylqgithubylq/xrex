@@ -189,20 +189,15 @@ Matrix4T<T> RotationFromTo(VectorT<T, 3> const & from, VectorT<T, 3> const & to)
 	}
 	VectorT<T, 3> ufrom = from.Normalize();
 	VectorT<T, 3> uto = to.Normalize();
-	T fx = ufrom.X();
-	T fy = ufrom.Y();
-	T fz = ufrom.Z();
-	
-	T tx = uto.X();
-	T ty = uto.Y();
-	T tz = uto.Z();
 
 	Matrix4T<T> temp;
 	T* resultArray = const_cast<T*>(temp.GetArray());
 
 	// Rotation matrix build from to vectors, see 'Real-time Rendering, 3rd', 4.3.2, 'Rotation from One VectorT to Another'
-	T vx = fy * tz - fz * ty, vy = fz * tx - fx * tz, vz = fx * ty - fy * tx;
-	T e = fx * tx + fy * ty + fz * tz;
+	T vx = ufrom.Y() * uto.Z() - ufrom.Z() * uto.Y();
+	T vy = ufrom.Z() * uto.X() - ufrom.X() * uto.Z();
+	T vz = ufrom.X() * uto.Y() - ufrom.Y() * uto.X();
+	T e = ufrom.X() * uto.X() + ufrom.Y() * uto.Y() + ufrom.Z() * uto.Z();
 	T h = T(1) / (T(1) + e);
 
 	resultArray[0] = e + h * vx * vx;
@@ -271,11 +266,13 @@ Matrix4T<T> Frustum(T const & top, T const & bottom, T const & left, T const & r
 template floatM44 Frustum(float const & top, float const & bottom, float const & left, float const & right, float const & near, float const & far);
 
 template <typename T>
-Matrix4T<T> FaceTo(VectorT<T, 3> const & self, VectorT<T, 3> const & to, VectorT<T, 3> const & up)
+Matrix4T<T> FaceTo(VectorT<T, 3> const & front, VectorT<T, 3> const & self, VectorT<T, 3> const & to, VectorT<T, 3> const & up)
 {
-	VectorT<T, 3> zAxis((self - to).Normalize());
-	VectorT<T, 3> xAxis(Cross(up, zAxis).Normalize());
-	VectorT<T, 3> yAxis(Cross(zAxis, xAxis));
+	// code below calculate the matrix using -z as the front, so rotate -z axis to front direction first
+	floatM44 rotateToNegtiveZ = RotationFromTo(floatV3(0, 0, -1), front);
+	VectorT<T, 3> zAxis = Transform(rotateToNegtiveZ, (self - to).Normalize());
+	VectorT<T, 3> xAxis = Cross(up, zAxis).Normalize();
+	VectorT<T, 3> yAxis = Cross(zAxis, xAxis);
 
 	if (self == to)
 	{
@@ -295,24 +292,25 @@ Matrix4T<T> FaceTo(VectorT<T, 3> const & self, VectorT<T, 3> const & to, VectorT
 	resultArray[3] = 0;
 	resultArray[4] = yAxis.X();
 	resultArray[5] = yAxis.Y();
-	resultArray[6] = yAxis.X();
+	resultArray[6] = yAxis.Z();
 	resultArray[7] = 0;
 	resultArray[8] = zAxis.X();
 	resultArray[9] = zAxis.Y();
 	resultArray[10] = zAxis.Z();
 	resultArray[11] = 0;
-	resultArray[12] = self.X();
-	resultArray[13] = self.Y();
-	resultArray[14] = self.Z();
+	resultArray[12] = 0;
+	resultArray[13] = 0;
+	resultArray[14] = 0;
 	resultArray[15] = 1;
 
 	return temp;
 }
-template floatM44 FaceTo(floatV3 const & self, floatV3 const & to, floatV3 const & up);
+template floatM44 FaceTo(floatV3 const & front, floatV3 const & self, floatV3 const & to, floatV3 const & up);
 
 template <typename T>
 Matrix4T<T> LookAt(VectorT<T, 3> const & eye, VectorT<T, 3> const & at, VectorT<T, 3> const & up)
 {
+	// -z is front direction
 	VectorT<T, 3> zAxis((eye - at).Normalize());
 	VectorT<T, 3> xAxis(Cross(up, zAxis).Normalize());
 	VectorT<T, 3> yAxis(Cross(zAxis, xAxis));

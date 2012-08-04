@@ -27,6 +27,11 @@ public:
 		return *mainWindow_.get();
 	}
 
+	Settings const & GetSettings() const
+	{
+		return settings_;
+	}
+
 	void Initialize(Settings const & settings);
 	void Start();
 
@@ -40,5 +45,6 @@ private:
 private:
 	std::unique_ptr<Window> mainWindow_;
 	std::unique_ptr<RenderingEngine> renderingEngine_;
+	Settings settings_;
 };
 

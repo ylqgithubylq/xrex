@@ -43,6 +43,22 @@ public:
 	virtual ComponentType GetComponentType() const = 0;
 
 	virtual void Update() = 0;
+
+	/*
+	 *	Used for SceneObject. Don't use this.
+	 */
+	void SetOwnerSceneObject(SceneObjectSP o)
+	{
+		sceneObject_ = o;
+	}
+	SceneObjectSP GetOwnerSceneObject() const
+	{
+		assert(!sceneObject_.expired());
+		return sceneObject_.lock();
+	}
+
+protected:
+	std::weak_ptr<SceneObject> sceneObject_;
 };
 
 template <typename T>
@@ -54,6 +70,7 @@ class TemplateComponent
 		static_assert(TypeToComponentType<T>::Type != ComponentType::ComponentTypeCount, "");
 		return TypeToComponentType<T>::Type;
 	}
+	virtual void Update() override = 0;
 };
 
 

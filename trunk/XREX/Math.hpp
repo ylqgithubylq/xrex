@@ -50,7 +50,10 @@ Matrix4T<T> Frustum(T const & fieldOfView, T const & aspectRatio, T const & near
 template <typename T>
 Matrix4T<T> Frustum(T const & top, T const & bottom, T const & left, T const & right, T const & near, T const & far);
 
+/*
+ *	Return matrix only contains rotation.
+ */
 template <typename T>
-Matrix4T<T> FaceTo(VectorT<T, 3> const & self, VectorT<T, 3> const & to, VectorT<T, 3> const & up);
+Matrix4T<T> FaceTo(VectorT<T, 3> const & front, VectorT<T, 3> const & self, VectorT<T, 3> const & to, VectorT<T, 3> const & up);
 template <typename T>
 Matrix4T<T> LookAt(VectorT<T, 3> const & eye, VectorT<T, 3> const & at, VectorT<T, 3> const & up);

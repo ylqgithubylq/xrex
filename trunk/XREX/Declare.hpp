@@ -15,6 +15,11 @@ class RenderingEngine;
 class Window;
 class GLWindow;
 
+class Scene;
+typedef std::shared_ptr<Scene> SceneSP;
+class NaiveManagedScene;
+typedef std::shared_ptr<NaiveManagedScene> NaiveManagedSceneSP;
+
 class SceneObject;
 typedef std::shared_ptr<SceneObject> SceneObjectSP;
 class Component;
