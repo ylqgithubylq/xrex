@@ -6,9 +6,12 @@
 #include <vector>
 
 
+
 class SceneObject
-	: Noncopyable
+	: public std::enable_shared_from_this<SceneObject>, Noncopyable
 {
+public:
+	static SceneObjectSP const NullSceneObject;
 public:
 	SceneObject();
 	explicit SceneObject(std::string const & name);
@@ -19,9 +22,20 @@ public:
 		return name_;
 	}
 
+	bool HasComponent(Component::ComponentType type) const
+	{
+		return components_[static_cast<uint32>(type)] != nullptr;
+	}
+	template <typename T>
+	bool HasComponent() const
+	{
+		return components_[static_cast<uint32>(Component::TypeToComponentType<T>::Type)] != nullptr;
+	}
+
 	void SetComponent(ComponentSP const & component)
 	{
 		components_[component->GetComponentType()] = component;
+		component->SetOwnerSceneObject(shared_from_this());
 	}
 
 	ComponentSP const & GetComponent(Component::ComponentType type) const

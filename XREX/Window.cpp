@@ -239,11 +239,11 @@ void Window::StartHandlingMessages()
 	{
 		if (active_ && rendering_)
 		{
-			hasMessage = PeekMessage(&msg, NULL, 0, 0, PM_REMOVE);
+			hasMessage = ::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE);
 		}
 		else
 		{
-			hasMessage = GetMessage(&msg, NULL, 0, 0);
+			hasMessage = ::GetMessage(&msg, NULL, 0, 0);
 		}
 
 		if (hasMessage)
@@ -254,8 +254,8 @@ void Window::StartHandlingMessages()
 			}
 			else
 			{
-				TranslateMessage(&msg);
-				DispatchMessage(&msg);
+				::TranslateMessage(&msg);
+				::DispatchMessage(&msg);
 			}
 		}
 		else

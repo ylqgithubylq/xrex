@@ -19,6 +19,7 @@ Context::~Context()
 
 void Context::Initialize(Settings const & settings)
 {
+	settings_ = settings;
 	InitializeMainWindow(settings.windowTitle, settings.renderingSettings);
 }
 

@@ -120,12 +120,36 @@ public:
 		orientation_ = Rotation(angle, axis) * orientation_;
 	}
 
-
+	/*
+	 *	Used by FaceTo.
+	 */
+	void SetFrontDirection(floatV3 const & front)
+	{
+		front_ = front;
+	}
+	/*
+	 *	Used by FaceTo.
+	 *	Default value is +y.
+	 */
+	void SetUpDirection(floatV3 const & up)
+	{
+		up_ = up;
+	}
+	/*
+	 *	Call this will set orientation. Make sure front and up are set by SetFrontDirection and SetUpDirection.
+	 */
+	void FaceTo(floatV3 to)
+	{
+		orientation_ = ::FaceTo(front_, position_, to, up_);
+	}
 
 private:
 	floatV3 position_;
 	floatM44 orientation_; // TODO change to quaternion
 	floatV3 scaling_;
+
+	floatV3 front_;
+	floatV3 up_;
 
 	floatM44 modelMatrix_;
 

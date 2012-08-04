@@ -29,11 +29,11 @@ vector<string> ShaderObject::InitializeShaderMacros()
 	return move(macros);
 }
 
-vector<string> const ShaderObject::SHADER_DEFINE_MACROS = InitializeShaderMacros();
+vector<string> const ShaderObject::ShaderDefineMacros = InitializeShaderMacros();
 
 
-string const ShaderObject::VERSION_MACRO = "#version 420\n\n";
-//const string ShaderObject::VERSION_MACRO = "\n\n";
+string const ShaderObject::VersionMacro = "#version 420\n\n";
+//const string ShaderObject::VersionMacro = "\n\n";
 
 
 vector<uint32> ShaderObject::InitializeGLShaderTypeMapping()
@@ -47,20 +47,20 @@ vector<uint32> ShaderObject::InitializeGLShaderTypeMapping()
 	return move(mapping);
 }
 
-const vector<uint32> ShaderObject::SHADER_TYPE_TO_GL_SHADER_TYPE = InitializeGLShaderTypeMapping();
+const vector<uint32> ShaderObject::ShaderTypeToGLShaderType = InitializeGLShaderTypeMapping();
 
 
 
 
 ShaderObject::ShaderObject(ShaderType type, string const & source) : type_(type), source_(source)
 {
-	shaderID_ = gl::CreateShader(SHADER_TYPE_TO_GL_SHADER_TYPE[static_cast<uint32>(type_)]);
+	shaderID_ = gl::CreateShader(ShaderTypeToGLShaderType[static_cast<uint32>(type_)]);
 	Compile();
 }
 
 ShaderObject::ShaderObject(ShaderType type, string&& source) : type_(type), source_(move(source))
 {
-	shaderID_ = gl::CreateShader(SHADER_TYPE_TO_GL_SHADER_TYPE[static_cast<uint32>(type_)]);
+	shaderID_ = gl::CreateShader(ShaderTypeToGLShaderType[static_cast<uint32>(type_)]);
 	Compile();
 }
 
@@ -86,9 +86,9 @@ bool ShaderObject::Compile()
 		return false;
 	}
 
-	string const & macroToDefine = SHADER_DEFINE_MACROS[static_cast<uint32>(type_)];
+	string const & macroToDefine = ShaderDefineMacros[static_cast<uint32>(type_)];
 
-	char const * cstring[] = { VERSION_MACRO.c_str(), macroToDefine.c_str(), source_.c_str() };
+	char const * cstring[] = { VersionMacro.c_str(), macroToDefine.c_str(), source_.c_str() };
 	gl::ShaderSource(shaderID_, sizeof(cstring) / sizeof(cstring[0]), cstring, nullptr);
 	gl::CompileShader(shaderID_);
 	
@@ -421,7 +421,7 @@ void ProgramObject::InitializeUniformBinder(UniformBinder& binder, EffectParamet
 			{
 				binder.setter = [&binder, parameter] ()
 				{
-					gl::Uniform1i(binder.location, parameter->GetValue());
+					gl::Uniform1i(binder.location, parameter->GetValue<bool>());
 				};
 			}
 			break;
@@ -429,7 +429,7 @@ void ProgramObject::InitializeUniformBinder(UniformBinder& binder, EffectParamet
 			{
 				binder.setter = [&binder, parameter] ()
 				{
-					gl::Uniform1i(binder.location, parameter->GetValue());
+					gl::Uniform1i(binder.location, parameter->GetValue<int32>());
 				};
 			}
 			break;
@@ -437,7 +437,7 @@ void ProgramObject::InitializeUniformBinder(UniformBinder& binder, EffectParamet
 			{
 				binder.setter = [&binder, parameter] ()
 				{
-					gl::Uniform1f(binder.location, parameter->GetValue());
+					gl::Uniform1f(binder.location, parameter->GetValue<float>());
 				};
 			}
 			break;
@@ -445,7 +445,7 @@ void ProgramObject::InitializeUniformBinder(UniformBinder& binder, EffectParamet
 			{
 				binder.setter = [&binder, parameter] ()
 				{
-					gl::Uniform2fv(binder.location, 1, static_cast<floatV2>(parameter->GetValue()).GetArray());
+					gl::Uniform2fv(binder.location, 1, parameter->GetValue<floatV2>().GetArray());
 				};
 			}
 			break;
@@ -453,7 +453,7 @@ void ProgramObject::InitializeUniformBinder(UniformBinder& binder, EffectParamet
 			{
 				binder.setter = [&binder, parameter] ()
 				{
-					gl::Uniform3fv(binder.location, 1, static_cast<floatV3>(parameter->GetValue()).GetArray());
+					gl::Uniform3fv(binder.location, 1, parameter->GetValue<floatV3>().GetArray());
 				};
 			}
 			break;
@@ -461,7 +461,7 @@ void ProgramObject::InitializeUniformBinder(UniformBinder& binder, EffectParamet
 			{
 				binder.setter = [&binder, parameter] ()
 				{
-					gl::Uniform4fv(binder.location, 1, static_cast<floatV4>(parameter->GetValue()).GetArray());
+					gl::Uniform4fv(binder.location, 1, parameter->GetValue<floatV4>().GetArray());
 				};
 			}
 			break;
@@ -469,7 +469,7 @@ void ProgramObject::InitializeUniformBinder(UniformBinder& binder, EffectParamet
 			{
 				binder.setter = [&binder, parameter] ()
 				{
-					gl::UniformMatrix4fv(binder.location, 1, false, static_cast<floatM44>(parameter->GetValue()).GetArray());
+					gl::UniformMatrix4fv(binder.location, 1, false, parameter->GetValue<floatM44>().GetArray());
 				};
 			}
 			break;

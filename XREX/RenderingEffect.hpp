@@ -11,6 +11,8 @@
 class EffectParameter
 	: Noncopyable
 {
+public:
+	static EffectParameterSP const NullEffectParameter;
 
 public:
 	EffectParameter(std::string name);
@@ -58,7 +60,13 @@ public:
 	/*
 	 *	@return ParameterValueAutoConverter: a helper struct that can convert to other type automatically.
 	 */
-	virtual ParameterValueAutoConverter const & GetValue() const;
+	virtual ParameterValueAutoConverter const & GetValue() const = 0;
+
+	template <typename T>
+	T const & GetValue() const
+	{
+		return GetValue();
+	}
 
 protected:
 		std::string name_;
@@ -80,14 +88,16 @@ public:
 		return TypeToElementType<T>::Type;
 	}
 
-	virtual ParameterValueAutoConverter const & GetValue() const override
-	{
-		return converter_;
-	}
 	virtual void SetValue(T const & value) override
 	{
 		value_ = value;
 	}
+	
+	virtual ParameterValueAutoConverter const & GetValue() const override
+	{
+		return converter_;
+	}
+
 
 
 private:

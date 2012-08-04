@@ -13,6 +13,8 @@
 #include "SceneObject.hpp"
 #include "Transformation.hpp"
 #include "Camera.hpp"
+#include "Scene.hpp"
+#include "NaiveManagedScene.hpp"
 
 #include <CoreGL.hpp>
 //#include "CoreGL.h"
@@ -41,10 +43,13 @@ using namespace std;
 
 
 
-struct Scene
+struct TempScene
 {
+	SceneSP scene_;
 	StaticMeshSP mesh_;
 	SceneObjectSP cube_;
+	SceneObjectSP camera_;
+	vector<SceneObjectSP> objects_;
 
 	void InitializeScene()
 	{
@@ -82,11 +87,22 @@ struct Scene
 			return;
 		}
 
-		RenderingEffectSP effect;
-		effect = MakeSP<RenderingEffect>("test effect");
-		RenderingPassSP pass = MakeSP<RenderingPass>(*effect);
-		pass->Initialize(program);
-		effect->Initialize(vector<RenderingPassSP>(1, pass));
+		camera_ = MakeSP<SceneObject>("camera");
+		Settings const & settings = Context::GetInstance().GetSettings();
+		CameraSP camera = MakeSP<Camera>(PI / 4, static_cast<float>(settings.renderingSettings.width) / settings.renderingSettings.height, 0.1, 100.0);
+		camera_->SetComponent(camera);
+
+		scene_ = Context::GetInstance().GetRenderingEngine().GetCurrentScene();
+		scene_->AddObject(camera_);
+
+
+		floatV3 eye = floatV3(0.5, 1.5, 15.0);
+		floatV3 up = floatV3(0.0, 1.0, 0.0);
+		TransformationSP cameraTransformation = camera_->GetComponent<Transformation>();
+		cameraTransformation->SetPosition(eye);
+		cameraTransformation->SetUpDirection(up);
+		cameraTransformation->SetFrontDirection(floatV3(0, 0, -1));
+		cameraTransformation->FaceTo(floatV3(0, 0, 0));
 
 		vector<floatV3> vertexData;
 		vector<uint16> indexData;
@@ -151,71 +167,50 @@ struct Scene
 		map<string, RenderingLayoutSP> meshLayout;
 		meshLayout["cube"] = layout;
 
+
 		mesh_ = MakeSP<StaticMesh>(move(meshLayout));
+
+		RenderingEffectSP effect = MakeSP<RenderingEffect>("test effect");
+		RenderingPassSP pass = MakeSP<RenderingPass>(*effect);
+		pass->Initialize(program);
+		effect->Initialize(vector<RenderingPassSP>(1, pass));
 		mesh_->SetEffect("cube", effect);
 
+		effect = mesh_->GetEffect("cube");
+		EffectParameterSP color = effect->GetParameterByName("color"); // this is something that should be in material
+		color->SetValue(floatV3(0.5f, 0.5f, 1.0f));
+		floatV3 c = color->GetValue();
 
-		cube_ = MakeSP<SceneObject>("cube");
-		cube_->SetComponent(mesh_);
+		int32 count = 9;
+		objects_.resize(count);
+		for (int32 i = 0; i < count; ++i)
+		{
+			SceneObjectSP& object = objects_[i];
+			object = MakeSP<SceneObject>("cube");
+			object->SetComponent(mesh_);
+			scene_->AddObject(object);
+
+			TransformationSP cubeTransform = object->GetComponent<Transformation>();
+
+			floatV3 position = floatV3(i % 3 * 4 - 4, i / 3 * 4 - 4, 0);
+			cubeTransform->SetPosition(position);
+			cubeTransform->SetScaling(2);
+			floatM44 orientation = Rotation(PI / 8 * i, 0.0f, 1.0f, 0.0f);
+			cubeTransform->SetOrientation(orientation);
+			cubeTransform->SetFrontDirection(floatV3(1, 0, 0));
+			floatV3 temp = Transform(orientation, floatV3(1, 0, 0));
+			cubeTransform->FaceTo(temp + position);
+		}
+
+
+
+		// 		wMatrix->SetValue(translate * rotation);
+
 	}
 
 
 	void Render(double delta)
 	{
-		gl::ClearColor(0.4f, 0.6f, 0.9f, 1);
-		gl::Clear(gl::GL_COLOR_BUFFER_BIT | gl::GL_DEPTH_BUFFER_BIT | gl::GL_STENCIL_BUFFER_BIT);
-
-
-		RenderingEffectSP effect = mesh_->GetEffect("cube");
-		EffectParameterSP color = effect->GetParameterByName("color");
-		color->SetValue(floatV3(0.5f, 0.5f, 1.0f));
-		floatV3 c = color->GetValue();
-		EffectParameterSP wMatrix = effect->GetParameterByName("wMatrix");
-		EffectParameterSP vMatrix = effect->GetParameterByName("vMatrix");
-		EffectParameterSP pMatrix = effect->GetParameterByName("pMatrix");
-
-		TransformationSP transform = cube_->GetComponent<Transformation>();
-		CameraSP camera = cube_->GetComponent<Camera>();
-
-		floatV3 position = floatV3(0, 0, -5);
-		transform->SetPosition(position);
-		transform->SetScaling(2);
-		floatM44 orientation = Rotation(PI / 8, 0.0f, 1.0f, 0.0f);
-		transform->SetOrientation(orientation);
-
-		//transform->Rotate(PI / 4096, 1.0f, 0.5f, 0.25f);
-
-// 		floatM44 translate = Translation(floatV3(0, 0, -5));
-// 		floatM44 rotation = Rotation(0 * PI / 4, floatV3(0.5, 0.5, 0.5));
-		floatV3 eye = floatV3(0.5, 1.0, 0.0);
-		floatV3 at = position;
-		floatV3 up = floatV3(0.0, 1.0, 0.0);
-		floatM44 view = LookAt(eye, at, up);
-		//view = Translation(eye) * RotationFromTo(floatV3(0, 0, -1), (at - eye)).Inverse() * Translation(-eye);
-		floatM44 projection = Frustum(PI / 4, 6.0f / 5.0f, 1.0f, 10.0f);
-// 		wMatrix->SetValue(translate * rotation);
-		transform->Update();
-		floatM44 model = transform->GetModelMatrix();
-		floatV3 temp = Transform(orientation, floatV3(0, 0, -1));
-		model = FaceTo(position, temp + position, up) * Scaling(transform->GetScaling()); // TODO finish this, seems not correct. how to do FaceTo?
-		wMatrix->SetValue(model);
-		vMatrix->SetValue(view);
-		pMatrix->SetValue(projection);
-
-		effect->GetPass(0)->Bind();
-		//gl::UseProgram(1);
-
-		vector<Renderable::LayoutAndEffect> const & layouts = mesh_->GetLayoutsAndEffects();
-		layouts[0].layout->BindToProgram(*effect->GetPass(0)->GetProgram());
-
-
-		int32 count = layouts[0].layout->GetElementCount();
-		ElementType elementType = layouts[0].layout->GetIndexElementType();
-		uint32 glType = GetGLType(elementType);
-		assert(glType == gl::GL_UNSIGNED_SHORT);
-
-		gl::DrawElements(gl::GL_TRIANGLES, count, GetGLType(elementType), reinterpret_cast<void const *>(0));
-
 
 	}
 	void operator()(double delta)
@@ -313,10 +308,10 @@ void Main()
 
 	Context::GetInstance().Initialize(settings);
 
-	Scene s;
+	TempScene s;
 	s.InitializeScene();
 
-	Context::GetInstance().GetRenderingEngine().SetRenderingFunction(function<void(double)>(s));
+	//Context::GetInstance().GetRenderingEngine().SetRenderingFunction(function<void(double)>(s));
 
 
 
@@ -340,21 +335,21 @@ int main()
 }
 
 //memory leak check
-#define _CRTDBG_MAP_ALLOC
-#include <crtdbg.h>
-
-struct DML
-{
-	~DML()
-	{
-		if (_CrtDumpMemoryLeaks())
-		{
-			cout << "memory leaks." << endl;
-		}
-		else
-		{
-			cout << "no memeory leaks." << endl;
-		}
-		cin.get();
-	}
-} _dml;
+// #define _CRTDBG_MAP_ALLOC
+// #include <crtdbg.h>
+// 
+// struct DML
+// {
+// 	~DML()
+// 	{
+// 		if (_CrtDumpMemoryLeaks())
+// 		{
+// 			cout << "memory leaks." << endl;
+// 		}
+// 		else
+// 		{
+// 			cout << "no memeory leaks." << endl;
+// 		}
+// 		cin.get();
+// 	}
+// } _dml;

@@ -5,7 +5,17 @@
 #include "Math.hpp"
 
 #include <memory>
+#include <vector>
 
+
+template <typename T>
+void SwapBackRemove(std::vector<T>& vector, typename std::vector<T>::iterator toBeRemove)
+{
+	assert(toBeRemove != vector.end());
+	auto last = --vector.end();
+	*toBeRemove = *last;
+	vector.pop_back();
+}
 
 class Noncopyable
 {
@@ -221,3 +231,4 @@ struct TypeToElementType<floatM44>
 	static ElementType const Type = ElementType::FloatM44;
 };
 // TODO samplers
+

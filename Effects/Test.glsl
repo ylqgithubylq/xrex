@@ -1,9 +1,9 @@
 
 
 uniform vec3 color;
-uniform mat4 wMatrix;
-uniform mat4 vMatrix;
-uniform mat4 pMatrix;
+uniform mat4 modelMatrix;
+uniform mat4 viewMatrix;
+uniform mat4 projectionMatrix;
 
 #ifdef VS
 
@@ -11,11 +11,11 @@ in vec3 mPosition;
 out vec3 vertexColor;
 void main()
 {
-	vertexColor = (mPosition + 1.0) / 2 + color / 16;
+	vertexColor = ((modelMatrix * vec4(mPosition, 1.0)).xyz + 1.0) / 4 + color / 16;
 	gl_Position = 
-		pMatrix *
-		vMatrix *
-		wMatrix *
+		projectionMatrix *
+		viewMatrix *
+		modelMatrix *
 		vec4(mPosition, 1.0);
 }
 

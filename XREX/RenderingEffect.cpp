@@ -13,6 +13,9 @@ using std::string;
 using std::vector;
 
 
+EffectParameterSP const EffectParameter::NullEffectParameter = nullptr;
+
+
 EffectParameter::EffectParameter(string name)
 	: name_(name)
 {
@@ -112,11 +115,11 @@ EffectParameter::ParameterValueAutoConverter::operator floatM44 const &() const
 // 		EffectParameter::ParameterValueAutoConverter::operator std::vector<floatV3> const &()  const{ assert(false); return std::vector<floatV3>(); }
 // 		EffectParameter::ParameterValueAutoConverter::operator std::vector<floatV4> const &()  const{ assert(false); return std::vector<floatV4>(); }
 
-auto EffectParameter::GetValue() const -> ParameterValueAutoConverter const &
-{
-	assert(false);
-	return ParameterValueAutoConverter();
-}
+// auto EffectParameter::GetValue() const -> ParameterValueAutoConverter const &
+// {
+// 	assert(false);
+// 	return ParameterValueAutoConverter();
+// }
 
 #pragma warning(pop)
 
@@ -149,7 +152,7 @@ EffectParameterSP const & RenderingEffect::GetParameterByName(string const & nam
 	});
 	if (i == parameters_.end())
 	{
-		return nullptr;
+		return EffectParameter::NullEffectParameter;
 	}
 	return *i;
 }
