@@ -1,7 +1,12 @@
 #pragma once
 
-#include <cassert>
 
+#pragma warning(disable: 4482) // enum grammar extension: MyEnum::EnumValue
+#pragma warning(error: 4150) // deletion of pointer to incomplete type (destructor will not be called)
+#pragma warning(error: 4715) // not all control paths return a value
+
+
+#include <cassert>
 
 #include <memory>
 
@@ -12,8 +17,12 @@ class Context;
 class LocalResourceLoader;
 class Logger;
 class RenderingEngine;
+class InputCenter;
 class Window;
 class GLWindow;
+
+class InputHandler;
+typedef std::shared_ptr<InputHandler> InputHandlerSP;
 
 class Scene;
 typedef std::shared_ptr<Scene> SceneSP;
@@ -53,7 +62,7 @@ class Camera;
 typedef std::shared_ptr<Camera> CameraSP;
 
 
-#pragma warning(disable: 4482) // enum grammar extension: MyEnum::EnumValue
+
 
 #include "BasicType.hpp"
 

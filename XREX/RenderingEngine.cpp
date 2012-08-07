@@ -44,11 +44,15 @@ void RenderingEngine::RenderScene()
 
 void RenderingEngine::Update()
 {
+	double currentTime = timer_.Elapsed();
+	double delta = currentTime - lastTime_;
 	if (renderingFunction_ != nullptr)
 	{
-		renderingFunction_(0.0);
+//		renderingFunction_(0.0, 0.0);
+		renderingFunction_(currentTime, delta);
 	}
 	RenderScene();
+	lastTime_ = currentTime;
 }
 
 void RenderingEngine::RenderACamera(SceneObjectSP const & cameraObject)

@@ -6,7 +6,7 @@
 
 
 Context::Context()
-	: renderingEngine_(MakeUP<RenderingEngine>())
+	: renderingEngine_(MakeUP<RenderingEngine>()), inputCenter_(MakeUP<InputCenter>())
 {
 
 }
@@ -31,5 +31,7 @@ void Context::InitializeMainWindow(std::wstring const & name, RenderingSettings 
 
 void Context::Start()
 {
+	timer_.Restart();
+	renderingEngine_->Start();
 	mainWindow_->StartHandlingMessages();
 }

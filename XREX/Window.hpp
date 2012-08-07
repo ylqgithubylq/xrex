@@ -1,9 +1,11 @@
 #pragma once
 
 #include "Declare.hpp"
+#include "InputCenter.hpp"
 
 #include <string>
 #include <memory>
+#include <vector>
 
 
 
@@ -40,6 +42,10 @@ protected:
 
 
 private:
+	static std::vector<InputCenter::InputSemantic> const WindowsVKToInputSemantic;
+	static std::vector<InputCenter::InputSemantic> InitializeInputSemanticMapping();
+
+private:
 
 
 	// TODO add event register unregister, fire event
@@ -47,16 +53,28 @@ private:
 	void OnResize(uint32 width, uint32 height);
 
 	void OnKeyDown(uint32 winKey);
+
+
 	void OnKeyUp(uint32 winKey);
 	void OnMouseDown(uint32 buttons, uint32 x, uint32 y);
 	void OnMouseUp(uint32 buttons, uint32 x, uint32 y);
-	void OnMouseWheel(uint32 buttons, uint32 x, uint32 y, uint32 wheelDelta);
+	void OnMouseWheel(uint32 buttons, uint32 x, uint32 y, int32 wheelDelta);
 	void OnMouseMove(uint32 buttons, uint32 x, uint32 y);
+
+	uint32 DistinguishLeftRightShiftCtrlAlt(uint32 winKey, bool down);
 
 protected:
 	 // used to hide windows.h to the cpp file
 	struct HideWindows_;
 	std::unique_ptr<HideWindows_> hideWindows_;
+
+	InputCenter* inputCenter_;
+	bool leftShift_;
+	bool rightShift_;
+	bool leftCtrl_;
+	bool rightCtrl_;
+	bool leftAlt_;
+	bool rightAlt_;
 
 	bool active_;
 	bool running_;

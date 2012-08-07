@@ -24,27 +24,10 @@ public:
 		}) != objects_.end();
 	}
 
-	virtual SceneObjectSP const & GetObject(std::string const & sceneObjectName) override
-	{
-		auto found = std::find_if(objects_.begin(), objects_.end(), [&sceneObjectName] (SceneObjectSP const & sceneObject)
-		{
-			return sceneObject->GetName() == sceneObjectName;
-		});
-		if (found == objects_.end())
-		{
-			return SceneObject::NullSceneObject;
-		}
-		return *found;
-	}
+	virtual SceneObjectSP const & GetObject(std::string const & sceneObjectName) override;
 
-	virtual bool RemoveObject(std::string const & sceneObjectName) override
-	{
-		auto found = std::find_if(objects_.begin(), objects_.end(), [&sceneObjectName] (SceneObjectSP const & sceneObject)
-		{
-			return sceneObject->GetName() == sceneObjectName;
-		});
+	virtual bool RemoveObject(std::string const & sceneObjectName) override;
 
-	}
 
 	virtual bool HasObject(SceneObjectSP const & sceneObject) override
 	{
@@ -55,18 +38,18 @@ public:
 
 	virtual bool RemoveObject(SceneObjectSP const & sceneObject) override;
 
-	virtual std::vector<SceneObjectSP> GetRenderableQueue(SceneObjectSP const & camera) override
+	virtual int32 GetObjectCount() override
 	{
-		std::vector<SceneObjectSP> resultObjects;
-		std::_For_each(objects_.begin(), objects_.end(), [&resultObjects] (SceneObjectSP const & sceneObject)
-		{
-			if (sceneObject->HasComponent<Renderable>())
-			{
-				resultObjects.push_back(sceneObject);
-			}
-		});
-		return std::move(resultObjects);
+		return objects_.size();
 	}
+
+	virtual void ClearAllObject() override
+	{
+		objects_.clear();
+		cameras_.clear();
+	}
+
+	virtual std::vector<SceneObjectSP> GetRenderableQueue(SceneObjectSP const & camera) override;
 
 	virtual std::vector<SceneObjectSP> GetCameras() override
 	{
