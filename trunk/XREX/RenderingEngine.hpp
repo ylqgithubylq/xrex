@@ -1,9 +1,11 @@
 #pragma once
 
 #include "Declare.hpp"
+#include "Timer.hpp"
 
 #include <functional>
 #include <vector>
+
 
 
 class RenderingEngine
@@ -23,13 +25,19 @@ public:
 		return scene_;
 	}
 
+	void Start()
+	{
+//		timer_.Restart();
+//		lastTime_ = timer_.Elapsed();
+	}
+
 	void Update();
 
 	void RenderScene();
 
 
 	// Temp function for convenience
-	void SetRenderingFunction(std::function<void(double delta)>& renderingFunction)
+	void SetRenderingFunction(std::function<void(double current, double delta)>& renderingFunction)
 	{
 		renderingFunction_ = renderingFunction;
 	}
@@ -38,9 +46,10 @@ public:
 private:
 	void RenderACamera(SceneObjectSP const & cameraObject);
 
-
-	std::function<void(double delta)> renderingFunction_;
+private:
+	std::function<void(double current, double delta)> renderingFunction_;
 	SceneSP scene_;
-
+	Timer timer_;
+	double lastTime_;
 };
 

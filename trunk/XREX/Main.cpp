@@ -15,6 +15,7 @@
 #include "Camera.hpp"
 #include "Scene.hpp"
 #include "NaiveManagedScene.hpp"
+#include "Timer.hpp"
 
 #include <CoreGL.hpp>
 //#include "CoreGL.h"
@@ -25,6 +26,9 @@
 #include <functional>
 #include <type_traits>
 #include <map>
+#include <sstream>
+#include <iosfwd>
+
 
 
 
@@ -186,7 +190,9 @@ struct TempScene
 		for (int32 i = 0; i < count; ++i)
 		{
 			SceneObjectSP& object = objects_[i];
-			object = MakeSP<SceneObject>("cube");
+			stringstream objectNameStream;
+			objectNameStream << "cube" << i;
+			object = MakeSP<SceneObject>(objectNameStream.str());
 			object->SetComponent(mesh_);
 			scene_->AddObject(object);
 
@@ -205,19 +211,19 @@ struct TempScene
 
 
 		// 		wMatrix->SetValue(translate * rotation);
-
 	}
 
 
-	void Render(double delta)
+	void Render(double current, double delta)
 	{
-
+// 		cout << "Timer.Elapsed: " << timer_.Elapsed() << endl;
+// 		cout << "Timer.CurrentTime: " << timer_.CurrentTime() << endl;
 	}
-	void operator()(double delta)
+	void operator()(double current, double delta)
 	{
-		Render(delta);
+		Render(current, delta);
 	}
-	
+	Timer timer_;
 
 };
 
@@ -311,11 +317,22 @@ void Main()
 	TempScene s;
 	s.InitializeScene();
 
-	//Context::GetInstance().GetRenderingEngine().SetRenderingFunction(function<void(double)>(s));
+	function<void(double current, double delta)> f = bind(&TempScene::operator(), ref(s), placeholders::_1, placeholders::_2);
+	Context::GetInstance().GetRenderingEngine().SetRenderingFunction(f);
 
 
 
 	Context::GetInstance().Start();
+
+
+	assert(s.scene_->RemoveObject("camera"));
+	int32 count = s.scene_->GetObjectCount();
+	for (int32 i = 0; i < count; ++i)
+	{
+		stringstream objectNameStream;
+		objectNameStream << "cube" << i;
+		assert(s.scene_->RemoveObject(objectNameStream.str()));
+	}
 }
 
 

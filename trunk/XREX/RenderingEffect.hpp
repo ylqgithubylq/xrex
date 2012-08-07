@@ -79,10 +79,14 @@ class ConcreteEffectParameter
 public:
 	typedef T ValueType;
 
+#pragma warning(push)
+#pragma warning(disable: 4355) // 'this' used in base member initializer list
 	explicit ConcreteEffectParameter(std::string const & name)
 		: EffectParameter(name), converter_(this)
 	{
 	}
+#pragma warning(pop)
+
 	virtual ElementType GetType() const override
 	{
 		return TypeToElementType<T>::Type;

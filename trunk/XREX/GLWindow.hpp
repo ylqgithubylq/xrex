@@ -34,7 +34,7 @@ public:
 protected:
 	virtual void OnMessageIdle() override
 	{
-		Context::GetInstance().GetRenderingEngine().Update();
+		Context::GetInstance().RenderAFrame();
 		SwapBuffers();
 	}
 
