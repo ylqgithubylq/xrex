@@ -274,7 +274,7 @@ namespace MathHelper
 			T determinant = (_1122_2112 * _3344_4334 - _1132_3112 * _2344_4324 + _1142_4112 * _2334_3324 + _2132_3122 * _1344_4314 - _2142_4122 * _1334_3314 + _3142_4132 * _1324_2314);
 
 			// non-invertable
-			if (std::numeric_limits<T>::epsilon() >= determinant) {
+			if (Equal<T>(determinant, 0)) {
 				return false;
 			}
 

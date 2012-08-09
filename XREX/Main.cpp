@@ -18,7 +18,8 @@
 #include "Timer.hpp"
 
 #include <CoreGL.hpp>
-//#include "CoreGL.h"
+
+//#include <CoreGL.h>
 
 #include <fstream>
 #include <vector>
@@ -100,8 +101,8 @@ struct TempScene
 		scene_->AddObject(camera_);
 
 
-		floatV3 eye = floatV3(0.5, 1.5, 15.0);
-		floatV3 up = floatV3(0.0, 1.0, 0.0);
+		floatV3 eye = floatV3(45.0, 22.5, 60.0);
+		floatV3 up = floatV3(0.3, 1.0, 0.0);
 		TransformationSP cameraTransformation = camera_->GetComponent<Transformation>();
 		cameraTransformation->SetPosition(eye);
 		cameraTransformation->SetUpDirection(up);
@@ -185,27 +186,36 @@ struct TempScene
 		color->SetValue(floatV3(0.5f, 0.5f, 1.0f));
 		floatV3 c = color->GetValue();
 
-		int32 count = 9;
-		objects_.resize(count);
-		for (int32 i = 0; i < count; ++i)
+		int32 edgeCount = 16;
+		float intervalSize = 4.0f;
+		float center = static_cast<float>(edgeCount - 1) / 2;
+		int32 totalCount = edgeCount * edgeCount * edgeCount;
+		objects_.resize(totalCount);
+		for (int32 i = 0; i < edgeCount; ++i)
 		{
-			SceneObjectSP& object = objects_[i];
-			stringstream objectNameStream;
-			objectNameStream << "cube" << i;
-			object = MakeSP<SceneObject>(objectNameStream.str());
-			object->SetComponent(mesh_);
-			scene_->AddObject(object);
+			for (int32 j = 0; j < edgeCount; ++j)
+			{
+				for (int32 k = 0; k < edgeCount; ++k)
+				{
+					SceneObjectSP& object = objects_[i];
+					stringstream objectNameStream;
+					objectNameStream << "cube" << i << j << k;
+					object = MakeSP<SceneObject>(objectNameStream.str());
+					object->SetComponent(mesh_);
+					scene_->AddObject(object);
 
-			TransformationSP cubeTransform = object->GetComponent<Transformation>();
+					TransformationSP cubeTransform = object->GetComponent<Transformation>();
 
-			floatV3 position = floatV3(i % 3 * 4 - 4, i / 3 * 4 - 4, 0);
-			cubeTransform->SetPosition(position);
-			cubeTransform->SetScaling(2);
-			floatM44 orientation = Rotation(PI / 8 * i, 0.0f, 1.0f, 0.0f);
-			cubeTransform->SetOrientation(orientation);
-			cubeTransform->SetFrontDirection(floatV3(1, 0, 0));
-			floatV3 temp = Transform(orientation, floatV3(1, 0, 0));
-			cubeTransform->FaceTo(temp + position);
+					floatV3 position = floatV3((k - center) * intervalSize, (j - center) * intervalSize, (i - center) * intervalSize);
+					cubeTransform->SetPosition(position);
+					cubeTransform->SetScaling(2);
+					floatM44 orientation = Rotation(PI / 8 * i, 0.0f, 1.0f, 0.0f);
+					cubeTransform->SetOrientation(orientation);
+					cubeTransform->SetFrontDirection(floatV3(1, 0, 0));
+					floatV3 temp = Transform(orientation, floatV3(1, 0, 0));
+					cubeTransform->FaceTo(floatV3::Zero);
+				}
+			}
 		}
 
 
@@ -293,8 +303,24 @@ void TestMath()
 
 	floatM44 frustum = Frustum(PI / 4, 8.0f / 6.0f, 1.0f, 10.0f);
 
+	floatQuaternion quat0(sin(PI / 2 / 2) * floatV3(1, 1, 0).Normalize(), cos(PI / 2 / 2));
+	floatQuaternion quat1 = quat0.Normalize();
+	floatQuaternion quat2 = quat0.Conjugate();
+	floatQuaternion quat3 = RotationQuaternion(PI / 2, floatV3(1, 1, 0));
+	floatM44 mat3 = Rotation(PI / 2, floatV3(1, 1, 0));
+	floatV3 axisQ = quat0.Axis();
+	if (quat3.Axis() != quat0.Axis())
+	{
+		axisQ = quat3.Axis();
+	}
+	floatV3 vecToRotate = floatV3(1, 0, 0);
+	floatV3 rotRes0 = RotateByQuaternion(quat1, vecToRotate);
+	floatV3 rotRes1 = Transform(mat3, vecToRotate);
 	//cin.get();
 }
+
+// GL4 sample code
+//#include "../CPPTest/DemoCode_HelloTriangle.h"
 
 void Main() 
 {
@@ -320,19 +346,14 @@ void Main()
 	function<void(double current, double delta)> f = bind(&TempScene::operator(), ref(s), placeholders::_1, placeholders::_2);
 	Context::GetInstance().GetRenderingEngine().SetRenderingFunction(f);
 
+	//assert(testmain(0, nullptr) == 0);
+	//Context::GetInstance().GetRenderingEngine().SetRenderingFunction(function<void(double,double)>(DrawHelper));
+
 
 
 	Context::GetInstance().Start();
 
 
-	assert(s.scene_->RemoveObject("camera"));
-	int32 count = s.scene_->GetObjectCount();
-	for (int32 i = 0; i < count; ++i)
-	{
-		stringstream objectNameStream;
-		objectNameStream << "cube" << i;
-		assert(s.scene_->RemoveObject(objectNameStream.str()));
-	}
 }
 
 
@@ -340,7 +361,7 @@ void Main()
 
 int main()
 {
-	//TestMath();
+	TestMath();
 	//return 0;
 
 	Main();

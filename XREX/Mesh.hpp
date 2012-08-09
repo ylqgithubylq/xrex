@@ -16,7 +16,7 @@ public:
 	void SetEffect(std::string const & layout, RenderingEffectSP& effect);
 	RenderingEffectSP const & GetEffect(std::string const & layout) const;
 
-	virtual std::vector<LayoutAndEffect> const & GetLayoutsAndEffects() const override
+	virtual std::vector<LayoutAndEffect> const & GetLayoutsAndEffects(SceneObjectSP camera) const override
 	{
 		return layoutsAndEffects_;
 	}

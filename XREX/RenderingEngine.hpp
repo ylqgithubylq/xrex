@@ -16,6 +16,9 @@ public:
 	RenderingEngine();
 	~RenderingEngine();
 
+	/*
+	 *	@scene: set to nullptr to make no scene to render.
+	 */
 	void SetScene(SceneSP const & scene)
 	{
 		scene_ = scene;
@@ -27,8 +30,8 @@ public:
 
 	void Start()
 	{
-//		timer_.Restart();
-//		lastTime_ = timer_.Elapsed();
+		timer_.Restart();
+		lastTime_ = timer_.Elapsed();
 	}
 
 	void Update();
