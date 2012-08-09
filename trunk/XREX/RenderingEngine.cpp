@@ -31,13 +31,16 @@ RenderingEngine::~RenderingEngine()
 
 void RenderingEngine::RenderScene()
 {
-	vector<SceneObjectSP> cameras_ = scene_->GetCameras();
-
-	for (uint32 i = 0; i < cameras_.size(); ++ i)
+	if (scene_ != nullptr)
 	{
-		if (cameras_[i]->GetComponent<Camera>()->IsActive())
+		vector<SceneObjectSP> cameras_ = scene_->GetCameras();
+
+		for (uint32 i = 0; i < cameras_.size(); ++ i)
 		{
-			RenderACamera(cameras_[i]);
+			if (cameras_[i]->GetComponent<Camera>()->IsActive())
+			{
+				RenderACamera(cameras_[i]);
+			}
 		}
 	}
 }
@@ -82,7 +85,7 @@ void RenderingEngine::RenderACamera(SceneObjectSP const & cameraObject)
 		transformation->Update();
 		floatM44 const & modelMatrix = transformation->GetModelMatrix();
 
-		vector<Renderable::LayoutAndEffect> const & layoutAndEffects = renderable->GetLayoutsAndEffects();
+		vector<Renderable::LayoutAndEffect> const & layoutAndEffects = renderable->GetLayoutsAndEffects(cameraObject);
 		for (uint32 k = 0; k < layoutAndEffects.size(); ++k)
 		{
 			RenderingEffectSP const & effect = layoutAndEffects[k].effect;

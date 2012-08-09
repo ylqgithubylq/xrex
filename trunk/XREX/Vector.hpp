@@ -9,7 +9,7 @@
 
 #include <array>
 
-//float ReciprocalSqrt(float number);
+
 
 /*
  *	Immutable type.

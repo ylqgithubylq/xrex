@@ -37,7 +37,15 @@ public:
 		return settings_;
 	}
 
+	double GetElapsedTime() const
+	{
+		return timer_.Elapsed();
+	}
+
 	void Initialize(Settings const & settings);
+	/*
+	 *	Block until this program stop running.
+	 */
 	void Start();
 
 	void RenderAFrame()

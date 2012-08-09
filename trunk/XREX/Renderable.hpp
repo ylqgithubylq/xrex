@@ -31,7 +31,7 @@ public:
 		// nothing to do for renderable
 	}
 
-	virtual std::vector<LayoutAndEffect> const & GetLayoutsAndEffects() const = 0;
+	virtual std::vector<LayoutAndEffect> const & GetLayoutsAndEffects(SceneObjectSP camera) const = 0;
 
 	bool IsVisible() const
 	{

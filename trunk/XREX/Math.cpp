@@ -5,7 +5,8 @@
 
 // Copy from KlayGE
 // From Quake III. But the magic number is from http://www.lomont.org/Math/Papers/2003/InvSqrt.pdf
-float ReciprocalSqrt(float number)
+template<>
+float ReciprocalSqrt<float>(float number)
 {
 	float const threehalfs = 1.5f;
 
@@ -24,24 +25,45 @@ float ReciprocalSqrt(float number)
 }
 
 template <typename T, uint32 N>
-VectorT<T, N> Transform(Matrix4T<T>& matrix, VectorT<T, N>& vector, T lastComponent)
+VectorT<T, N> Transform(Matrix4T<T> const & matrix, VectorT<T, N> const & vector, T const & lastComponent)
 {
 	VectorT<T, N> temp;
 	MathHelper::TransformHelper<T, N>::Do(const_cast<T*>(&temp[0]), &matrix[0], &vector[0], lastComponent);
 	return temp;
 }
-template floatV2 Transform(floatM44& matrix, floatV2& vector, float lastComponent);
-template floatV3 Transform(floatM44& matrix, floatV3& vector, float lastComponent);
-template floatV4 Transform(floatM44& matrix, floatV4& vector, float lastComponent);
+template floatV2 Transform(floatM44 const & matrix, floatV2 const & vector, float const & lastComponent);
+template floatV3 Transform(floatM44 const & matrix, floatV3 const & vector, float const & lastComponent);
+template floatV4 Transform(floatM44 const & matrix, floatV4 const & vector, float const & lastComponent);
+
+template <typename T>
+VectorT<T, 3> RotateByQuaternion(QuaternionT<T> const & quaternion, VectorT<T, 3> const & vector)
+{
+	// see Mathematics for 3D Game Programming and Computer Graphics, 3rd. 4.6.2 Rotations with Quaternions
+
+	// result = a*vector + b*quaternion + c(quaternion.Axis CROSS vector)
+	// where
+	//  a = quaternion.S^2 - (quaternion.Axis DOT quaternion.Axis)
+	//  b = 2*(quaternion.Axis DOT vector)
+	//  c = 2*quaternion.S
+	T const a(quaternion.S() * quaternion.S() - quaternion.Axis().LengthSquared());
+	T const b(2 * Dot(quaternion.Axis(), vector));
+	T const c(quaternion.S() + quaternion.S());
+
+	// Must store this, because result may alias vector
+	VectorT<T, 3> crossV(Cross(quaternion.Axis(), vector)); // quaternion.Axis CROSS vector
+
+	return a * vector + b * quaternion.Axis() + c * crossV;
+}
+template floatV3 RotateByQuaternion(floatQuaternion const & quaternion, floatV3 const & vector);
 
 template <typename T, uint32 N>
-VectorT<T, N> TransformNormal(Matrix4T<T>& matrix, VectorT<T, N>& vector)
+VectorT<T, N> TransformNormal(Matrix4T<T> const & matrix, VectorT<T, N> const & vector)
 {
 	return Transform(matrix, vector, T(0));
 }
-template floatV2 TransformNormal(floatM44& matrix, floatV2& vector);
-template floatV3 TransformNormal(floatM44& matrix, floatV3& vector);
-template floatV4 TransformNormal(floatM44& matrix, floatV4& vector);
+template floatV2 TransformNormal(floatM44 const & matrix, floatV2 const & vector);
+template floatV3 TransformNormal(floatM44 const & matrix, floatV3 const & vector);
+template floatV4 TransformNormal(floatM44 const & matrix, floatV4 const & vector);
 
 
 template <typename T>
@@ -223,6 +245,28 @@ Matrix4T<T> RotationFromTo(VectorT<T, 3> const & from, VectorT<T, 3> const & to)
 	return temp;
 }
 template floatM44 RotationFromTo(floatV3 const & from, floatV3 const & to);
+
+template <typename T>
+QuaternionT<T> RotationQuaternion(T const & angle, T const & x, T const & y, T const & z)
+{
+	return RotationQuaternion(angle, VectorT<T, 3>(x, y, z));
+}
+template floatQuaternion RotationQuaternion(float const & angle, float const & x, float const & y, float const & z);
+
+template <typename T>
+QuaternionT<T> RotationQuaternion(T const & angle, VectorT<T, 3> const & axis)
+{
+	// TODO change other place to use Equal<T>
+	if (Equal<T>(axis.LengthSquared(), 0))
+	{
+		return QuaternionT<T>::Identity;
+	}
+	T halfAngle = T(0.5) * angle;
+	T sha = std::sin(halfAngle);
+	T cha = std::cos(halfAngle);
+	return QuaternionT<T>(sha * axis.Normalize(), cha);
+}
+template floatQuaternion RotationQuaternion(float const & angle, floatV3 const & axis);
 
 template <typename T>
 Matrix4T<T> Frustum(T const & fieldOfView, T const & aspectRatio, T const & near, T const & far)

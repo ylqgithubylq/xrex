@@ -29,6 +29,7 @@ void Context::InitializeMainWindow(std::wstring const & name, RenderingSettings 
 	mainWindow_ = std::move(MakeUP<GLWindow>(name, settings));
 }
 
+
 void Context::Start()
 {
 	timer_.Restart();
