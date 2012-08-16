@@ -16,6 +16,8 @@ public:
 	RenderingEngine();
 	~RenderingEngine();
 
+	void Initialize();
+
 	/*
 	 *	@scene: set to nullptr to make no scene to render.
 	 */

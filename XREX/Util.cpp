@@ -3,9 +3,12 @@
 #include "Util.hpp"
 
 #include <vector>
-#include <utility>
+
 
 using std::vector;
+
+std::hash<void*> const PointerHasher::hasher_ = std::hash<void*>();
+
 
 namespace
 {

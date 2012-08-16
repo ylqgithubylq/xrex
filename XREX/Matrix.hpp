@@ -137,7 +137,7 @@ public:
 	}
 
 
-	ConstReference operator()(uint32 row, uint32 column) const
+	ConstReference operator ()(uint32 row, uint32 column) const
 	{
 		return vectors_[column][row];
 	}
@@ -145,7 +145,7 @@ public:
 	/*
 	 *	@index: column major index.
 	 */
-	ConstReference operator[](uint32 index) const
+	ConstReference operator [](uint32 index) const
 	{
 		return *(&vectors_[0][0] + index);
 	}
@@ -165,36 +165,36 @@ public:
 		return vectors_[index];
 	}
 
-	friend Matrix4T operator+(Matrix4T const & lhs, Matrix4T const & rhs)
+	friend Matrix4T operator +(Matrix4T const & lhs, Matrix4T const & rhs)
 	{
 		return Matrix4T(lhs.vectors_ + rhs.vectors_);
 	}
-	friend Matrix4T operator-(Matrix4T const & lhs, Matrix4T const & rhs)
+	friend Matrix4T operator -(Matrix4T const & lhs, Matrix4T const & rhs)
 	{
 		return Matrix4T(lhs.vectors_ - rhs.vectors_);
 	}
 
-	friend Matrix4T operator*(Matrix4T const & lhs, Matrix4T const & rhs)
+	friend Matrix4T operator *(Matrix4T const & lhs, Matrix4T const & rhs)
 	{
 		Matrix4T temp;
 		MathHelper::MatrixHepler<T>::DoMultiply(Matrix4T::GetFirstElementNonConstPointer(temp), Matrix4T::GetFirstElementNonConstPointer(lhs), Matrix4T::GetFirstElementNonConstPointer(rhs));
 		return temp;
 	}
-	friend Matrix4T operator*(Matrix4T const & lhs, T const & rhs)
+	friend Matrix4T operator *(Matrix4T const & lhs, T const & rhs)
 	{
 		return Matrix4T(lhs.vectors_ * VectorT<T, Dimension>(rhs));
 	}
-	friend Matrix4T operator*(T const & lhs, Matrix4T const & rhs)
+	friend Matrix4T operator *(T const & lhs, Matrix4T const & rhs)
 	{
 		return Matrix4T(VectorT<T, Dimension>(lhs) * rhs.vectors_);
 	}
 
-	friend Matrix4T operator/(Matrix4T const & lhs, T const & rhs)
+	friend Matrix4T operator /(Matrix4T const & lhs, T const & rhs)
 	{
 		return Matrix4T(lhs.vectors_ / VectorT<T, Dimension>(rhs));
 	}
 
-	Matrix4T& operator=(Matrix4T const & rhs)
+	Matrix4T& operator =(Matrix4T const & rhs)
 	{
 		if (this != &rhs)
 		{
@@ -203,7 +203,7 @@ public:
 		return *this;
 	}
 	template <typename U>
-	Matrix4T const & operator=(Matrix4T<U> const & rhs)
+	Matrix4T const & operator =(Matrix4T<U> const & rhs)
 	{
 		if (this != &rhs)
 		{
@@ -212,32 +212,32 @@ public:
 		return *this;
 	}
 
-	Matrix4T const & operator+() const
+	Matrix4T const & operator +() const
 	{
 		return *this;
 	}
-	Matrix4T operator-() const
+	Matrix4T operator -() const
 	{
 		Matrix4T temp(*this);
 		temp.vectors_ = -vectors_;
 		return temp;
 	}
 
-	friend bool operator==(Matrix4T const & lhs, Matrix4T const & rhs)
+	friend bool operator ==(Matrix4T const & lhs, Matrix4T const & rhs)
 	{
 		return lhs.vectors_ == rhs.vectors_;
 	}
-	friend bool operator!=(Matrix4T const & lhs, Matrix4T const & rhs)
+	friend bool operator !=(Matrix4T const & lhs, Matrix4T const & rhs)
 	{
 		return lhs.vectors_ != rhs.vectors_;
 	}
 
 	Matrix4T Transpose() const
 	{
-		return Matrix4T(operator[](0), operator[](4), operator[](8), operator[](12),
-			operator[](1), operator[](5), operator[](9),operator[](13),
-			operator[](2), operator[](6), operator[](10), operator[](14),
-			operator[](3), operator[](7), operator[](11), operator[](15));
+		return Matrix4T(operator [](0), operator [](4), operator [](8), operator [](12),
+			operator [](1), operator [](5), operator [](9),operator [](13),
+			operator [](2), operator [](6), operator [](10), operator [](14),
+			operator [](3), operator [](7), operator [](11), operator [](15));
 	}
 
 	Matrix4T Inverse() const

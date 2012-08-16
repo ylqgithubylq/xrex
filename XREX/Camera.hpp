@@ -50,7 +50,7 @@ public:
 	{
 		SceneObjectSP sceneObject = GetOwnerSceneObject();
 		TransformationSP transformation = sceneObject->GetComponent<Transformation>();
-		viewMatrix_ = transformation->GetOrientation().Transpose() * Translation(-transformation->GetPosition());
+		viewMatrix_ = RotationMatrixY(PI) * MatrixFromQuaternion(transformation->GetOrientation().Conjugate()) * TranslationMatrix(-transformation->GetPosition());
 	}
 
 
@@ -63,9 +63,6 @@ private:
 	floatM44 viewMatrix_;
 	floatM44 projectionMatrix_;
 
-
-	floatV3 at_;
-	floatV3 up_;
 
 	Color backgroundColor_;
 

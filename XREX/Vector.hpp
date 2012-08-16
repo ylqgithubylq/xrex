@@ -20,6 +20,7 @@ class VectorT
 	template <typename U, uint32 M>
 	friend class VectorT;
 
+	// Matrix knows the storage details
 	template <typename T>
 	friend class Matrix4;
 
@@ -89,7 +90,7 @@ public:
 		values_[2] = z;
 		values_[3] = w;
 	}
-	VectorT& operator=(VectorT const & rhs)
+	VectorT& operator =(VectorT const & rhs)
 	{
 		if (this != &rhs)
 		{
@@ -98,7 +99,7 @@ public:
 		return *this;
 	}
 	template <typename U, uint32 M>
-	VectorT& operator=(VectorT<U, M> const & rhs)
+	VectorT& operator =(VectorT<U, M> const & rhs)
 	{
 		static_assert(M >= N, "");
 
@@ -107,7 +108,7 @@ public:
 	}
 
 
-	ConstReference operator[](uint32 index) const
+	ConstReference operator [](uint32 index) const
 	{
 		return values_[index];
 	}
@@ -137,72 +138,72 @@ public:
 	}
 
 
-	friend VectorT operator+(VectorT const & lhs, VectorT const & rhs)
+	friend VectorT operator +(VectorT const & lhs, VectorT const & rhs)
 	{
 		VectorT temp;
 		MathHelper::VectorHelper<T, N>::DoAdd(&temp.values_[0], &lhs.values_[0], &rhs.values_[0]);
 		return temp;
 	}
 
-	friend VectorT operator-(VectorT const & lhs, VectorT const & rhs)
+	friend VectorT operator -(VectorT const & lhs, VectorT const & rhs)
 	{
 		VectorT temp;
 		MathHelper::VectorHelper<T, N>::DoSubtract(&temp.values_[0], &lhs.values_[0], &rhs.values_[0]);
 		return temp;
 	}
 
-	friend VectorT operator*(VectorT const & lhs, VectorT const & rhs)
+	friend VectorT operator *(VectorT const & lhs, VectorT const & rhs)
 	{
 		VectorT temp;
 		MathHelper::VectorHelper<T, N>::DoMultiply(&temp.values_[0], &lhs.values_[0], &rhs.values_[0]);
 		return temp;
 	}
 
-	friend VectorT operator*(VectorT const & lhs, T const & rhs)
+	friend VectorT operator *(VectorT const & lhs, T const & rhs)
 	{
 		VectorT temp;
 		MathHelper::VectorHelper<T, N>::DoScale(&temp.values_[0], &lhs.values_[0], rhs);
 		return temp;
 	}
-	friend VectorT operator*(T const & lhs, VectorT const & rhs)
+	friend VectorT operator *(T const & lhs, VectorT const & rhs)
 	{
 		VectorT temp;
 		MathHelper::VectorHelper<T, N>::DoScale(&temp.values_[0], &rhs.values_[0], lhs);
 		return temp;
 	}
 
-	friend VectorT operator/(VectorT const & lhs, VectorT const & rhs)
+	friend VectorT operator /(VectorT const & lhs, VectorT const & rhs)
 	{
 		VectorT temp;
 		MathHelper::VectorHelper<T, N>::DoDivide(&temp.values_[0], &lhs.values_[0], &rhs.values_[0]);
 		return temp;
 	}
 
-	friend VectorT operator/(VectorT const & lhs, T const & rhs)
+	friend VectorT operator /(VectorT const & lhs, T const & rhs)
 	{
 		VectorT temp;
 		MathHelper::VectorHelper<T, N>::DoScale(&temp.values_[0], &lhs.values_[0], T(1) / rhs);
 		return temp;
 	}
 
-	VectorT const & operator+() const
+	VectorT const & operator +() const
 	{
 		return *this; 
 	}
-	VectorT operator-() const
+	VectorT operator -() const
 	{
 		VectorT temp;
 		MathHelper::VectorHelper<T, N>::DoNegate(&temp.values_[0], &values_[0]);
 		return temp;
 	}
 
-	friend bool operator==(VectorT const & lhs, VectorT const & rhs)
+	friend bool operator ==(VectorT const & lhs, VectorT const & rhs)
 	{
 		return lhs.values_ == rhs.values_;
 		//return MathHelper::VectorHelper<T, N>::DoEqual(&lhs[0], &rhs[0]);
 	}
 
-	friend bool	operator!=(VectorT const & lhs, VectorT const & rhs)
+	friend bool	operator !=(VectorT const & lhs, VectorT const & rhs)
 	{
 		return lhs.values_ != rhs.values_;
 	}

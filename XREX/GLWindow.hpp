@@ -3,7 +3,7 @@
 
 #include "Window.hpp"
 
-#include "Context.hpp"
+#include "Application.hpp"
 #include "RenderingEngine.hpp"
 
 #include <memory>
@@ -34,7 +34,7 @@ public:
 protected:
 	virtual void OnMessageIdle() override
 	{
-		Context::GetInstance().RenderAFrame();
+		Application::GetInstance().RenderAFrame();
 		SwapBuffers();
 	}
 

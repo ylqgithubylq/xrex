@@ -51,7 +51,18 @@ inline bool Equal<double>(double const & lhs, double const & rhs)
 template<typename T>
 T ReciprocalSqrt(T number);
 
-// TODO QuaternionFromMatrix, MatrixFromQuaternion
+/*
+ *	@return: angle in [0, PI] in radians.
+ */
+template <typename T, uint32 N>
+T Angle(VectorT<T, N> const & from, VectorT<T, N> const & to);
+
+// have problems
+// template <typename T>
+// QuaternionT<T> QuaternionFromMatrix(Matrix4T<T> const & rotationMatrix);
+template <typename T>
+Matrix4T<T> MatrixFromQuaternion(QuaternionT<T> const & quaternion);
+
 
 template <typename T, uint32 N>
 VectorT<T, N> Transform(Matrix4T<T> const & matrix, VectorT<T, N> const & vector, T const & lastComponent = T(1));
@@ -63,47 +74,53 @@ template <typename T, uint32 N>
 VectorT<T, N> TransformNormal(Matrix4T<T> const & matrix, VectorT<T, N> const & vector);
 
 template <typename T>
-Matrix4T<T> Translation(T const & x, T const & y, T const & z);
+Matrix4T<T> TranslationMatrix(T const & x, T const & y, T const & z);
 template <typename T>
-Matrix4T<T> Translation(VectorT<T, 3> const & v);
+Matrix4T<T> TranslationMatrix(VectorT<T, 3> const & v);
 
 template <typename T>
-Matrix4T<T> Scaling(T const & s);
+Matrix4T<T> ScalingMatrix(T const & s);
 template <typename T>
-Matrix4T<T> Scaling(T const & sx, T const & sy, T const & sz);
+Matrix4T<T> ScalingMatrix(T const & sx, T const & sy, T const & sz);
 template <typename T>
-Matrix4T<T> Scaling(VectorT<T, 3> const & s);
+Matrix4T<T> ScalingMatrix(VectorT<T, 3> const & s);
 
 template <typename T>
-Matrix4T<T> RotationX(T const & angleX);
+Matrix4T<T> RotationMatrixX(T const & angleX);
 template <typename T>
-Matrix4T<T> RotationY(T const & angleY);
+Matrix4T<T> RotationMatrixY(T const & angleY);
 template <typename T>
-Matrix4T<T> RotationZ(T const & angleZ);
+Matrix4T<T> RotationMatrixZ(T const & angleZ);
 template <typename T>
-Matrix4T<T> Rotation(T const & angle, T const & x, T const & y, T const & z);
+Matrix4T<T> RotationMatrix(T const & angle, T const & x, T const & y, T const & z);
 template <typename T>
-Matrix4T<T> Rotation(T const & angle, VectorT<T, 3> const & axis);
+Matrix4T<T> RotationMatrix(T const & angle, VectorT<T, 3> const & axis);
 template <typename T>
-Matrix4T<T> RotationFromTo(VectorT<T, 3> const & from, VectorT<T, 3> const & to);
+Matrix4T<T> RotationMatrixFromTo(VectorT<T, 3> const & from, VectorT<T, 3> const & to);
 
 template <typename T>
 QuaternionT<T> RotationQuaternion(T const & angle, T const & x, T const & y, T const & z);
 template <typename T>
 QuaternionT<T> RotationQuaternion(T const & angle, VectorT<T, 3> const & axis);
+template <typename T>
+QuaternionT<T> RotationQuaternionFromTo(VectorT<T, 3> const & from, VectorT<T, 3> const & to);
+
 
 template <typename T>
-Matrix4T<T> Frustum(T const & fieldOfView, T const & aspectRatio, T const & near, T const & far);
+Matrix4T<T> FrustumMatrix(T const & fieldOfView, T const & aspectRatio, T const & near, T const & far);
 template <typename T>
-Matrix4T<T> Frustum(T const & top, T const & bottom, T const & left, T const & right, T const & near, T const & far);
-
-// TODO Quaternion version of RotationFromTo and FaceTo
+Matrix4T<T> FrustumMatrix(T const & top, T const & bottom, T const & left, T const & right, T const & near, T const & far);
 
 /*
  *	Return matrix only contains rotation component.
  */
 template <typename T>
-Matrix4T<T> FaceTo(VectorT<T, 3> const & front, VectorT<T, 3> const & self, VectorT<T, 3> const & to, VectorT<T, 3> const & up);
-
+Matrix4T<T> FaceToMatrix(VectorT<T, 3> const & front, VectorT<T, 3> const & self, VectorT<T, 3> const & to, VectorT<T, 3> const & up);
 template <typename T>
-Matrix4T<T> LookAt(VectorT<T, 3> const & eye, VectorT<T, 3> const & at, VectorT<T, 3> const & up);
+QuaternionT<T> FaceToQuaternion(VectorT<T, 3> const & front, VectorT<T, 3> const & self, VectorT<T, 3> const & to, VectorT<T, 3> const & up);
+
+/*
+ *	For creation of view matrix of camera.
+ */
+template <typename T>
+Matrix4T<T> LookAtMatrix(VectorT<T, 3> const & eye, VectorT<T, 3> const & at, VectorT<T, 3> const & up);

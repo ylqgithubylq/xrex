@@ -9,7 +9,7 @@ Camera::Camera(float fieldOfView, float aspectRatio, float near, float far)
 	: fieldOfView_(fieldOfView), aspectRatio_(aspectRatio), near_(near), far_(far),
 	backgroundColor_(DefaultBackgroundColor), active_(true)
 {
-	projectionMatrix_ = Frustum(fieldOfView, aspectRatio, near, far);
+	projectionMatrix_ = FrustumMatrix(fieldOfView, aspectRatio, near, far);
 }
 
 

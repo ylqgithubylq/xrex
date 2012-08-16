@@ -45,7 +45,8 @@ public:
 	template <typename T>
 	std::shared_ptr<T> GetComponent() const
 	{
-		return CheckedSPCast<T>(components_[static_cast<uint32>(Component::TypeToComponentType<T>::Type)]);
+		ComponentSP comonent = components_[static_cast<uint32>(Component::TypeToComponentType<T>::Type)];
+		return CheckedSPCast<T>(comonent);
 	}
 
 private:

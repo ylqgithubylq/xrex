@@ -17,6 +17,27 @@ void SwapBackRemove(std::vector<T>& vector, typename std::vector<T>::iterator to
 	vector.pop_back();
 }
 
+struct PointerHasher
+{
+	static size_t Hash(void* pointer)
+	{
+		return hasher_(pointer);
+	}
+	static std::hash<void*> const hasher_;
+};
+/*
+ *	std::hash do not provide a specialization for std::shared_ptr.
+ *	So in order to use unordered_map/set, we make a specialization for std::shared_ptr manually.
+ */
+template <typename T>
+struct std::hash<std::shared_ptr<T>>
+{
+	size_t operator ()(std::shared_ptr<T> const & key) const
+	{
+		return PointerHasher::Hash(key.get());
+	}
+};
+
 class Noncopyable
 {
 protected:
@@ -24,7 +45,7 @@ protected:
 	~Noncopyable() {}
 private:  // emphasize the following members are private
 	Noncopyable(Noncopyable const &);
-	Noncopyable& operator=(Noncopyable const &);
+	Noncopyable& operator =(Noncopyable const &);
 };
 
 template <typename To, typename From>
@@ -57,7 +78,7 @@ struct CheckedDeleter
 {
 	typedef T * PointerType;
 
-	void operator()(T* x) const
+	void operator ()(T* x) const
 	{
 		CheckedDelete(x);
 	}

@@ -1,7 +1,7 @@
 #include "XREX.hpp"
 
 #include "Window.hpp"
-#include "Context.hpp"
+#include "Application.hpp"
 
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
@@ -105,14 +105,14 @@ LRESULT Window::HideWindows_::InstanceWndProc(HWND hWnd, UINT message, WPARAM wP
 
 	case WM_MOUSEWHEEL:
 		{
-			// semantic should not be relied on
+			// wParam buttons should not be relied on
 			window_.OnMouseWheel(GET_KEYSTATE_WPARAM(wParam), LOWORD(lParam), HIWORD(lParam), GET_WHEEL_DELTA_WPARAM(wParam));
 		}
 		break;
 
 	case WM_MOUSEMOVE:
 		{
-			// semantic should not be relied on
+			// wParam buttons should not be relied on
 			window_.OnMouseMove(GET_KEYSTATE_WPARAM(wParam), LOWORD(lParam), HIWORD(lParam));
 		}
 		break;
@@ -167,7 +167,7 @@ void* Window::GetHWND() const
 
 
 Window::Window(std::wstring const & name, int32 left, int32 top, int32 width, int32 height)
-	: name_(name), left_(left), top_(top), active_(false), running_(false), rendering_(false), inputCenter_(nullptr)
+	: name_(name), left_(left), top_(top), active_(false), running_(false), rendering_(false)
 {
 	hideWindows_ = MakeUP<HideWindows_>(*this);
 
@@ -220,7 +220,6 @@ Window::Window(std::wstring const & name, int32 left, int32 top, int32 width, in
 
 Window::~Window()
 {
-	inputCenter_ = nullptr;
 	if (hideWindows_->hWnd_ != NULL)
 	{
 		::DestroyWindow(hideWindows_->hWnd_);
@@ -257,8 +256,6 @@ void Window::Recreate()
 
 void Window::StartHandlingMessages()
 {
-	inputCenter_ = &Context::GetInstance().GetInputCenter();
-
 	MSG msg;
 	BOOL hasMessage;
 	// Main message loop:
@@ -499,41 +496,39 @@ std::vector<InputCenter::InputSemantic> const Window::WindowsVKToInputSemantic =
 
 void Window::OnResize(uint32 width, uint32 height)
 {
-	
+	// TODO
 }
 
 void Window::OnKeyDown(uint32 winKey)
 {
 	winKey = DistinguishLeftRightShiftCtrlAlt(winKey, true);
-	inputCenter_->KeyDown(WindowsVKToInputSemantic[winKey]);
+	Application::GetInstance().GetInputCenter().GenerateKeyDown(WindowsVKToInputSemantic[winKey]);
 }
 
 void Window::OnKeyUp(uint32 winKey)
 {
 	winKey = DistinguishLeftRightShiftCtrlAlt(winKey, false);
-	inputCenter_->KeyUp(WindowsVKToInputSemantic[winKey]);
+	Application::GetInstance().GetInputCenter().GenerateKeyUp(WindowsVKToInputSemantic[winKey]);
 }
 
-void Window::OnMouseDown(uint32 buttons, uint32 x, uint32 y)
+void Window::OnMouseDown(uint32 winKey, uint32 x, uint32 y)
 {
-	inputCenter_->MouseDown(WindowsVKToInputSemantic[buttons], x, y);
+	Application::GetInstance().GetInputCenter().GenerateMouseDown(WindowsVKToInputSemantic[winKey], x, height_ - y);
 }
 
-void Window::OnMouseUp(uint32 buttons, uint32 x, uint32 y)
+void Window::OnMouseUp(uint32 winKey, uint32 x, uint32 y)
 {
-	inputCenter_->MouseUp(WindowsVKToInputSemantic[buttons], x, y);
+	Application::GetInstance().GetInputCenter().GenerateMouseUp(WindowsVKToInputSemantic[winKey], x, height_ - y);
 }
 
-void Window::OnMouseWheel(uint32 buttons, uint32 x, uint32 y, int32 wheelDelta)
+void Window::OnMouseWheel(uint32 winKey, uint32 x, uint32 y, int32 wheelDelta)
 {
-	// semantic should not be relied on
-	inputCenter_->MouseWheel(WindowsVKToInputSemantic[buttons], x, y, wheelDelta);
+	Application::GetInstance().GetInputCenter().GenerateMouseWheel(InputCenter::InputSemantic::M_Wheel, x, height_ - y, wheelDelta);
 }
 
-void Window::OnMouseMove(uint32 buttons, uint32 x, uint32 y)
+void Window::OnMouseMove(uint32 winKey, uint32 x, uint32 y)
 {
-	// semantic should not be relied on
-	inputCenter_->MouseMove(WindowsVKToInputSemantic[buttons], x, y);
+	Application::GetInstance().GetInputCenter().GenerateMouseMove(InputCenter::InputSemantic::M_Move, x, height_ - y);
 }
 
 uint32 Window::DistinguishLeftRightShiftCtrlAlt(uint32 winKey, bool down)
