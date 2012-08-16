@@ -17,7 +17,8 @@ public:
 
 	virtual void Update() override
 	{
-		modelMatrix_ = Translation(position_) * orientation_ * Scaling(scaling_);
+		// TODO add a GetmatrixFromTQS(v3, q, v3)
+		modelMatrix_ = TranslationMatrix(position_) * MatrixFromQuaternion(orientation_) * ScalingMatrix(scaling_);
 	}
 
 	floatM44 const & GetModelMatrix() const
@@ -38,19 +39,11 @@ public:
 		return position_;
 	}
 
-	void SetOrientation(float angle, float x, float y, float z)
-	{
-		orientation_ = Rotation(angle, x, y, z);
-	}
-	void SetOrientation(float angle, floatV3 const & axis)
-	{
-		orientation_ = Rotation(angle, axis);
-	}
-	void SetOrientation(floatM44 const & orientation)
+	void SetOrientation(floatQ const & orientation)
 	{
 		orientation_ = orientation;
 	}
-	floatM44 const & GetOrientation() const
+	floatQ const & GetOrientation() const
 	{
 		return orientation_;
 	}
@@ -99,25 +92,18 @@ public:
 		scaling_ = scaling_ * s;
 	}
 
-	void RotateX(float angleX)
-	{
-		orientation_ = RotationX(angleX) * orientation_;
-	}
-	void RotateY(float angleY)
-	{
-		orientation_ = RotationY(angleY) * orientation_;
-	}
-	void RotateZ(float angleZ)
-	{
-		orientation_ = RotationZ(angleZ) * orientation_;
-	}
+
 	void Rotate(float angle, float x, float y, float z)
 	{
-		orientation_ = Rotation(angle, x, y, z) * orientation_;
+		orientation_ = RotationQuaternion(angle, x, y, z) * orientation_;
 	}
 	void Rotate(float angle, floatV3 const & axis)
 	{
-		orientation_ = Rotation(angle, axis) * orientation_;
+		orientation_ = RotationQuaternion(angle, axis) * orientation_;
+	}
+	void Rotate(floatQ const rotation)
+	{
+		orientation_ = rotation * orientation_;
 	}
 
 	/*
@@ -140,12 +126,12 @@ public:
 	 */
 	void FaceTo(floatV3 to)
 	{
-		orientation_ = ::FaceTo(front_, position_, to, up_);
+		orientation_ = FaceToQuaternion(front_, position_, to, up_);
 	}
 
 private:
 	floatV3 position_;
-	floatM44 orientation_; // TODO change to quaternion
+	floatQ orientation_;
 	floatV3 scaling_;
 
 	floatV3 front_;

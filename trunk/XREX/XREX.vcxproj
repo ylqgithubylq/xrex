@@ -57,6 +57,7 @@
       <AdditionalLibraryDirectories>$(SolutionDir)\Lib\$(Platform)</AdditionalLibraryDirectories>
       <AdditionalDependencies>glload.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <Profile>true</Profile>
+      <AdditionalOptions>/LTCG /NODEFAULTLIB:library %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
       <Command>copy $(SolutionDir)$(Configuration)\$(TargetName)$(TargetExt) $(SolutionDir)Bin\$(Platform)\</Command>
@@ -80,6 +81,7 @@
       <AdditionalLibraryDirectories>$(SolutionDir)\Lib\$(Platform)</AdditionalLibraryDirectories>
       <AdditionalDependencies>glload.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <Profile>true</Profile>
+      <AdditionalOptions>/LTCG /NODEFAULTLIB:library %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
       <Command>copy $(SolutionDir)$(Configuration)\$(TargetName)$(TargetExt) $(SolutionDir)Bin\$(Platform)\</Command>
@@ -90,6 +92,7 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Color.cpp" />
     <ClCompile Include="Component.cpp" />
+    <ClCompile Include="FPSCameraController.cpp" />
     <ClCompile Include="GLUtil.cpp" />
     <ClCompile Include="GLWindow.cpp" />
     <ClCompile Include="GraphicsBuffer.cpp" />
@@ -117,7 +120,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="Context.cpp" />
+    <ClCompile Include="Application.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BasicType.hpp" />
@@ -126,6 +129,7 @@
     <ClInclude Include="Component.hpp" />
     <ClInclude Include="Declare.hpp" />
     <ClInclude Include="DefinedShaderName.hpp" />
+    <ClInclude Include="FPSCameraController.hpp" />
     <ClInclude Include="GLUtil.hpp" />
     <ClInclude Include="GraphicsBuffer.hpp" />
     <ClInclude Include="InputCenter.hpp" />
@@ -153,7 +157,7 @@
     <ClInclude Include="Vector.hpp" />
     <ClInclude Include="Window.hpp" />
     <ClInclude Include="XREX.hpp" />
-    <ClInclude Include="Context.hpp" />
+    <ClInclude Include="Application.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Effects\Test.glsl" />

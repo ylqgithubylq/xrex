@@ -16,6 +16,8 @@
 #include "Scene.hpp"
 #include "NaiveManagedScene.hpp"
 #include "Timer.hpp"
+#include "FPSCameraController.hpp"
+#include "InputCenter.hpp"
 
 #include <CoreGL.hpp>
 
@@ -60,8 +62,7 @@ struct TempScene
 	{
 		//gl::Enable(gl::GL_DEPTH_TEST);
 		//gl::Enable(gl::GL_BLEND);
-		gl::PolygonMode(gl::GL_FRONT_AND_BACK, gl::GL_FILL);
-		gl::Enable(gl::GL_CULL_FACE);
+
 
 		ProgramObjectSP program = MakeSP<ProgramObject>();
 		string shaderString;
@@ -93,21 +94,21 @@ struct TempScene
 		}
 
 		camera_ = MakeSP<SceneObject>("camera");
-		Settings const & settings = Context::GetInstance().GetSettings();
+		Settings const & settings = Application::GetInstance().GetSettings();
 		CameraSP camera = MakeSP<Camera>(PI / 4, static_cast<float>(settings.renderingSettings.width) / settings.renderingSettings.height, 0.1, 100.0);
 		camera_->SetComponent(camera);
 
-		scene_ = Context::GetInstance().GetRenderingEngine().GetCurrentScene();
+		scene_ = Application::GetInstance().GetRenderingEngine().GetCurrentScene();
 		scene_->AddObject(camera_);
 
 
-		floatV3 eye = floatV3(45.0, 22.5, 60.0);
+		floatV3 eye = floatV3(0.0, 0.5, -60.0);
 		floatV3 up = floatV3(0.3, 1.0, 0.0);
 		TransformationSP cameraTransformation = camera_->GetComponent<Transformation>();
 		cameraTransformation->SetPosition(eye);
 		cameraTransformation->SetUpDirection(up);
 		cameraTransformation->SetFrontDirection(floatV3(0, 0, -1));
-		cameraTransformation->FaceTo(floatV3(0, 0, 0));
+		//cameraTransformation->FaceTo(floatV3(0, 0, 0));
 
 		vector<floatV3> vertexData;
 		vector<uint16> indexData;
@@ -186,7 +187,7 @@ struct TempScene
 		color->SetValue(floatV3(0.5f, 0.5f, 1.0f));
 		floatV3 c = color->GetValue();
 
-		int32 edgeCount = 16;
+		int32 edgeCount = 5;
 		float intervalSize = 4.0f;
 		float center = static_cast<float>(edgeCount - 1) / 2;
 		int32 totalCount = edgeCount * edgeCount * edgeCount;
@@ -209,17 +210,20 @@ struct TempScene
 					floatV3 position = floatV3((k - center) * intervalSize, (j - center) * intervalSize, (i - center) * intervalSize);
 					cubeTransform->SetPosition(position);
 					cubeTransform->SetScaling(2);
-					floatM44 orientation = Rotation(PI / 8 * i, 0.0f, 1.0f, 0.0f);
+					floatQ orientation = RotationQuaternion<float>(PI / 8, i, j, k);
 					cubeTransform->SetOrientation(orientation);
 					cubeTransform->SetFrontDirection(floatV3(1, 0, 0));
-					floatV3 temp = Transform(orientation, floatV3(1, 0, 0));
-					cubeTransform->FaceTo(floatV3::Zero);
+					floatV3 temp = RotateByQuaternion(orientation, floatV3(1, 0, 0));
+					//cubeTransform->FaceTo(floatV3::Zero);
 				}
 			}
 		}
 
 
-
+		FPSCameraControllerSP cameraController = MakeSP<FPSCameraController>();
+		cameraController->InitializeActionMap();
+		cameraController->AttachToCamera(camera_);
+		Application::GetInstance().GetInputCenter().AddInputHandler(cameraController);
 		// 		wMatrix->SetValue(translate * rotation);
 	}
 
@@ -229,13 +233,56 @@ struct TempScene
 // 		cout << "Timer.Elapsed: " << timer_.Elapsed() << endl;
 // 		cout << "Timer.CurrentTime: " << timer_.CurrentTime() << endl;
 	}
-	void operator()(double current, double delta)
+	void operator ()(double current, double delta)
 	{
 		Render(current, delta);
 	}
 	Timer timer_;
 
 };
+
+
+
+// GL4 sample code
+//#include "../CPPTest/DemoCode_HelloTriangle.h"
+
+void Main() 
+{
+	Settings settings;
+	settings.windowTitle = L"TestMath GL4 window";
+
+	settings.renderingSettings.colorBits = 32;
+	settings.renderingSettings.depthBits = 24;
+	settings.renderingSettings.stencilBits = 8;
+	settings.renderingSettings.sampleCount = 4;
+
+	settings.renderingSettings.left = 400;
+	settings.renderingSettings.top = 300;
+	settings.renderingSettings.width = 600;
+	settings.renderingSettings.height = 500;
+
+
+	Application::GetInstance().Initialize(settings);
+
+	TempScene s;
+	s.InitializeScene();
+
+	function<void(double current, double delta)> f = [&s] (double current, double delta)
+	{
+		s(current, delta);
+	};
+	Application::GetInstance().GetRenderingEngine().SetRenderingFunction(f);
+
+	//assert(testmain(0, nullptr) == 0);
+	//Application::GetInstance().GetRenderingEngine().SetRenderingFunction(function<void(double,double)>(DrawHelper));
+
+
+
+	Application::GetInstance().Start();
+
+
+}
+
 
 void TestMath()
 {
@@ -293,77 +340,111 @@ void TestMath()
 	resultNormal = TransformNormal(m1, resultNormal);
 	resultNormal = TransformNormal(m1, resultNormal);
 
-	floatM44 trans = Translation(floatV3(1, 2, 3));
-	floatM44 rot = Rotation(PI / 4, floatV3(0, 1, 0));
-	rot = RotationX(PI / 4);
-	rot = RotationY(PI / 4);
-	rot = RotationZ(PI / 4);
-	floatM44 sc = Scaling(floatV3(1, 2, 1));
-	floatM44 rotft = RotationFromTo(floatV3(0, 1, 0), floatV3(1, 0, 1));
+	floatM44 trans = TranslationMatrix(floatV3(1, 2, 3));
+	floatM44 rot = RotationMatrix(PI / 4, floatV3(0, 1, 0));
+	rot = RotationMatrixX(PI / 4);
+	rot = RotationMatrixY(PI / 4);
+	rot = RotationMatrixZ(PI / 4);
+	floatM44 sc = ScalingMatrix(floatV3(1, 2, 1));
+	floatM44 rotft = RotationMatrixFromTo(floatV3(0, 1, 0), floatV3(1, 0, 1));
 
-	floatM44 frustum = Frustum(PI / 4, 8.0f / 6.0f, 1.0f, 10.0f);
+	floatM44 frustum = FrustumMatrix(PI / 4, 8.0f / 6.0f, 1.0f, 10.0f);
 
-	floatQuaternion quat0(sin(PI / 2 / 2) * floatV3(1, 1, 0).Normalize(), cos(PI / 2 / 2));
-	floatQuaternion quat1 = quat0.Normalize();
-	floatQuaternion quat2 = quat0.Conjugate();
-	floatQuaternion quat3 = RotationQuaternion(PI / 2, floatV3(1, 1, 0));
-	floatM44 mat3 = Rotation(PI / 2, floatV3(1, 1, 0));
-	floatV3 axisQ = quat0.Axis();
-	if (quat3.Axis() != quat0.Axis())
+	floatQ quat0(sin(PI / 2 / 2) * floatV3(1, 1, 0).Normalize(), cos(PI / 2 / 2));
+	floatQ quat1 = quat0.Normalize();
+	floatQ quat2 = quat0.Conjugate();
+	float angle = PI * 0.15f;
+	floatQ quat3 = RotationQuaternion(angle, floatV3(-1, -1, 1));
+	floatM44 mat3 = RotationMatrix(angle, floatV3(-1, -1, 1));
+	floatV3 axisQ = quat0.V();
+	if (quat3.V() != quat0.V())
 	{
-		axisQ = quat3.Axis();
+		axisQ = quat3.V();
 	}
-	floatV3 vecToRotate = floatV3(1, 0, 0);
-	floatV3 rotRes0 = RotateByQuaternion(quat1, vecToRotate);
-	floatV3 rotRes1 = Transform(mat3, vecToRotate);
-	//cin.get();
+	floatV3 vecToRotate = floatV3(1, 1, 0);
+	floatM44 tempMat = MatrixFromQuaternion(quat3);
+	//floatQ resQ = QuaternionFromMatrix(tempMat);
+	floatV3 rotRes0 = RotateByQuaternion(quat3, vecToRotate);
+	floatM44 fromQuat3 = MatrixFromQuaternion(quat3);
+	floatV3 rotRes1 = Transform(fromQuat3, vecToRotate);
+	floatV3 rotRes2 = Transform(mat3, vecToRotate);
+	// 	floatQ quatFromMat3 = QuaternionFromMatrix(mat3);
+	// 	floatV3 rotRes3 = RotateByQuaternion(quatFromMat3, vecToRotate);
+	// 	
+
+	floatV3 rfrom = floatV3(1, 0, 0);
+	floatV3 rto = floatV3(0, 1, 0);
+	floatV3 toRotate0 = floatV3(0, 0, -1);
+	floatM44 rotateftm = RotationMatrixFromTo(rfrom, rto);
+	floatQ rotateftq = RotationQuaternionFromTo(rfrom, rto);
+	floatV3 rftmr0 = Transform(rotateftm, toRotate0);
+	floatV3 rftqr0 = RotateByQuaternion(rotateftq, toRotate0);
+	floatV3 rftmr1 = Transform(rotateftm, rfrom);
+	floatV3 rftqr1 = RotateByQuaternion(rotateftq, rfrom);
+
+	floatV3 front = floatV3(1.0, 1.0, 0);
+	floatV3 position = floatV3(0, 1.0, 1.0);
+	floatV3 to = floatV3(-1, 0, 0);
+	floatV3 up = floatV3(0, 1, 0);
+	floatQ ftq = FaceToQuaternion(front, position, to, up);
+	floatM44 ftm = FaceToMatrix(front, position, to, up);
+
+	floatV3 ftrrq = RotateByQuaternion(ftq, vecToRotate);
+	floatV3 ftrrm = Transform(ftm, vecToRotate);
+	floatV3 pmt = (to - position).Normalize();
 }
 
-// GL4 sample code
-//#include "../CPPTest/DemoCode_HelloTriangle.h"
-
-void Main() 
+void SQRTSpeedTest()
 {
-	Settings settings;
-	settings.windowTitle = L"TestMath GL4 window";
+	int N = 1000000;
+	vector<float> results(N, 0);
+	vector<float> todo(N);
+	for (int i = 0; i < N; ++i)
+	{
+		todo[i] = float(i);
+	}
 
-	settings.renderingSettings.colorBits = 32;
-	settings.renderingSettings.depthBits = 24;
-	settings.renderingSettings.stencilBits = 8;
-	settings.renderingSettings.sampleCount = 4;
+	Timer t;
+	cout << ReciprocalSqrt(0.0f) << endl;
+	
+	for (int i = 0; i < N; ++i)
+	{
+		results[i] = 1 / sqrt(todo[i]);
+	}
+	for (int i = 0; i < N; ++i)
+	{
+		results[i] = ReciprocalSqrt(todo[i]);
+	}
 
-	settings.renderingSettings.left = 400;
-	settings.renderingSettings.top = 300;
-	settings.renderingSettings.width = 600;
-	settings.renderingSettings.height = 500;
-
-
-	Context::GetInstance().Initialize(settings);
-
-	TempScene s;
-	s.InitializeScene();
-
-	function<void(double current, double delta)> f = bind(&TempScene::operator(), ref(s), placeholders::_1, placeholders::_2);
-	Context::GetInstance().GetRenderingEngine().SetRenderingFunction(f);
-
-	//assert(testmain(0, nullptr) == 0);
-	//Context::GetInstance().GetRenderingEngine().SetRenderingFunction(function<void(double,double)>(DrawHelper));
-
-
-
-	Context::GetInstance().Start();
-
-
+	t.Restart();
+	float start1 = t.Elapsed();
+	for (int i = 0; i < N; ++i)
+	{
+		results[i] = 1 / sqrt(todo[i]);
+		//results[i] = sqrt(todo[i]);
+	}
+	float end1 = t.Elapsed();
+	float result1 = end1 - start1;
+	cout << result1 << endl;
+	t.Restart();
+	float start2 = t.Elapsed();
+	for (int i = 0; i < N; ++i)
+	{
+		results[i] = ReciprocalSqrt(todo[i]);
+		//results[i] = 1 / ReciprocalSqrt(todo[i]);
+	}
+	float end2 = t.Elapsed();
+	float result2 = end2 - start2;
+	cout << result2 << endl;
+	float delta = result1 - result2;
+	cout << delta << endl;
 }
-
-
-
 
 int main()
 {
 	TestMath();
+	//SQRTSpeedTest();
 	//return 0;
-
 	Main();
 
 

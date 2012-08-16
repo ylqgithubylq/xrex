@@ -4,18 +4,17 @@
 
 #include "Settings.hpp"
 #include "Timer.hpp"
-#include "RenderingEngine.hpp"
 
 #include <string>
 
 
-class Context
+class Application
 	: Noncopyable
 {
 public:
-	static Context& GetInstance()
+	static Application& GetInstance()
 	{
-		static Context context;
+		static Application context;
 		return context;
 	}
 
@@ -48,17 +47,16 @@ public:
 	 */
 	void Start();
 
-	void RenderAFrame()
-	{
-		renderingEngine_->Update();
-	}
+	void ExecuteALogicFrame();
+
+	void RenderAFrame();
 
 private:
 	void InitializeMainWindow(std::wstring const & name, RenderingSettings const & settings);
 
 private:
-	Context();
-	~Context();
+	Application();
+	~Application();
 
 private:
 	std::unique_ptr<Window> mainWindow_;

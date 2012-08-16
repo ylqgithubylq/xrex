@@ -47,19 +47,14 @@ private:
 
 private:
 
-
-	// TODO add event register unregister, fire event
-
 	void OnResize(uint32 width, uint32 height);
 
 	void OnKeyDown(uint32 winKey);
-
-
 	void OnKeyUp(uint32 winKey);
-	void OnMouseDown(uint32 buttons, uint32 x, uint32 y);
-	void OnMouseUp(uint32 buttons, uint32 x, uint32 y);
-	void OnMouseWheel(uint32 buttons, uint32 x, uint32 y, int32 wheelDelta);
-	void OnMouseMove(uint32 buttons, uint32 x, uint32 y);
+	void OnMouseDown(uint32 winKey, uint32 x, uint32 y);
+	void OnMouseUp(uint32 winKey, uint32 x, uint32 y);
+	void OnMouseWheel(uint32 winKey, uint32 x, uint32 y, int32 wheelDelta);
+	void OnMouseMove(uint32 winKey, uint32 x, uint32 y);
 
 	uint32 DistinguishLeftRightShiftCtrlAlt(uint32 winKey, bool down);
 
@@ -68,7 +63,6 @@ protected:
 	struct HideWindows_;
 	std::unique_ptr<HideWindows_> hideWindows_;
 
-	InputCenter* inputCenter_;
 	bool leftShift_;
 	bool rightShift_;
 	bool leftCtrl_;

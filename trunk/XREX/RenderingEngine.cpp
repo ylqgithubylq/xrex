@@ -12,7 +12,7 @@
 #include "GLUtil.hpp"
 #include "DefinedShaderName.hpp"
 
-#include <utility>
+
 
 
 
@@ -28,6 +28,13 @@ RenderingEngine::~RenderingEngine()
 {
 }
 
+
+void RenderingEngine::Initialize()
+{
+	gl::PolygonMode(gl::GL_FRONT_AND_BACK, gl::GL_FILL);
+	gl::Enable(gl::GL_CULL_FACE);
+	gl::Enable(gl::GL_DEPTH_TEST);
+}
 
 void RenderingEngine::RenderScene()
 {

@@ -10,10 +10,12 @@
 
 #include <memory>
 
+#include <utility>
+
 struct Settings;
 struct RenderingSettings;
 
-class Context;
+class Application;
 class LocalResourceLoader;
 class Logger;
 class RenderingEngine;
@@ -23,6 +25,8 @@ class GLWindow;
 
 class InputHandler;
 typedef std::shared_ptr<InputHandler> InputHandlerSP;
+class FPSCameraController;
+typedef std::shared_ptr<FPSCameraController> FPSCameraControllerSP;
 
 class Scene;
 typedef std::shared_ptr<Scene> SceneSP;

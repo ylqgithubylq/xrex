@@ -7,7 +7,7 @@
 
 #include <CoreGL.hpp>
 
-#include <utility>
+
 #include <iostream>
 #include <algorithm>
 

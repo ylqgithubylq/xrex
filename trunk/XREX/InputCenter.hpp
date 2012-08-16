@@ -2,11 +2,17 @@
 
 #include "Declare.hpp"
 
+
+#include <vector>
+#include <unordered_set>
+#include <queue>
+#include <functional>
+
 class InputCenter
 	: Noncopyable
 {
 public:
-	// copy from KlayGE
+	// copy from KlayGE and modified
 	enum InputSemantic
 	{
 		NullSemantic		= 0x00,
@@ -162,17 +168,16 @@ public:
 
 
 
-		M_X					= 0xF0,
-		M_Y					= 0xF1,
-		M_Z					= 0xF2,
-		M_Button0			= 0xF3,
-		M_Button1			= 0xF4,
-		M_Button2			= 0xF5,
-		M_Button3			= 0xF6,
-		M_Button4			= 0xF7,
-		M_Button5			= 0xF8,
-		M_Button6			= 0xF9,
-		M_Button7			= 0xFA,
+		M_Button0			= 0xF0,
+		M_Button1			= 0xF1,
+		M_Button2			= 0xF2,
+		M_Button3			= 0xF3,
+		M_Button4			= 0xF4,
+		M_Button5			= 0xF5,
+		M_Button6			= 0xF6,
+		M_Button7			= 0xF7,
+		M_Move				= 0xFA,
+		M_Wheel				= 0xFB,
 
 		Temp_Shift			= 0x100,
 		Temp_Ctrl			= 0x101,
@@ -180,26 +185,94 @@ public:
 
 		InputSemanticInvalid
 	};
+
+
+
+
 public:
 	InputCenter();
 	virtual ~InputCenter();
 
+	bool AddInputHandler(InputHandlerSP const & inputHandler);
+	
+	bool RemoveInputHandler(InputHandlerSP const & inputHandler);
 
-	void KeyDown(InputSemantic semantic);
+	bool GetKeyState(InputSemantic semantic) const
+	{
+		return semanticStates_[static_cast<uint32>(semantic)];
+	}
 
-	void KeyUp(InputSemantic semantic);
+	VectorT<uint32, 2> GetPointerPosition() const
+	{
+		return pointerPosition_;
+	}
 
-	void MouseDown(InputSemantic semantic, uint32 x, uint32 y);
+	VectorT<uint32, 2> GetPreviousPointerPosition() const
+	{
+		return previousPointerPosition_;
+	}
 
-	void MouseUp(InputSemantic semantic, uint32 x, uint32 y);
+	/*
+	 *	InputHandler generated action command should be enqueued here.
+	 */
+	void EnqueueAction(std::function<void()>&& action)
+	{
+		actionQueue_.push(Action(std::move(action)));
+	}
 
-	void MouseWheel(InputSemantic semantic, uint32 x, uint32 y, int32 wheelDelta);
+	/*
+	 *	Should be called by Context before logic thread traversing and call Behavior component of each SceneObject.
+	 */
+	void ExecuteAllQueuedActions();
 
-	void MouseMove(InputSemantic semantic, uint32 x, uint32 y);
+
+	void GenerateKeyDown(InputSemantic semantic);
+
+	void GenerateKeyUp(InputSemantic semantic);
+
+	void GenerateMouseDown(InputSemantic semantic, uint32 x, uint32 y);
+
+	void GenerateMouseUp(InputSemantic semantic, uint32 x, uint32 y);
+
+	void GenerateMouseWheel(InputSemantic semantic, uint32 x, uint32 y, int32 wheelDelta);
+
+	void GenerateMouseMove(InputSemantic semantic, uint32 x, uint32 y);
 
 private:
-	std::vector<bool> SemanticStates_;
+	void DispatchInputEvent(InputSemantic semantic, uint32 data);
+
+private:
+		
+	/*
+	 *	Used for queueing generated action command to command queue.
+	 */
+	struct Action
+		: Noncopyable
+	{
+		Action(std::function<void()>&& command)
+			: inputCommand(std::move(command))
+		{
+		}
+		Action(Action&& rhs)
+			: inputCommand(std::move(rhs.inputCommand))
+		{
+		}
+		Action& operator =(Action&& rhs)
+		{
+			inputCommand = std::move(rhs.inputCommand);
+		}
+
+		std::function<void()> inputCommand;
+	};
+
+private:
+	std::vector<bool> semanticStates_;
 	VectorT<uint32, 2> previousPointerPosition_;
 	VectorT<uint32, 2> pointerPosition_;
+
+	std::unordered_set<InputHandlerSP> inputHandlers_;
+
+	std::queue<Action> actionQueue_;
+
 };
 
