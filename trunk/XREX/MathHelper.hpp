@@ -196,33 +196,22 @@ namespace MathHelper
 	{
 		static void DoMultiply(T out[16], T const lhs[16], T const rhs[16])
 		{
-			// subscript: row, column
-			T l11 = lhs[0], l21 = lhs[1], l31 = lhs[2], l41 = lhs[3],
-				l12 = lhs[4], l22 = lhs[5], l32 = lhs[6], l42 = lhs[7],
-				l13 = lhs[8], l23 = lhs[9], l33 = lhs[10], l43 = lhs[11],
-				l14 = lhs[12], l24 = lhs[13], l34 = lhs[14], l44 = lhs[15];
-			// subscript: row, column
-			T r11 = rhs[0], r21 = rhs[1], r31 = rhs[2], r41 = rhs[3],
-				r12 = rhs[4], r22 = rhs[5], r32 = rhs[6], r42 = rhs[7],
-				r13 = rhs[8], r23 = rhs[9], r33 = rhs[10], r43 = rhs[11],
-				r14 = rhs[12], r24 = rhs[13], r34 = rhs[14], r44 = rhs[15];
-
-			out[0] = r11 * l11 + r21 * l12 + r31 * l13 + r41 * l14;
-			out[1] = r11 * l21 + r21 * l22 + r31 * l23 + r41 * l24;
-			out[2] = r11 * l31 + r21 * l32 + r31 * l33 + r41 * l34;
-			out[3] = r11 * l41 + r21 * l42 + r31 * l43 + r41 * l44;
-			out[4] = r12 * l11 + r22 * l12 + r32 * l13 + r42 * l14;
-			out[5] = r12 * l21 + r22 * l22 + r32 * l23 + r42 * l24;
-			out[6] = r12 * l31 + r22 * l32 + r32 * l33 + r42 * l34;
-			out[7] = r12 * l41 + r22 * l42 + r32 * l43 + r42 * l44;
-			out[8] = r13 * l11 + r23 * l12 + r33 * l13 + r43 * l14;
-			out[9] = r13 * l21 + r23 * l22 + r33 * l23 + r43 * l24;
-			out[10] = r13 * l31 + r23 * l32 + r33 * l33 + r43 * l34;
-			out[11] = r13 * l41 + r23 * l42 + r33 * l43 + r43 * l44;
-			out[12] = r14 * l11 + r24 * l12 + r34 * l13 + r44 * l14;
-			out[13] = r14 * l21 + r24 * l22 + r34 * l23 + r44 * l24;
-			out[14] = r14 * l31 + r24 * l32 + r34 * l33 + r44 * l34;
-			out[15] = r14 * l41 + r24 * l42 + r34 * l43 + r44 * l44;
+			out[0] = rhs[0] * lhs[0] + rhs[1] * lhs[4] + rhs[2] * lhs[8] + rhs[3] * lhs[12];
+			out[1] = rhs[0] * lhs[1] + rhs[1] * lhs[5] + rhs[2] * lhs[9] + rhs[3] * lhs[13];
+			out[2] = rhs[0] * lhs[2] + rhs[1] * lhs[6] + rhs[2] * lhs[10] + rhs[3] * lhs[14];
+			out[3] = rhs[0] * lhs[3] + rhs[1] * lhs[7] + rhs[2] * lhs[11] + rhs[3] * lhs[15];
+			out[4] = rhs[4] * lhs[0] + rhs[5] * lhs[4] + rhs[6] * lhs[8] + rhs[7] * lhs[12];
+			out[5] = rhs[4] * lhs[1] + rhs[5] * lhs[5] + rhs[6] * lhs[9] + rhs[7] * lhs[13];
+			out[6] = rhs[4] * lhs[2] + rhs[5] * lhs[6] + rhs[6] * lhs[10] + rhs[7] * lhs[14];
+			out[7] = rhs[4] * lhs[3] + rhs[5] * lhs[7] + rhs[6] * lhs[11] + rhs[7] * lhs[15];
+			out[8] = rhs[8] * lhs[0] + rhs[9] * lhs[4] + rhs[10] * lhs[8] + rhs[11] * lhs[12];
+			out[9] = rhs[8] * lhs[1] + rhs[9] * lhs[5] + rhs[10] * lhs[9] + rhs[11] * lhs[13];
+			out[10] = rhs[8] * lhs[2] + rhs[9] * lhs[6] + rhs[10] * lhs[10] + rhs[11] * lhs[14];
+			out[11] = rhs[8] * lhs[3] + rhs[9] * lhs[7] + rhs[10] * lhs[11] + rhs[11] * lhs[15];
+			out[12] = rhs[12] * lhs[0] + rhs[13] * lhs[4] + rhs[14] * lhs[8] + rhs[15] * lhs[12];
+			out[13] = rhs[12] * lhs[1] + rhs[13] * lhs[5] + rhs[14] * lhs[9] + rhs[15] * lhs[13];
+			out[14] = rhs[12] * lhs[2] + rhs[13] * lhs[6] + rhs[14] * lhs[10] + rhs[15] * lhs[14];
+			out[15] = rhs[12] * lhs[3] + rhs[13] * lhs[7] + rhs[14] * lhs[11] + rhs[15] * lhs[15];
 		}
 
 		static void CalculateDeterminant(T vectors_[16]) 

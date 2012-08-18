@@ -70,12 +70,12 @@ public:
 	void InitializeActionMap()
 	{
 		actionMap_ = GenerateActionMap();
-		initialized = true;
+		initialized_ = true;
 	}
 
 	ActionMap const & GetActionMap() const
 	{
-		assert(initialized);
+		assert(initialized_);
 		return actionMap_;
 	}
 
@@ -106,6 +106,6 @@ protected:
 
 private:
 	ActionMap actionMap_;
-	bool initialized;
+	bool initialized_;
 };
 

@@ -35,8 +35,6 @@ template float Angle(floatV2 const & from, floatV2 const & to);
 template <typename T>
 QuaternionT<T> QuaternionFromMatrix(Matrix4T<T> const & rotationMatrix)
 {
-	assert(false); // have problems, I have no idea where it goes wrong.
-
 	// see Real-Time Rendering, 3rd. 4.3.2 Quaternion Transforms.
 	// code modified from From paper 'Quaternion to Matrix and Back', by ID software, 2005.
 	T x, y, z, w;
@@ -44,12 +42,12 @@ QuaternionT<T> QuaternionFromMatrix(Matrix4T<T> const & rotationMatrix)
 	// check the diagonal
 	if (rotationMatrix(0, 0) + rotationMatrix(1, 1) + rotationMatrix(2, 2) > 0)
 	{
-		T const t(rotationMatrix(0, 0) + rotationMatrix(1, 1) + rotationMatrix(2, 2));
+		T const t = +rotationMatrix(0, 0) + rotationMatrix(1, 1) + rotationMatrix(2, 2) + T(1);
 		T const s = ReciprocalSqrt(t) * T(0.5);
 		w = s * t;
-		x = (rotationMatrix(1, 2) - rotationMatrix(2, 1)) * s;
-		y = (rotationMatrix(2, 0) - rotationMatrix(0, 2)) * s;
-		z = (rotationMatrix(0, 1) - rotationMatrix(1, 0)) * s;
+		x = (rotationMatrix(2, 1) - rotationMatrix(1, 2)) * s;
+		y = (rotationMatrix(0, 2) - rotationMatrix(2, 0)) * s;
+		z = (rotationMatrix(1, 0) - rotationMatrix(0, 1)) * s;
 	}
 	else if (rotationMatrix(0, 0) > rotationMatrix(1, 1) && rotationMatrix(0, 0) > rotationMatrix(2, 2))
 	{
@@ -57,8 +55,8 @@ QuaternionT<T> QuaternionFromMatrix(Matrix4T<T> const & rotationMatrix)
 		T s = ReciprocalSqrt(t) * T(0.5);
 		x = s * t;
 		y = (rotationMatrix(0, 1) + rotationMatrix(1, 0)) * s;
-		z = (rotationMatrix(2, 0) + rotationMatrix(0, 2)) * s;
-		w = (rotationMatrix(1, 2) - rotationMatrix(2, 1)) * s;
+		z = (rotationMatrix(0, 2) + rotationMatrix(2, 0)) * s;
+		w = (rotationMatrix(2, 1) + rotationMatrix(1, 2)) * s;
 	}
 	else if (rotationMatrix(1, 1) > rotationMatrix(2, 2))
 	{ 
@@ -67,7 +65,7 @@ QuaternionT<T> QuaternionFromMatrix(Matrix4T<T> const & rotationMatrix)
 
 		y = s * t;
 		x = (rotationMatrix(0, 1) + rotationMatrix(1, 0)) * s;
-		w = (rotationMatrix(2, 0) - rotationMatrix(0, 2)) * s;
+		w = (rotationMatrix(0, 2) - rotationMatrix(2, 0)) * s;
 		z = (rotationMatrix(1, 2) + rotationMatrix(2, 1)) * s;
 	}
 	else
@@ -76,8 +74,8 @@ QuaternionT<T> QuaternionFromMatrix(Matrix4T<T> const & rotationMatrix)
 		T const s = ReciprocalSqrt(t) * T(0.5);
 
 		z = s * t;
-		w = (rotationMatrix(0, 1) - rotationMatrix(1, 0)) * s;
-		x = (rotationMatrix(2, 0) + rotationMatrix(0, 2)) * s;
+		w = (rotationMatrix(1, 0) - rotationMatrix(0, 1)) * s;
+		x = (rotationMatrix(0, 2) + rotationMatrix(2, 0)) * s;
 		y = (rotationMatrix(1, 2) + rotationMatrix(2, 1)) * s;
 	}
 
@@ -385,6 +383,157 @@ QuaternionT<T> RotationQuaternionFromTo(VectorT<T, 3> const & from, VectorT<T, 3
 }
 template floatQ RotationQuaternionFromTo(floatV3 const & from, floatV3 const & to);
 
+namespace
+{
+	template <typename T>
+	Matrix4T<T> BaseMatrixByZReferenceY(VectorT<T, 3> const & zAxis, VectorT<T, 3> const & yAxis, bool transpose = false)
+	{
+		VectorT<T, 3> z = zAxis.Normalize();
+		VectorT<T, 3> left = Cross(yAxis, z);
+		if (left.LengthSquared() == 0)
+		{
+			return Matrix4T<T>::Zero;
+		}
+		VectorT<T, 3> x = left.Normalize();
+		VectorT<T, 3> y = Cross(z, x);
+
+		Matrix4T<T> matrix;
+		T* resultArray = const_cast<T*>(matrix.GetArray());
+		if (transpose)
+		{
+			resultArray[0] = x.X();
+			resultArray[1] = y.X();
+			resultArray[2] = z.X();
+			resultArray[3] = 0;
+			resultArray[4] = x.Y();
+			resultArray[5] = y.Y();
+			resultArray[6] = z.Y();
+			resultArray[7] = 0;
+			resultArray[8] = x.Z();
+			resultArray[9] = y.Z();
+			resultArray[10] = z.Z();
+			resultArray[11] = 0;
+		}
+		else
+		{
+			resultArray[0] = x.X();
+			resultArray[1] = x.Y();
+			resultArray[2] = x.Z();
+			resultArray[3] = 0;
+			resultArray[4] = y.X();
+			resultArray[5] = y.Y();
+			resultArray[6] = y.Z();
+			resultArray[7] = 0;
+			resultArray[8] = z.X();
+			resultArray[9] = z.Y();
+			resultArray[10] = z.Z();
+			resultArray[11] = 0;
+		}
+		resultArray[12] = 0;
+		resultArray[13] = 0;
+		resultArray[14] = 0;
+		resultArray[15] = 1;
+		return matrix;
+	}
+
+}
+
+template <typename T>
+Matrix4T<T> FaceToMatrix(VectorT<T, 3> const & to, VectorT<T, 3> const & up, VectorT<T, 3> const & localFront, VectorT<T, 3> const & localUp)
+{
+	if (to.LengthSquared() == 0)
+	{
+		return Matrix4T<T>::Zero;
+	}
+	if (up.LengthSquared() == 0)
+	{
+		return Matrix4T<T>::Zero;
+	}
+	if (localFront.LengthSquared() == 0)
+	{
+		return Matrix4T<T>::Zero;
+	}
+	if (localUp.LengthSquared() == 0)
+	{
+		return Matrix4T<T>::Zero;
+	}
+
+	// To build a matrix M that M * localX/Y/Z = worldX/Y/Z, so M = world(X,Y,Z) * local(X,Y,Z)^(-1)
+	Matrix4T<T> world = BaseMatrixByZReferenceY(to, up, false);
+	Matrix4T<T> localInverse = BaseMatrixByZReferenceY(localFront, localUp, true);
+
+	return world * localInverse;
+}
+template floatM44 FaceToMatrix(floatV3 const & to, floatV3 const & up, floatV3 const & localFront, floatV3 const & localUp);
+
+template <typename T>
+QuaternionT<T> FaceToQuaternion(VectorT<T, 3> const & to, VectorT<T, 3> const & up, VectorT<T, 3> const & localFront, VectorT<T, 3> const & localUp)
+{
+	if (to.LengthSquared() == 0)
+	{
+		return QuaternionT<T>::Zero;
+	}
+	if (up.LengthSquared() == 0)
+	{
+		return QuaternionT<T>::Zero;
+	}
+	if (localFront.LengthSquared() == 0)
+	{
+		return QuaternionT<T>::Zero;
+	}
+	if (localUp.LengthSquared() == 0)
+	{
+		return QuaternionT<T>::Zero;
+	}
+	// see FaceToMatrix
+	QuaternionT<T> world = QuaternionFromMatrix(BaseMatrixByZReferenceY(to, up, false));
+	QuaternionT<T> localInverse = QuaternionFromMatrix(BaseMatrixByZReferenceY(localFront, localUp, true));
+	return world * localInverse;
+}
+template floatQ FaceToQuaternion(floatV3 const & to, floatV3 const & up, floatV3 const & localFront, floatV3 const & localUp);
+
+
+template <typename T>
+Matrix4T<T> LookAtMatrix(VectorT<T, 3> const & eye, VectorT<T, 3> const & at, VectorT<T, 3> const & up)
+{
+	// -z is localFront direction
+	VectorT<T, 3> zAxis((eye - at).Normalize());
+	VectorT<T, 3> xAxis(Cross(up, zAxis).Normalize());
+	VectorT<T, 3> yAxis(Cross(zAxis, xAxis));
+
+	if (eye == at)
+	{
+		return Matrix4T<T>::Identity;
+	}
+	if (up.LengthSquared() == 0)
+	{
+		return Matrix4T<T>::Identity;
+	}
+
+	Matrix4T<T> temp;
+	T* resultArray = const_cast<T*>(temp.GetArray());
+
+	resultArray[0] = xAxis.X();
+	resultArray[1] = yAxis.X();
+	resultArray[2] = zAxis.X();
+	resultArray[3] = 0;
+	resultArray[4] = xAxis.Y();
+	resultArray[5] = yAxis.Y();
+	resultArray[6] = zAxis.Y();
+	resultArray[7] = 0;
+	resultArray[8] = xAxis.Z();
+	resultArray[9] = yAxis.Z();
+	resultArray[10] = zAxis.Z();
+	resultArray[11] = 0;
+	resultArray[12] = -Dot(xAxis, eye);
+	resultArray[13] = -Dot(yAxis, eye);
+	resultArray[14] = -Dot(zAxis, eye);
+	resultArray[15] = 1;
+
+	return temp;
+}
+template floatM44 LookAtMatrix(floatV3 const & eye, floatV3 const & at, floatV3 const & up);
+
 template <typename T>
 Matrix4T<T> FrustumMatrix(T const & fieldOfView, T const & aspectRatio, T const & near, T const & far)
 {
@@ -425,103 +574,3 @@ Matrix4T<T> FrustumMatrix(T const & top, T const & bottom, T const & left, T con
 	return temp;
 };
 template floatM44 FrustumMatrix(float const & top, float const & bottom, float const & left, float const & right, float const & near, float const & far);
-
-template <typename T>
-Matrix4T<T> FaceToMatrix(VectorT<T, 3> const & front, VectorT<T, 3> const & self, VectorT<T, 3> const & to, VectorT<T, 3> const & up)
-{
-	// TODO have problems, not correct
-	// code below calculate the matrix using -z as the front, so rotate front direction axis to -z first
-	QuaternionT<T> rotateToNegtiveZ = RotationQuaternionFromTo(VectorT<T, 3>(0, 0, -1), front);
-	VectorT<T, 3> zAxis = RotateByQuaternion(rotateToNegtiveZ, (self - to).Normalize());
-	VectorT<T, 3> xAxis = Cross(up, zAxis).Normalize();
-	VectorT<T, 3> yAxis = Cross(zAxis, xAxis);
-
-	if (self == to)
-	{
-		return Matrix4T<T>::Identity;
-	}
-	if (up.LengthSquared() == 0)
-	{
-		return Matrix4T<T>::Zero;
-	}
-
-	Matrix4T<T> temp;
-	T* resultArray = const_cast<T*>(temp.GetArray());
-
-	resultArray[0] = xAxis.X();
-	resultArray[1] = xAxis.Y();
-	resultArray[2] = xAxis.Z();
-	resultArray[3] = 0;
-	resultArray[4] = yAxis.X();
-	resultArray[5] = yAxis.Y();
-	resultArray[6] = yAxis.Z();
-	resultArray[7] = 0;
-	resultArray[8] = zAxis.X();
-	resultArray[9] = zAxis.Y();
-	resultArray[10] = zAxis.Z();
-	resultArray[11] = 0;
-	resultArray[12] = 0;
-	resultArray[13] = 0;
-	resultArray[14] = 0;
-	resultArray[15] = 1;
-
-	return temp;
-}
-template floatM44 FaceToMatrix(floatV3 const & front, floatV3 const & self, floatV3 const & to, floatV3 const & up);
-
-template <typename T>
-QuaternionT<T> FaceToQuaternion(VectorT<T, 3> const & front, VectorT<T, 3> const & self, VectorT<T, 3> const & to, VectorT<T, 3> const & up)
-{
-	QuaternionT<T> rotation = RotationQuaternionFromTo(front, to);
-	VectorT<T, 3> upRotated = RotateByQuaternion(rotation, up).Normalize();
-	VectorT<T, 3> frontRotated = RotateByQuaternion(rotation, front);
-	VectorT<T, 3> normalOfFrontRotatedAndUp = Cross(frontRotated, up).Normalize();
-
-	T angleToRotate = Dot((upRotated - Dot(upRotated, normalOfFrontRotatedAndUp) * normalOfFrontRotatedAndUp).Normalize(), upRotated);
-	QuaternionT<T> adjust = RotationQuaternion(-angleToRotate, frontRotated);
-	// assert(false); // TODO not verified, seems have problem
-	return adjust * rotation;
-}
-template floatQ FaceToQuaternion(floatV3 const & front, floatV3 const & self, floatV3 const & to, floatV3 const & up);
-
-
-template <typename T>
-Matrix4T<T> LookAtMatrix(VectorT<T, 3> const & eye, VectorT<T, 3> const & at, VectorT<T, 3> const & up)
-{
-	// -z is front direction
-	VectorT<T, 3> zAxis((eye - at).Normalize());
-	VectorT<T, 3> xAxis(Cross(up, zAxis).Normalize());
-	VectorT<T, 3> yAxis(Cross(zAxis, xAxis));
-
-	if (eye == at)
-	{
-		return Matrix4T<T>::Identity;
-	}
-	if (up.LengthSquared() == 0)
-	{
-		return Matrix4T<T>::Identity;
-	}
-
-	Matrix4T<T> temp;
-	T* resultArray = const_cast<T*>(temp.GetArray());
-
-	resultArray[0] = xAxis.X();
-	resultArray[1] = yAxis.X();
-	resultArray[2] = zAxis.X();
-	resultArray[3] = 0;
-	resultArray[4] = xAxis.Y();
-	resultArray[5] = yAxis.Y();
-	resultArray[6] = zAxis.Y();
-	resultArray[7] = 0;
-	resultArray[8] = xAxis.Z();
-	resultArray[9] = yAxis.Z();
-	resultArray[10] = zAxis.Z();
-	resultArray[11] = 0;
-	resultArray[12] = -Dot(xAxis, eye);
-	resultArray[13] = -Dot(yAxis, eye);
-	resultArray[14] = -Dot(zAxis, eye);
-	resultArray[15] = 1;
-
-	return temp;
-}
-template floatM44 LookAtMatrix(floatV3 const & eye, floatV3 const & at, floatV3 const & up);

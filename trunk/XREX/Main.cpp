@@ -210,11 +210,11 @@ struct TempScene
 					floatV3 position = floatV3((k - center) * intervalSize, (j - center) * intervalSize, (i - center) * intervalSize);
 					cubeTransform->SetPosition(position);
 					cubeTransform->SetScaling(2);
-					floatQ orientation = RotationQuaternion<float>(PI / 8, i, j, k);
-					cubeTransform->SetOrientation(orientation);
 					cubeTransform->SetFrontDirection(floatV3(1, 0, 0));
-					floatV3 temp = RotateByQuaternion(orientation, floatV3(1, 0, 0));
-					//cubeTransform->FaceTo(floatV3::Zero);
+					cubeTransform->FaceToPosition(floatV3::Zero, floatV3(0, 1, 0));
+					floatQ orientation = cubeTransform->GetOrientation();
+					floatV3 faceTo = RotateByQuaternion(orientation, floatV3(1, 0, 0));
+					floatV3 direction = floatV3::Zero - position;
 				}
 			}
 		}
@@ -363,14 +363,14 @@ void TestMath()
 	}
 	floatV3 vecToRotate = floatV3(1, 1, 0);
 	floatM44 tempMat = MatrixFromQuaternion(quat3);
-	//floatQ resQ = QuaternionFromMatrix(tempMat);
+	floatQ resQ = QuaternionFromMatrix(tempMat);
 	floatV3 rotRes0 = RotateByQuaternion(quat3, vecToRotate);
 	floatM44 fromQuat3 = MatrixFromQuaternion(quat3);
 	floatV3 rotRes1 = Transform(fromQuat3, vecToRotate);
 	floatV3 rotRes2 = Transform(mat3, vecToRotate);
-	// 	floatQ quatFromMat3 = QuaternionFromMatrix(mat3);
-	// 	floatV3 rotRes3 = RotateByQuaternion(quatFromMat3, vecToRotate);
-	// 	
+	floatQ quatFromMat3 = QuaternionFromMatrix(mat3);
+	floatV3 rotRes3 = RotateByQuaternion(quatFromMat3, vecToRotate);
+	
 
 	floatV3 rfrom = floatV3(1, 0, 0);
 	floatV3 rto = floatV3(0, 1, 0);
@@ -382,16 +382,29 @@ void TestMath()
 	floatV3 rftmr1 = Transform(rotateftm, rfrom);
 	floatV3 rftqr1 = RotateByQuaternion(rotateftq, rfrom);
 
-	floatV3 front = floatV3(1.0, 1.0, 0);
-	floatV3 position = floatV3(0, 1.0, 1.0);
-	floatV3 to = floatV3(-1, 0, 0);
+	floatV3 front = floatV3(1, 0, 0);
 	floatV3 up = floatV3(0, 1, 0);
-	floatQ ftq = FaceToQuaternion(front, position, to, up);
-	floatM44 ftm = FaceToMatrix(front, position, to, up);
+	floatV3 to0 = floatV3(0, 0, 1);
+	floatV3 to1 = floatV3(-1, -1, -1);
+	floatQ ftq0 = FaceToQuaternion(to0, up, front, up);
+	floatM44 ftm0 = FaceToMatrix(to0, up, front, up);
+	floatQ ftq1 = FaceToQuaternion(to1, up, front, up);
+	floatM44 ftm1 = FaceToMatrix(to1, up, front, up);
+	floatV3 vecToRotateFaceTo0 = floatV3(1, 0, 0);
+	floatV3 vecToRotateFaceTo1 = floatV3(0, 1, 0);
 
-	floatV3 ftrrq = RotateByQuaternion(ftq, vecToRotate);
-	floatV3 ftrrm = Transform(ftm, vecToRotate);
-	floatV3 pmt = (to - position).Normalize();
+	floatV3 ftrrq00 = RotateByQuaternion(ftq0, vecToRotateFaceTo0);
+	floatV3 ftrrm00 = Transform(ftm0, vecToRotateFaceTo0);
+
+	floatV3 ftrrq01 = RotateByQuaternion(ftq0, vecToRotateFaceTo1);
+	floatV3 ftrrm01 = Transform(ftm0, vecToRotateFaceTo1);
+
+	floatV3 ftrrq10 = RotateByQuaternion(ftq1, vecToRotateFaceTo0);
+	floatV3 ftrrm10 = Transform(ftm1, vecToRotateFaceTo0);
+
+	floatV3 ftrrq11 = RotateByQuaternion(ftq1, vecToRotateFaceTo1);
+	floatV3 ftrrm11 = Transform(ftm1, vecToRotateFaceTo1);
+
 }
 
 void SQRTSpeedTest()

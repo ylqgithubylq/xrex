@@ -86,7 +86,7 @@ public:
 	{
 		for (uint32 i = 0; i < Dimension; ++i)
 		{
-			vectors_[i] = VectorT<T, Dimension>(&rhs[i << 2]);
+			vectors_[i] = VectorT<T, Dimension>(&rhs[i * 4]);
 		}
 	}
 	/*

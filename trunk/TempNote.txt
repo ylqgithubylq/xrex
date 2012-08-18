@@ -1,0 +1,2 @@
+using regular expressions(Ctrl+Shift+F):
+^:b*[^:b*#/{}]+.*$

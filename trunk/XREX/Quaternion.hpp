@@ -26,6 +26,10 @@ public:
 	typedef ValueType const & ConstReference;
 
 public:
+	/*
+	 *	Used for intentionally make error.
+	 */
+	static QuaternionT const Zero;
 	static QuaternionT const Identity;
 public:
 
@@ -124,9 +128,9 @@ public:
 	{
 		// see Mathematics for 3D Game Programming and Computer Graphics, 3rd. 4.6.1 Quaternions Mathematics
 		return QuaternionT(
-			lhs.X() * rhs.W() - lhs.Y() * rhs.Z() + lhs.Z() * rhs.Y() + lhs.W() * rhs.X(),
-			lhs.X() * rhs.Z() + lhs.Y() * rhs.W() - lhs.Z() * rhs.X() + lhs.W() * rhs.Y(),
-			lhs.Y() * rhs.X() - lhs.X() * rhs.Y() + lhs.Z() * rhs.W() + lhs.W() * rhs.Z(),
+			lhs.W() * rhs.X() + lhs.X() * rhs.W() + lhs.Y() * rhs.Z() - lhs.Z() * rhs.Y(),
+			lhs.W() * rhs.Y() + lhs.Y() * rhs.W() + lhs.Z() * rhs.X() - lhs.X() * rhs.Z(),
+			lhs.W() * rhs.Z() + lhs.Z() * rhs.W() + lhs.X() * rhs.Y() - lhs.Y() * rhs.X(),
 			lhs.W() * rhs.W() - lhs.X() * rhs.X() - lhs.Y() * rhs.Y() - lhs.Z() * rhs.Z());
 	}
 
@@ -192,6 +196,9 @@ public:
 private:
 	VectorT<T, Dimension> values_;
 };
+
+template <typename T>
+QuaternionT<T> const QuaternionT<T>::Zero = QuaternionT(VectorT<T, 3>(T(0)), T(0));
 
 template <typename T>
 QuaternionT<T> const QuaternionT<T>::Identity = QuaternionT(VectorT<T, 3>(T(0)), T(1));
