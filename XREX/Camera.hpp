@@ -6,7 +6,9 @@
 #include "SceneObject.hpp"
 #include "Transformation.hpp"
 
-
+/*
+ *	+z is the front direction.
+ */
 class Camera
 	: public TemplateComponent<Camera>
 {

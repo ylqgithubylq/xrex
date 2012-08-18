@@ -4,7 +4,7 @@
 
 
 Transformation::Transformation()
-	: position_(floatV3::Zero), orientation_(floatQ::Identity), scaling_(floatV3(1.0f, 1.0f, 1.0f)), up_(0.0f, 1.0f, 0.0f)
+	: position_(floatV3::Zero), orientation_(floatQ::Identity), scaling_(floatV3(1.0f, 1.0f, 1.0f)), front_(0.0f, 0.0f, 1.0f), up_(0.0f, 1.0f, 0.0f)
 {
 }
 

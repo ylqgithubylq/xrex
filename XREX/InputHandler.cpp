@@ -4,7 +4,7 @@
 
 
 InputHandler::InputHandler()
-	: initialized(false)
+	: initialized_(false)
 {
 }
 

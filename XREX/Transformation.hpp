@@ -108,6 +108,7 @@ public:
 
 	/*
 	 *	Used by FaceTo.
+	 *	Default value is +z.
 	 */
 	void SetFrontDirection(floatV3 const & front)
 	{
@@ -122,11 +123,20 @@ public:
 		up_ = up;
 	}
 	/*
-	 *	Call this will set orientation. Make sure front and up are set by SetFrontDirection and SetUpDirection.
+	 *	Face to a direction, using front and up as reference.
+	 *	@up: up direction in world space as reference.
 	 */
-	void FaceTo(floatV3 to)
+	void FaceToDirection(floatV3 const & to, floatV3 const & up)
 	{
-		orientation_ = FaceToQuaternion(front_, position_, to, up_);
+		orientation_ = FaceToQuaternion(to, up, front_, up_);
+	}
+	/*
+	 *	Face to a position, using front and up as reference.
+	 *	@up: up direction in world space as reference.
+	 */
+	void FaceToPosition(floatV3 const & to, floatV3 const & up)
+	{
+		orientation_ = FaceToQuaternion(to - position_, up, front_, up_);
 	}
 
 private:
