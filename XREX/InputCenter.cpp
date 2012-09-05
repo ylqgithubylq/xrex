@@ -18,13 +18,13 @@ InputCenter::~InputCenter()
 }
 
 
-bool InputCenter::AddInputHandler(InputHandlerSP const & inputHandler)
+bool InputCenter::AddInputHandler(InputHandlerSP const& inputHandler)
 {
 	auto result = inputHandlers_.insert(inputHandler);
 	return result.second;
 }
 
-bool InputCenter::RemoveInputHandler(InputHandlerSP const & inputHandler)
+bool InputCenter::RemoveInputHandler(InputHandlerSP const& inputHandler)
 {
 	auto found = inputHandlers_.find(inputHandler);
 	if (found == inputHandlers_.end())
@@ -66,48 +66,48 @@ void InputCenter::GenerateKeyUp(InputSemantic semantic)
 	DispatchInputEvent(semantic, static_cast<uint32>(false));
 }
 
-void InputCenter::GenerateMouseDown(InputSemantic semantic, uint32 x, uint32 y)
+void InputCenter::GenerateMouseDown(InputSemantic semantic, int32 x, int32 y)
 {
 	semanticStates_[static_cast<uint32>(semantic)] = true;
 	previousPointerPosition_ = pointerPosition_;
-	pointerPosition_ = VectorT<uint32, 2>(x, y);
+	pointerPosition_ = VectorT<int32, 2>(x, y);
 	DispatchInputEvent(semantic, static_cast<uint32>(true));
 }
 
-void InputCenter::GenerateMouseUp(InputSemantic semantic, uint32 x, uint32 y)
+void InputCenter::GenerateMouseUp(InputSemantic semantic, int32 x, int32 y)
 {
 	semanticStates_[static_cast<uint32>(semantic)] = false;
 	previousPointerPosition_ = pointerPosition_;
-	pointerPosition_ = VectorT<uint32, 2>(x, y);
+	pointerPosition_ = VectorT<int32, 2>(x, y);
 	DispatchInputEvent(semantic, static_cast<uint32>(false));
 }
 
-void InputCenter::GenerateMouseWheel(InputSemantic semantic, uint32 x, uint32 y, int32 wheelDelta)
+void InputCenter::GenerateMouseWheel(InputSemantic semantic, int32 x, int32 y, int32 wheelDelta)
 {
 	previousPointerPosition_ = pointerPosition_;
-	pointerPosition_ = VectorT<uint32, 2>(x, y);
+	pointerPosition_ = VectorT<int32, 2>(x, y);
 	DispatchInputEvent(semantic, wheelDelta);
 }
 
-void InputCenter::GenerateMouseMove(InputSemantic semantic, uint32 x, uint32 y)
+void InputCenter::GenerateMouseMove(InputSemantic semantic, int32 x, int32 y)
 {
 	previousPointerPosition_ = pointerPosition_;
-	pointerPosition_ = VectorT<uint32, 2>(x, y);
+	pointerPosition_ = VectorT<int32, 2>(x, y);
 	DispatchInputEvent(semantic, 0);
 }
 
 
-void InputCenter::DispatchInputEvent(InputSemantic semantic, uint32 data)
+void InputCenter::DispatchInputEvent(InputSemantic semantic, int32 data)
 {
 	double currentTime = Application::GetInstance().GetElapsedTime();
 	for (auto i = inputHandlers_.begin(); i != inputHandlers_.end(); ++i)
 	{
-		InputHandler::ActionMap const & actionMap = (*i)->GetActionMap();
-		unordered_map<InputSemantic, uint32> const & mapData = actionMap.GetAllActions();
+		InputHandler::ActionMap const& actionMap = (*i)->GetActionMap();
+		unordered_map<InputSemantic, uint32> const& mapData = actionMap.GetAllActions();
 		auto found = mapData.find(semantic);
 		if (found != mapData.end())
 		{
-			(*i)->OnAction(found->second, data, pointerPosition_, previousPointerPosition_, currentTime);
+			(*i)->OnAction(found->second, data, pointerPosition_, currentTime);
 		}
 	}
 }

@@ -13,17 +13,18 @@
 using std::string;
 using std::vector;
 
-std::vector<uint32> const GraphicsBuffer::USAGE_TO_GL_USAGE = GraphicsBuffer::InitializeUsage();
-
-vector<uint32> GraphicsBuffer:: InitializeUsage()
+uint32 GraphicsBuffer::GLUsageFromUsage(Usage usage)
 {
-	vector<uint32> temp(static_cast<uint32>(GraphicsBuffer::Usage::UsageCount));
-	temp[static_cast<uint32>(GraphicsBuffer::Usage::Static)] = gl::GL_STATIC_DRAW;
-	temp[static_cast<uint32>(GraphicsBuffer::Usage::Dynamic)] = gl::GL_DYNAMIC_DRAW;
-	temp[static_cast<uint32>(GraphicsBuffer::Usage::Stream)] = gl::GL_STREAM_DRAW;
-	return std::move(temp);
+	static vector<uint32> mapping = [] ()
+	{
+		vector<uint32> temp(static_cast<uint32>(GraphicsBuffer::Usage::UsageCount));
+		temp[static_cast<uint32>(GraphicsBuffer::Usage::Static)] = gl::GL_STATIC_DRAW;
+		temp[static_cast<uint32>(GraphicsBuffer::Usage::Dynamic)] = gl::GL_DYNAMIC_DRAW;
+		temp[static_cast<uint32>(GraphicsBuffer::Usage::Stream)] = gl::GL_STREAM_DRAW;
+		return temp;
+	} ();
+	return mapping[static_cast<uint32>(usage)];
 }
-
 
 
 bool GraphicsBuffer::DataDescription::AddChannelLayout(ElementLayoutDescription&& elementLayout)
@@ -33,9 +34,9 @@ bool GraphicsBuffer::DataDescription::AddChannelLayout(ElementLayoutDescription&
 	return true;
 }
 
-auto GraphicsBuffer::DataDescription::GetChannelLayout(string const & channel) const -> ElementLayoutDescription const & 
+auto GraphicsBuffer::DataDescription::GetChannelLayout(string const& channel) const -> ElementLayoutDescription const& 
 {
-	auto found = std::find_if(channelLayouts_.begin(), channelLayouts_.end(), [&channel] (ElementLayoutDescription const & elementLayout) 
+	auto found = std::find_if(channelLayouts_.begin(), channelLayouts_.end(), [&channel] (ElementLayoutDescription const& elementLayout) 
 	{
 		return elementLayout.channel == channel;
 	});
@@ -52,7 +53,7 @@ void GraphicsBuffer::DoConsctruct(void const * data, uint32 dataSize)
 	assert(bufferID_ != 0); // 0 is reserved by GL
 	target_ = type_ == BufferType::Vertex ? gl::GL_ARRAY_BUFFER : gl::GL_ELEMENT_ARRAY_BUFFER;
 	gl::BindBuffer(target_, bufferID_);
-	gl::BufferData(target_, dataSize, data, USAGE_TO_GL_USAGE[static_cast<uint32>(usage_)]);
+	gl::BufferData(target_, dataSize, data, GLUsageFromUsage(usage_));
 }
 
 GraphicsBuffer::~GraphicsBuffer()
@@ -65,7 +66,7 @@ void GraphicsBuffer::Bind()
 	gl::BindBuffer(target_, bufferID_);
 }
 
-void GraphicsBuffer::BindToProgram(ProgramObject const & program)
+void GraphicsBuffer::BindToProgram(ProgramObject const& program)
 {
 	Bind();
 	for (uint32 i = 0; i < description_.channelLayouts_.size(); ++i)

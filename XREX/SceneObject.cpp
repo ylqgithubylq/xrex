@@ -14,7 +14,7 @@ SceneObject::SceneObject()
 	components_[0] = MakeSP<Transformation>();
 }
 
-SceneObject::SceneObject(std::string const & name)
+SceneObject::SceneObject(std::string const& name)
 	: name_(name), components_(static_cast<uint32>(Component::ComponentType::ComponentTypeCount))
 {
 	components_[0] = MakeSP<Transformation>();
@@ -23,6 +23,17 @@ SceneObject::SceneObject(std::string const & name)
 
 SceneObject::~SceneObject()
 {
+}
+
+void SceneObject::SetComponent(ComponentSP const& component)
+{
+	ComponentSP const& original = components_[static_cast<uint32>(component->GetComponentType())];
+	if (original != nullptr)
+	{
+		original->SetOwnerSceneObject(SceneObject::NullSceneObject);
+	}
+	components_[static_cast<uint32>(component->GetComponentType())] = component;
+	component->SetOwnerSceneObject(shared_from_this());
 }
 
 

@@ -13,7 +13,7 @@ class InputCenter
 {
 public:
 	// copy from KlayGE and modified
-	enum InputSemantic
+	enum class InputSemantic
 	{
 		NullSemantic		= 0x00,
 
@@ -193,21 +193,21 @@ public:
 	InputCenter();
 	virtual ~InputCenter();
 
-	bool AddInputHandler(InputHandlerSP const & inputHandler);
+	bool AddInputHandler(InputHandlerSP const& inputHandler);
 	
-	bool RemoveInputHandler(InputHandlerSP const & inputHandler);
+	bool RemoveInputHandler(InputHandlerSP const& inputHandler);
 
 	bool GetKeyState(InputSemantic semantic) const
 	{
 		return semanticStates_[static_cast<uint32>(semantic)];
 	}
 
-	VectorT<uint32, 2> GetPointerPosition() const
+	VectorT<int32, 2> GetPointerPosition() const
 	{
 		return pointerPosition_;
 	}
 
-	VectorT<uint32, 2> GetPreviousPointerPosition() const
+	VectorT<int32, 2> GetPreviousPointerPosition() const
 	{
 		return previousPointerPosition_;
 	}
@@ -230,21 +230,21 @@ public:
 
 	void GenerateKeyUp(InputSemantic semantic);
 
-	void GenerateMouseDown(InputSemantic semantic, uint32 x, uint32 y);
+	void GenerateMouseDown(InputSemantic semantic, int32 x, int32 y);
 
-	void GenerateMouseUp(InputSemantic semantic, uint32 x, uint32 y);
+	void GenerateMouseUp(InputSemantic semantic, int32 x, int32 y);
 
-	void GenerateMouseWheel(InputSemantic semantic, uint32 x, uint32 y, int32 wheelDelta);
+	void GenerateMouseWheel(InputSemantic semantic, int32 x, int32 y, int32 wheelDelta);
 
-	void GenerateMouseMove(InputSemantic semantic, uint32 x, uint32 y);
+	void GenerateMouseMove(InputSemantic semantic, int32 x, int32 y);
 
 private:
-	void DispatchInputEvent(InputSemantic semantic, uint32 data);
+	void DispatchInputEvent(InputSemantic semantic, int32 data);
 
 private:
 		
 	/*
-	 *	Used for queueing generated action command to command queue.
+	 *	Used for queuing generated action command to command queue.
 	 */
 	struct Action
 		: Noncopyable
@@ -267,8 +267,8 @@ private:
 
 private:
 	std::vector<bool> semanticStates_;
-	VectorT<uint32, 2> previousPointerPosition_;
-	VectorT<uint32, 2> pointerPosition_;
+	VectorT<int32, 2> previousPointerPosition_;
+	VectorT<int32, 2> pointerPosition_;
 
 	std::unordered_set<InputHandlerSP> inputHandlers_;
 

@@ -25,8 +25,8 @@ class GLWindow;
 
 class InputHandler;
 typedef std::shared_ptr<InputHandler> InputHandlerSP;
-class FPSCameraController;
-typedef std::shared_ptr<FPSCameraController> FPSCameraControllerSP;
+class FreeRoamCameraController;
+typedef std::shared_ptr<FreeRoamCameraController> FreeRoamCameraControllerSP;
 
 class Scene;
 typedef std::shared_ptr<Scene> SceneSP;

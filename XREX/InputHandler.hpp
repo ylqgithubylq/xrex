@@ -52,7 +52,7 @@ public:
 			actionMap_.erase(inputSemantic);
 		}
 
-		std::unordered_map<InputCenter::InputSemantic, uint32> const & GetAllActions() const
+		std::unordered_map<InputCenter::InputSemantic, uint32> const& GetAllActions() const
 		{
 			return actionMap_;
 		}
@@ -73,13 +73,13 @@ public:
 		initialized_ = true;
 	}
 
-	ActionMap const & GetActionMap() const
+	ActionMap const& GetActionMap() const
 	{
 		assert(initialized_);
 		return actionMap_;
 	}
 
-	void OnAction(uint32 mappedSemantic, uint32 data, VectorT<uint32, 2> pointerPosition, VectorT<uint32, 2> previousPointerPosition, double currentTime);
+	void OnAction(uint32 mappedSemantic, int32 data, VectorT<int32, 2> pointerPosition, double currentTime);
 
 	void OnBeforeLogicFrame(double currentTime);
 
@@ -97,7 +97,7 @@ protected:
 	 *	@data: if event is Key/Mouse Down, data is 1, Key/Mouse Up, data is 0. else if event is mouse wheel, data is the wheel delta.
 	 *	@return: true indicates action generated.
 	 */
-	virtual bool GenerateAction(uint32 mappedSemantic, uint32 data, VectorT<uint32, 2> pointerPosition, VectorT<uint32, 2> previousPointerPosition, double currentTime, std::function<void()>* generatedAction) = 0;
+	virtual bool GenerateAction(uint32 mappedSemantic, int32 data, VectorT<int32, 2> pointerPosition, double currentTime, std::function<void()>* generatedAction) = 0;
 
 	ActionMap& GetMutableActionMap()
 	{

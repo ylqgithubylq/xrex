@@ -17,7 +17,7 @@ public:
 		LayoutAndEffect()
 		{
 		}
-		LayoutAndEffect(RenderingLayoutSP const & renderingLayout, RenderingEffectSP const & renderingEffect)
+		LayoutAndEffect(RenderingLayoutSP const& renderingLayout, RenderingEffectSP const& renderingEffect)
 			: layout(renderingLayout), effect(renderingEffect)
 		{
 		}
@@ -31,7 +31,7 @@ public:
 		// nothing to do for renderable
 	}
 
-	virtual std::vector<LayoutAndEffect> const & GetLayoutsAndEffects(SceneObjectSP camera) const = 0;
+	virtual std::vector<LayoutAndEffect> const& GetLayoutsAndEffects(SceneObjectSP camera) const = 0;
 
 	bool IsVisible() const
 	{

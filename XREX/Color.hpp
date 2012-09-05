@@ -12,7 +12,7 @@ public:
 		: value_(r, g, b, a)
 	{
 	}
-	Color(Color const & rhs)
+	Color(Color const& rhs)
 		: value_(rhs.value_)
 	{
 	}
@@ -37,48 +37,48 @@ public:
 		return value_.W();
 	}
 
-	friend Color operator +(Color const & lhs, Color const & rhs)
+	friend Color operator +(Color const& lhs, Color const& rhs)
 	{
 		Color temp;
 		temp.value_ = lhs.value_ + rhs.value_;
 		return temp;
 	}
 
-	friend Color operator -(Color const & lhs, Color const & rhs)
+	friend Color operator -(Color const& lhs, Color const& rhs)
 	{
 		Color temp;
 		temp.value_ = lhs.value_ - rhs.value_;
 		return temp;
 	}
 
-	friend Color operator *(Color const & lhs, Color const & rhs)
+	friend Color operator *(Color const& lhs, Color const& rhs)
 	{
 		Color temp;
 		temp.value_ = lhs.value_ * rhs.value_;
 		return temp;
 	}
 
-	friend Color operator *(Color const & lhs, float rhs)
+	friend Color operator *(Color const& lhs, float rhs)
 	{
 		Color temp;
 		temp.value_ = lhs.value_ * rhs;
 		return temp;
 	}
-	friend Color operator *(float const & lhs, Color const & rhs)
+	friend Color operator *(float const& lhs, Color const& rhs)
 	{
 		Color temp;
 		temp.value_ = lhs * rhs.value_;
 		return temp;
 	}
 
-	friend Color operator /(Color const & lhs, float const & rhs)
+	friend Color operator /(Color const& lhs, float const& rhs)
 	{
 		Color temp;
 		temp.value_ = lhs.value_ / rhs;
 		return temp;
 	}
 
-	Color const & operator +() const
+	Color const& operator +() const
 	{
 		return *this; 
 	}
@@ -87,12 +87,12 @@ public:
 		return -*this;
 	}
 
-	friend bool operator ==(Color const & lhs, Color const & rhs)
+	friend bool operator ==(Color const& lhs, Color const& rhs)
 	{
 		return lhs.value_ == rhs.value_;
 	}
 
-	friend bool operator !=(Color const & lhs, Color const & rhs)
+	friend bool operator !=(Color const& lhs, Color const& rhs)
 	{
 		return lhs.value_ != rhs.value_;
 	}

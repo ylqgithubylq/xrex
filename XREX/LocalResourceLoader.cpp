@@ -31,7 +31,7 @@ LocalResourceLoader::~LocalResourceLoader()
 {
 }
 
-bool LocalResourceLoader::LoadString(string const & path, string* result)
+bool LocalResourceLoader::LoadString(string const& path, string* result)
 {
 	ifstream file(path, ios::in | ios::binary);
 
@@ -52,7 +52,7 @@ bool LocalResourceLoader::LoadString(string const & path, string* result)
 	return false;
 }
 
-bool LocalResourceLoader::LoadWString(string const & path, wstring* result)
+bool LocalResourceLoader::LoadWString(string const& path, wstring* result)
 {
 	wifstream file(path, ios::in | ios::binary);
 

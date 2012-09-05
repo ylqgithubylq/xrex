@@ -16,42 +16,34 @@
 using std::string;
 using std::vector;
 
-
-vector<string> ShaderObject::InitializeShaderMacros()
+vector<string> const ShaderObject::ShaderDefineMacros = [] ()
 {
-	vector<string> macros(static_cast<uint32>(ShaderType::CountOfShaderTypes));
-	macros[static_cast<uint32>(ShaderType::VertexShader)] = "#define VS\n";
-	macros[static_cast<uint32>(ShaderType::FragmentShader)] = "#define FS\n";
-	macros[static_cast<uint32>(ShaderType::GeometryShader)] = "#define GS\n";
-	macros[static_cast<uint32>(ShaderType::TessellationControlShader)] = "#define TCS\n";
-	macros[static_cast<uint32>(ShaderType::TessellationEvaluationShader)] = "#define TES\n";
-	return move(macros);
-}
-
-vector<string> const ShaderObject::ShaderDefineMacros = InitializeShaderMacros();
-
+	vector<string> macros(static_cast<uint32>(ShaderObject::ShaderType::CountOfShaderTypes));
+	macros[static_cast<uint32>(ShaderObject::ShaderType::VertexShader)] = "#define VS\n";
+	macros[static_cast<uint32>(ShaderObject::ShaderType::FragmentShader)] = "#define FS\n";
+	macros[static_cast<uint32>(ShaderObject::ShaderType::GeometryShader)] = "#define GS\n";
+	macros[static_cast<uint32>(ShaderObject::ShaderType::TessellationControlShader)] = "#define TCS\n";
+	macros[static_cast<uint32>(ShaderObject::ShaderType::TessellationEvaluationShader)] = "#define TES\n";
+	return macros;
+} ();
 
 string const ShaderObject::VersionMacro = "#version 420\n\n";
-//const string ShaderObject::VersionMacro = "\n\n";
 
-
-vector<uint32> ShaderObject::InitializeGLShaderTypeMapping()
+const vector<uint32> ShaderObject::ShaderTypeToGLShaderType = [] ()
 {
-	vector<uint32> mapping(ShaderType::CountOfShaderTypes);
-	mapping[static_cast<uint32>(ShaderType::VertexShader)] = gl::GL_VERTEX_SHADER;
-	mapping[static_cast<uint32>(ShaderType::FragmentShader)] = gl::GL_FRAGMENT_SHADER;
-	mapping[static_cast<uint32>(ShaderType::GeometryShader)] = gl::GL_GEOMETRY_SHADER;
-	mapping[static_cast<uint32>(ShaderType::TessellationControlShader)] = gl::GL_TESS_CONTROL_SHADER;
-	mapping[static_cast<uint32>(ShaderType::TessellationEvaluationShader)] = gl::GL_TESS_EVALUATION_SHADER;
-	return move(mapping);
-}
-
-const vector<uint32> ShaderObject::ShaderTypeToGLShaderType = InitializeGLShaderTypeMapping();
+	vector<uint32> mapping(static_cast<uint32>(ShaderObject::ShaderType::CountOfShaderTypes));
+	mapping[static_cast<uint32>(ShaderObject::ShaderType::VertexShader)] = gl::GL_VERTEX_SHADER;
+	mapping[static_cast<uint32>(ShaderObject::ShaderType::FragmentShader)] = gl::GL_FRAGMENT_SHADER;
+	mapping[static_cast<uint32>(ShaderObject::ShaderType::GeometryShader)] = gl::GL_GEOMETRY_SHADER;
+	mapping[static_cast<uint32>(ShaderObject::ShaderType::TessellationControlShader)] = gl::GL_TESS_CONTROL_SHADER;
+	mapping[static_cast<uint32>(ShaderObject::ShaderType::TessellationEvaluationShader)] = gl::GL_TESS_EVALUATION_SHADER;
+	return mapping;
+} ();
 
 
 
 
-ShaderObject::ShaderObject(ShaderType type, string const & source) : type_(type), source_(source)
+ShaderObject::ShaderObject(ShaderType type, string const& source) : type_(type), source_(source)
 {
 	shaderID_ = gl::CreateShader(ShaderTypeToGLShaderType[static_cast<uint32>(type_)]);
 	Compile();
@@ -85,7 +77,7 @@ bool ShaderObject::Compile()
 		return false;
 	}
 
-	string const & macroToDefine = ShaderDefineMacros[static_cast<uint32>(type_)];
+	string const& macroToDefine = ShaderDefineMacros[static_cast<uint32>(type_)];
 
 	char const * cstring[] = { VersionMacro.c_str(), macroToDefine.c_str(), source_.c_str() };
 	gl::ShaderSource(shaderID_, sizeof(cstring) / sizeof(cstring[0]), cstring, nullptr);
@@ -224,9 +216,9 @@ void ProgramObject::Bind()
 #endif
 }
 
-int32 ProgramObject::GetAttributeLocation(string const & channel) const
+int32 ProgramObject::GetAttributeLocation(string const& channel) const
 {
-	auto found = std::find_if(attributeBindingInformation_.begin(), attributeBindingInformation_.end(), [&channel] (AttributeBindingInformation const & bindingInformation)
+	auto found = std::find_if(attributeBindingInformation_.begin(), attributeBindingInformation_.end(), [&channel] (AttributeBindingInformation const& bindingInformation)
 	{
 		return bindingInformation.channel == channel;
 	});
@@ -240,7 +232,7 @@ int32 ProgramObject::GetAttributeLocation(string const & channel) const
 
 void ProgramObject::InitializeParameterSetters(RenderingEffect& effect)
 {
-	vector<EffectParameterSP> const & parameters = effect.GetAllParameters();
+	vector<EffectParameterSP> const& parameters = effect.GetAllParameters();
 
 	// uniforms
 
@@ -272,7 +264,7 @@ void ProgramObject::InitializeParameterSetters(RenderingEffect& effect)
 		binder.location = location;
 
 
-		auto resultIter = std::find_if(parameters.begin(), parameters.end(), [&name] (EffectParameterSP const & parameter)
+		auto resultIter = std::find_if(parameters.begin(), parameters.end(), [&name] (EffectParameterSP const& parameter)
 		{
 			return parameter->GetName() == name;
 		});

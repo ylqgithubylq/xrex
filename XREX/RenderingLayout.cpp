@@ -10,28 +10,29 @@
 using std::vector;
 
 
-
-std::vector<uint32> RenderingLayout::InitializeGLDrawTypeMapping()
+uint32 RenderingLayout::GLDrawModeFromDrawMode(DrawingMode mode)
 {
-	vector<uint32> mapping(DrawingMode::DrawingModeCount);
-	mapping[static_cast<uint32>(DrawingMode::Points)] = gl::GL_POINTS;
-	mapping[static_cast<uint32>(DrawingMode::LineStrip)] = gl::GL_LINE_STRIP;
-	mapping[static_cast<uint32>(DrawingMode::LineLoop)] = gl::GL_LINE_LOOP;
-	mapping[static_cast<uint32>(DrawingMode::Lines)] = gl::GL_LINES;
-	mapping[static_cast<uint32>(DrawingMode::TriangleStrip)] = gl::GL_TRIANGLE_STRIP;
-	mapping[static_cast<uint32>(DrawingMode::TriangleFan)] = gl::GL_TRIANGLE_FAN;
-	mapping[static_cast<uint32>(DrawingMode::Triangles)] = gl::GL_TRIANGLES;
-	return move(mapping);
-}
-
-std::vector<uint32> const RenderingLayout::DrawTypeToGLDrawType = RenderingLayout::InitializeGLDrawTypeMapping();
-
-
-
-
+	static vector<uint32> const mapping = [] ()
+	{
+		vector<uint32> mapping(static_cast<uint32>(DrawingMode::DrawingModeCount));
+		mapping[static_cast<uint32>(DrawingMode::Points)] = gl::GL_POINTS;
+		mapping[static_cast<uint32>(DrawingMode::LineStrip)] = gl::GL_LINE_STRIP;
+		mapping[static_cast<uint32>(DrawingMode::LineLoop)] = gl::GL_LINE_LOOP;
+		mapping[static_cast<uint32>(DrawingMode::Lines)] = gl::GL_LINES;
+		mapping[static_cast<uint32>(DrawingMode::TriangleStrip)] = gl::GL_TRIANGLE_STRIP;
+		mapping[static_cast<uint32>(DrawingMode::TriangleFan)] = gl::GL_TRIANGLE_FAN;
+		mapping[static_cast<uint32>(DrawingMode::Triangles)] = gl::GL_TRIANGLES;
+		return mapping;
+	} ();
+	return mapping[static_cast<uint32>(mode)];
+};
 
 
-RenderingLayout::RenderingLayout(vector<GraphicsBufferSP> const & buffers, GraphicsBufferSP& indexBuffer, DrawingMode mode)
+
+
+
+
+RenderingLayout::RenderingLayout(vector<GraphicsBufferSP> const& buffers, GraphicsBufferSP& indexBuffer, DrawingMode mode)
 	: buffers_(buffers), indexBuffer_(indexBuffer), mode_(mode)
 {
 #ifdef XREX_DEBUG
@@ -55,7 +56,7 @@ RenderingLayout::~RenderingLayout()
 {
 }
 
-void RenderingLayout::BindToProgram(ProgramObject const & program)
+void RenderingLayout::BindToProgram(ProgramObject const& program)
 {
 	// TODO build VAO
 	for (auto i = buffers_.begin(); i != buffers_.end(); ++i)
@@ -82,5 +83,5 @@ ElementType RenderingLayout::GetIndexElementType() const
 
 void RenderingLayout::Draw()
 {
-	gl::DrawElements(DrawTypeToGLDrawType[static_cast<uint32>(GetDrawingMode())], GetElementCount(), GetGLType(GetIndexElementType()), reinterpret_cast<void const *>(0));
+	gl::DrawElements(GLDrawModeFromDrawMode(GetDrawingMode()), GetElementCount(), GetGLType(GetIndexElementType()), reinterpret_cast<void const *>(0));
 }

@@ -21,7 +21,7 @@ public:
 		modelMatrix_ = TranslationMatrix(position_) * MatrixFromQuaternion(orientation_) * ScalingMatrix(scaling_);
 	}
 
-	floatM44 const & GetModelMatrix() const
+	floatM44 const& GetModelMatrix() const
 	{
 		return modelMatrix_;
 	}
@@ -30,20 +30,20 @@ public:
 	{
 		SetPosition(floatV3(x, y, z));
 	}
-	void SetPosition(floatV3 const & position)
+	void SetPosition(floatV3 const& position)
 	{
 		position_ = position;
 	}
-	floatV3 const & GetPosition() const
+	floatV3 const& GetPosition() const
 	{
 		return position_;
 	}
 
-	void SetOrientation(floatQ const & orientation)
+	void SetOrientation(floatQ const& orientation)
 	{
 		orientation_ = orientation;
 	}
-	floatQ const & GetOrientation() const
+	floatQ const& GetOrientation() const
 	{
 		return orientation_;
 	}
@@ -56,7 +56,7 @@ public:
 	{
 		SetScaling(floatV3(sx, sy, sz));
 	}
-	void SetScaling(floatV3 const & scaling)
+	void SetScaling(floatV3 const& scaling)
 	{
 		scaling_ = scaling;
 	}
@@ -74,7 +74,7 @@ public:
 	{
 		Translate(floatV3(x, y, z));
 	}
-	void Translate(floatV3 const & displacement)
+	void Translate(floatV3 const& displacement)
 	{
 		position_ = position_ + displacement;
 	}
@@ -87,7 +87,7 @@ public:
 	{
 		Scale(floatV3(sx, sy, sz));
 	}
-	void Scale(floatV3 const & s)
+	void Scale(floatV3 const& s)
 	{
 		scaling_ = scaling_ * s;
 	}
@@ -97,7 +97,7 @@ public:
 	{
 		orientation_ = RotationQuaternion(angle, x, y, z) * orientation_;
 	}
-	void Rotate(float angle, floatV3 const & axis)
+	void Rotate(float angle, floatV3 const& axis)
 	{
 		orientation_ = RotationQuaternion(angle, axis) * orientation_;
 	}
@@ -110,7 +110,7 @@ public:
 	 *	Used by FaceTo.
 	 *	Default value is +z.
 	 */
-	void SetFrontDirection(floatV3 const & front)
+	void SetFrontDirection(floatV3 const& front)
 	{
 		front_ = front;
 	}
@@ -118,7 +118,7 @@ public:
 	 *	Used by FaceTo.
 	 *	Default value is +y.
 	 */
-	void SetUpDirection(floatV3 const & up)
+	void SetUpDirection(floatV3 const& up)
 	{
 		up_ = up;
 	}
@@ -126,7 +126,7 @@ public:
 	 *	Face to a direction, using front and up as reference.
 	 *	@up: up direction in world space as reference.
 	 */
-	void FaceToDirection(floatV3 const & to, floatV3 const & up)
+	void FaceToDirection(floatV3 const& to, floatV3 const& up)
 	{
 		orientation_ = FaceToQuaternion(to, up, front_, up_);
 	}
@@ -134,7 +134,7 @@ public:
 	 *	Face to a position, using front and up as reference.
 	 *	@up: up direction in world space as reference.
 	 */
-	void FaceToPosition(floatV3 const & to, floatV3 const & up)
+	void FaceToPosition(floatV3 const& to, floatV3 const& up)
 	{
 		orientation_ = FaceToQuaternion(to - position_, up, front_, up_);
 	}

@@ -29,7 +29,7 @@ namespace
 		parameterMap[static_cast<uint32>(ElementType::Sampler2D)] = gl::GL_SAMPLER_2D;
 		parameterMap[static_cast<uint32>(ElementType::Sampler3D)] = gl::GL_SAMPLER_3D;
 		parameterMap[static_cast<uint32>(ElementType::SamplerCube)] = gl::GL_SAMPLER_CUBE;
-		return std::move(parameterMap);
+		return parameterMap;
 	}
 }
 

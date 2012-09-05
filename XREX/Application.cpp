@@ -20,7 +20,7 @@ Application::~Application()
 }
 
 
-void Application::Initialize(Settings const & settings)
+void Application::Initialize(Settings const& settings)
 {
 	settings_ = settings;
 	InitializeMainWindow(settings.windowTitle, settings.renderingSettings);
@@ -28,7 +28,7 @@ void Application::Initialize(Settings const & settings)
 }
 
 
-void Application::InitializeMainWindow(std::wstring const & name, RenderingSettings const & settings)
+void Application::InitializeMainWindow(std::wstring const& name, RenderingSettings const& settings)
 {
 	mainWindow_ = std::move(MakeUP<GLWindow>(name, settings));
 }

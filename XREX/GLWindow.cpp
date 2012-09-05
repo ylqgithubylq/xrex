@@ -43,7 +43,7 @@ struct GLWindow::GLHideWindows_
 };
 
 
-GLWindow::GLWindow(wstring const & name, RenderingSettings const & settings)
+GLWindow::GLWindow(wstring const& name, RenderingSettings const& settings)
 	: Window(name, settings.left, settings.top, settings.width, settings.height), majorVersion_(0), minorVersion_(0)
 {
 	glHideWindows_ = MakeUP<GLHideWindows_>(*this);

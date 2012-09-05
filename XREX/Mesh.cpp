@@ -8,7 +8,7 @@ using std::map;
 using std::string;
 using std::vector;
 
-StaticMesh::StaticMesh(map<string, RenderingLayoutSP> const & layouts)
+StaticMesh::StaticMesh(map<string, RenderingLayoutSP> const& layouts)
 	: layoutsAndEffects_(layouts.size())
 {
 	int32 index = 0;
@@ -25,9 +25,9 @@ StaticMesh::~StaticMesh()
 {
 }
 
-void StaticMesh::SetEffect(std::string const & layout, RenderingEffectSP& effect)
+void StaticMesh::SetEffect(std::string const& layout, RenderingEffectSP& effect)
 {
-	auto found = std::find_if(nameToIndex_.begin(), nameToIndex_.end(), [&layout] (std::pair<std::string, uint32> const & nameToindex)
+	auto found = std::find_if(nameToIndex_.begin(), nameToIndex_.end(), [&layout] (std::pair<std::string, uint32> const& nameToindex)
 	{
 		return layout == nameToindex.first;
 	});
@@ -35,9 +35,9 @@ void StaticMesh::SetEffect(std::string const & layout, RenderingEffectSP& effect
 	layoutsAndEffects_[found->second].effect = effect;
 }
 
-RenderingEffectSP const & StaticMesh::GetEffect(std::string const & layout) const
+RenderingEffectSP const& StaticMesh::GetEffect(std::string const& layout) const
 {
-	auto found = std::find_if(nameToIndex_.begin(), nameToIndex_.end(), [&layout] (std::pair<std::string, uint32> const & nameToindex)
+	auto found = std::find_if(nameToIndex_.begin(), nameToIndex_.end(), [&layout] (std::pair<std::string, uint32> const& nameToindex)
 	{
 		return layout == nameToindex.first;
 	});

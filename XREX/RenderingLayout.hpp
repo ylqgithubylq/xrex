@@ -9,7 +9,7 @@ class RenderingLayout
 	: Noncopyable
 {
 public:
-	enum DrawingMode
+	enum class DrawingMode
 	{
 		Points,
 		LineStrip,
@@ -23,12 +23,12 @@ public:
 	};
 
 public:
-	RenderingLayout(std::vector<GraphicsBufferSP> const & buffers, GraphicsBufferSP& indexBuffer, DrawingMode mode);
+	RenderingLayout(std::vector<GraphicsBufferSP> const& buffers, GraphicsBufferSP& indexBuffer, DrawingMode mode);
 	~RenderingLayout();
 
 
 
-	void BindToProgram(ProgramObject const & program);
+	void BindToProgram(ProgramObject const& program);
 	void Unbind();
 
 	DrawingMode GetDrawingMode() const
@@ -46,8 +46,7 @@ public:
 	void Draw();
 
 private:
-	static std::vector<uint32> InitializeGLDrawTypeMapping();
-	static std::vector<uint32> const DrawTypeToGLDrawType;
+	static uint32 GLDrawModeFromDrawMode(DrawingMode mode);
 
 private:
 	std::vector<GraphicsBufferSP> buffers_;

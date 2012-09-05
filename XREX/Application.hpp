@@ -31,7 +31,7 @@ public:
 		return *inputCenter_.get();
 	}
 
-	Settings const & GetSettings() const
+	Settings const& GetSettings() const
 	{
 		return settings_;
 	}
@@ -41,7 +41,7 @@ public:
 		return timer_.Elapsed();
 	}
 
-	void Initialize(Settings const & settings);
+	void Initialize(Settings const& settings);
 	/*
 	 *	Block until this program stop running.
 	 */
@@ -52,7 +52,7 @@ public:
 	void RenderAFrame();
 
 private:
-	void InitializeMainWindow(std::wstring const & name, RenderingSettings const & settings);
+	void InitializeMainWindow(std::wstring const& name, RenderingSettings const& settings);
 
 private:
 	Application();

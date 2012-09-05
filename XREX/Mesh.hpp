@@ -10,13 +10,13 @@ class StaticMesh
 	: public Renderable
 {
 public:
-	StaticMesh(std::map<std::string, RenderingLayoutSP> const & layouts);
+	StaticMesh(std::map<std::string, RenderingLayoutSP> const& layouts);
 	virtual ~StaticMesh();
 
-	void SetEffect(std::string const & layout, RenderingEffectSP& effect);
-	RenderingEffectSP const & GetEffect(std::string const & layout) const;
+	void SetEffect(std::string const& layout, RenderingEffectSP& effect);
+	RenderingEffectSP const& GetEffect(std::string const& layout) const;
 
-	virtual std::vector<LayoutAndEffect> const & GetLayoutsAndEffects(SceneObjectSP camera) const override
+	virtual std::vector<LayoutAndEffect> const& GetLayoutsAndEffects(SceneObjectSP camera) const override
 	{
 		return layoutsAndEffects_;
 	}

@@ -13,8 +13,8 @@ public:
 
 public:
 	
-	bool LoadString(std::string const & path, std::string* result);
-	bool LoadWString(std::string const & path, std::wstring* result);
+	bool LoadString(std::string const& path, std::string* result);
+	bool LoadWString(std::string const& path, std::wstring* result);
 
 private:
 	LocalResourceLoader();
