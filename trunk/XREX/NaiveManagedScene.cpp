@@ -13,10 +13,10 @@ NaiveManagedScene::NaiveManagedScene(void)
 NaiveManagedScene::~NaiveManagedScene(void)
 {
 }
-bool NaiveManagedScene::RemoveObject(std::string const & sceneObjectName)
+bool NaiveManagedScene::RemoveObject(std::string const& sceneObjectName)
 {
 
-	auto found = std::find_if(objects_.begin(), objects_.end(), [&sceneObjectName] (SceneObjectSP const & sceneObject)
+	auto found = std::find_if(objects_.begin(), objects_.end(), [&sceneObjectName] (SceneObjectSP const& sceneObject)
 	{
 		return sceneObject->GetName() == sceneObjectName;
 	});
@@ -37,7 +37,7 @@ bool NaiveManagedScene::RemoveObject(std::string const & sceneObjectName)
 	return true;
 }
 
-bool NaiveManagedScene::AddObject(SceneObjectSP const & sceneObject)
+bool NaiveManagedScene::AddObject(SceneObjectSP const& sceneObject)
 {
 	if (HasObject(sceneObject))
 	{
@@ -55,9 +55,9 @@ bool NaiveManagedScene::AddObject(SceneObjectSP const & sceneObject)
 	return true;
 }
 
-SceneObjectSP const & NaiveManagedScene::GetObject(std::string const & sceneObjectName)
+SceneObjectSP const& NaiveManagedScene::GetObject(std::string const& sceneObjectName)
 {
-	auto found = std::find_if(objects_.begin(), objects_.end(), [&sceneObjectName] (SceneObjectSP const & sceneObject)
+	auto found = std::find_if(objects_.begin(), objects_.end(), [&sceneObjectName] (SceneObjectSP const& sceneObject)
 	{
 		return sceneObject->GetName() == sceneObjectName;
 	});
@@ -68,7 +68,7 @@ SceneObjectSP const & NaiveManagedScene::GetObject(std::string const & sceneObje
 	return *found;
 }
 
-bool NaiveManagedScene::RemoveObject(SceneObjectSP const & sceneObject)
+bool NaiveManagedScene::RemoveObject(SceneObjectSP const& sceneObject)
 {
 	auto found = find(objects_.begin(), objects_.end(), sceneObject);
 	if (found == objects_.end())
@@ -88,15 +88,15 @@ bool NaiveManagedScene::RemoveObject(SceneObjectSP const & sceneObject)
 	return true;
 }
 
-vector<SceneObjectSP> NaiveManagedScene::GetRenderableQueue(SceneObjectSP const & camera)
+vector<SceneObjectSP> NaiveManagedScene::GetRenderableQueue(SceneObjectSP const& camera)
 {
 	vector<SceneObjectSP> resultObjects;
-	std::_For_each(objects_.begin(), objects_.end(), [&resultObjects] (SceneObjectSP const & sceneObject)
+	std::_For_each(objects_.begin(), objects_.end(), [&resultObjects] (SceneObjectSP const& sceneObject)
 	{
 		if (sceneObject->HasComponent<Renderable>())
 		{
 			resultObjects.push_back(sceneObject);
 		}
 	});
-	return std::move(resultObjects);
+	return resultObjects;
 }

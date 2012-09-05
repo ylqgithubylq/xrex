@@ -13,10 +13,10 @@ InputHandler::~InputHandler()
 {
 }
 
-void InputHandler::OnAction(uint32 mappedSemantic, uint32 data, VectorT<uint32, 2> pointerPosition, VectorT<uint32, 2> previousPointerPosition, double currentTime)
+void InputHandler::OnAction(uint32 mappedSemantic, int32 data, VectorT<int32, 2> pointerPosition, double currentTime)
 {
 	std::function<void()> action;
-	if (GenerateAction(mappedSemantic, data, pointerPosition, previousPointerPosition, currentTime, &action))
+	if (GenerateAction(mappedSemantic, data, pointerPosition, currentTime, &action))
 	{
 		Application::GetInstance().GetInputCenter().EnqueueAction(std::move(action));
 	}

@@ -6,7 +6,7 @@ class Component
 	: Noncopyable
 {
 public:
-	enum ComponentType
+	enum class ComponentType
 	{
 		TransformationType,
 		RenderableType,
@@ -47,9 +47,9 @@ public:
 	/*
 	 *	Used for SceneObject. Don't use this.
 	 */
-	void SetOwnerSceneObject(SceneObjectSP o)
+	void SetOwnerSceneObject(SceneObjectSP const& owner)
 	{
-		sceneObject_ = o;
+		sceneObject_ = owner;
 	}
 	SceneObjectSP GetOwnerSceneObject() const
 	{

@@ -65,19 +65,19 @@ void RenderingEngine::Update()
 	lastTime_ = currentTime;
 }
 
-void RenderingEngine::RenderACamera(SceneObjectSP const & cameraObject)
+void RenderingEngine::RenderACamera(SceneObjectSP const& cameraObject)
 {
 	CameraSP camera = cameraObject->GetComponent<Camera>();
 	assert(camera != nullptr);
 
-	Color const & backgroundColor = camera->GetBackgroundColor();
+	Color const& backgroundColor = camera->GetBackgroundColor();
 	// TODO scissor rectangle
 	gl::ClearColor(backgroundColor.R(), backgroundColor.G(), backgroundColor.B(), backgroundColor.A());
 	gl::Clear(gl::GL_COLOR_BUFFER_BIT | gl::GL_DEPTH_BUFFER_BIT | gl::GL_STENCIL_BUFFER_BIT);
 
 	camera->Update();
-	floatM44 const & viewMatrix = camera->GetViewMatrix();
-	floatM44 const & projectionMatrix = camera->GetProjectionMatrix();
+	floatM44 const& viewMatrix = camera->GetViewMatrix();
+	floatM44 const& projectionMatrix = camera->GetProjectionMatrix();
 
 	vector<SceneObjectSP> sceneObjects = scene_->GetRenderableQueue(cameraObject);
 
@@ -90,26 +90,26 @@ void RenderingEngine::RenderACamera(SceneObjectSP const & cameraObject)
 		assert(renderable->IsVisible());
 
 		transformation->Update();
-		floatM44 const & modelMatrix = transformation->GetModelMatrix();
+		floatM44 const& modelMatrix = transformation->GetModelMatrix();
 
-		vector<Renderable::LayoutAndEffect> const & layoutAndEffects = renderable->GetLayoutsAndEffects(cameraObject);
+		vector<Renderable::LayoutAndEffect> const& layoutAndEffects = renderable->GetLayoutsAndEffects(cameraObject);
 		for (uint32 k = 0; k < layoutAndEffects.size(); ++k)
 		{
-			RenderingEffectSP const & effect = layoutAndEffects[k].effect;
-			RenderingLayoutSP const & layout = layoutAndEffects[k].layout;
+			RenderingEffectSP const& effect = layoutAndEffects[k].effect;
+			RenderingLayoutSP const& layout = layoutAndEffects[k].layout;
 
 			// are these too hard coded?
-			EffectParameterSP const & model = effect->GetParameterByName(DefinedUniform::ModelMatrix);
+			EffectParameterSP const& model = effect->GetParameterByName(DefinedUniform::ModelMatrix);
 			if (model)
 			{
 				model->SetValue(modelMatrix);
 			}
-			EffectParameterSP const & view = effect->GetParameterByName(DefinedUniform::ViewMatrix);
+			EffectParameterSP const& view = effect->GetParameterByName(DefinedUniform::ViewMatrix);
 			if (view)
 			{
 				view->SetValue(viewMatrix);
 			}
-			EffectParameterSP const & projection = effect->GetParameterByName(DefinedUniform::ProjectionMatrix);
+			EffectParameterSP const& projection = effect->GetParameterByName(DefinedUniform::ProjectionMatrix);
 			if (projection)
 			{
 				projection->SetValue(projectionMatrix);

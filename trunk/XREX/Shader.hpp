@@ -14,7 +14,7 @@ class ShaderObject
 	: Noncopyable
 {
 public:
-	enum ShaderType
+	enum class ShaderType
 	{
 		VertexShader,
 		FragmentShader,
@@ -26,7 +26,7 @@ public:
 	};
 
 public:
-	ShaderObject(ShaderType type, std::string const & source);
+	ShaderObject(ShaderType type, std::string const& source);
 	ShaderObject(ShaderType type, std::string&& source);
 	~ShaderObject();
 
@@ -46,7 +46,7 @@ public:
 	{
 		return validate_;
 	}
-	std::string const & GetCompileError() const
+	std::string const& GetCompileError() const
 	{
 		return errorString_;
 	}
@@ -55,7 +55,6 @@ private:
 
 	static std::string const VersionMacro;
 
-	static std::vector<std::string> InitializeShaderMacros();
 	static std::vector<std::string> const ShaderDefineMacros;
 
 	static std::vector<uint32> InitializeGLShaderTypeMapping();
@@ -95,7 +94,7 @@ public:
 	{
 		return validate_;
 	}
-	std::string const & GetLinkError() const
+	std::string const& GetLinkError() const
 	{
 		return errorString_;
 	}
@@ -104,7 +103,7 @@ public:
 	/*
 	 *	@return: -1 indicates not found.
 	 */
-	int32 GetAttributeLocation(std::string const & channel) const;
+	int32 GetAttributeLocation(std::string const& channel) const;
 
 	/*
 	 *	@effect: new parameters will be added to it if this shader have uniform names that not in parameters of effect.

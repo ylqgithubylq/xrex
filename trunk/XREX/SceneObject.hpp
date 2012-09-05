@@ -14,10 +14,10 @@ public:
 	static SceneObjectSP const NullSceneObject;
 public:
 	SceneObject();
-	explicit SceneObject(std::string const & name);
+	explicit SceneObject(std::string const& name);
 	~SceneObject();
 
-	std::string const & GetName() const
+	std::string const& GetName() const
 	{
 		return name_;
 	}
@@ -32,21 +32,17 @@ public:
 		return components_[static_cast<uint32>(Component::TypeToComponentType<T>::Type)] != nullptr;
 	}
 
-	void SetComponent(ComponentSP const & component)
-	{
-		components_[component->GetComponentType()] = component;
-		component->SetOwnerSceneObject(shared_from_this());
-	}
+	void SetComponent(ComponentSP const& component);
 
-	ComponentSP const & GetComponent(Component::ComponentType type) const
+	ComponentSP const& GetComponent(Component::ComponentType type) const
 	{
 		return	components_[static_cast<uint32>(type)];
 	}
 	template <typename T>
 	std::shared_ptr<T> GetComponent() const
 	{
-		ComponentSP comonent = components_[static_cast<uint32>(Component::TypeToComponentType<T>::Type)];
-		return CheckedSPCast<T>(comonent);
+		ComponentSP const& comonent = components_[static_cast<uint32>(Component::TypeToComponentType<T>::Type)];
+		return CheckedSPCast<T>(comonent); // shared_ptr_cast create a new shared_ptr object.
 	}
 
 private:

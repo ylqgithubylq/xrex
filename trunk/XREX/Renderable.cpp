@@ -4,6 +4,7 @@
 
 
 Renderable::Renderable()
+	: visible_(true)
 {
 };
 

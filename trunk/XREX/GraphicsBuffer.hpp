@@ -12,13 +12,13 @@ class GraphicsBuffer
 	: Noncopyable
 {
 public:
-	enum BufferType
+	enum class BufferType
 	{
 		Vertex,
 		Index
 	};
 
-	enum Usage
+	enum class Usage
 	{
 		Static,
 		Dynamic,
@@ -40,7 +40,7 @@ public:
 			/*
 			 *	@elementStrip: 0 indicates no strip between elements.
 			 */
-			ElementLayoutDescription(uint32 startLocation, uint32 elementStrip, ElementType type, std::string const & attributeChannel, bool normalize = false)
+			ElementLayoutDescription(uint32 startLocation, uint32 elementStrip, ElementType type, std::string const& attributeChannel, bool normalize = false)
 				: start(startLocation), strip(elementStrip), elementType(type), channel(attributeChannel), needNormalize(normalize)
 			{
 			}
@@ -65,7 +65,7 @@ public:
 		}
 
 		bool AddChannelLayout(ElementLayoutDescription&& elementLayout);
-		ElementLayoutDescription const & GetChannelLayout(std::string const & channel) const;
+		ElementLayoutDescription const& GetChannelLayout(std::string const& channel) const;
 
 		uint32 GetElementCount() const
 		{
@@ -78,15 +78,14 @@ public:
 	};
 
 private:
-	static std::vector<uint32> const USAGE_TO_GL_USAGE;
-	static std::vector<uint32> InitializeUsage();
+	static uint32 GLUsageFromUsage(Usage usage);
 
 public:
 	/*
 	 *	For single-channel buffer.
 	 */
 	template <typename T>
-	GraphicsBuffer(BufferType type, Usage usage, std::vector<T> const & data, std::string const & channel = "", bool normalized = false)
+	GraphicsBuffer(BufferType type, Usage usage, std::vector<T> const& data, std::string const& channel = "", bool normalized = false)
 		: type_(type), usage_(usage), description_(data.size())
 	{
 		assert(type != BufferType::Index || channel == ""); // index buffer must have channel == ""
@@ -99,7 +98,7 @@ public:
 	 *	For mutli-channel buffer. a.k.a.: array of structures.
 	 */
 	template <typename T>
-	GraphicsBuffer(BufferType type, Usage usage, std::vector<T> const & data, DataDescription&& description)
+	GraphicsBuffer(BufferType type, Usage usage, std::vector<T> const& data, DataDescription&& description)
 		: type_(type), usage_(usage), description_(std::move(description))
 	{
 		assert(sizeof(T) == GetElementSizeInByte(TypeToElementType<T>::Type));
@@ -121,13 +120,13 @@ public:
 	{
 		return description_.elementCount_;
 	}
-	DataDescription const & GetDataDescription() const
+	DataDescription const& GetDataDescription() const
 	{
 		return description_;
 	}
 
 	void Bind();
-	void BindToProgram(ProgramObject const & program);
+	void BindToProgram(ProgramObject const& program);
 	void Unbind();
 
 private:

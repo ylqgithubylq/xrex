@@ -21,11 +21,11 @@ public:
 	/*
 	 *	@scene: set to nullptr to make no scene to render.
 	 */
-	void SetScene(SceneSP const & scene)
+	void SetScene(SceneSP const& scene)
 	{
 		scene_ = scene;
 	}
-	SceneSP const & GetCurrentScene() const
+	SceneSP const& GetCurrentScene() const
 	{
 		return scene_;
 	}
@@ -49,7 +49,7 @@ public:
 
 
 private:
-	void RenderACamera(SceneObjectSP const & cameraObject);
+	void RenderACamera(SceneObjectSP const& cameraObject);
 
 private:
 	std::function<void(double current, double delta)> renderingFunction_;

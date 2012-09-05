@@ -26,7 +26,7 @@ public:
 	typedef ValueType const * ConstPointer;
 
 	typedef ValueType& Reference;
-	typedef ValueType const & ConstReference;
+	typedef ValueType const& ConstReference;
 
 	static uint32 const Dimension = 4;
 	static uint32 const ElementCount = Dimension * Dimension;
@@ -45,7 +45,7 @@ public:
 	/*
 	 *	Create a scalar equivalent matrix, fill principal diagonal with rhs.
 	 */
-	explicit Matrix4T(T const & rhs)
+	explicit Matrix4T(T const& rhs)
 	{
 		T* temp = GetFirstElementNonConstPointer(*this);
 		temp[0] = rhs;
@@ -82,7 +82,7 @@ public:
 	/*
 	 *	@rhs: column major array.
 	 */
-	explicit Matrix4T(std::array<T, ElementCount> const & rhs) // TODO need test
+	explicit Matrix4T(std::array<T, ElementCount> const& rhs) // TODO need test
 	{
 		for (uint32 i = 0; i < Dimension; ++i)
 		{
@@ -92,26 +92,26 @@ public:
 	/*
 	 *	@rhs: column major vectors.
 	 */
-	explicit Matrix4T(VectorT<VectorT<T, Dimension>, Dimension> const & rhs)
+	explicit Matrix4T(VectorT<VectorT<T, Dimension>, Dimension> const& rhs)
 		: vectors_(rhs)
 	{
 	}
-	Matrix4T(Matrix4T const & rhs)
+	Matrix4T(Matrix4T const& rhs)
 		: vectors_(rhs.vectors_)
 	{
 	}
 	template <typename U>
-	Matrix4T(Matrix4T<U> const & rhs)
+	Matrix4T(Matrix4T<U> const& rhs)
 		: vectors_(rhs.vectors_)
 	{
 	}
 	/*
 	 *	parameters subscript: row, column
 	 */
-	Matrix4T(T const & m11, T const & m21, T const & m31, T const & m41,
-		T const & m12, T const & m22, T const & m32, T const & m42,
-		T const & m13, T const & m23, T const & m33, T const & m43,
-		T const & m14, T const & m24, T const & m34, T const & m44)
+	Matrix4T(T const& m11, T const& m21, T const& m31, T const& m41,
+		T const& m12, T const& m22, T const& m32, T const& m42,
+		T const& m13, T const& m23, T const& m33, T const& m43,
+		T const& m14, T const& m24, T const& m34, T const& m44)
 	{
 
 		T* temp = GetFirstElementNonConstPointer(*this);
@@ -160,41 +160,41 @@ public:
 		}
 		return result;
 	}
-	VectorT<T, Dimension> const & Column(uint32 index) const
+	VectorT<T, Dimension> const& Column(uint32 index) const
 	{
 		return vectors_[index];
 	}
 
-	friend Matrix4T operator +(Matrix4T const & lhs, Matrix4T const & rhs)
+	friend Matrix4T operator +(Matrix4T const& lhs, Matrix4T const& rhs)
 	{
 		return Matrix4T(lhs.vectors_ + rhs.vectors_);
 	}
-	friend Matrix4T operator -(Matrix4T const & lhs, Matrix4T const & rhs)
+	friend Matrix4T operator -(Matrix4T const& lhs, Matrix4T const& rhs)
 	{
 		return Matrix4T(lhs.vectors_ - rhs.vectors_);
 	}
 
-	friend Matrix4T operator *(Matrix4T const & lhs, Matrix4T const & rhs)
+	friend Matrix4T operator *(Matrix4T const& lhs, Matrix4T const& rhs)
 	{
 		Matrix4T temp;
 		MathHelper::MatrixHepler<T>::DoMultiply(Matrix4T::GetFirstElementNonConstPointer(temp), Matrix4T::GetFirstElementNonConstPointer(lhs), Matrix4T::GetFirstElementNonConstPointer(rhs));
 		return temp;
 	}
-	friend Matrix4T operator *(Matrix4T const & lhs, T const & rhs)
+	friend Matrix4T operator *(Matrix4T const& lhs, T const& rhs)
 	{
 		return Matrix4T(lhs.vectors_ * VectorT<T, Dimension>(rhs));
 	}
-	friend Matrix4T operator *(T const & lhs, Matrix4T const & rhs)
+	friend Matrix4T operator *(T const& lhs, Matrix4T const& rhs)
 	{
 		return Matrix4T(VectorT<T, Dimension>(lhs) * rhs.vectors_);
 	}
 
-	friend Matrix4T operator /(Matrix4T const & lhs, T const & rhs)
+	friend Matrix4T operator /(Matrix4T const& lhs, T const& rhs)
 	{
 		return Matrix4T(lhs.vectors_ / VectorT<T, Dimension>(rhs));
 	}
 
-	Matrix4T& operator =(Matrix4T const & rhs)
+	Matrix4T& operator =(Matrix4T const& rhs)
 	{
 		if (this != &rhs)
 		{
@@ -203,7 +203,7 @@ public:
 		return *this;
 	}
 	template <typename U>
-	Matrix4T const & operator =(Matrix4T<U> const & rhs)
+	Matrix4T const& operator =(Matrix4T<U> const& rhs)
 	{
 		if (this != &rhs)
 		{
@@ -212,7 +212,7 @@ public:
 		return *this;
 	}
 
-	Matrix4T const & operator +() const
+	Matrix4T const& operator +() const
 	{
 		return *this;
 	}
@@ -223,11 +223,11 @@ public:
 		return temp;
 	}
 
-	friend bool operator ==(Matrix4T const & lhs, Matrix4T const & rhs)
+	friend bool operator ==(Matrix4T const& lhs, Matrix4T const& rhs)
 	{
 		return lhs.vectors_ == rhs.vectors_;
 	}
-	friend bool operator !=(Matrix4T const & lhs, Matrix4T const & rhs)
+	friend bool operator !=(Matrix4T const& lhs, Matrix4T const& rhs)
 	{
 		return lhs.vectors_ != rhs.vectors_;
 	}
@@ -259,7 +259,7 @@ public:
 	}
 	
 private:
-	static Pointer GetFirstElementNonConstPointer(Matrix4T const & result)
+	static Pointer GetFirstElementNonConstPointer(Matrix4T const& result)
 	{
 		return const_cast<Pointer>(&result.vectors_[0][0]);
 	}

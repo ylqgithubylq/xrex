@@ -54,7 +54,7 @@ namespace MathHelper
 			VectorHelper<T, N - 1>::DoCopy(out + 1, rhs + 1);
 		}
 
-		static void DoAssign(T out[N], T const & rhs)
+		static void DoAssign(T out[N], T const& rhs)
 		{
 			out[0] = rhs;
 			VectorHelper<T, N - 1>::DoAssign(out + 1, rhs);
@@ -66,7 +66,7 @@ namespace MathHelper
 			VectorHelper<T, N - 1>::DoAdd(out + 1, lhs + 1, rhs + 1);
 		}
 
-		static void DoAdd(T out[N], T const lhs[N], T const & rhs)
+		static void DoAdd(T out[N], T const lhs[N], T const& rhs)
 		{
 			out[0] = lhs[0] + rhs;
 			VectorHelper<T, N - 1>::DoAdd(out + 1, lhs + 1, rhs);
@@ -78,7 +78,7 @@ namespace MathHelper
 			VectorHelper<T, N - 1>::DoSubtract(out + 1, lhs + 1, rhs + 1);
 		}
 
-		static void DoSubtract(T out[N], T const lhs[N], T const & rhs)
+		static void DoSubtract(T out[N], T const lhs[N], T const& rhs)
 		{
 			out[0] = lhs[0] - rhs;
 			VectorHelper<T, N - 1>::DoSubtract(out + 1, lhs + 1, rhs);
@@ -90,7 +90,7 @@ namespace MathHelper
 			VectorHelper<T, N - 1>::DoMultiply(out + 1, lhs + 1, rhs + 1);
 		}
 
-		static void DoScale(T out[N], T const lhs[N], T const & rhs)
+		static void DoScale(T out[N], T const lhs[N], T const& rhs)
 		{
 			out[0] = lhs[0] * rhs;
 			VectorHelper<T, N - 1>::DoScale(out + 1, lhs + 1, rhs);
@@ -135,7 +135,7 @@ namespace MathHelper
 			out[0] = static_cast<T>(rhs[0]);
 		}
 
-		static void DoAssign(T out[1], T const & rhs)
+		static void DoAssign(T out[1], T const& rhs)
 		{
 			out[0] = rhs;
 		}
@@ -155,7 +155,7 @@ namespace MathHelper
 			out[0] = lhs[0] - rhs[0];
 		}
 
-		static void DoSubtract(T out[1], T const lhs[1], T const & rhs)
+		static void DoSubtract(T out[1], T const lhs[1], T const& rhs)
 		{
 			out[0] = lhs[0] - rhs;
 		}
@@ -165,7 +165,7 @@ namespace MathHelper
 			out[0] = lhs[0] * rhs[0];
 		}
 
-		static void DoScale(T out[1], T const lhs[1], T const & rhs)
+		static void DoScale(T out[1], T const lhs[1], T const& rhs)
 		{
 			out[0] = lhs[0] * rhs;
 		}

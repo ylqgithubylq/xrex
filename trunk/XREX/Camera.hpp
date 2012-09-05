@@ -43,7 +43,7 @@ public:
 	{
 		backgroundColor_ = color;
 	}
-	Color const & GetBackgroundColor() const
+	Color const& GetBackgroundColor() const
 	{
 		return backgroundColor_;
 	}
@@ -52,6 +52,7 @@ public:
 	{
 		SceneObjectSP sceneObject = GetOwnerSceneObject();
 		TransformationSP transformation = sceneObject->GetComponent<Transformation>();
+		// RotationMatrixY(PI) make +z as the view direction
 		viewMatrix_ = RotationMatrixY(PI) * MatrixFromQuaternion(transformation->GetOrientation().Conjugate()) * TranslationMatrix(-transformation->GetPosition());
 	}
 

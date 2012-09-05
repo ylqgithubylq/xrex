@@ -166,7 +166,7 @@ void* Window::GetHWND() const
 
 
 
-Window::Window(std::wstring const & name, int32 left, int32 top, int32 width, int32 height)
+Window::Window(std::wstring const& name, int32 left, int32 top, int32 width, int32 height)
 	: name_(name), left_(left), top_(top), active_(false), running_(false), rendering_(false)
 {
 	hideWindows_ = MakeUP<HideWindows_>(*this);
@@ -486,7 +486,7 @@ std::vector<InputCenter::InputSemantic> Window::InitializeInputSemanticMapping()
 	mapping[VK_OEM_8] = InputCenter::InputSemantic::InputSemanticInvalid;
 
 
-	return std::move(mapping);
+	return mapping;
 }
 
 std::vector<InputCenter::InputSemantic> const Window::WindowsVKToInputSemantic = InitializeInputSemanticMapping();

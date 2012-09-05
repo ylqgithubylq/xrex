@@ -16,27 +16,27 @@ public:
 	virtual ~NaiveManagedScene(void);
 
 
-	virtual bool HasObject(std::string const & sceneObjectName) override
+	virtual bool HasObject(std::string const& sceneObjectName) override
 	{
-		return std::find_if(objects_.begin(), objects_.end(), [&sceneObjectName] (SceneObjectSP const & sceneObject)
+		return std::find_if(objects_.begin(), objects_.end(), [&sceneObjectName] (SceneObjectSP const& sceneObject)
 		{
 			return sceneObject->GetName() == sceneObjectName;
 		}) != objects_.end();
 	}
 
-	virtual SceneObjectSP const & GetObject(std::string const & sceneObjectName) override;
+	virtual SceneObjectSP const& GetObject(std::string const& sceneObjectName) override;
 
-	virtual bool RemoveObject(std::string const & sceneObjectName) override;
+	virtual bool RemoveObject(std::string const& sceneObjectName) override;
 
 
-	virtual bool HasObject(SceneObjectSP const & sceneObject) override
+	virtual bool HasObject(SceneObjectSP const& sceneObject) override
 	{
 		return std::find(objects_.begin(), objects_.end(), sceneObject) != objects_.end();
 	}
 
-	virtual bool AddObject(SceneObjectSP const & sceneObject) override;
+	virtual bool AddObject(SceneObjectSP const& sceneObject) override;
 
-	virtual bool RemoveObject(SceneObjectSP const & sceneObject) override;
+	virtual bool RemoveObject(SceneObjectSP const& sceneObject) override;
 
 	virtual int32 GetObjectCount() override
 	{
@@ -49,7 +49,7 @@ public:
 		cameras_.clear();
 	}
 
-	virtual std::vector<SceneObjectSP> GetRenderableQueue(SceneObjectSP const & camera) override;
+	virtual std::vector<SceneObjectSP> GetRenderableQueue(SceneObjectSP const& camera) override;
 
 	virtual std::vector<SceneObjectSP> GetCameras() override
 	{
