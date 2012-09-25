@@ -8,9 +8,9 @@
 using std::function;
 
 
-FreeRoamCameraController::FreeRoamCameraController(float moveScaler, float rotateScaler)
-	: moveScaler_(moveScaler), rotateScaler_(rotateScaler), semanticStates_(static_cast<uint32>(RoamSemantic::FPSSemanticCount)), previousFrameTime_(0),
-	previousPointerPosition_(0, 0), forward_(0), left_(0), up_(0), roll_(0), turnTriggered_(false)
+FreeRoamCameraController::FreeRoamCameraController(float moveScaler, float rotateScaler, float speedScaler)
+	: moveScaler_(moveScaler), rotateScaler_(rotateScaler), speedScaler_(speedScaler), semanticStates_(static_cast<uint32>(RoamSemantic::FPSSemanticCount)), previousFrameTime_(0),
+	previousPointerPosition_(0, 0), forward_(0), left_(0), up_(0), roll_(0), turnTriggered_(false), spedUp_(false)
 {
 }
 
@@ -75,6 +75,11 @@ bool FreeRoamCameraController::GenerateAction(uint32 mappedSemantic, int32 data,
 			turnTriggered_ = !!data;
 		}
 		break;
+	case RoamSemantic::SpeedUp:
+		{
+			spedUp_ = !!data;
+		}
+		break;
 	default:
 		{
 			assert(false);
@@ -93,8 +98,10 @@ auto FreeRoamCameraController::GenerateActionMap() -> ActionMap
 	map.Set(InputCenter::InputSemantic::K_Q, static_cast<uint32>(RoamSemantic::RollLeft));
 	map.Set(InputCenter::InputSemantic::K_E, static_cast<uint32>(RoamSemantic::RollRight));
 	map.Set(InputCenter::InputSemantic::K_V, static_cast<uint32>(RoamSemantic::MoveUp));
-	map.Set(InputCenter::InputSemantic::K_B, static_cast<uint32>(RoamSemantic::MoveDown));
+	map.Set(InputCenter::InputSemantic::K_C, static_cast<uint32>(RoamSemantic::MoveDown));
 	map.Set(InputCenter::InputSemantic::M_Move, static_cast<uint32>(RoamSemantic::Turn));
+	map.Set(InputCenter::InputSemantic::K_LeftShift, static_cast<uint32>(RoamSemantic::SpeedUp));
+	map.Set(InputCenter::InputSemantic::K_RightShift, static_cast<uint32>(RoamSemantic::SpeedUp));
 	map.Set(InputCenter::InputSemantic::M_Button0, static_cast<uint32>(RoamSemantic::TriggerTurn));
 	return map;
 }
@@ -121,7 +128,8 @@ function<void()> FreeRoamCameraController::GenerateFrameAction(float delta)
 			roll_();
 		}
 	};
-	FrameAction action(GenerateMoveAction(delta * forward_, delta * left_, delta * up_), GenerateRollAction(delta * roll_));
+	float spedUpDelta = delta * ((spedUp_ ? 1 : 0) * speedScaler_ + 1);
+	FrameAction action(GenerateMoveAction(spedUpDelta * forward_, spedUpDelta * left_, spedUpDelta * up_), GenerateRollAction(delta * roll_));
 
 	return action;
 }
@@ -151,7 +159,7 @@ function<void()> FreeRoamCameraController::GenerateRollAction(float roll)
 	{
 		TransformationSP cameraTransformation = cameraObject->GetComponent<Transformation>();
 		floatQ orientation = cameraTransformation->GetOrientation();
-		floatV3 rollAxis = RotateByQuaternion(orientation, floatV3(0, 0, 1));
+		floatV3 rollAxis = RotateByQuaternion(orientation, floatV3(0, 0, -1));
 		floatQ rollRotation = RotationQuaternion(roll, rollAxis);
 		orientation = rollRotation * orientation;
 		cameraTransformation->SetOrientation(orientation);

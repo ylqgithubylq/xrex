@@ -7,7 +7,6 @@
 
 
 
-
 class GraphicsBuffer
 	: Noncopyable
 {
@@ -26,6 +25,7 @@ public:
 
 		UsageCount
 	};
+
 	class DataDescription
 	{
 		friend class GraphicsBuffer;
@@ -51,7 +51,6 @@ public:
 				: start(startLocation), strip(elementStrip), elementType(type), channel(std::move(attributeChannel)), needNormalize(normalize)
 			{
 			}
-
 		};
 
 	public:
@@ -88,14 +87,14 @@ public:
 	GraphicsBuffer(BufferType type, Usage usage, std::vector<T> const& data, std::string const& channel = "", bool normalized = false)
 		: type_(type), usage_(usage), description_(data.size())
 	{
-		assert(type != BufferType::Index || channel == ""); // index buffer must have channel == ""
+		assert((type == BufferType::Index && channel == "") || (type != BufferType::Index && channel != "")); // index buffer must have channel == ""
 		description_.channelLayouts_.push_back(DataDescription::ElementLayoutDescription(0, 0, TypeToElementType<T>::Type, channel));
 		assert(sizeof(T) == GetElementSizeInByte(TypeToElementType<T>::Type));
 		DoConsctruct(data.data(), data.size() * sizeof(T));
 	}
 
 	/*
-	 *	For mutli-channel buffer. a.k.a.: array of structures.
+	 *	For multi-channel buffer. a.k.a.: array of structures.
 	 */
 	template <typename T>
 	GraphicsBuffer(BufferType type, Usage usage, std::vector<T> const& data, DataDescription&& description)
@@ -134,11 +133,10 @@ private:
 
 private:
 	BufferType type_;
-	uint32 target_; // gl binding target
 	Usage usage_;
 	DataDescription description_;
+	uint32 target_; // gl binding target
 	uint32 bufferID_;
-	std::vector<int32> lastAttributeLocations_;
-
+	std::vector<int32> lastAttributeLocations_; // used to store attribute binding location temporarily
 };
 

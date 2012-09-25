@@ -116,7 +116,7 @@ EffectParameter::ParameterValueAutoConverter::operator floatM44 const&() const
 
 
 RenderingEffect::RenderingEffect(string const& name)
-	: name_(name), initialized(false)
+	: name_(name)
 {
 }
 
@@ -125,11 +125,6 @@ RenderingEffect::~RenderingEffect()
 {
 }
 
-void RenderingEffect::Initialize(std::vector<RenderingPassSP> const& passes)
-{
-	passes_ = passes;
-	initialized = true;
-}
 
 EffectParameterSP const& RenderingEffect::GetParameterByName(string const& name) const
 {
@@ -144,13 +139,42 @@ EffectParameterSP const& RenderingEffect::GetParameterByName(string const& name)
 	return *i;
 }
 
+RenderingTechniqueSP const& RenderingEffect::CreateTechnique()
+{
+	techniques_.emplace_back(new RenderingTechnique(*this));
+	return techniques_.back();
+}
 
 
 
 
 
-RenderingPass::RenderingPass(RenderingEffect& effect)
-	: effect_(effect), initialized_(false)
+
+RenderingTechnique::RenderingTechnique(RenderingEffect& effect)
+	: effect_(effect)
+{
+}
+
+RenderingTechnique::~RenderingTechnique()
+{
+
+}
+
+RenderingPassSP const& RenderingTechnique::CreatePass()
+{
+	passes_.emplace_back(new RenderingPass(*this));
+	return passes_.back();
+}
+
+
+
+
+
+
+
+
+RenderingPass::RenderingPass(RenderingTechnique& technique)
+	: technique_(technique), initialized_(false)
 {
 }
 RenderingPass::~RenderingPass()
@@ -160,7 +184,7 @@ RenderingPass::~RenderingPass()
 void RenderingPass::Initialize(ProgramObjectSP& program)
 {
 	program_ = program;
-	program->InitializeParameterSetters(effect_);
+	program->InitializeParameterSetters(technique_.GetEffect());
 	initialized_ = true;
 }
 

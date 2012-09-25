@@ -15,7 +15,7 @@ using std::vector;
 
 uint32 GraphicsBuffer::GLUsageFromUsage(Usage usage)
 {
-	static vector<uint32> mapping = [] ()
+	static vector<uint32> const mapping = [] ()
 	{
 		vector<uint32> temp(static_cast<uint32>(GraphicsBuffer::Usage::UsageCount));
 		temp[static_cast<uint32>(GraphicsBuffer::Usage::Static)] = gl::GL_STATIC_DRAW;
@@ -47,8 +47,6 @@ auto GraphicsBuffer::DataDescription::GetChannelLayout(string const& channel) co
 
 void GraphicsBuffer::DoConsctruct(void const * data, uint32 dataSize)
 {
-	lastAttributeLocations_.resize(description_.channelLayouts_.size());
-
 	gl::GenBuffers(1, &bufferID_);
 	assert(bufferID_ != 0); // 0 is reserved by GL
 	target_ = type_ == BufferType::Vertex ? gl::GL_ARRAY_BUFFER : gl::GL_ELEMENT_ARRAY_BUFFER;
@@ -69,25 +67,35 @@ void GraphicsBuffer::Bind()
 void GraphicsBuffer::BindToProgram(ProgramObject const& program)
 {
 	Bind();
-	for (uint32 i = 0; i < description_.channelLayouts_.size(); ++i)
+	if (type_ == BufferType::Vertex)
 	{
-		DataDescription::ElementLayoutDescription& channelLayout = description_.channelLayouts_[i];
-		lastAttributeLocations_[i] = program.GetAttributeLocation(channelLayout.channel);
-		if (lastAttributeLocations_[i] != -1)
+		lastAttributeLocations_.resize(description_.channelLayouts_.size());
+		for (uint32 i = 0; i < description_.channelLayouts_.size(); ++i)
 		{
-			gl::EnableVertexAttribArray(lastAttributeLocations_[i]);
-			gl::VertexAttribPointer(lastAttributeLocations_[i], GetElementPrimitiveCount(channelLayout.elementType), GetGLType(GetElementPrimitiveType(channelLayout.elementType)),
-				channelLayout.needNormalize, channelLayout.strip, reinterpret_cast<void const *>(channelLayout.start));
+			DataDescription::ElementLayoutDescription& channelLayout = description_.channelLayouts_[i];
+			lastAttributeLocations_[i] = program.GetAttributeLocation(channelLayout.channel);
+			if (lastAttributeLocations_[i] != -1)
+			{
+				gl::EnableVertexAttribArray(lastAttributeLocations_[i]);
+				gl::VertexAttribPointer(lastAttributeLocations_[i], GetElementPrimitiveCount(channelLayout.elementType), GLTypeFromElementType(GetElementPrimitiveType(channelLayout.elementType)),
+					channelLayout.needNormalize, channelLayout.strip, reinterpret_cast<void const *>(channelLayout.start));
+			}
 		}
 	}
 }
 
 void GraphicsBuffer::Unbind()
 {
-	for (uint32 i = 0; i < description_.channelLayouts_.size(); ++i)
+	if (type_ == BufferType::Vertex)
 	{
-		gl::DisableVertexAttribArray(lastAttributeLocations_[i]);
+		for (uint32 i = 0; i < description_.channelLayouts_.size(); ++i)
+		{
+			gl::DisableVertexAttribArray(lastAttributeLocations_[i]);
+		}
+		lastAttributeLocations_.clear();
 	}
+
 	gl::BindBuffer(target_, 0);
+
 }
 

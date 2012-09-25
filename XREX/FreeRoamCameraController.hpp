@@ -25,13 +25,14 @@ public:
 		RollRight,
 		Turn,
 		TriggerTurn,
+		SpeedUp,
 
 		FPSSemanticCount,
 	};
 
 public:
-	FreeRoamCameraController(float moveScaler = 2.0f, float rotateScaler = 1.0f);
-	virtual ~FreeRoamCameraController();
+	FreeRoamCameraController(float moveScaler = 2.0f, float rotateScaler = 1.0f,  float speedScaler = 5.0);
+	virtual ~FreeRoamCameraController() override;
 
 	void AttachToCamera(SceneObjectSP const& cameraObject);
 
@@ -56,6 +57,7 @@ private:
 
 	float moveScaler_;
 	float rotateScaler_;
+	float speedScaler_;
 
 	double previousFrameTime_;
 	VectorT<int32, 2> previousPointerPosition_;
@@ -67,5 +69,6 @@ private:
 	int32 roll_;
 
 	bool turnTriggered_;
+	bool spedUp_;
 };
 

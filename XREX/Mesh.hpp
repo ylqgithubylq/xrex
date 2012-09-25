@@ -3,28 +3,51 @@
 
 #include "Renderable.hpp"
 
-#include <map>
 #include <string>
 
-class StaticMesh
+class Mesh
 	: public Renderable
 {
 public:
-	StaticMesh(std::map<std::string, RenderingLayoutSP> const& layouts);
-	virtual ~StaticMesh();
+	Mesh(std::string const& name);
+	virtual ~Mesh() override;
 
-	void SetEffect(std::string const& layout, RenderingEffectSP& effect);
-	RenderingEffectSP const& GetEffect(std::string const& layout) const;
-
-	virtual std::vector<LayoutAndEffect> const& GetLayoutsAndEffects(SceneObjectSP camera) const override
+	std::string const& GetName() const
 	{
-		return layoutsAndEffects_;
+		return name_;
 	}
 
+	SubMeshSP const& GetSubMesh(std::string const& subMeshName) const;
 
+	virtual std::vector<LayoutAndTechnique> GetLayoutsAndTechniques(SceneObjectSP const& camera) const override;
+
+	SubMeshSP const& CreateSubMesh(std::string const& name, RenderingLayoutSP const& layout, RenderingEffectSP const& effect);
 
 private:
-	std::vector<LayoutAndEffect> layoutsAndEffects_;
-	std::map<std::string, uint32> nameToIndex_;
+	std::string name_;
+	std::vector<SubMeshSP> subMeshes_;
+};
+
+
+class SubMesh
+{
+	friend class Mesh;
+	SubMesh(Mesh& mesh, std::string const& name, RenderingLayoutSP const& layout, RenderingEffectSP const& effect);
+
+public:
+	~SubMesh();
+
+	std::string const& GetName() const
+	{
+		return name_;
+	}
+
+	Renderable::LayoutAndTechnique GetLayoutAndTechnique(SceneObjectSP const& camera) const;
+
+private:
+	Mesh& mesh_;
+	std::string name_;
+	RenderingLayoutSP layout_;
+	RenderingEffectSP effect_;
 };
 

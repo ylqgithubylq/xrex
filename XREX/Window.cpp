@@ -291,205 +291,207 @@ void Window::StartHandlingMessages()
 	}
 }
 
-std::vector<InputCenter::InputSemantic> Window::InitializeInputSemanticMapping()
+InputCenter::InputSemantic Window::InputSemanticFromWindowsVK(uint32 winKey)
 {
-	uint32 const WindowsVKCount = 256;
-	vector<InputCenter::InputSemantic> mapping(WindowsVKCount, InputCenter::InputSemantic::InputSemanticInvalid);
+	static std::vector<InputCenter::InputSemantic> mapping = [] ()
+	{
+		uint32 const WindowsVKCount = 256;
+		vector<InputCenter::InputSemantic> mapping(WindowsVKCount, InputCenter::InputSemantic::InputSemanticInvalid);
 
-	mapping[0] = InputCenter::InputSemantic::NullSemantic;
+		mapping[0] = InputCenter::InputSemantic::NullSemantic;
 
-	mapping[VK_LBUTTON] = InputCenter::InputSemantic::M_Button0;
-	mapping[VK_RBUTTON] = InputCenter::InputSemantic::M_Button1;
-	mapping[VK_CANCEL] = InputCenter::InputSemantic::InputSemanticInvalid;
-	mapping[VK_MBUTTON] = InputCenter::InputSemantic::M_Button2;
-	mapping[VK_XBUTTON1] = InputCenter::InputSemantic::M_Button3;
-	mapping[VK_XBUTTON2] = InputCenter::InputSemantic::M_Button4;
+		mapping[VK_LBUTTON] = InputCenter::InputSemantic::M_Button0;
+		mapping[VK_RBUTTON] = InputCenter::InputSemantic::M_Button1;
+		mapping[VK_CANCEL] = InputCenter::InputSemantic::InputSemanticInvalid;
+		mapping[VK_MBUTTON] = InputCenter::InputSemantic::M_Button2;
+		mapping[VK_XBUTTON1] = InputCenter::InputSemantic::M_Button3;
+		mapping[VK_XBUTTON2] = InputCenter::InputSemantic::M_Button4;
 
-	mapping[VK_BACK] = InputCenter::InputSemantic::K_BackSpace;
-	mapping[VK_TAB] = InputCenter::InputSemantic::K_Tab;
-	mapping[VK_CLEAR] = InputCenter::InputSemantic::InputSemanticInvalid;
-	mapping[VK_RETURN] = InputCenter::InputSemantic::K_Enter;
+		mapping[VK_BACK] = InputCenter::InputSemantic::K_BackSpace;
+		mapping[VK_TAB] = InputCenter::InputSemantic::K_Tab;
+		mapping[VK_CLEAR] = InputCenter::InputSemantic::InputSemanticInvalid;
+		mapping[VK_RETURN] = InputCenter::InputSemantic::K_Enter;
 
-	mapping[VK_SHIFT] = InputCenter::InputSemantic::Temp_Shift;
-	mapping[VK_CONTROL] = InputCenter::InputSemantic::Temp_Ctrl;
-	mapping[VK_MENU] = InputCenter::InputSemantic::Temp_Alt;
-	mapping[VK_PAUSE] = InputCenter::InputSemantic::K_Pause;
-	mapping[VK_CAPITAL] = InputCenter::InputSemantic::K_CapsLock;
+		mapping[VK_SHIFT] = InputCenter::InputSemantic::Temp_Shift;
+		mapping[VK_CONTROL] = InputCenter::InputSemantic::Temp_Ctrl;
+		mapping[VK_MENU] = InputCenter::InputSemantic::Temp_Alt;
+		mapping[VK_PAUSE] = InputCenter::InputSemantic::K_Pause;
+		mapping[VK_CAPITAL] = InputCenter::InputSemantic::K_CapsLock;
 
-	mapping[VK_KANA] = InputCenter::InputSemantic::InputSemanticInvalid;
-	mapping[VK_HANGEUL] = InputCenter::InputSemantic::InputSemanticInvalid;
-	mapping[VK_HANGUL] = InputCenter::InputSemantic::InputSemanticInvalid;
+		mapping[VK_KANA] = InputCenter::InputSemantic::InputSemanticInvalid;
+		mapping[VK_HANGEUL] = InputCenter::InputSemantic::InputSemanticInvalid;
+		mapping[VK_HANGUL] = InputCenter::InputSemantic::InputSemanticInvalid;
 
-	mapping[VK_JUNJA] = InputCenter::InputSemantic::InputSemanticInvalid;
-	mapping[VK_FINAL] = InputCenter::InputSemantic::InputSemanticInvalid;
-	mapping[VK_HANJA] = InputCenter::InputSemantic::InputSemanticInvalid;
-	mapping[VK_KANJI] = InputCenter::InputSemantic::InputSemanticInvalid;
+		mapping[VK_JUNJA] = InputCenter::InputSemantic::InputSemanticInvalid;
+		mapping[VK_FINAL] = InputCenter::InputSemantic::InputSemanticInvalid;
+		mapping[VK_HANJA] = InputCenter::InputSemantic::InputSemanticInvalid;
+		mapping[VK_KANJI] = InputCenter::InputSemantic::InputSemanticInvalid;
 
-	mapping[VK_ESCAPE] = InputCenter::InputSemantic::K_Escape;
-	mapping[VK_CONVERT] = InputCenter::InputSemantic::InputSemanticInvalid;
-	mapping[VK_NONCONVERT] = InputCenter::InputSemantic::InputSemanticInvalid;
-	mapping[VK_ACCEPT] = InputCenter::InputSemantic::InputSemanticInvalid;
-	mapping[VK_MODECHANGE] = InputCenter::InputSemantic::InputSemanticInvalid;
+		mapping[VK_ESCAPE] = InputCenter::InputSemantic::K_Escape;
+		mapping[VK_CONVERT] = InputCenter::InputSemantic::InputSemanticInvalid;
+		mapping[VK_NONCONVERT] = InputCenter::InputSemantic::InputSemanticInvalid;
+		mapping[VK_ACCEPT] = InputCenter::InputSemantic::InputSemanticInvalid;
+		mapping[VK_MODECHANGE] = InputCenter::InputSemantic::InputSemanticInvalid;
 
-	mapping[VK_SPACE] = InputCenter::InputSemantic::K_Space;
-	mapping[VK_PRIOR] = InputCenter::InputSemantic::K_PageUp;
-	mapping[VK_NEXT] = InputCenter::InputSemantic::K_PageDown;
-	mapping[VK_END] = InputCenter::InputSemantic::K_End;
-	mapping[VK_HOME] = InputCenter::InputSemantic::K_Home;
-	mapping[VK_LEFT] = InputCenter::InputSemantic::K_LeftArrow;
-	mapping[VK_UP] = InputCenter::InputSemantic::K_UpArrow;
-	mapping[VK_RIGHT] = InputCenter::InputSemantic::K_RightArrow;
-	mapping[VK_DOWN] = InputCenter::InputSemantic::K_DownArrow;
-	mapping[VK_SELECT] = InputCenter::InputSemantic::InputSemanticInvalid;
-	mapping[VK_PRINT] = InputCenter::InputSemantic::InputSemanticInvalid;
-	mapping[VK_EXECUTE] = InputCenter::InputSemantic::InputSemanticInvalid;
-	mapping[VK_SNAPSHOT] = InputCenter::InputSemantic::InputSemanticInvalid;
-	mapping[VK_INSERT] = InputCenter::InputSemantic::K_Insert;
-	mapping[VK_DELETE] = InputCenter::InputSemantic::K_Delete;
-	mapping[VK_HELP] = InputCenter::InputSemantic::InputSemanticInvalid;
+		mapping[VK_SPACE] = InputCenter::InputSemantic::K_Space;
+		mapping[VK_PRIOR] = InputCenter::InputSemantic::K_PageUp;
+		mapping[VK_NEXT] = InputCenter::InputSemantic::K_PageDown;
+		mapping[VK_END] = InputCenter::InputSemantic::K_End;
+		mapping[VK_HOME] = InputCenter::InputSemantic::K_Home;
+		mapping[VK_LEFT] = InputCenter::InputSemantic::K_LeftArrow;
+		mapping[VK_UP] = InputCenter::InputSemantic::K_UpArrow;
+		mapping[VK_RIGHT] = InputCenter::InputSemantic::K_RightArrow;
+		mapping[VK_DOWN] = InputCenter::InputSemantic::K_DownArrow;
+		mapping[VK_SELECT] = InputCenter::InputSemantic::InputSemanticInvalid;
+		mapping[VK_PRINT] = InputCenter::InputSemantic::InputSemanticInvalid;
+		mapping[VK_EXECUTE] = InputCenter::InputSemantic::InputSemanticInvalid;
+		mapping[VK_SNAPSHOT] = InputCenter::InputSemantic::InputSemanticInvalid;
+		mapping[VK_INSERT] = InputCenter::InputSemantic::K_Insert;
+		mapping[VK_DELETE] = InputCenter::InputSemantic::K_Delete;
+		mapping[VK_HELP] = InputCenter::InputSemantic::InputSemanticInvalid;
 
-	mapping['0'] = InputCenter::InputSemantic::K_0;
-	mapping['1'] = InputCenter::InputSemantic::K_1;
-	mapping['2'] = InputCenter::InputSemantic::K_2;
-	mapping['3'] = InputCenter::InputSemantic::K_3;
-	mapping['4'] = InputCenter::InputSemantic::K_4;
-	mapping['5'] = InputCenter::InputSemantic::K_5;
-	mapping['6'] = InputCenter::InputSemantic::K_6;
-	mapping['7'] = InputCenter::InputSemantic::K_7;
-	mapping['8'] = InputCenter::InputSemantic::K_8;
-	mapping['9'] = InputCenter::InputSemantic::K_9;
+		mapping['0'] = InputCenter::InputSemantic::K_0;
+		mapping['1'] = InputCenter::InputSemantic::K_1;
+		mapping['2'] = InputCenter::InputSemantic::K_2;
+		mapping['3'] = InputCenter::InputSemantic::K_3;
+		mapping['4'] = InputCenter::InputSemantic::K_4;
+		mapping['5'] = InputCenter::InputSemantic::K_5;
+		mapping['6'] = InputCenter::InputSemantic::K_6;
+		mapping['7'] = InputCenter::InputSemantic::K_7;
+		mapping['8'] = InputCenter::InputSemantic::K_8;
+		mapping['9'] = InputCenter::InputSemantic::K_9;
 
-	mapping['A'] = InputCenter::InputSemantic::K_A;
-	mapping['B'] = InputCenter::InputSemantic::K_B;
-	mapping['C'] = InputCenter::InputSemantic::K_C;
-	mapping['D'] = InputCenter::InputSemantic::K_D;
-	mapping['E'] = InputCenter::InputSemantic::K_E;
-	mapping['F'] = InputCenter::InputSemantic::K_F;
-	mapping['G'] = InputCenter::InputSemantic::K_G;
-	
-	mapping['H'] = InputCenter::InputSemantic::K_H;
-	mapping['I'] = InputCenter::InputSemantic::K_I;
-	mapping['J'] = InputCenter::InputSemantic::K_J;
-	mapping['K'] = InputCenter::InputSemantic::K_K;
-	mapping['L'] = InputCenter::InputSemantic::K_L;
-	mapping['M'] = InputCenter::InputSemantic::K_M;
-	mapping['N'] = InputCenter::InputSemantic::K_N;
+		mapping['A'] = InputCenter::InputSemantic::K_A;
+		mapping['B'] = InputCenter::InputSemantic::K_B;
+		mapping['C'] = InputCenter::InputSemantic::K_C;
+		mapping['D'] = InputCenter::InputSemantic::K_D;
+		mapping['E'] = InputCenter::InputSemantic::K_E;
+		mapping['F'] = InputCenter::InputSemantic::K_F;
+		mapping['G'] = InputCenter::InputSemantic::K_G;
 
-	mapping['O'] = InputCenter::InputSemantic::K_O;
-	mapping['P'] = InputCenter::InputSemantic::K_P;
-	mapping['Q'] = InputCenter::InputSemantic::K_Q;
-	mapping['R'] = InputCenter::InputSemantic::K_R;
-	mapping['S'] = InputCenter::InputSemantic::K_S;
-	mapping['T'] = InputCenter::InputSemantic::K_T;
+		mapping['H'] = InputCenter::InputSemantic::K_H;
+		mapping['I'] = InputCenter::InputSemantic::K_I;
+		mapping['J'] = InputCenter::InputSemantic::K_J;
+		mapping['K'] = InputCenter::InputSemantic::K_K;
+		mapping['L'] = InputCenter::InputSemantic::K_L;
+		mapping['M'] = InputCenter::InputSemantic::K_M;
+		mapping['N'] = InputCenter::InputSemantic::K_N;
 
-	mapping['U'] = InputCenter::InputSemantic::K_U;
-	mapping['V'] = InputCenter::InputSemantic::K_V;
-	mapping['W'] = InputCenter::InputSemantic::K_W;
-	mapping['X'] = InputCenter::InputSemantic::K_X;
-	mapping['Y'] = InputCenter::InputSemantic::K_Y;
-	mapping['Z'] = InputCenter::InputSemantic::K_Z;
+		mapping['O'] = InputCenter::InputSemantic::K_O;
+		mapping['P'] = InputCenter::InputSemantic::K_P;
+		mapping['Q'] = InputCenter::InputSemantic::K_Q;
+		mapping['R'] = InputCenter::InputSemantic::K_R;
+		mapping['S'] = InputCenter::InputSemantic::K_S;
+		mapping['T'] = InputCenter::InputSemantic::K_T;
 
-	mapping[VK_LWIN] = InputCenter::InputSemantic::K_LeftWin;
-	mapping[VK_RWIN] = InputCenter::InputSemantic::K_RightWin;
-	mapping[VK_APPS] = InputCenter::InputSemantic::K_Apps;
+		mapping['U'] = InputCenter::InputSemantic::K_U;
+		mapping['V'] = InputCenter::InputSemantic::K_V;
+		mapping['W'] = InputCenter::InputSemantic::K_W;
+		mapping['X'] = InputCenter::InputSemantic::K_X;
+		mapping['Y'] = InputCenter::InputSemantic::K_Y;
+		mapping['Z'] = InputCenter::InputSemantic::K_Z;
 
-	mapping[VK_SLEEP] = InputCenter::InputSemantic::K_Sleep;
+		mapping[VK_LWIN] = InputCenter::InputSemantic::K_LeftWin;
+		mapping[VK_RWIN] = InputCenter::InputSemantic::K_RightWin;
+		mapping[VK_APPS] = InputCenter::InputSemantic::K_Apps;
 
-	mapping[VK_NUMPAD0] = InputCenter::InputSemantic::K_NumPad0;
-	mapping[VK_NUMPAD1] = InputCenter::InputSemantic::K_NumPad1;
-	mapping[VK_NUMPAD2] = InputCenter::InputSemantic::K_NumPad2;
-	mapping[VK_NUMPAD3] = InputCenter::InputSemantic::K_NumPad3;
-	mapping[VK_NUMPAD4] = InputCenter::InputSemantic::K_NumPad4;
-	mapping[VK_NUMPAD5] = InputCenter::InputSemantic::K_NumPad5;
-	mapping[VK_NUMPAD6] = InputCenter::InputSemantic::K_NumPad6;
-	mapping[VK_NUMPAD7] = InputCenter::InputSemantic::K_NumPad7;
-	mapping[VK_NUMPAD8] = InputCenter::InputSemantic::K_NumPad8;
-	mapping[VK_NUMPAD9] = InputCenter::InputSemantic::K_NumPad9;
+		mapping[VK_SLEEP] = InputCenter::InputSemantic::K_Sleep;
 
-	mapping[VK_MULTIPLY] = InputCenter::InputSemantic::K_NumPadAsterisk;
-	mapping[VK_ADD] = InputCenter::InputSemantic::K_NumPadPlus;
-	mapping[VK_SEPARATOR] = InputCenter::InputSemantic::InputSemanticInvalid;
-	mapping[VK_SUBTRACT] = InputCenter::InputSemantic::K_NumPadMinus;
-	mapping[VK_DECIMAL] = InputCenter::InputSemantic::K_NumPadPeriod;
-	mapping[VK_DIVIDE] = InputCenter::InputSemantic::K_NumPadSlash;
+		mapping[VK_NUMPAD0] = InputCenter::InputSemantic::K_NumPad0;
+		mapping[VK_NUMPAD1] = InputCenter::InputSemantic::K_NumPad1;
+		mapping[VK_NUMPAD2] = InputCenter::InputSemantic::K_NumPad2;
+		mapping[VK_NUMPAD3] = InputCenter::InputSemantic::K_NumPad3;
+		mapping[VK_NUMPAD4] = InputCenter::InputSemantic::K_NumPad4;
+		mapping[VK_NUMPAD5] = InputCenter::InputSemantic::K_NumPad5;
+		mapping[VK_NUMPAD6] = InputCenter::InputSemantic::K_NumPad6;
+		mapping[VK_NUMPAD7] = InputCenter::InputSemantic::K_NumPad7;
+		mapping[VK_NUMPAD8] = InputCenter::InputSemantic::K_NumPad8;
+		mapping[VK_NUMPAD9] = InputCenter::InputSemantic::K_NumPad9;
 
-	mapping[VK_F1] = InputCenter::InputSemantic::K_F1;
-	mapping[VK_F2] = InputCenter::InputSemantic::K_F2;
-	mapping[VK_F3] = InputCenter::InputSemantic::K_F3;
-	mapping[VK_F4] = InputCenter::InputSemantic::K_F4;
-	mapping[VK_F5] = InputCenter::InputSemantic::K_F5;
-	mapping[VK_F6] = InputCenter::InputSemantic::K_F6;
-	mapping[VK_F7] = InputCenter::InputSemantic::K_F7;
-	mapping[VK_F8] = InputCenter::InputSemantic::K_F8;
-	mapping[VK_F9] = InputCenter::InputSemantic::K_F9;
-	mapping[VK_F10] = InputCenter::InputSemantic::K_F10;
-	mapping[VK_F11] = InputCenter::InputSemantic::K_F11;
-	mapping[VK_F12] = InputCenter::InputSemantic::K_F12;
-	mapping[VK_F13] = InputCenter::InputSemantic::K_F13;
-	mapping[VK_F14] = InputCenter::InputSemantic::K_F14;
-	mapping[VK_F15] = InputCenter::InputSemantic::K_F15;
-	mapping[VK_F16] = InputCenter::InputSemantic::InputSemanticInvalid;
-	mapping[VK_F17] = InputCenter::InputSemantic::InputSemanticInvalid;
-	mapping[VK_F18] = InputCenter::InputSemantic::InputSemanticInvalid;
-	mapping[VK_F19] = InputCenter::InputSemantic::InputSemanticInvalid;
-	mapping[VK_F20] = InputCenter::InputSemantic::InputSemanticInvalid;
-	mapping[VK_F21] = InputCenter::InputSemantic::InputSemanticInvalid;
-	mapping[VK_F22] = InputCenter::InputSemantic::InputSemanticInvalid;
-	mapping[VK_F23] = InputCenter::InputSemantic::InputSemanticInvalid;
-	mapping[VK_F24] = InputCenter::InputSemantic::InputSemanticInvalid;
+		mapping[VK_MULTIPLY] = InputCenter::InputSemantic::K_NumPadAsterisk;
+		mapping[VK_ADD] = InputCenter::InputSemantic::K_NumPadPlus;
+		mapping[VK_SEPARATOR] = InputCenter::InputSemantic::InputSemanticInvalid;
+		mapping[VK_SUBTRACT] = InputCenter::InputSemantic::K_NumPadMinus;
+		mapping[VK_DECIMAL] = InputCenter::InputSemantic::K_NumPadPeriod;
+		mapping[VK_DIVIDE] = InputCenter::InputSemantic::K_NumPadSlash;
 
-	mapping[VK_NUMLOCK] = InputCenter::InputSemantic::K_NumLock;
-	mapping[VK_SCROLL] = InputCenter::InputSemantic::K_ScrollLock;
+		mapping[VK_F1] = InputCenter::InputSemantic::K_F1;
+		mapping[VK_F2] = InputCenter::InputSemantic::K_F2;
+		mapping[VK_F3] = InputCenter::InputSemantic::K_F3;
+		mapping[VK_F4] = InputCenter::InputSemantic::K_F4;
+		mapping[VK_F5] = InputCenter::InputSemantic::K_F5;
+		mapping[VK_F6] = InputCenter::InputSemantic::K_F6;
+		mapping[VK_F7] = InputCenter::InputSemantic::K_F7;
+		mapping[VK_F8] = InputCenter::InputSemantic::K_F8;
+		mapping[VK_F9] = InputCenter::InputSemantic::K_F9;
+		mapping[VK_F10] = InputCenter::InputSemantic::K_F10;
+		mapping[VK_F11] = InputCenter::InputSemantic::K_F11;
+		mapping[VK_F12] = InputCenter::InputSemantic::K_F12;
+		mapping[VK_F13] = InputCenter::InputSemantic::K_F13;
+		mapping[VK_F14] = InputCenter::InputSemantic::K_F14;
+		mapping[VK_F15] = InputCenter::InputSemantic::K_F15;
+		mapping[VK_F16] = InputCenter::InputSemantic::InputSemanticInvalid;
+		mapping[VK_F17] = InputCenter::InputSemantic::InputSemanticInvalid;
+		mapping[VK_F18] = InputCenter::InputSemantic::InputSemanticInvalid;
+		mapping[VK_F19] = InputCenter::InputSemantic::InputSemanticInvalid;
+		mapping[VK_F20] = InputCenter::InputSemantic::InputSemanticInvalid;
+		mapping[VK_F21] = InputCenter::InputSemantic::InputSemanticInvalid;
+		mapping[VK_F22] = InputCenter::InputSemantic::InputSemanticInvalid;
+		mapping[VK_F23] = InputCenter::InputSemantic::InputSemanticInvalid;
+		mapping[VK_F24] = InputCenter::InputSemantic::InputSemanticInvalid;
 
-	mapping[VK_OEM_NEC_EQUAL] = InputCenter::InputSemantic::K_NumPadEquals;
+		mapping[VK_NUMLOCK] = InputCenter::InputSemantic::K_NumLock;
+		mapping[VK_SCROLL] = InputCenter::InputSemantic::K_ScrollLock;
 
-
-	mapping[VK_LSHIFT] = InputCenter::InputSemantic::K_LeftShift;
-	mapping[VK_RSHIFT] = InputCenter::InputSemantic::K_RightShift;
-	mapping[VK_LCONTROL] = InputCenter::InputSemantic::K_LeftCtrl;
-	mapping[VK_RCONTROL] = InputCenter::InputSemantic::K_RightCtrl;
-	mapping[VK_LMENU] = InputCenter::InputSemantic::K_LeftAlt;
-	mapping[VK_RMENU] = InputCenter::InputSemantic::K_RightAlt;
-
-	mapping[VK_BROWSER_BACK] = InputCenter::InputSemantic::K_WebBack;
-	mapping[VK_BROWSER_FORWARD] = InputCenter::InputSemantic::K_WebForward;
-	mapping[VK_BROWSER_REFRESH] = InputCenter::InputSemantic::K_WebRefresh;
-	mapping[VK_BROWSER_STOP] = InputCenter::InputSemantic::K_WebStop;
-	mapping[VK_BROWSER_SEARCH] = InputCenter::InputSemantic::K_WebSearch;
-	mapping[VK_BROWSER_FAVORITES] = InputCenter::InputSemantic::K_WebFavorites;
-	mapping[VK_BROWSER_HOME] = InputCenter::InputSemantic::K_WebHome;
-
-	mapping[VK_VOLUME_MUTE] = InputCenter::InputSemantic::K_Mute;
-	mapping[VK_VOLUME_DOWN] = InputCenter::InputSemantic::K_VolumeUp;
-	mapping[VK_VOLUME_UP] = InputCenter::InputSemantic::K_VolumeDown;
-	mapping[VK_MEDIA_NEXT_TRACK] = InputCenter::InputSemantic::K_NextTrack;
-	mapping[VK_MEDIA_PREV_TRACK] = InputCenter::InputSemantic::K_PrevTrack;
-	mapping[VK_MEDIA_STOP] = InputCenter::InputSemantic::K_MediaStop;
-	mapping[VK_MEDIA_PLAY_PAUSE] = InputCenter::InputSemantic::K_PlayPause;
-	mapping[VK_LAUNCH_MAIL] = InputCenter::InputSemantic::K_Mail;
-	mapping[VK_LAUNCH_MEDIA_SELECT] = InputCenter::InputSemantic::K_MediaSelect;
-	mapping[VK_LAUNCH_APP1] = InputCenter::InputSemantic::InputSemanticInvalid;
-	mapping[VK_LAUNCH_APP2] = InputCenter::InputSemantic::InputSemanticInvalid;
-
-	mapping[VK_OEM_1] = InputCenter::InputSemantic::K_Semicolon;
-	mapping[VK_OEM_PLUS] = InputCenter::InputSemantic::InputSemanticInvalid;
-	mapping[VK_OEM_COMMA] = InputCenter::InputSemantic::K_Comma;
-	mapping[VK_OEM_MINUS] = InputCenter::InputSemantic::K_Minus;
-	mapping[VK_OEM_PERIOD] = InputCenter::InputSemantic::K_Period;
-	mapping[VK_OEM_2] = InputCenter::InputSemantic::K_Slash;
-	mapping[VK_OEM_3] = InputCenter::InputSemantic::K_Tilde;
-
-	mapping[VK_OEM_4] = InputCenter::InputSemantic::K_LeftBracket;
-	mapping[VK_OEM_5] = InputCenter::InputSemantic::K_BackSlash;
-	mapping[VK_OEM_6] = InputCenter::InputSemantic::K_RightBracket;
-	mapping[VK_OEM_7] = InputCenter::InputSemantic::K_Quote;
-	mapping[VK_OEM_8] = InputCenter::InputSemantic::InputSemanticInvalid;
+		mapping[VK_OEM_NEC_EQUAL] = InputCenter::InputSemantic::K_NumPadEquals;
 
 
-	return mapping;
+		mapping[VK_LSHIFT] = InputCenter::InputSemantic::K_LeftShift;
+		mapping[VK_RSHIFT] = InputCenter::InputSemantic::K_RightShift;
+		mapping[VK_LCONTROL] = InputCenter::InputSemantic::K_LeftCtrl;
+		mapping[VK_RCONTROL] = InputCenter::InputSemantic::K_RightCtrl;
+		mapping[VK_LMENU] = InputCenter::InputSemantic::K_LeftAlt;
+		mapping[VK_RMENU] = InputCenter::InputSemantic::K_RightAlt;
+
+		mapping[VK_BROWSER_BACK] = InputCenter::InputSemantic::K_WebBack;
+		mapping[VK_BROWSER_FORWARD] = InputCenter::InputSemantic::K_WebForward;
+		mapping[VK_BROWSER_REFRESH] = InputCenter::InputSemantic::K_WebRefresh;
+		mapping[VK_BROWSER_STOP] = InputCenter::InputSemantic::K_WebStop;
+		mapping[VK_BROWSER_SEARCH] = InputCenter::InputSemantic::K_WebSearch;
+		mapping[VK_BROWSER_FAVORITES] = InputCenter::InputSemantic::K_WebFavorites;
+		mapping[VK_BROWSER_HOME] = InputCenter::InputSemantic::K_WebHome;
+
+		mapping[VK_VOLUME_MUTE] = InputCenter::InputSemantic::K_Mute;
+		mapping[VK_VOLUME_DOWN] = InputCenter::InputSemantic::K_VolumeUp;
+		mapping[VK_VOLUME_UP] = InputCenter::InputSemantic::K_VolumeDown;
+		mapping[VK_MEDIA_NEXT_TRACK] = InputCenter::InputSemantic::K_NextTrack;
+		mapping[VK_MEDIA_PREV_TRACK] = InputCenter::InputSemantic::K_PrevTrack;
+		mapping[VK_MEDIA_STOP] = InputCenter::InputSemantic::K_MediaStop;
+		mapping[VK_MEDIA_PLAY_PAUSE] = InputCenter::InputSemantic::K_PlayPause;
+		mapping[VK_LAUNCH_MAIL] = InputCenter::InputSemantic::K_Mail;
+		mapping[VK_LAUNCH_MEDIA_SELECT] = InputCenter::InputSemantic::K_MediaSelect;
+		mapping[VK_LAUNCH_APP1] = InputCenter::InputSemantic::InputSemanticInvalid;
+		mapping[VK_LAUNCH_APP2] = InputCenter::InputSemantic::InputSemanticInvalid;
+
+		mapping[VK_OEM_1] = InputCenter::InputSemantic::K_Semicolon;
+		mapping[VK_OEM_PLUS] = InputCenter::InputSemantic::InputSemanticInvalid;
+		mapping[VK_OEM_COMMA] = InputCenter::InputSemantic::K_Comma;
+		mapping[VK_OEM_MINUS] = InputCenter::InputSemantic::K_Minus;
+		mapping[VK_OEM_PERIOD] = InputCenter::InputSemantic::K_Period;
+		mapping[VK_OEM_2] = InputCenter::InputSemantic::K_Slash;
+		mapping[VK_OEM_3] = InputCenter::InputSemantic::K_Tilde;
+
+		mapping[VK_OEM_4] = InputCenter::InputSemantic::K_LeftBracket;
+		mapping[VK_OEM_5] = InputCenter::InputSemantic::K_BackSlash;
+		mapping[VK_OEM_6] = InputCenter::InputSemantic::K_RightBracket;
+		mapping[VK_OEM_7] = InputCenter::InputSemantic::K_Quote;
+		mapping[VK_OEM_8] = InputCenter::InputSemantic::InputSemanticInvalid;
+
+		return mapping;
+	} ();
+
+	return mapping[winKey];
 }
-
-std::vector<InputCenter::InputSemantic> const Window::WindowsVKToInputSemantic = InitializeInputSemanticMapping();
 
 
 
@@ -502,23 +504,23 @@ void Window::OnResize(uint32 width, uint32 height)
 void Window::OnKeyDown(uint32 winKey)
 {
 	winKey = DistinguishLeftRightShiftCtrlAlt(winKey, true);
-	Application::GetInstance().GetInputCenter().GenerateKeyDown(WindowsVKToInputSemantic[winKey]);
+	Application::GetInstance().GetInputCenter().GenerateKeyDown(InputSemanticFromWindowsVK(winKey));
 }
 
 void Window::OnKeyUp(uint32 winKey)
 {
 	winKey = DistinguishLeftRightShiftCtrlAlt(winKey, false);
-	Application::GetInstance().GetInputCenter().GenerateKeyUp(WindowsVKToInputSemantic[winKey]);
+	Application::GetInstance().GetInputCenter().GenerateKeyUp(InputSemanticFromWindowsVK(winKey));
 }
 
 void Window::OnMouseDown(uint32 winKey, uint32 x, uint32 y)
 {
-	Application::GetInstance().GetInputCenter().GenerateMouseDown(WindowsVKToInputSemantic[winKey], x, height_ - y);
+	Application::GetInstance().GetInputCenter().GenerateMouseDown(InputSemanticFromWindowsVK(winKey), x, height_ - y);
 }
 
 void Window::OnMouseUp(uint32 winKey, uint32 x, uint32 y)
 {
-	Application::GetInstance().GetInputCenter().GenerateMouseUp(WindowsVKToInputSemantic[winKey], x, height_ - y);
+	Application::GetInstance().GetInputCenter().GenerateMouseUp(InputSemanticFromWindowsVK(winKey), x, height_ - y);
 }
 
 void Window::OnMouseWheel(uint32 winKey, uint32 x, uint32 y, int32 wheelDelta)

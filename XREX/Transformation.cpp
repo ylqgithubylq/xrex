@@ -13,3 +13,13 @@ Transformation::~Transformation()
 {
 }
 
+void Transformation::Update() const
+{
+	if (dirty_)
+	{
+		// TODO add a GetMatrixFromTQS(v3, q, v3) to math.hpp
+		modelMatrix_ = TranslationMatrix(position_) * MatrixFromQuaternion(orientation_) * ScalingMatrix(scaling_);
+		dirty_ = false;
+	}
+}
+

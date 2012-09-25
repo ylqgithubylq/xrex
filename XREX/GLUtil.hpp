@@ -4,4 +4,4 @@
 
 #include "Util.hpp"
 
-uint32 GetGLType(ElementType type);
+uint32 GLTypeFromElementType(ElementType type);

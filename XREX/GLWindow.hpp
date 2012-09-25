@@ -17,7 +17,7 @@ class GLWindow
 {
 public:
 	GLWindow(std::wstring const& name, RenderingSettings const& settings);
-	virtual ~GLWindow();
+	virtual ~GLWindow() override;
 
 	void Destory();
 

@@ -12,8 +12,9 @@ in vec3 mPosition;
 out vec3 vertexColor;
 void main()
 {
-	vertexColor = ((viewMatrix * modelMatrix * vec4(mPosition - centerPosition, 1.0)).xyz / 400 + 1.0) + color / 16;
-	vertexColor = (mPosition - centerPosition) + 1.0 + color / 16;
+	vec3 temp = (modelMatrix * vec4(mPosition, 1.0)).xyz - centerPosition;
+	vertexColor = normalize(temp) * 1.1 + color / 16;
+	//vertexColor = (mPosition - centerPosition) + 1.0 + color / 16;
 	gl_Position = 
 		projectionMatrix *
 		viewMatrix *

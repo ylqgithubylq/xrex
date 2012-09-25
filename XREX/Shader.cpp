@@ -16,42 +16,54 @@
 using std::string;
 using std::vector;
 
-vector<string> const ShaderObject::ShaderDefineMacros = [] ()
+string const& ShaderObject::ShaderDefineMacroFromShaderType(ShaderType type)
 {
-	vector<string> macros(static_cast<uint32>(ShaderObject::ShaderType::CountOfShaderTypes));
-	macros[static_cast<uint32>(ShaderObject::ShaderType::VertexShader)] = "#define VS\n";
-	macros[static_cast<uint32>(ShaderObject::ShaderType::FragmentShader)] = "#define FS\n";
-	macros[static_cast<uint32>(ShaderObject::ShaderType::GeometryShader)] = "#define GS\n";
-	macros[static_cast<uint32>(ShaderObject::ShaderType::TessellationControlShader)] = "#define TCS\n";
-	macros[static_cast<uint32>(ShaderObject::ShaderType::TessellationEvaluationShader)] = "#define TES\n";
-	return macros;
-} ();
+	static vector<string> const mapping = [] ()
+	{
+		vector<string> macros(static_cast<uint32>(ShaderObject::ShaderType::CountOfShaderTypes));
+		macros[static_cast<uint32>(ShaderObject::ShaderType::VertexShader)] = "#define VS\n";
+		macros[static_cast<uint32>(ShaderObject::ShaderType::FragmentShader)] = "#define FS\n";
+		macros[static_cast<uint32>(ShaderObject::ShaderType::GeometryShader)] = "#define GS\n";
+		macros[static_cast<uint32>(ShaderObject::ShaderType::TessellationControlShader)] = "#define TCS\n";
+		macros[static_cast<uint32>(ShaderObject::ShaderType::TessellationEvaluationShader)] = "#define TES\n";
+		return macros;
+	} ();
+	return mapping[static_cast<uint32>(type)];
+}
 
-string const ShaderObject::VersionMacro = "#version 420\n\n";
-
-const vector<uint32> ShaderObject::ShaderTypeToGLShaderType = [] ()
+string const& ShaderObject::VersionMacro()
 {
-	vector<uint32> mapping(static_cast<uint32>(ShaderObject::ShaderType::CountOfShaderTypes));
-	mapping[static_cast<uint32>(ShaderObject::ShaderType::VertexShader)] = gl::GL_VERTEX_SHADER;
-	mapping[static_cast<uint32>(ShaderObject::ShaderType::FragmentShader)] = gl::GL_FRAGMENT_SHADER;
-	mapping[static_cast<uint32>(ShaderObject::ShaderType::GeometryShader)] = gl::GL_GEOMETRY_SHADER;
-	mapping[static_cast<uint32>(ShaderObject::ShaderType::TessellationControlShader)] = gl::GL_TESS_CONTROL_SHADER;
-	mapping[static_cast<uint32>(ShaderObject::ShaderType::TessellationEvaluationShader)] = gl::GL_TESS_EVALUATION_SHADER;
-	return mapping;
-} ();
+	static string const macro = "#version 420\n\n";
+	return macro;
+}
+
+uint32 ShaderObject::GLShaderTypeFromShaderType(ShaderType type)
+{
+	static vector<uint32> const mapping = [] ()
+	{
+		vector<uint32> mapping(static_cast<uint32>(ShaderObject::ShaderType::CountOfShaderTypes));
+		mapping[static_cast<uint32>(ShaderObject::ShaderType::VertexShader)] = gl::GL_VERTEX_SHADER;
+		mapping[static_cast<uint32>(ShaderObject::ShaderType::FragmentShader)] = gl::GL_FRAGMENT_SHADER;
+		mapping[static_cast<uint32>(ShaderObject::ShaderType::GeometryShader)] = gl::GL_GEOMETRY_SHADER;
+		mapping[static_cast<uint32>(ShaderObject::ShaderType::TessellationControlShader)] = gl::GL_TESS_CONTROL_SHADER;
+		mapping[static_cast<uint32>(ShaderObject::ShaderType::TessellationEvaluationShader)] = gl::GL_TESS_EVALUATION_SHADER;
+		return mapping;
+	} ();
+	return mapping[static_cast<uint32>(type)];
+};
 
 
 
 
 ShaderObject::ShaderObject(ShaderType type, string const& source) : type_(type), source_(source)
 {
-	shaderID_ = gl::CreateShader(ShaderTypeToGLShaderType[static_cast<uint32>(type_)]);
+	shaderID_ = gl::CreateShader(GLShaderTypeFromShaderType(type_));
 	Compile();
 }
 
 ShaderObject::ShaderObject(ShaderType type, string&& source) : type_(type), source_(move(source))
 {
-	shaderID_ = gl::CreateShader(ShaderTypeToGLShaderType[static_cast<uint32>(type_)]);
+	shaderID_ = gl::CreateShader(GLShaderTypeFromShaderType(type_));
 	Compile();
 }
 
@@ -77,9 +89,9 @@ bool ShaderObject::Compile()
 		return false;
 	}
 
-	string const& macroToDefine = ShaderDefineMacros[static_cast<uint32>(type_)];
+	string const& macroToDefine = ShaderDefineMacroFromShaderType(type_);
 
-	char const * cstring[] = { VersionMacro.c_str(), macroToDefine.c_str(), source_.c_str() };
+	char const * cstring[] = { VersionMacro().c_str(), macroToDefine.c_str(), source_.c_str() };
 	gl::ShaderSource(shaderID_, sizeof(cstring) / sizeof(cstring[0]), cstring, nullptr);
 	gl::CompileShader(shaderID_);
 	
@@ -319,7 +331,7 @@ void ProgramObject::InitializeParameterSetters(RenderingEffect& effect)
 		{
 			parameter = *resultIter;
 			// check if uniform type in this shader not equals to type of parameter created by other shader.
-			assert(GetGLType(parameter->GetType()) == glType);
+			assert(GLTypeFromElementType(parameter->GetType()) == glType);
 		}
 
 		InitializeUniformBinder(binder, parameter, availableSamplerLocation);

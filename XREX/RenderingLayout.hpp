@@ -4,6 +4,7 @@
 #include "GraphicsBuffer.hpp"
 
 #include <vector>
+#include <unordered_map>
 
 class RenderingLayout
 	: Noncopyable
@@ -52,5 +53,6 @@ private:
 	std::vector<GraphicsBufferSP> buffers_;
 	GraphicsBufferSP indexBuffer_;
 	DrawingMode mode_;
+	std::unordered_map<ProgramObject const*, uint32> programBindingVAOCache_;
 };
 

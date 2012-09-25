@@ -9,9 +9,10 @@
 
 using std::vector;
 
-namespace
+
+uint32 GLTypeFromElementType(ElementType type)
 {
-	std::vector<uint32> InitializeTypeMap()
+	static vector<uint32> const mapping = [] ()
 	{
 		vector<uint32> parameterMap(static_cast<uint32>(ElementType::ParameterTypeCount));
 		parameterMap[static_cast<uint32>(ElementType::Bool)] = gl::GL_BOOL;
@@ -30,11 +31,6 @@ namespace
 		parameterMap[static_cast<uint32>(ElementType::Sampler3D)] = gl::GL_SAMPLER_3D;
 		parameterMap[static_cast<uint32>(ElementType::SamplerCube)] = gl::GL_SAMPLER_CUBE;
 		return parameterMap;
-	}
-}
-
-uint32 GetGLType(ElementType type)
-{
-	static vector<uint32> const ELEMENT_TYPE_TO_GL_TYPE = InitializeTypeMap();
-	return ELEMENT_TYPE_TO_GL_TYPE[static_cast<uint32>(type)];
+	} ();
+	return mapping[static_cast<uint32>(type)];
 }

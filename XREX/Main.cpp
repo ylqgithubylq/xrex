@@ -28,7 +28,6 @@
 #include <iostream>
 #include <functional>
 #include <type_traits>
-#include <map>
 #include <sstream>
 #include <iosfwd>
 
@@ -53,7 +52,7 @@ using namespace std;
 struct TempScene
 {
 	SceneSP scene_;
-	StaticMeshSP mesh_;
+	MeshSP mesh_;
 	SceneObjectSP cube_;
 	SceneObjectSP camera_;
 	vector<SceneObjectSP> objects_;
@@ -155,29 +154,26 @@ struct TempScene
 		GraphicsBufferSP indices = MakeSP<GraphicsBuffer>(GraphicsBuffer::BufferType::Index, GraphicsBuffer::Usage::Static, indexData);
 		RenderingLayoutSP layout = MakeSP<RenderingLayout>(vector<GraphicsBufferSP>(1, vertices), indices, RenderingLayout::DrawingMode::Triangles);
 
-		map<string, RenderingLayoutSP> meshLayout;
-		meshLayout["cube"] = layout;
 
+		mesh_ = MakeSP<Mesh>("cube");
 
-		mesh_ = MakeSP<StaticMesh>(move(meshLayout));
-
-
-		centerPosition_ = floatV3(0, 0, 6000);
+		centerPosition_ = floatV3(0, 0, 60000);
 
 
 		RenderingEffectSP effect = MakeSP<RenderingEffect>("test effect");
-		RenderingPassSP pass = MakeSP<RenderingPass>(*effect);
+		RenderingTechniqueSP technique = effect->CreateTechnique();
+		RenderingPassSP pass = technique->CreatePass();
 		pass->Initialize(program);
-		effect->Initialize(vector<RenderingPassSP>(1, pass));
-		mesh_->SetEffect("cube", effect);
 
-		effect = mesh_->GetEffect("cube");
+		SubMeshSP const& subMesh = mesh_->CreateSubMesh("cube", layout, effect);
+
 		EffectParameterSP const& color = effect->GetParameterByName("color"); // this is something that should be in material
 		color->SetValue(floatV3(0.0, 0.0, 0.01));
 		EffectParameterSP const& centerPosition = effect->GetParameterByName("centerPosition");
 		if (centerPosition)
 		{
 			centerPosition->SetValue(centerPosition_);
+			centerPosition_ = centerPosition->GetValue<floatV3>();
 		}
 
 		camera_ = MakeSP<SceneObject>("camera");
@@ -197,7 +193,7 @@ struct TempScene
 		cameraTransformation->SetFrontDirection(floatV3(0, 0, -1));
 		cameraTransformation->FaceToDirection(floatV3(0.0, 0.0, -1), floatV3(0, 1, 0));
 
-		int32 edgeCount = 5;
+		int32 edgeCount = 9;
 		float intervalSize = 4.0f;
 		float center = static_cast<float>(edgeCount - 1) / 2;
 		int32 totalCount = edgeCount * edgeCount * edgeCount;
@@ -233,6 +229,7 @@ struct TempScene
 		cameraController->AttachToCamera(camera_);
 		Application::GetInstance().GetInputCenter().AddInputHandler(cameraController);
 		// 		wMatrix->SetValue(translate * rotation);
+
 	}
 
 

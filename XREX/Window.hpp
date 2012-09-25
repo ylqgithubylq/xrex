@@ -42,8 +42,7 @@ protected:
 
 
 private:
-	static std::vector<InputCenter::InputSemantic> const WindowsVKToInputSemantic;
-	static std::vector<InputCenter::InputSemantic> InitializeInputSemanticMapping();
+	static InputCenter::InputSemantic InputSemanticFromWindowsVK(uint32 winKey);
 
 private:
 

@@ -10,28 +10,23 @@ class Renderable
 	: public TemplateComponent<Renderable>
 {
 public:
-	struct LayoutAndEffect
+	struct LayoutAndTechnique
 	{
 		RenderingLayoutSP layout;
-		RenderingEffectSP effect;
-		LayoutAndEffect()
+		RenderingTechniqueSP technique;
+		LayoutAndTechnique()
 		{
 		}
-		LayoutAndEffect(RenderingLayoutSP const& renderingLayout, RenderingEffectSP const& renderingEffect)
-			: layout(renderingLayout), effect(renderingEffect)
+		LayoutAndTechnique(RenderingLayoutSP const& renderingLayout, RenderingTechniqueSP const& renderingTechnique)
+			: layout(renderingLayout), technique(renderingTechnique)
 		{
 		}
 	};
 public:
 	Renderable();
-	virtual ~Renderable();
+	virtual ~Renderable() override;
 
-	virtual void Update() override
-	{
-		// nothing to do for renderable
-	}
-
-	virtual std::vector<LayoutAndEffect> const& GetLayoutsAndEffects(SceneObjectSP camera) const = 0;
+	virtual std::vector<LayoutAndTechnique> GetLayoutsAndTechniques(SceneObjectSP const& camera) const = 0;
 
 	bool IsVisible() const
 	{

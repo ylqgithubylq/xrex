@@ -43,8 +43,10 @@ typedef std::shared_ptr<Transformation> TransformationSP;
 
 class Renderable;
 typedef std::shared_ptr<Renderable> RenderableSP;
-class StaticMesh;
-typedef std::shared_ptr<StaticMesh> StaticMeshSP;
+class Mesh;
+typedef std::shared_ptr<Mesh> MeshSP;
+class SubMesh;
+typedef std::shared_ptr<SubMesh> SubMeshSP;
 
 class ShaderObject;
 typedef std::shared_ptr<ShaderObject> ShaderObjectSP;
@@ -54,6 +56,8 @@ class EffectParameter;
 typedef std::shared_ptr<EffectParameter> EffectParameterSP;
 class RenderingEffect;
 typedef std::shared_ptr<RenderingEffect> RenderingEffectSP;
+class RenderingTechnique;
+typedef std::shared_ptr<RenderingTechnique> RenderingTechniqueSP;
 class RenderingPass;
 typedef std::shared_ptr<RenderingPass> RenderingPassSP;
 
