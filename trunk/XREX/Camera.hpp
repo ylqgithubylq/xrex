@@ -16,7 +16,7 @@ public:
 	static Color const DefaultBackgroundColor;
 public:
 	Camera(float fieldOfView, float aspectRatio, float near, float far);
-	virtual ~Camera();
+	virtual ~Camera() override;
 
 	bool IsActive() const
 	{
@@ -27,13 +27,15 @@ public:
 		active_ = active;
 	}
 
-	floatM44 GetViewMatrix()
+	floatM44 GetViewMatrix() const
 	{
+		Update();
 		return viewMatrix_;
 	}
 
-	floatM44 GetProjectionMatrix()
+	floatM44 GetProjectionMatrix() const
 	{
+		Update();
 		return projectionMatrix_;
 	}
 
@@ -48,13 +50,8 @@ public:
 		return backgroundColor_;
 	}
 
-	virtual void Update() override
-	{
-		SceneObjectSP sceneObject = GetOwnerSceneObject();
-		TransformationSP transformation = sceneObject->GetComponent<Transformation>();
-		// RotationMatrixY(PI) make +z as the view direction
-		viewMatrix_ = RotationMatrixY(PI) * MatrixFromQuaternion(transformation->GetOrientation().Conjugate()) * TranslationMatrix(-transformation->GetPosition());
-	}
+private:
+	void Update() const;
 
 
 private:
@@ -63,13 +60,15 @@ private:
 	float near_;
 	float far_;
 
-	floatM44 viewMatrix_;
-	floatM44 projectionMatrix_;
+	floatM44 mutable viewMatrix_;
+	floatM44 mutable projectionMatrix_;
 
 
 	Color backgroundColor_;
 
 	bool active_;
+
+	bool mutable dirty_;
 
 };
 

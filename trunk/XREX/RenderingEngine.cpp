@@ -58,7 +58,6 @@ void RenderingEngine::Update()
 	double delta = currentTime - lastTime_;
 	if (renderingFunction_ != nullptr)
 	{
-//		renderingFunction_(0.0, 0.0);
 		renderingFunction_(currentTime, delta);
 	}
 	RenderScene();
@@ -75,53 +74,51 @@ void RenderingEngine::RenderACamera(SceneObjectSP const& cameraObject)
 	gl::ClearColor(backgroundColor.R(), backgroundColor.G(), backgroundColor.B(), backgroundColor.A());
 	gl::Clear(gl::GL_COLOR_BUFFER_BIT | gl::GL_DEPTH_BUFFER_BIT | gl::GL_STENCIL_BUFFER_BIT);
 
-	camera->Update();
 	floatM44 const& viewMatrix = camera->GetViewMatrix();
 	floatM44 const& projectionMatrix = camera->GetProjectionMatrix();
 
 	vector<SceneObjectSP> sceneObjects = scene_->GetRenderableQueue(cameraObject);
 
-	for (uint32 i = 0; i < sceneObjects.size(); ++i)
+	for (SceneObjectSP sceneObject : sceneObjects)
 	{
-		SceneObjectSP sceneObject = sceneObjects[i];
 		TransformationSP transformation = sceneObject->GetComponent<Transformation>();
 		RenderableSP renderable = sceneObject->GetComponent<Renderable>();
 		assert(renderable != nullptr);
 		assert(renderable->IsVisible());
 
-		transformation->Update();
 		floatM44 const& modelMatrix = transformation->GetModelMatrix();
 
-		vector<Renderable::LayoutAndEffect> const& layoutAndEffects = renderable->GetLayoutsAndEffects(cameraObject);
-		for (uint32 k = 0; k < layoutAndEffects.size(); ++k)
+		vector<Renderable::LayoutAndTechnique> const& layoutAndTechniques = renderable->GetLayoutsAndTechniques(cameraObject);
+		for (auto& layoutAndTechnique : layoutAndTechniques)
 		{
-			RenderingEffectSP const& effect = layoutAndEffects[k].effect;
-			RenderingLayoutSP const& layout = layoutAndEffects[k].layout;
+			RenderingTechniqueSP const& technique = layoutAndTechnique.technique;
+			RenderingLayoutSP const& layout = layoutAndTechnique.layout;
 
+			RenderingEffect const& effect = technique->GetEffect();
 			// are these too hard coded?
-			EffectParameterSP const& model = effect->GetParameterByName(DefinedUniform::ModelMatrix);
+			EffectParameterSP const& model = effect.GetParameterByName(DefinedUniform::ModelMatrix);
 			if (model)
 			{
 				model->SetValue(modelMatrix);
 			}
-			EffectParameterSP const& view = effect->GetParameterByName(DefinedUniform::ViewMatrix);
+			EffectParameterSP const& view = effect.GetParameterByName(DefinedUniform::ViewMatrix);
 			if (view)
 			{
 				view->SetValue(viewMatrix);
 			}
-			EffectParameterSP const& projection = effect->GetParameterByName(DefinedUniform::ProjectionMatrix);
+			EffectParameterSP const& projection = effect.GetParameterByName(DefinedUniform::ProjectionMatrix);
 			if (projection)
 			{
 				projection->SetValue(projectionMatrix);
 			}
 
-			uint32 passCount = effect->GetPassCount();
+			uint32 passCount = technique->GetPassCount();
 
 			for (uint32 passIndex = 0; passIndex < passCount; ++passIndex)
 			{
-				RenderingPassSP pass = effect->GetPass(passIndex);
+				RenderingPassSP pass = technique->GetPass(passIndex);
 				pass->Bind();
-				layout->BindToProgram(*effect->GetPass(0)->GetProgram());
+				layout->BindToProgram(*technique->GetPass(0)->GetProgram());
 				layout->Draw();
 				layout->Unbind();
 			}

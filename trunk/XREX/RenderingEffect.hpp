@@ -151,12 +151,9 @@ class RenderingEffect
 	: Noncopyable
 {
 
-
 public:
 	explicit RenderingEffect(std::string const& name);
 	~RenderingEffect();
-
-	void Initialize(std::vector<RenderingPassSP> const& passes);
 
 	std::vector<EffectParameterSP> const& GetAllParameters()
 	{
@@ -171,35 +168,75 @@ public:
 	 */
 	EffectParameterSP const& GetParameterByName(std::string const& name) const;
 
-	uint32 GetPassCount() const
+	uint32 GetTechniqueCount() const
 	{
-		return passes_.size();
+		return techniques_.size();
 	}
-	RenderingPassSP const& GetPass(uint32 pass) const
+	RenderingTechniqueSP const& GetTechnique(uint32 techniqueIndex) const
 	{
-		return passes_[pass];
+		return techniques_[techniqueIndex];
 	}
+
+	RenderingTechniqueSP const& GetAvailableTechnique(int32 lodLevel) const
+	{
+		return techniques_[0]; // TODO
+	}
+
+	RenderingTechniqueSP const& CreateTechnique();
 
 private:
 	std::string name_;
 
 	std::vector<EffectParameterSP> parameters_;
-	std::vector<RenderingPassSP> passes_;
-	bool initialized;
+	std::vector<RenderingTechniqueSP> techniques_;
 };
 
 
 
+class RenderingTechnique
+	: Noncopyable
+{
+	friend class RenderingEffect;
+	explicit RenderingTechnique(RenderingEffect& effect);
 
+public:
+	~RenderingTechnique();
+
+	RenderingEffect& GetEffect() const
+	{
+		return effect_;
+	}
+
+	uint32 GetPassCount() const
+	{
+		return passes_.size();
+	}
+	RenderingPassSP const& GetPass(uint32 passIndex) const
+	{
+		return passes_[passIndex];
+	}
+	RenderingPassSP const& CreatePass();
+
+private:
+	RenderingEffect& effect_;
+	std::vector<RenderingPassSP> passes_;
+};
 
 class RenderingPass
 	: Noncopyable
 {
+	friend class RenderingTechnique;
+	explicit RenderingPass(RenderingTechnique& technique);
+
 public:
-	explicit RenderingPass(RenderingEffect& effect);
 	~RenderingPass();
 
-	void Initialize(ProgramObjectSP& program);
+	RenderingTechnique& GetTechnique() const
+	{
+		return technique_;
+	}
+
+	void Initialize(ProgramObjectSP& program); // TODO add pipeline states
 
 
 	void Bind();
@@ -210,7 +247,8 @@ public:
 	}
 
 private:
-	RenderingEffect& effect_;
+	RenderingTechnique& technique_;
 	ProgramObjectSP program_;
+	// TODO pipeline states
 	bool initialized_;
 };

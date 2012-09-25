@@ -42,19 +42,26 @@ public:
 
 	virtual ComponentType GetComponentType() const = 0;
 
-	virtual void Update() = 0;
-
 	/*
 	 *	Used for SceneObject. Don't use this.
 	 */
 	void SetOwnerSceneObject(SceneObjectSP const& owner)
 	{
+		SceneObjectSP oldOwner = GetOwnerSceneObject();
 		sceneObject_ = owner;
+		if (oldOwner != owner)
+		{
+			OnOwnerObjectChanged(oldOwner, owner);
+		}
 	}
 	SceneObjectSP GetOwnerSceneObject() const
 	{
-		assert(!sceneObject_.expired());
 		return sceneObject_.lock();
+	}
+
+protected:
+	virtual void OnOwnerObjectChanged(SceneObjectSP const& oldOwnerObject, SceneObjectSP const& newOwnerObject)
+	{
 	}
 
 protected:
@@ -70,7 +77,6 @@ class TemplateComponent
 		static_assert(TypeToComponentType<T>::Type != ComponentType::ComponentTypeCount, "");
 		return TypeToComponentType<T>::Type;
 	}
-	virtual void Update() override = 0;
 };
 
 

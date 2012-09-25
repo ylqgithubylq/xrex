@@ -13,26 +13,23 @@ class Transformation
 {
 public:
 	Transformation();
-	virtual ~Transformation();
-
-	virtual void Update() override
-	{
-		// TODO add a GetmatrixFromTQS(v3, q, v3)
-		modelMatrix_ = TranslationMatrix(position_) * MatrixFromQuaternion(orientation_) * ScalingMatrix(scaling_);
-	}
+	virtual ~Transformation() override;
 
 	floatM44 const& GetModelMatrix() const
 	{
+		Update();
 		return modelMatrix_;
 	}
 
 	void SetPosition(float x, float y, float z)
 	{
 		SetPosition(floatV3(x, y, z));
+		dirty_ = true;
 	}
 	void SetPosition(floatV3 const& position)
 	{
 		position_ = position;
+		dirty_ = true;
 	}
 	floatV3 const& GetPosition() const
 	{
@@ -42,6 +39,7 @@ public:
 	void SetOrientation(floatQ const& orientation)
 	{
 		orientation_ = orientation;
+		dirty_ = true;
 	}
 	floatQ const& GetOrientation() const
 	{
@@ -51,14 +49,17 @@ public:
 	void SetScaling(float s)
 	{
 		SetScaling(floatV3(s, s, s));
+		dirty_ = true;
 	}
 	void SetScaling(float sx, float sy, float sz)
 	{
 		SetScaling(floatV3(sx, sy, sz));
+		dirty_ = true;
 	}
 	void SetScaling(floatV3 const& scaling)
 	{
 		scaling_ = scaling;
+		dirty_ = true;
 	}
 	floatV3 GetScaling() const
 	{
@@ -73,37 +74,45 @@ public:
 	void Translate(float x, float y, float z)
 	{
 		Translate(floatV3(x, y, z));
+		dirty_ = true;
 	}
 	void Translate(floatV3 const& displacement)
 	{
 		position_ = position_ + displacement;
+		dirty_ = true;
 	}
 
 	void Scale(float s)
 	{
 		Scale(floatV3(s, s, s));
+		dirty_ = true;
 	}
 	void Scale(float sx, float sy, float sz)
 	{
 		Scale(floatV3(sx, sy, sz));
+		dirty_ = true;
 	}
 	void Scale(floatV3 const& s)
 	{
 		scaling_ = scaling_ * s;
+		dirty_ = true;
 	}
 
 
 	void Rotate(float angle, float x, float y, float z)
 	{
 		orientation_ = RotationQuaternion(angle, x, y, z) * orientation_;
+		dirty_ = true;
 	}
 	void Rotate(float angle, floatV3 const& axis)
 	{
 		orientation_ = RotationQuaternion(angle, axis) * orientation_;
+		dirty_ = true;
 	}
 	void Rotate(floatQ const rotation)
 	{
 		orientation_ = rotation * orientation_;
+		dirty_ = true;
 	}
 
 	/*
@@ -113,6 +122,7 @@ public:
 	void SetFrontDirection(floatV3 const& front)
 	{
 		front_ = front;
+		dirty_ = true;
 	}
 	/*
 	 *	Used by FaceTo.
@@ -121,6 +131,7 @@ public:
 	void SetUpDirection(floatV3 const& up)
 	{
 		up_ = up;
+		dirty_ = true;
 	}
 	/*
 	 *	Face to a direction, using front and up as reference.
@@ -129,6 +140,7 @@ public:
 	void FaceToDirection(floatV3 const& to, floatV3 const& up)
 	{
 		orientation_ = FaceToQuaternion(to, up, front_, up_);
+		dirty_ = true;
 	}
 	/*
 	 *	Face to a position, using front and up as reference.
@@ -137,7 +149,25 @@ public:
 	void FaceToPosition(floatV3 const& to, floatV3 const& up)
 	{
 		orientation_ = FaceToQuaternion(to - position_, up, front_, up_);
+		dirty_ = true;
 	}
+
+	/*
+	 * @return: whether the underlaying representation need to be updated. (the underlaying representation updating only affect performance)
+	 */
+	bool NeedUpdate() const
+	{
+		return dirty_;
+	}
+
+protected:
+	void OnOwnerObjectChanged(SceneObjectSP const& oldOwnerObject, SceneObjectSP const& newOwnerObject) override
+	{
+		dirty_ = true;
+	}
+
+private:
+	void Update() const;
 
 private:
 	floatV3 position_;
@@ -147,7 +177,8 @@ private:
 	floatV3 front_;
 	floatV3 up_;
 
-	floatM44 modelMatrix_;
+	floatM44 mutable modelMatrix_;
 
+	bool mutable dirty_;
 };
 

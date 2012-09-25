@@ -56,17 +56,20 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>XREX.hpp</PrecompiledHeaderFile>
       <EnablePREfast>true</EnablePREfast>
+      <BrowseInformation>true</BrowseInformation>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)\Lib\$(Platform)</AdditionalLibraryDirectories>
       <AdditionalDependencies>glload.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <Profile>true</Profile>
       <AdditionalOptions>/NODEFAULTLIB:library %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
       <Command>copy $(SolutionDir)$(Configuration)\$(TargetName)$(TargetExt) $(SolutionDir)Bin\$(Platform)\</Command>
     </PostBuildEvent>
+    <Bscmake>
+      <PreserveSbr>true</PreserveSbr>
+    </Bscmake>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -86,7 +89,6 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(SolutionDir)\Lib\$(Platform)</AdditionalLibraryDirectories>
       <AdditionalDependencies>glload.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <Profile>true</Profile>
       <AdditionalOptions>/NODEFAULTLIB:library %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>

@@ -37,15 +37,15 @@ RenderingLayout::RenderingLayout(vector<GraphicsBufferSP> const& buffers, Graphi
 {
 #ifdef XREX_DEBUG
 	int32 elementCount = -1;
-	for (auto i = buffers_.begin(); i != buffers_.end(); ++i)
+	for (auto& buffer : buffers_)
 	{
 		if (elementCount == -1)
 		{
-			elementCount = (*i)->GetElementCount();
+			elementCount = buffer->GetElementCount();
 		}
 		else
 		{
-			assert(elementCount == (*i)->GetElementCount());
+			assert(elementCount == buffer->GetElementCount());
 		}
 	}
 #endif
@@ -54,24 +54,44 @@ RenderingLayout::RenderingLayout(vector<GraphicsBufferSP> const& buffers, Graphi
 
 RenderingLayout::~RenderingLayout()
 {
+	for (auto& vao : programBindingVAOCache_)
+	{
+		gl::DeleteVertexArrays(1, &vao.second);
+	}
 }
 
 void RenderingLayout::BindToProgram(ProgramObject const& program)
 {
-	// TODO build VAO
-	for (auto i = buffers_.begin(); i != buffers_.end(); ++i)
+	auto found = programBindingVAOCache_.find(&program);
+	if (found == programBindingVAOCache_.end()) // initialize vao to the new program
 	{
-		(*i)->BindToProgram(program);
+		uint32 vao;
+		gl::GenVertexArrays(1, &vao);
+		assert(vao != 0);
+		programBindingVAOCache_[&program] = vao;
+		gl::BindVertexArray(vao);
+
+		for (auto& buffer : buffers_)
+		{
+			buffer->BindToProgram(program);
+		}
+		indexBuffer_->Bind();
+
+		gl::BindVertexArray(0);
+		for (auto& buffer : buffers_)
+		{
+			buffer->Unbind();
+		}
+		indexBuffer_->Unbind();
 	}
-	indexBuffer_->Bind();
+
+	gl::BindVertexArray(programBindingVAOCache_[&program]);
+
 }
 
 void RenderingLayout::Unbind()
 {
-	for (auto i = buffers_.begin(); i != buffers_.end(); ++i)
-	{
-		(*i)->Unbind();
-	}
+	gl::BindVertexArray(0);
 }
 
 
@@ -83,5 +103,5 @@ ElementType RenderingLayout::GetIndexElementType() const
 
 void RenderingLayout::Draw()
 {
-	gl::DrawElements(GLDrawModeFromDrawMode(GetDrawingMode()), GetElementCount(), GetGLType(GetIndexElementType()), reinterpret_cast<void const *>(0));
+	gl::DrawElements(GLDrawModeFromDrawMode(GetDrawingMode()), GetElementCount(), GLTypeFromElementType(GetIndexElementType()), reinterpret_cast<void const *>(0));
 }
