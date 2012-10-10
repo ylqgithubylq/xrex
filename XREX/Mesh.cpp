@@ -58,8 +58,9 @@ void Mesh::OnLayoutBeforeRendered(LayoutAndTechnique& layoutAndTechnique)
 
 
 SubMesh::SubMesh(Mesh& mesh, string const& name, MaterialSP const& material, RenderingLayoutSP const& layout, RenderingEffectSP const& effect)
-	: mesh_(mesh), name_(name), material_(material), layout_(layout), effect_(effect)
+	: mesh_(mesh), name_(name), material_(material), layout_(layout)
 {
+	SetEffect(effect);
 }
 
 SubMesh::~SubMesh()
@@ -75,12 +76,16 @@ Renderable::LayoutAndTechnique SubMesh::GetLayoutAndTechnique(SceneObjectSP cons
 void SubMesh::SetEffect(RenderingEffectSP const& effect)
 {
 	effect_ = effect;
-	for (auto& effectParameter : effect_->GetAllParameters())
+	parameterMappingCache_.clear();
+	if (effect_ != nullptr)
 	{
-		EffectParameterSP materialParameter = material_->GetParameter(effectParameter->GetName());
-		if (materialParameter)
+		for (auto& effectParameter : effect_->GetAllParameters())
 		{
-			parameterMappingCache_.push_back(std::make_pair(materialParameter, effectParameter));
+			EffectParameterSP materialParameter = material_->GetParameter(effectParameter->GetName());
+			if (materialParameter)
+			{
+				parameterMappingCache_.push_back(std::make_pair(materialParameter, effectParameter));
+			}
 		}
 	}
 }

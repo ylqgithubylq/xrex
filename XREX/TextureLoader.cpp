@@ -13,48 +13,16 @@
 
 namespace
 {
-	std::pair<int32, int32> GetBeginAndEndIndexOfMask(uint32 mask)
-	{
-		int32 begin = -1;
-		int32 end = -1;
-		uint32 p = 1;
-		for (uint32 i = 0; i < 32; ++i)
-		{
-			if ((mask & p) != 0)
-			{
-				begin = i;
-				break;
-			}
-			p <<= 1;
-		}
-		for (uint32 i = begin + 1; i < 32; ++i)
-		{
-			if ((mask & p) == 0)
-			{
-				end = i;
-				break;
-			}
-			p <<= 1;
-		}
-		return std::pair<int32, int32>(begin, end);
-	}
 
 	Texture::TexelFormat TexelFormatFromFreeImageFormat(FREE_IMAGE_FORMAT freeImageFormat, FIBITMAP* bitmap)
 	{
 		FREE_IMAGE_TYPE imageType = FreeImage_GetImageType(bitmap);
 		FREE_IMAGE_COLOR_TYPE colorType = FreeImage_GetColorType(bitmap);
-		// FREE_IMAGE_COLOR_CHANNEL colorChannel;
+
 		FREE_IMAGE_COLOR_TYPE::FIC_MINISBLACK;
 		FREE_IMAGE_COLOR_TYPE::FIC_RGB;
 		FREE_IMAGE_COLOR_TYPE::FIC_RGBALPHA;
 		
-		uint32 bytePerPixel = FreeImage_GetBPP(bitmap) / 8;
-
-		uint32 redMask = FreeImage_GetRedMask(bitmap);
-		uint32 greenMask = FreeImage_GetGreenMask(bitmap);
-		uint32 blueMask = FreeImage_GetBlueMask(bitmap);
-		uint32 alphaMask = std::numeric_limits<uint32>::max() - redMask - greenMask - blueMask;
-
 		Texture::TexelFormat texelFormat;
 		if (imageType == FREE_IMAGE_TYPE::FIT_BITMAP)
 		{
