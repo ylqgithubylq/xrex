@@ -2,6 +2,7 @@
 
 #include "RenderingEffect.hpp"
 #include "Shader.hpp"
+#include "Texture.hpp"
 
 #include <CoreGL.hpp>
 
@@ -48,7 +49,10 @@ void EffectParameter::SetValue(floatM44 const& value)
 {
 	assert(false);
 }
-//void EffectParameter::SetValue(TextureSP const& value) { assert(false); }
+void EffectParameter::SetValue(TextureSP const& value)
+{
+	assert(false);
+}
 // 	void EffectParameter::SetValue(std::vector<bool> const& value) { assert(false); }
 // 	void EffectParameter::SetValue(std::vector<int32> const& value) { assert(false); }
 // 	void EffectParameter::SetValue(std::vector<float> const& value) { assert(false); }
@@ -94,6 +98,11 @@ EffectParameter::ParameterValueAutoConverter::operator floatM44 const&() const
 {
 	assert(false);
 	return floatM44();
+}
+EffectParameter::ParameterValueAutoConverter::operator TextureSP const&() const
+{
+	assert(false);
+	return nullptr;
 }
 // 		EffectParameter::ParameterValueAutoConverter::operator std::vector<bool> const&()  const{ assert(false); return std::vector<bool>(); }
 // 		EffectParameter::ParameterValueAutoConverter::operator std::vector<int32> const&()  const{ assert(false); return std::vector<int32>(); }

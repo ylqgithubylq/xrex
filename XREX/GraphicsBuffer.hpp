@@ -27,8 +27,9 @@ public:
 	};
 
 	class DataDescription
+		: Noncopyable
 	{
-		friend class GraphicsBuffer;
+		// friend class GraphicsBuffer; TODO needed?
 	public:
 		struct ElementLayoutDescription
 		{
@@ -54,7 +55,7 @@ public:
 		};
 
 	public:
-		DataDescription(uint32 elementCount)
+		explicit DataDescription(uint32 elementCount)
 			: elementCount_(elementCount)
 		{
 		}
@@ -65,7 +66,14 @@ public:
 
 		bool AddChannelLayout(ElementLayoutDescription&& elementLayout);
 		ElementLayoutDescription const& GetChannelLayout(std::string const& channel) const;
-
+		uint32 GetChannelLayoutCount() const
+		{
+			return channelLayouts_.size();
+		}
+		ElementLayoutDescription const& GetChannelLayoutAtIndex(uint32 index) const
+		{
+			return channelLayouts_[index];
+		}
 		uint32 GetElementCount() const
 		{
 			return elementCount_;
@@ -88,7 +96,7 @@ public:
 		: type_(type), usage_(usage), description_(data.size())
 	{
 		assert((type == BufferType::Index && channel == "") || (type != BufferType::Index && channel != "")); // index buffer must have channel == ""
-		description_.channelLayouts_.push_back(DataDescription::ElementLayoutDescription(0, 0, TypeToElementType<T>::Type, channel));
+		description_.AddChannelLayout(DataDescription::ElementLayoutDescription(0, 0, TypeToElementType<T>::Type, channel));
 		assert(sizeof(T) == GetElementSizeInByte(TypeToElementType<T>::Type));
 		DoConsctruct(data.data(), data.size() * sizeof(T));
 	}
@@ -117,7 +125,7 @@ public:
 	}
 	uint32 GetElementCount() const
 	{
-		return description_.elementCount_;
+		return description_.GetElementCount();
 	}
 	DataDescription const& GetDataDescription() const
 	{
@@ -125,18 +133,18 @@ public:
 	}
 
 	void Bind();
-	void BindToProgram(ProgramObject const& program);
+	void BindToProgram(ProgramObjectSP const& program);
 	void Unbind();
 
 private:
-	void DoConsctruct(void const * data, uint32 dataSize);
+	void DoConsctruct(void const* data, uint32 dataSize);
 
 private:
 	BufferType type_;
 	Usage usage_;
 	DataDescription description_;
-	uint32 target_; // gl binding target
-	uint32 bufferID_;
+	uint32 bindingTarget_; // gl binding target
+	uint32 bufferID_; // gl buffer ID
 	std::vector<int32> lastAttributeLocations_; // used to store attribute binding location temporarily
 };
 

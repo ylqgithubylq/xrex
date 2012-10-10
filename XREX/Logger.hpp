@@ -5,16 +5,14 @@
 class Logger
 	: Noncopyable
 {
-public:
-	Logger& GetInstance();
 
 public:
 	Logger();
 	virtual ~Logger();
 
-	void Log();
-	void Warn();
-	void Error();
+	void Log(std::string const& message);
+	void Warn(std::string const& message);
+	void Error(std::string const& message);
 
 };
 

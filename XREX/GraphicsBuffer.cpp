@@ -34,7 +34,7 @@ bool GraphicsBuffer::DataDescription::AddChannelLayout(ElementLayoutDescription&
 	return true;
 }
 
-auto GraphicsBuffer::DataDescription::GetChannelLayout(string const& channel) const -> ElementLayoutDescription const& 
+auto GraphicsBuffer::DataDescription::GetChannelLayout(string const& channel) const -> ElementLayoutDescription const&
 {
 	auto found = std::find_if(channelLayouts_.begin(), channelLayouts_.end(), [&channel] (ElementLayoutDescription const& elementLayout) 
 	{
@@ -45,13 +45,13 @@ auto GraphicsBuffer::DataDescription::GetChannelLayout(string const& channel) co
 }
 
 
-void GraphicsBuffer::DoConsctruct(void const * data, uint32 dataSize)
+void GraphicsBuffer::DoConsctruct(void const* data, uint32 dataSize)
 {
 	gl::GenBuffers(1, &bufferID_);
 	assert(bufferID_ != 0); // 0 is reserved by GL
-	target_ = type_ == BufferType::Vertex ? gl::GL_ARRAY_BUFFER : gl::GL_ELEMENT_ARRAY_BUFFER;
-	gl::BindBuffer(target_, bufferID_);
-	gl::BufferData(target_, dataSize, data, GLUsageFromUsage(usage_));
+	bindingTarget_ = type_ == BufferType::Vertex ? gl::GL_ARRAY_BUFFER : gl::GL_ELEMENT_ARRAY_BUFFER;
+	gl::BindBuffer(bindingTarget_, bufferID_);
+	gl::BufferData(bindingTarget_, dataSize, data, GLUsageFromUsage(usage_));
 }
 
 GraphicsBuffer::~GraphicsBuffer()
@@ -61,19 +61,20 @@ GraphicsBuffer::~GraphicsBuffer()
 
 void GraphicsBuffer::Bind()
 {
-	gl::BindBuffer(target_, bufferID_);
+	gl::BindBuffer(bindingTarget_, bufferID_);
 }
 
-void GraphicsBuffer::BindToProgram(ProgramObject const& program)
+void GraphicsBuffer::BindToProgram(ProgramObjectSP const& program)
 {
 	Bind();
 	if (type_ == BufferType::Vertex)
 	{
-		lastAttributeLocations_.resize(description_.channelLayouts_.size());
-		for (uint32 i = 0; i < description_.channelLayouts_.size(); ++i)
+		assert(lastAttributeLocations_.size() == 0); // make sure this buffer is not binding to other programs
+		lastAttributeLocations_.resize(description_.GetChannelLayoutCount());
+		for (uint32 i = 0; i < description_.GetChannelLayoutCount(); ++i)
 		{
-			DataDescription::ElementLayoutDescription& channelLayout = description_.channelLayouts_[i];
-			lastAttributeLocations_[i] = program.GetAttributeLocation(channelLayout.channel);
+			DataDescription::ElementLayoutDescription const& channelLayout = description_.GetChannelLayoutAtIndex(i);
+			lastAttributeLocations_[i] = program->GetAttributeLocation(channelLayout.channel);
 			if (lastAttributeLocations_[i] != -1)
 			{
 				gl::EnableVertexAttribArray(lastAttributeLocations_[i]);
@@ -88,14 +89,17 @@ void GraphicsBuffer::Unbind()
 {
 	if (type_ == BufferType::Vertex)
 	{
-		for (uint32 i = 0; i < description_.channelLayouts_.size(); ++i)
+		for (uint32 i = 0; i < description_.GetChannelLayoutCount(); ++i)
 		{
-			gl::DisableVertexAttribArray(lastAttributeLocations_[i]);
+			if (lastAttributeLocations_[i] != -1)
+			{
+				gl::DisableVertexAttribArray(lastAttributeLocations_[i]);
+			}
 		}
 		lastAttributeLocations_.clear();
 	}
 
-	gl::BindBuffer(target_, 0);
+	gl::BindBuffer(bindingTarget_, 0);
 
 }
 

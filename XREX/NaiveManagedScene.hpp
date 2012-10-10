@@ -12,8 +12,8 @@ class NaiveManagedScene
 	: public Scene
 {
 public:
-	NaiveManagedScene(void);
-	virtual ~NaiveManagedScene(void) override;
+	NaiveManagedScene();
+	virtual ~NaiveManagedScene() override;
 
 
 	virtual bool HasObject(std::string const& sceneObjectName) override

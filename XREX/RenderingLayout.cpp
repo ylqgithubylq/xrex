@@ -32,7 +32,7 @@ uint32 RenderingLayout::GLDrawModeFromDrawMode(DrawingMode mode)
 
 
 
-RenderingLayout::RenderingLayout(vector<GraphicsBufferSP> const& buffers, GraphicsBufferSP& indexBuffer, DrawingMode mode)
+RenderingLayout::RenderingLayout(vector<GraphicsBufferSP> const& buffers, GraphicsBufferSP const& indexBuffer, DrawingMode mode)
 	: buffers_(buffers), indexBuffer_(indexBuffer), mode_(mode)
 {
 #ifdef XREX_DEBUG
@@ -60,15 +60,15 @@ RenderingLayout::~RenderingLayout()
 	}
 }
 
-void RenderingLayout::BindToProgram(ProgramObject const& program)
+void RenderingLayout::BindToProgram(ProgramObjectSP const& program)
 {
-	auto found = programBindingVAOCache_.find(&program);
+	auto found = programBindingVAOCache_.find(program);
 	if (found == programBindingVAOCache_.end()) // initialize vao to the new program
 	{
 		uint32 vao;
 		gl::GenVertexArrays(1, &vao);
 		assert(vao != 0);
-		programBindingVAOCache_[&program] = vao;
+		programBindingVAOCache_[program] = vao;
 		gl::BindVertexArray(vao);
 
 		for (auto& buffer : buffers_)
@@ -85,7 +85,7 @@ void RenderingLayout::BindToProgram(ProgramObject const& program)
 		indexBuffer_->Unbind();
 	}
 
-	gl::BindVertexArray(programBindingVAOCache_[&program]);
+	gl::BindVertexArray(programBindingVAOCache_[program]);
 
 }
 

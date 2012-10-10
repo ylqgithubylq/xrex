@@ -4,12 +4,15 @@
 
 #include "GLWindow.hpp"
 
+#include "RenderingFactory.hpp"
 #include "RenderingEngine.hpp"
 #include "InputCenter.hpp"
+#include "ResourceManager.hpp"
+#include "LocalResourceLoader.hpp"
 
 
 Application::Application()
-	: renderingEngine_(MakeUP<RenderingEngine>()), inputCenter_(MakeUP<InputCenter>())
+	: renderingFactory_(MakeUP<RenderingFactory>()), renderingEngine_(MakeUP<RenderingEngine>()), inputCenter_(MakeUP<InputCenter>()), resourceManager_(MakeUP<ResourceManager>()), resourceLoader_(MakeUP<LocalResourceLoader>())
 {
 
 }
@@ -48,6 +51,6 @@ void Application::ExecuteALogicFrame()
 
 void Application::RenderAFrame()
 {
-	ExecuteALogicFrame(); // temp, remove when using seperate thread to do logic.
+	ExecuteALogicFrame(); // temp, remove when using separate thread to do logic.
 	renderingEngine_->Update();
 }

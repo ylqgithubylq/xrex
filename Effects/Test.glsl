@@ -6,20 +6,32 @@ uniform mat4 modelMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
 
+uniform sampler2D diffuseMap;
+// uniform sampler2D specularMap;
+// uniform sampler2D normalMap;
+// uniform sampler2D shininessMap;
+// uniform sampler2D opacityMap;
+
 #ifdef VS
 
-in vec3 mPosition;
-out vec3 vertexColor;
+in vec3 position;
+in vec3 normal;
+in vec3 textureCoordinate0;
+out vec3 wNormal;
+out vec3 pixelTextureCoordinate;
+
 void main()
 {
-	vec3 temp = (modelMatrix * vec4(mPosition, 1.0)).xyz - centerPosition;
-	vertexColor = normalize(temp) * 1.1 + color / 16;
-	//vertexColor = (mPosition - centerPosition) + 1.0 + color / 16;
+	vec3 temp = (modelMatrix * vec4(position, 1.0)).xyz - centerPosition;
+	//vertexColor = normalize(temp) * 1.1 + color / 16;
+	//vertexColor = (position - centerPosition) + 1.0 + color / 16;
+	wNormal = (modelMatrix * vec4(normal, 0.0)).xyz;
 	gl_Position = 
 		projectionMatrix *
 		viewMatrix *
 		modelMatrix *
-		vec4(mPosition, 1.0);
+		vec4(position, 1.0);
+	pixelTextureCoordinate = textureCoordinate0;
 }
 
 #endif
@@ -27,12 +39,15 @@ void main()
 
 #ifdef FS
 
-in vec3 vertexColor;
+in vec3 wNormal;
+in vec3 pixelTextureCoordinate;
+
 layout(location = 0) out vec4 finalColor;
 
 void main()
 {
-	finalColor = vec4(vertexColor, 0.8);
+	vec3 normal = normalize(wNormal) * 0.5 + 0.5;
+	finalColor = vec4(normal, 1.0) * 0.01 + texture(diffuseMap, pixelTextureCoordinate.xy);
 }
 
 #endif

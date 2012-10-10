@@ -12,13 +12,17 @@ class Renderable
 public:
 	struct LayoutAndTechnique
 	{
+		Renderable& renderable;
 		RenderingLayoutSP layout;
 		RenderingTechniqueSP technique;
-		LayoutAndTechnique()
+		int32 userCustomData;
+
+		LayoutAndTechnique(Renderable& ownerRenderable)
+			: renderable(ownerRenderable)
 		{
 		}
-		LayoutAndTechnique(RenderingLayoutSP const& renderingLayout, RenderingTechniqueSP const& renderingTechnique)
-			: layout(renderingLayout), technique(renderingTechnique)
+		LayoutAndTechnique(Renderable& ownerRenderable, RenderingLayoutSP const& renderingLayout, RenderingTechniqueSP const& renderingTechnique)
+			: renderable(ownerRenderable), layout(renderingLayout), technique(renderingTechnique)
 		{
 		}
 	};
@@ -35,6 +39,10 @@ public:
 	void SetVisible(bool visible)
 	{
 		visible_ = visible;
+	}
+
+	virtual void OnLayoutBeforeRendered(LayoutAndTechnique& layoutAndTechnique)
+	{
 	}
 
 private:

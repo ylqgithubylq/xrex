@@ -12,12 +12,19 @@
 
 #include <utility>
 
+#include <limits>
+
+
+
 struct Settings;
 struct RenderingSettings;
 
 class Application;
 class LocalResourceLoader;
-class Logger;
+class MeshLoader;
+class TextureLoader;
+class ResourceManager;
+class RenderingFactory;
 class RenderingEngine;
 class InputCenter;
 class Window;
@@ -60,11 +67,15 @@ class RenderingTechnique;
 typedef std::shared_ptr<RenderingTechnique> RenderingTechniqueSP;
 class RenderingPass;
 typedef std::shared_ptr<RenderingPass> RenderingPassSP;
+class Material;
+typedef std::shared_ptr<Material> MaterialSP;
 
 class RenderingLayout;
 typedef std::shared_ptr<RenderingLayout> RenderingLayoutSP;
 class GraphicsBuffer;
 typedef std::shared_ptr<GraphicsBuffer> GraphicsBufferSP;
+class Texture;
+typedef std::shared_ptr<Texture> TextureSP;
 
 class Camera;
 typedef std::shared_ptr<Camera> CameraSP;

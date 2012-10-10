@@ -1,9 +1,12 @@
 #include "XREX.hpp"
 
 #include "LocalResourceLoader.hpp"
+#include "MeshLoader.hpp"
+#include "TextureLoader.hpp"
 
 #include <fstream>
 #include <vector>
+
 
 
 
@@ -16,13 +19,8 @@ using std::wifstream;
 using std::ios;
 
 
-LocalResourceLoader& LocalResourceLoader::GetInstance()
-{
-	static LocalResourceLoader instance_;
-	return instance_;
-}
-
 LocalResourceLoader::LocalResourceLoader()
+	: meshLoader_(MakeUP<MeshLoader>()), textureLoader_(MakeUP<TextureLoader>())
 {
 }
 
@@ -31,9 +29,9 @@ LocalResourceLoader::~LocalResourceLoader()
 {
 }
 
-bool LocalResourceLoader::LoadString(string const& path, string* result)
+bool LocalResourceLoader::LoadString(string const& fileName, string* result)
 {
-	ifstream file(path, ios::in | ios::binary);
+	ifstream file(fileName, ios::in | ios::binary);
 
 	if (file)
 	{
@@ -52,9 +50,9 @@ bool LocalResourceLoader::LoadString(string const& path, string* result)
 	return false;
 }
 
-bool LocalResourceLoader::LoadWString(string const& path, wstring* result)
+bool LocalResourceLoader::LoadWString(string const& fileName, wstring* result)
 {
-	wifstream file(path, ios::in | ios::binary);
+	wifstream file(fileName, ios::in | ios::binary);
 
 	if (file)
 	{
@@ -73,4 +71,25 @@ bool LocalResourceLoader::LoadWString(string const& path, wstring* result)
 	return false;
 }
 
+MeshSP LocalResourceLoader::LoadMesh(std::string const& fileName)
+{
+	return meshLoader_->LoadMesh(fileName);
+}
+
+TextureSP LocalResourceLoader::LoadTexture1D(std::string const& fileName)
+{
+	return textureLoader_->LoadTexture1D(fileName);
+}
+TextureSP LocalResourceLoader::LoadTexture2D(std::string const& fileName)
+{
+	return textureLoader_->LoadTexture2D(fileName);
+}
+TextureSP LocalResourceLoader::LoadTexture3D(std::string const& fileName)
+{
+	return textureLoader_->LoadTexture3D(fileName);
+}
+TextureSP LocalResourceLoader::LoadTextureCube(std::string const& fileName)
+{
+	return textureLoader_->LoadTextureCube(fileName);
+}
 

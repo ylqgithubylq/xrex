@@ -36,6 +36,18 @@ void RenderingEngine::Initialize()
 	gl::Enable(gl::GL_DEPTH_TEST);
 }
 
+void RenderingEngine::Update()
+{
+	double currentTime = timer_.Elapsed();
+	double delta = currentTime - lastTime_;
+	if (renderingFunction_ != nullptr)
+	{
+		renderingFunction_(currentTime, delta);
+	}
+	RenderScene();
+	lastTime_ = currentTime;
+}
+
 void RenderingEngine::RenderScene()
 {
 	if (scene_ != nullptr)
@@ -50,18 +62,6 @@ void RenderingEngine::RenderScene()
 			}
 		}
 	}
-}
-
-void RenderingEngine::Update()
-{
-	double currentTime = timer_.Elapsed();
-	double delta = currentTime - lastTime_;
-	if (renderingFunction_ != nullptr)
-	{
-		renderingFunction_(currentTime, delta);
-	}
-	RenderScene();
-	lastTime_ = currentTime;
 }
 
 void RenderingEngine::RenderACamera(SceneObjectSP const& cameraObject)
@@ -79,6 +79,8 @@ void RenderingEngine::RenderACamera(SceneObjectSP const& cameraObject)
 
 	vector<SceneObjectSP> sceneObjects = scene_->GetRenderableQueue(cameraObject);
 
+	vector<Renderable::LayoutAndTechnique> allLayoutAndTechniqueNeedToRender;
+
 	for (SceneObjectSP sceneObject : sceneObjects)
 	{
 		TransformationSP transformation = sceneObject->GetComponent<Transformation>();
@@ -86,42 +88,51 @@ void RenderingEngine::RenderACamera(SceneObjectSP const& cameraObject)
 		assert(renderable != nullptr);
 		assert(renderable->IsVisible());
 
-		floatM44 const& modelMatrix = transformation->GetModelMatrix();
-
 		vector<Renderable::LayoutAndTechnique> const& layoutAndTechniques = renderable->GetLayoutsAndTechniques(cameraObject);
 		for (auto& layoutAndTechnique : layoutAndTechniques)
 		{
-			RenderingTechniqueSP const& technique = layoutAndTechnique.technique;
-			RenderingLayoutSP const& layout = layoutAndTechnique.layout;
+			allLayoutAndTechniqueNeedToRender.push_back(layoutAndTechnique);
+		}
+	}
+	// TODO do some sorting works
 
-			RenderingEffect const& effect = technique->GetEffect();
-			// are these too hard coded?
-			EffectParameterSP const& model = effect.GetParameterByName(DefinedUniform::ModelMatrix);
-			if (model)
-			{
-				model->SetValue(modelMatrix);
-			}
-			EffectParameterSP const& view = effect.GetParameterByName(DefinedUniform::ViewMatrix);
-			if (view)
-			{
-				view->SetValue(viewMatrix);
-			}
-			EffectParameterSP const& projection = effect.GetParameterByName(DefinedUniform::ProjectionMatrix);
-			if (projection)
-			{
-				projection->SetValue(projectionMatrix);
-			}
+	for (auto& layoutAndTechnique : allLayoutAndTechniqueNeedToRender)
+	{
+		Renderable& ownerRenderable = layoutAndTechnique.renderable;
+		RenderingTechniqueSP const& technique = layoutAndTechnique.technique;
+		RenderingLayoutSP const& layout = layoutAndTechnique.layout;
 
-			uint32 passCount = technique->GetPassCount();
+		floatM44 const& modelMatrix = ownerRenderable.GetOwnerSceneObject()->GetComponent<Transformation>()->GetModelMatrix();
 
-			for (uint32 passIndex = 0; passIndex < passCount; ++passIndex)
-			{
-				RenderingPassSP pass = technique->GetPass(passIndex);
-				pass->Bind();
-				layout->BindToProgram(*technique->GetPass(0)->GetProgram());
-				layout->Draw();
-				layout->Unbind();
-			}
+		RenderingEffect const& effect = technique->GetEffect();
+		// are these too hard coded?
+		EffectParameterSP const& model = effect.GetParameterByName(GetUniformString(DefinedUniform::ModelMatrix));
+		if (model)
+		{
+			model->SetValue(modelMatrix);
+		}
+		EffectParameterSP const& view = effect.GetParameterByName(GetUniformString(DefinedUniform::ViewMatrix));
+		if (view)
+		{
+			view->SetValue(viewMatrix);
+		}
+		EffectParameterSP const& projection = effect.GetParameterByName(GetUniformString(DefinedUniform::ProjectionMatrix));
+		if (projection)
+		{
+			projection->SetValue(projectionMatrix);
+		}
+
+		ownerRenderable.OnLayoutBeforeRendered(layoutAndTechnique);
+
+		uint32 passCount = technique->GetPassCount();
+
+		for (uint32 passIndex = 0; passIndex < passCount; ++passIndex)
+		{
+			RenderingPassSP pass = technique->GetPass(passIndex);
+			pass->Bind();
+			layout->BindToProgram(pass->GetProgram());
+			layout->Draw();
+			layout->Unbind();
 		}
 	}
 }

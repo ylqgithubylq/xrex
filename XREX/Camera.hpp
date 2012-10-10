@@ -41,7 +41,7 @@ public:
 
 
 
-	void SetBackgroundColor(Color & color)
+	void SetBackgroundColor(Color const& color)
 	{
 		backgroundColor_ = color;
 	}
