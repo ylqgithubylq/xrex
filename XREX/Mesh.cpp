@@ -76,24 +76,16 @@ Renderable::LayoutAndTechnique SubMesh::GetLayoutAndTechnique(SceneObjectSP cons
 void SubMesh::SetEffect(RenderingEffectSP const& effect)
 {
 	effect_ = effect;
-	parameterMappingCache_.clear();
-	if (effect_ != nullptr)
+	if (material_)
 	{
-		for (auto& effectParameter : effect_->GetAllParameters())
-		{
-			EffectParameterSP materialParameter = material_->GetParameter(effectParameter->GetName());
-			if (materialParameter)
-			{
-				parameterMappingCache_.push_back(std::make_pair(materialParameter, effectParameter));
-			}
-		}
+		material_->BindToEffect(effect_);
 	}
 }
 
 void SubMesh::BindAllParameterValue()
 {
-	for (auto& parameterPair : parameterMappingCache_)
+	if (material_)
 	{
-		parameterPair.second->GetValueFrom(*parameterPair.first);
+		material_->SetAllEffectParameterValues();
 	}
 }

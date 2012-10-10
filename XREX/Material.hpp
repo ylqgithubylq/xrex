@@ -7,6 +7,7 @@
 #include <string>
 #include <unordered_map>
 
+
 class Material
 	: Noncopyable
 {
@@ -32,16 +33,17 @@ public:
 
 	EffectParameterSP const& GetParameter(std::string const& parameterName);
 
+	void BindToEffect(RenderingEffectSP const& effect);
+
+	void SetAllEffectParameterValues();
+
 private:
-// 	floatV3 ambient_;
-// 	floatV3 diffuse_;
-// 	floatV3 specular_;
-// 	floatV3 emit_;
-// 	float opacity_;
-// 	float specularLevel_;
-// 	float shininess_;
 	std::string name_;
 
 	std::unordered_map<std::string, EffectParameterSP> parameters_;
+
+	RenderingEffectSP boundEffect_;
+	std::vector<std::pair<EffectParameterSP, EffectParameterSP>> parameterMappingCache_;
+
 };
 

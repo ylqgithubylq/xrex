@@ -41,7 +41,6 @@ class SubMesh
 	: Noncopyable
 {
 	friend class Mesh;
-	SubMesh(Mesh& mesh, std::string const& name, MaterialSP const& material, RenderingLayoutSP const& layout, RenderingEffectSP const& effect);
 
 public:
 	~SubMesh();
@@ -60,6 +59,9 @@ public:
 
 	Renderable::LayoutAndTechnique GetLayoutAndTechnique(SceneObjectSP const& camera) const;
 
+private:
+	SubMesh(Mesh& mesh, std::string const& name, MaterialSP const& material, RenderingLayoutSP const& layout, RenderingEffectSP const& effect);
+
 	void BindAllParameterValue();
 
 private:
@@ -68,6 +70,5 @@ private:
 	MaterialSP material_;
 	RenderingLayoutSP layout_;
 	RenderingEffectSP effect_;
-	std::vector<std::pair<EffectParameterSP, EffectParameterSP>> parameterMappingCache_;
 };
 
