@@ -5,12 +5,12 @@
 using std::vector;
 using std::find;
 
-NaiveManagedScene::NaiveManagedScene(void)
+NaiveManagedScene::NaiveManagedScene()
 {
 }
 
 
-NaiveManagedScene::~NaiveManagedScene(void)
+NaiveManagedScene::~NaiveManagedScene()
 {
 }
 bool NaiveManagedScene::RemoveObject(std::string const& sceneObjectName)

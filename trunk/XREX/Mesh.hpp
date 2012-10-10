@@ -18,10 +18,18 @@ public:
 	}
 
 	SubMeshSP const& GetSubMesh(std::string const& subMeshName) const;
+	std::vector<SubMeshSP> const& GetAllSubMeshes() const
+	{
+		return subMeshes_;
+	}
+
+	SubMeshSP const& CreateSubMesh(std::string const& name, MaterialSP const& material, RenderingLayoutSP const& layout, RenderingEffectSP const& effect);
 
 	virtual std::vector<LayoutAndTechnique> GetLayoutsAndTechniques(SceneObjectSP const& camera) const override;
 
-	SubMeshSP const& CreateSubMesh(std::string const& name, RenderingLayoutSP const& layout, RenderingEffectSP const& effect);
+	virtual void OnLayoutBeforeRendered(LayoutAndTechnique& layoutAndTechnique) override;
+
+
 
 private:
 	std::string name_;
@@ -30,9 +38,10 @@ private:
 
 
 class SubMesh
+	: Noncopyable
 {
 	friend class Mesh;
-	SubMesh(Mesh& mesh, std::string const& name, RenderingLayoutSP const& layout, RenderingEffectSP const& effect);
+	SubMesh(Mesh& mesh, std::string const& name, MaterialSP const& material, RenderingLayoutSP const& layout, RenderingEffectSP const& effect);
 
 public:
 	~SubMesh();
@@ -42,12 +51,23 @@ public:
 		return name_;
 	}
 
+	void SetEffect(RenderingEffectSP const& effect);
+
+	MaterialSP& GetMaterial()
+	{
+		return material_;
+	}
+
 	Renderable::LayoutAndTechnique GetLayoutAndTechnique(SceneObjectSP const& camera) const;
+
+	void BindAllParameterValue();
 
 private:
 	Mesh& mesh_;
 	std::string name_;
+	MaterialSP material_;
 	RenderingLayoutSP layout_;
 	RenderingEffectSP effect_;
+	std::vector<std::pair<EffectParameterSP, EffectParameterSP>> parameterMappingCache_;
 };
 

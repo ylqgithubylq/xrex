@@ -17,18 +17,29 @@ public:
 		static Application context;
 		return context;
 	}
-
+	RenderingFactory& GetRenderingFactory() const
+	{
+		return *renderingFactory_;
+	}
 	RenderingEngine& GetRenderingEngine() const
 	{
 		return *renderingEngine_;
 	}
 	Window& GetMainWindow() const
 	{
-		return *mainWindow_.get();
+		return *mainWindow_;
 	}
 	InputCenter& GetInputCenter() const
 	{
-		return *inputCenter_.get();
+		return *inputCenter_;
+	}
+	ResourceManager& GetResourceManager() const
+	{
+		return *resourceManager_;
+	}
+	LocalResourceLoader& GetResourceLoader() const
+	{
+		return *resourceLoader_;
 	}
 
 	Settings const& GetSettings() const
@@ -60,8 +71,11 @@ private:
 
 private:
 	std::unique_ptr<Window> mainWindow_;
+	std::unique_ptr<RenderingFactory> renderingFactory_;
 	std::unique_ptr<RenderingEngine> renderingEngine_;
 	std::unique_ptr<InputCenter> inputCenter_;
+	std::unique_ptr<ResourceManager> resourceManager_;
+	std::unique_ptr<LocalResourceLoader> resourceLoader_;
 	Settings settings_;
 	Timer timer_;
 };

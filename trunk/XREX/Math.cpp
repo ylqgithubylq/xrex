@@ -5,7 +5,7 @@
 
 // Copy from KlayGE
 // From Quake III. But the magic number is from http://www.lomont.org/Math/Papers/2003/InvSqrt.pdf
-template<>
+template <>
 float ReciprocalSqrt<float>(float number)
 {
 	float const threehalfs = 1.5f;

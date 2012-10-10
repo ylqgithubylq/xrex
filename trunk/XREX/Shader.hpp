@@ -13,6 +13,7 @@
 class ShaderObject
 	: Noncopyable
 {
+	friend class ProgramObject;
 public:
 	enum class ShaderType
 	{
@@ -37,11 +38,6 @@ public:
 		return type_;
 	}
 
-	uint32 GetID() const
-	{
-		return shaderID_;
-	}
-
 	bool IsValidate() const
 	{
 		return validate_;
@@ -59,13 +55,17 @@ private:
 
 	static uint32 GLShaderTypeFromShaderType(ShaderType type);
 
-
-private:
 	static uint32 GetGLShaderType(ShaderType type);
 
 
 private:
 	bool Compile();
+
+	uint32 GetID() const
+	{
+		return shaderID_;
+	}
+
 
 private:
 	ProgramObject* program_;

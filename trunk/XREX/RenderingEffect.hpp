@@ -38,7 +38,7 @@ public:
 	virtual void SetValue(floatV3 const& value);
 	virtual void SetValue(floatV4 const& value);
 	virtual void SetValue(floatM44 const& value);
-	//virtual void SetValue(TextureSP const& value);
+	virtual void SetValue(TextureSP const& value);
 // 	virtual void SetValue(std::vector<bool> const& value);
 // 	virtual void SetValue(std::vector<int32> const& value);
 // 	virtual void SetValue(std::vector<float> const& value);
@@ -59,6 +59,7 @@ public:
 		virtual operator floatV3 const&() const;
 		virtual operator floatV4 const&() const;
 		virtual operator floatM44 const&() const;
+		virtual operator TextureSP const&() const;
 // 		virtual operator std::vector<bool> const&() const;
 // 		virtual operator std::vector<int32> const&() const;
 // 		virtual operator std::vector<float> const&() const;
@@ -66,9 +67,6 @@ public:
 // 		virtual operator std::vector<floatV3> const&() const;
 // 		virtual operator std::vector<floatV4> const&() const;
 	};
-	/*
-	 *	@return ParameterValueAutoConverter: a helper struct that can convert to other type automatically.
-	 */
 
 	template <typename T>
 	T const& GetValue() const
@@ -76,7 +74,12 @@ public:
 		return DoGetValue();
 	}
 
+	virtual void GetValueFrom(EffectParameter const& rhs) = 0;
+
 private:
+	/*
+	 *	@return ParameterValueAutoConverter: a helper struct that can convert to other type automatically.
+	 */
 	virtual ParameterValueAutoConverter const& DoGetValue() const = 0;
 
 protected:
@@ -108,7 +111,10 @@ public:
 		value_ = value;
 	}
 	
-
+	virtual void GetValueFrom(EffectParameter const& rhs) override
+	{
+		value_ = CheckedCast<ConcreteEffectParameter const*>(&rhs)->value_;
+	}
 
 private:
 	friend class ConcreteParameterValueAutoConverter;
@@ -137,6 +143,7 @@ private:
 	{
 		return converter_;
 	}
+
 
 protected:
 	T value_;

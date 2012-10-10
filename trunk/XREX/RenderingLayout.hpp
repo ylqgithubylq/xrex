@@ -24,12 +24,12 @@ public:
 	};
 
 public:
-	RenderingLayout(std::vector<GraphicsBufferSP> const& buffers, GraphicsBufferSP& indexBuffer, DrawingMode mode);
+	RenderingLayout(std::vector<GraphicsBufferSP> const& buffers, GraphicsBufferSP const& indexBuffer, DrawingMode mode);
 	~RenderingLayout();
 
 
 
-	void BindToProgram(ProgramObject const& program);
+	void BindToProgram(ProgramObjectSP const& program);
 	void Unbind();
 
 	DrawingMode GetDrawingMode() const
@@ -53,6 +53,6 @@ private:
 	std::vector<GraphicsBufferSP> buffers_;
 	GraphicsBufferSP indexBuffer_;
 	DrawingMode mode_;
-	std::unordered_map<ProgramObject const*, uint32> programBindingVAOCache_;
+	std::unordered_map<ProgramObjectSP, uint32> programBindingVAOCache_;
 };
 

@@ -4,6 +4,7 @@
 #include "RenderingEffect.hpp"
 #include "GLUtil.hpp"
 #include "GraphicsBuffer.hpp"
+#include "Texture.hpp"
 
 #include <CoreGL.hpp>
 
@@ -98,7 +99,7 @@ bool ShaderObject::Compile()
 	int32 sourceLength;
 	gl::GetShaderiv(shaderID_, gl::GL_SHADER_SOURCE_LENGTH, &sourceLength); // '\0' included
 	source_.resize(sourceLength);
-	gl::GetShaderSource(shaderID_, sourceLength, &sourceLength, &source_[0]);
+	gl::GetShaderSource(shaderID_, sourceLength, &sourceLength, &source_[0]); // write back actual source content
 
 	int32 compiled = 0;
 	gl::GetShaderiv(shaderID_, gl::GL_COMPILE_STATUS, &compiled);
@@ -321,6 +322,14 @@ void ProgramObject::InitializeParameterSetters(RenderingEffect& effect)
 					parameter = MakeSP<ConcreteEffectParameter<floatM44>>(name);
 				}
 				break;
+			case gl::GL_SAMPLER_1D:
+			case gl::GL_SAMPLER_2D:
+			case gl::GL_SAMPLER_3D:
+			case gl::GL_SAMPLER_CUBE:
+				{
+					parameter = MakeSP<ConcreteEffectParameter<TextureSP>>(name);
+				}
+				break;
 			default:
 				// not support.
 				assert(false);
@@ -380,34 +389,18 @@ void ProgramObject::InitializeUniformBinder(UniformBinder& binder, EffectParamet
 		switch(glType)
 		{
 		case gl::GL_SAMPLER_1D:
-			{
-				binder.setter = [&binder, parameter] ()
-				{
-					// TODO
-				};
-			}
-			break;
 		case gl::GL_SAMPLER_2D:
-			{
-				binder.setter = [&binder, parameter] ()
-				{
-					// TODO
-				};
-			}
-			break;
 		case gl::GL_SAMPLER_3D:
-			{
-				binder.setter = [&binder, parameter] ()
-				{
-					// TODO
-				};
-			}
-			break;
 		case gl::GL_SAMPLER_CUBE:
 			{
-				binder.setter = [&binder, parameter] ()
+				binder.setter = [&binder, parameter, samplerLocation] ()
 				{
-					// TODO
+					TextureSP const& texture = parameter->GetValue<TextureSP>();
+					if (texture)
+					{
+						texture->BindTexture(samplerLocation);
+						gl::Uniform1i(binder.location, samplerLocation);
+					}
 				};
 			}
 			break;

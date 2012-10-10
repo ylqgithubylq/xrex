@@ -1,2 +1,9 @@
 using regular expressions(Ctrl+Shift+F):
 ^:b*[^:b*#/{}]+.*$
+
+TODO:
+texture class
+texture loading
+mesh.material
+effect texture binding
+program texture binding

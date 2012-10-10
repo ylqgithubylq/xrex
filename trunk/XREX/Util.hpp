@@ -43,27 +43,6 @@ inline std::shared_ptr<To> CheckedSPCast(std::shared_ptr<From> const& p)
 
 
 
-// code modified from boost/CheckedDelete.hpp
-template <class T>
-inline void CheckedDelete(T * x)
-{
-	// intentionally complex - simplification causes regressions
-	typedef char TypeMustBeComplete[sizeof(T) ? 1 : -1];
-	(void) sizeof(TypeMustBeComplete);
-	delete x;
-}
-template <class T>
-struct CheckedDeleter
-{
-	typedef T * PointerType;
-
-	void operator ()(T* x) const
-	{
-		CheckedDelete(x);
-	}
-
-};
-
 
 template<typename T>
 std::unique_ptr<T> MakeUP()
@@ -123,7 +102,7 @@ inline std::shared_ptr<T> MakeSP(A0&& a0, A1&& a1, A2&& a2, A3&& a3)
 	return std::make_shared<T>(std::forward<A0>(a0), std::forward<A1>(a1), std::forward<A2>(a2), std::forward<A3>(a3));
 }
 template <typename T, typename A0, typename A1, typename A2, typename A3, typename A4>
-inline std::shared_ptr<T> MakeUP(A0&& a0, A1&& a1, A2&& a2, A3&& a3, A4&& a4)
+inline std::shared_ptr<T> MakeSP(A0&& a0, A1&& a1, A2&& a2, A3&& a3, A4&& a4)
 {
 	return std::make_shared<T>(std::forward<A0>(a0), std::forward<A1>(a1), std::forward<A2>(a2), std::forward<A3>(a3), std::forward<A4>(a4));
 }
