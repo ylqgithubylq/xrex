@@ -19,7 +19,7 @@
 #include <sstream>
 #include <array>
 
-
+#include <filesystem>
 
 using std::vector;
 
@@ -27,34 +27,37 @@ namespace
 {
 	struct SceneProcessor
 	{
-		MeshSP* outMesh;
-		aiScene const& scene;
+		MeshSP* outMesh_;
+		aiScene const& scene_;
 		vector<RenderingLayoutSP> layouts_;
 		vector<MaterialSP> materials_;
 		vector<TextureSP> textures_;
+		std::string directoryPath_;
 
-		SceneProcessor(aiScene const& theScene, MeshSP* theOutMesh)
-			: scene(theScene), outMesh(theOutMesh)
+		SceneProcessor(aiScene const& theScene, std::string const& filePath, MeshSP* theOutMesh)
+			: scene_(theScene), outMesh_(theOutMesh)
 		{
+			std::tr2::sys::path scenePath(filePath);
+			directoryPath_ = scenePath.parent_path().string() + "/";
 			ProcessScene();
 		}
 
 		void ProcessScene()
 		{
-// 			aiAnimation** animations = scene.mAnimations;
-// 			for (uint32 i = 0; i < scene.mNumAnimations; ++i)
+// 			aiAnimation** animations = scene_.mAnimations;
+// 			for (uint32 i = 0; i < scene_.mNumAnimations; ++i)
 // 			{
 // 				aiAnimation* animation = animations[i];
 // 			}
 // 
-// 			aiCamera** cameras = scene.mCameras;
-// 			for (uint32 i = 0; i < scene.mNumCameras; ++i)
+// 			aiCamera** cameras = scene_.mCameras;
+// 			for (uint32 i = 0; i < scene_.mNumCameras; ++i)
 // 			{
 // 				aiCamera* camera = cameras[i];
 // 			}
 // 
-// 			aiLight** lights = scene.mLights;
-// 			for (uint32 i = 0; i < scene.mNumLights; ++i)
+// 			aiLight** lights = scene_.mLights;
+// 			for (uint32 i = 0; i < scene_.mNumLights; ++i)
 // 			{
 // 				aiLight* light = lights[i];
 // 			}
@@ -62,8 +65,8 @@ namespace
 			ProcessMaterial();
 			ProcessMesh();
 
-// 			aiTexture** textures = scene.mTextures;
-// 			for (uint32 i = 0; i < scene.mNumTextures; ++i)
+// 			aiTexture** textures = scene_.mTextures;
+// 			for (uint32 i = 0; i < scene_.mNumTextures; ++i)
 // 			{
 // 				aiTexture* texture = textures[i];
 // 				texture->pcData;
@@ -72,15 +75,15 @@ namespace
 // 			}
 
 
-			aiNode* rootNode = scene.mRootNode;
+			aiNode* rootNode = scene_.mRootNode;
 			ProcessNode(*rootNode);
 		}
 
 		void ProcessMaterial()
 		{
-			materials_.resize(scene.mNumMaterials);
-			aiMaterial** materials = scene.mMaterials;
-			for (uint32 i = 0; i < scene.mNumMaterials; ++i)
+			materials_.resize(scene_.mNumMaterials);
+			aiMaterial** materials = scene_.mMaterials;
+			for (uint32 i = 0; i < scene_.mNumMaterials; ++i)
 			{
 				aiMaterial* loaderMaterial = materials[i];
 				// TODO iterate over all the loaderMaterial parameters
@@ -165,6 +168,11 @@ namespace
 						if (AI_SUCCESS == loaderMaterial->GetTexture(textureType.first, j, &path, &textureMapping, &uvIndex, &blend, &textureOp, &textureMapMode))
 						{
 							TextureSP texture = Application::GetInstance().GetResourceManager().GetTexture2D(path.C_Str());
+							if (!texture)
+							{
+								texture = Application::GetInstance().GetResourceManager().GetTexture2D(directoryPath_ + path.C_Str());
+							}
+							
 							assert(textureType.second != ""); // TODO log failure rather than assert
 							material->SetParameter(textureType.second, texture);
 							// TODO generate sampler
@@ -176,11 +184,11 @@ namespace
 
 		void ProcessMesh()
 		{
-			layouts_.resize(scene.mNumMeshes);
-			aiMesh** meshes = scene.mMeshes;
-			for (uint32 i = 0; i < scene.mNumMeshes; ++i)
+			layouts_.resize(scene_.mNumMeshes);
+			aiMesh** meshes = scene_.mMeshes;
+			for (uint32 i = 0; i < scene_.mNumMeshes; ++i)
 			{
-				aiMesh* mesh = scene.mMeshes[i];
+				aiMesh* mesh = scene_.mMeshes[i];
 
 				// not handled
 				// 				mesh->mNumAnimMeshes;
@@ -376,8 +384,8 @@ namespace
 			uint32* meshIndices = node.mMeshes;
 			for (uint32 i = 0; i < node.mNumMeshes; ++i)
 			{
-				aiMesh* mesh = scene.mMeshes[meshIndices[i]];
-				(*outMesh)->CreateSubMesh(mesh->mName.C_Str(), materials_[mesh->mMaterialIndex], layouts_[meshIndices[i]], nullptr);
+				aiMesh* mesh = scene_.mMeshes[meshIndices[i]];
+				(*outMesh_)->CreateSubMesh(mesh->mName.C_Str(), materials_[mesh->mMaterialIndex], layouts_[meshIndices[i]], nullptr);
 			}
 
 			aiNode** children = node.mChildren;
@@ -421,7 +429,7 @@ MeshSP MeshLoader::LoadMesh(std::string const& fileName)
 		return nullptr;
 	}
 	MeshSP mesh = MakeSP<Mesh>(fileName);
-	SceneProcessor(*scene, &mesh);
+	SceneProcessor(*scene, fileName, &mesh);
 
 	// Everything will be cleaned up by the importer destructor
 	return mesh;

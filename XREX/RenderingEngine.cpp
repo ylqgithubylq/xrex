@@ -34,6 +34,8 @@ void RenderingEngine::Initialize()
 	gl::PolygonMode(gl::GL_FRONT_AND_BACK, gl::GL_FILL);
 	gl::Enable(gl::GL_CULL_FACE);
 	gl::Enable(gl::GL_DEPTH_TEST);
+	gl::BlendFunc(gl::GL_SRC_ALPHA, gl::GL_ONE_MINUS_SRC_ALPHA);
+	gl::Enable(gl::GL_BLEND);
 }
 
 void RenderingEngine::Update()

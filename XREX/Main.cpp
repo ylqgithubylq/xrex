@@ -221,15 +221,16 @@ struct TempScene
 		Application::GetInstance().GetInputCenter().AddInputHandler(cameraController);
 		// 		wMatrix->SetValue(translate * rotation);
 
-		Application::GetInstance().GetResourceManager().AddResourceLocation("Data/crytek-sponza");
-		MeshSP sponza = Application::GetInstance().GetResourceManager().GetModel("sponza.obj");
-		//Application::GetInstance().GetResourceLoader().LoadMesh("E:/UserFiles/Desktop/Trial/XREXc/Data/crytek-sponza/sponza.obj");
-		for (auto& subMesh : sponza->GetAllSubMeshes())
+		Application::GetInstance().GetResourceManager().AddResourceLocation("Data/");
+		MeshSP model = Application::GetInstance().GetResourceManager().GetModel("crytek-sponza/sponza.obj");
+		//MeshSP model = Application::GetInstance().GetResourceManager().GetModel("sibenik/sibenik.obj");
+		//MeshSP model = Application::GetInstance().GetResourceManager().GetModel("rungholt/rungholt.obj");
+		for (auto& subMesh : model->GetAllSubMeshes())
 		{
 			subMesh->SetEffect(effect);
 		}
-		SceneObjectSP bannerObject = MakeSP<SceneObject>("sponza");
-		bannerObject->SetComponent(sponza);
+		SceneObjectSP bannerObject = MakeSP<SceneObject>("model");
+		bannerObject->SetComponent(model);
 		bannerObject->GetComponent<Transformation>()->SetPosition(centerPosition_);
 		scene_->AddObject(bannerObject);
 		
