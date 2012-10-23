@@ -23,7 +23,7 @@ public:
 	typedef T ValueType;
 
 	typedef ValueType* Pointer;
-	typedef ValueType const * ConstPointer;
+	typedef ValueType const* ConstPointer;
 
 	typedef ValueType& Reference;
 	typedef ValueType const& ConstReference;
@@ -71,7 +71,7 @@ public:
 	/*
 	 *	@rhs: column major array.
 	 */
-	explicit Matrix4T(T const * rhs)
+	explicit Matrix4T(T const* rhs)
 	{
 		for (uint32 i = 0; i < Dimension; ++i)
 		{

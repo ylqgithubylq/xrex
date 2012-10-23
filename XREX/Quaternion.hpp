@@ -20,7 +20,7 @@ public:
 	typedef T ValueType;
 
 	typedef ValueType* Pointer;
-	typedef ValueType const * ConstPointer;
+	typedef ValueType const* ConstPointer;
 
 	typedef ValueType& Reference;
 	typedef ValueType const& ConstReference;
@@ -110,7 +110,7 @@ public:
 		assert(&(reinterpret_cast<VectorT<T, 4>*>(nullptr)->X()) == &(reinterpret_cast<VectorT<T, 4>*>(nullptr)->operator [](0)));
 		assert(&(reinterpret_cast<VectorT<T, 4>*>(nullptr)->Z()) == &(reinterpret_cast<VectorT<T, 4>*>(nullptr)->operator [](2)));
 		// evil hack, first three component are the axis.
-		return *reinterpret_cast<VectorT<T, 3> const *>(&values_);
+		return *reinterpret_cast<VectorT<T, 3> const*>(&values_);
 	}
 
 	friend QuaternionT operator +(QuaternionT const& lhs, QuaternionT const& rhs)

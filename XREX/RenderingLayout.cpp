@@ -103,5 +103,5 @@ ElementType RenderingLayout::GetIndexElementType() const
 
 void RenderingLayout::Draw()
 {
-	gl::DrawElements(GLDrawModeFromDrawMode(GetDrawingMode()), GetElementCount(), GLTypeFromElementType(GetIndexElementType()), reinterpret_cast<void const *>(0));
+	gl::DrawElements(GLDrawModeFromDrawMode(GetDrawingMode()), GetElementCount(), GLTypeFromElementType(GetIndexElementType()), reinterpret_cast<void const*>(0));
 }

@@ -39,9 +39,13 @@ bool ResourceManager::AddResourceLocation(std::string const& path)
 	std::tr2::sys::path pathObj = std::tr2::sys::path(path);
 	if (pathObj.has_root_path())
 	{
+
 		if (std::tr2::sys::exists(pathObj) && std::tr2::sys::is_directory(pathObj))
 		{
-			hideFileSystemHeader_->paths.push_back(pathObj);
+			if (std::find(hideFileSystemHeader_->paths.begin(), hideFileSystemHeader_->paths.end(), pathObj) == hideFileSystemHeader_->paths.end())
+			{
+				hideFileSystemHeader_->paths.push_back(pathObj);
+			}
 			return true;
 		}
 		return false;
@@ -51,7 +55,10 @@ bool ResourceManager::AddResourceLocation(std::string const& path)
 		pathObj = hideFileSystemHeader_->rootPath / pathObj;
 		if (std::tr2::sys::exists(pathObj) && std::tr2::sys::is_directory(pathObj))
 		{
-			hideFileSystemHeader_->paths.push_back(pathObj);
+			if (std::find(hideFileSystemHeader_->paths.begin(), hideFileSystemHeader_->paths.end(), pathObj) == hideFileSystemHeader_->paths.end())
+			{
+				hideFileSystemHeader_->paths.push_back(pathObj);
+			}
 			return true;
 		}
 		return false;

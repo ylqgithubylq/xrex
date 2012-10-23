@@ -100,3 +100,9 @@ vector<SceneObjectSP> NaiveManagedScene::GetRenderableQueue(SceneObjectSP const&
 	});
 	return resultObjects;
 }
+
+std::vector<SceneObjectSP> NaiveManagedScene::GetCameras()
+{
+	// TODO remove all objects that do not contain camera.
+	return cameras_; // a copy of cameras_
+}

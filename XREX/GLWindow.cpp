@@ -205,10 +205,10 @@ GLWindow::GLWindow(wstring const& name, RenderingSettings const& settings)
 
 
 	string vendor, renderer, glVersion, glslVersion;
-	vendor = reinterpret_cast<char const *>(gl::GetString(gl::GL_VENDOR));
-	renderer = reinterpret_cast<char const *>(gl::GetString(gl::GL_RENDERER));
-	glVersion = reinterpret_cast<char const *>(gl::GetString(gl::GL_VERSION));
-	glslVersion = reinterpret_cast<char const *>(gl::GetString(gl::GL_SHADING_LANGUAGE_VERSION));
+	vendor = reinterpret_cast<char const*>(gl::GetString(gl::GL_VENDOR));
+	renderer = reinterpret_cast<char const*>(gl::GetString(gl::GL_RENDERER));
+	glVersion = reinterpret_cast<char const*>(gl::GetString(gl::GL_VERSION));
+	glslVersion = reinterpret_cast<char const*>(gl::GetString(gl::GL_SHADING_LANGUAGE_VERSION));
 	std::stringstream oss;
 	oss << vendor << " " << renderer << endl;
 	oss << glVersion << ", GLSL version: " << glslVersion;

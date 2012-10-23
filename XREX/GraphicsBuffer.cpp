@@ -79,7 +79,7 @@ void GraphicsBuffer::BindToProgram(ProgramObjectSP const& program)
 			{
 				gl::EnableVertexAttribArray(lastAttributeLocations_[i]);
 				gl::VertexAttribPointer(lastAttributeLocations_[i], GetElementPrimitiveCount(channelLayout.elementType), GLTypeFromElementType(GetElementPrimitiveType(channelLayout.elementType)),
-					channelLayout.needNormalize, channelLayout.strip, reinterpret_cast<void const *>(channelLayout.start));
+					channelLayout.needNormalize, channelLayout.strip, reinterpret_cast<void const*>(channelLayout.start));
 			}
 		}
 	}

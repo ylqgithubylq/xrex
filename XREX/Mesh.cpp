@@ -39,20 +39,26 @@ SubMeshSP const& Mesh::CreateSubMesh(string const& name, MaterialSP const& mater
 
 
 
-vector<Renderable::LayoutAndTechnique> Mesh::GetLayoutsAndTechniques(SceneObjectSP const& camera) const 
+vector<Renderable::RenderablePack> Mesh::GetRenderablePack(SceneObjectSP const& camera) const 
 {
-	std::vector<LayoutAndTechnique> layoutAndTechnique;
+	std::vector<RenderablePack> renderablePacks;
 	for (uint32 i = 0; i < subMeshes_.size(); ++i)
 	{
-		layoutAndTechnique.push_back(subMeshes_[i]->GetLayoutAndTechnique(camera));
-		layoutAndTechnique.back().userCustomData = i; // for updating effect parameters use
+		renderablePacks.push_back(subMeshes_[i]->GetRenderablePack(camera));
 	}
-	return layoutAndTechnique;
+	return renderablePacks;
 }
 
-void Mesh::OnLayoutBeforeRendered(LayoutAndTechnique& layoutAndTechnique)
+RenderableSP Mesh::ShallowClone() const
 {
-	subMeshes_[layoutAndTechnique.userCustomData]->BindAllParameterValue();
+	MeshSP cloneSP = MakeSP<Mesh>(name_);
+	Mesh& clone = *cloneSP;
+	clone.SetVisible(IsVisible());
+	for (auto& subMesh : subMeshes_)
+	{
+		clone.CreateSubMesh(subMesh->GetName(), subMesh->GetMaterial(), subMesh->layout_, subMesh->effect_);
+	}
+	return cloneSP;
 }
 
 
@@ -68,9 +74,10 @@ SubMesh::~SubMesh()
 
 }
 
-Renderable::LayoutAndTechnique SubMesh::GetLayoutAndTechnique(SceneObjectSP const& camera) const
+Renderable::RenderablePack SubMesh::GetRenderablePack(SceneObjectSP const& camera) const
 {
-	return Renderable::LayoutAndTechnique(this->mesh_, layout_, effect_->GetAvailableTechnique(0));
+	// TODO camera dependence technique
+	return Renderable::RenderablePack(this->mesh_, material_, layout_, effect_->GetAvailableTechnique(0));
 }
 
 void SubMesh::SetEffect(RenderingEffectSP const& effect)
@@ -82,10 +89,3 @@ void SubMesh::SetEffect(RenderingEffectSP const& effect)
 	}
 }
 
-void SubMesh::BindAllParameterValue()
-{
-	if (material_)
-	{
-		material_->SetAllEffectParameterValues();
-	}
-}

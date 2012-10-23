@@ -64,12 +64,11 @@ public:
 
 
 public:
-	InputHandler();
 	virtual ~InputHandler();
 
 	void InitializeActionMap()
 	{
-		actionMap_ = GenerateActionMap();
+		actionMap_ = GenerateActionMap(); // better using polymorphism constructor trick?
 		initialized_ = true;
 	}
 
@@ -86,6 +85,7 @@ public:
 
 protected:
 
+	InputHandler();
 
 	virtual ActionMap GenerateActionMap() = 0;
 

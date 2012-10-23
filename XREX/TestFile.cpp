@@ -4,7 +4,7 @@
 
 #include "Timer.hpp"
 
-
+#include "Transformation.hpp"
 
 
 #include <iostream>
@@ -180,6 +180,28 @@ void TestFile::TestMath()
 
 	floatV3 ftrrq11 = RotateByQuaternion(ftq1, vecToRotateFaceTo1);
 	floatV3 ftrrm11 = Transform(ftm1, vecToRotateFaceTo1);
+}
+
+void TestFile::TestTransformation()
+{
+	TransformationSP parent0 = MakeSP<Transformation>();
+	TransformationSP parent1 = MakeSP<Transformation>();
+	TransformationSP child = MakeSP<Transformation>();
+	parent0->Rotate(RadianFromDegree(90), 0, 1, 0);
+	parent0->Translate(1, 0, 0);
+	floatM44 p0m = parent0->GetWorldMatrix();
+	parent1->SetParent(parent0);
+	floatM44 p1m = parent1->GetWorldMatrix();
+	parent1->Rotate(RadianFromDegree(90), 0, -1, 0);
+	parent1->Translate(0, 0, -1);
+	floatM44 p1m1 = parent1->GetWorldMatrix();
+
+	child->Translate(1, 0, 0);
+	child->SetParent(parent1);
+	floatM44 cm = child->GetWorldMatrix();
+
+	parent0->Translate(-1, 0, 0);
+	floatM44 cm1 = child->GetWorldMatrix();
 }
 
 template <uint32 N>

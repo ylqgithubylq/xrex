@@ -32,7 +32,7 @@ public:
 	typedef T ValueType;
 
 	typedef ValueType* Pointer;
-	typedef ValueType const * ConstPointer;
+	typedef ValueType const* ConstPointer;
 
 	typedef ValueType& Reference;
 	typedef ValueType const& ConstReference;
@@ -47,7 +47,7 @@ public:
 	VectorT()
 	{
 	}
-	explicit VectorT(T const * rhs)
+	explicit VectorT(T const* rhs)
 	{
 		MathHelper::VectorHelper<T, N>::DoCopy(&values_[0], rhs);
 	}

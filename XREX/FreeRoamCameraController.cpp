@@ -177,7 +177,7 @@ function<void()> FreeRoamCameraController::GenerateRotateAction(floatV2 const& d
 		floatV3 rotationAxis = floatV3(-deltaTurn.Y(), deltaTurn.X(), 0); // the one perpendicular to the deltaTurn axis
 		floatQ orientation = cameraTransformation->GetOrientation();
 		floatV3 rotationAxisRotated = RotateByQuaternion(orientation, rotationAxis.Normalize());
-		floatQ rotation = RotationQuaternion(ToRadian(rotationAxis.Length()), rotationAxisRotated); // think the rotationAxis.Length is the rotation in degree
+		floatQ rotation = RotationQuaternion(RadianFromDegree(rotationAxis.Length()), rotationAxisRotated); // think the rotationAxis.Length is the rotation in degree
 		orientation = rotation * orientation;
 		cameraTransformation->SetOrientation(orientation);
 	};
