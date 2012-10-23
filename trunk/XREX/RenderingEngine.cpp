@@ -8,6 +8,7 @@
 #include "Camera.hpp"
 #include "RenderingEffect.hpp"
 #include "RenderingLayout.hpp"
+#include "Material.hpp"
 
 #include "GLUtil.hpp"
 #include "DefinedShaderName.hpp"
@@ -72,7 +73,7 @@ void RenderingEngine::RenderACamera(SceneObjectSP const& cameraObject)
 	assert(camera != nullptr);
 
 	Color const& backgroundColor = camera->GetBackgroundColor();
-	// TODO scissor rectangle
+	// TODO viewport and scissor rectangle
 	gl::ClearColor(backgroundColor.R(), backgroundColor.G(), backgroundColor.B(), backgroundColor.A());
 	gl::Clear(gl::GL_COLOR_BUFFER_BIT | gl::GL_DEPTH_BUFFER_BIT | gl::GL_STENCIL_BUFFER_BIT);
 
@@ -81,7 +82,7 @@ void RenderingEngine::RenderACamera(SceneObjectSP const& cameraObject)
 
 	vector<SceneObjectSP> sceneObjects = scene_->GetRenderableQueue(cameraObject);
 
-	vector<Renderable::LayoutAndTechnique> allLayoutAndTechniqueNeedToRender;
+	vector<Renderable::RenderablePack> allRenderableNeedToRender;
 
 	for (SceneObjectSP sceneObject : sceneObjects)
 	{
@@ -90,23 +91,24 @@ void RenderingEngine::RenderACamera(SceneObjectSP const& cameraObject)
 		assert(renderable != nullptr);
 		assert(renderable->IsVisible());
 
-		vector<Renderable::LayoutAndTechnique> const& layoutAndTechniques = renderable->GetLayoutsAndTechniques(cameraObject);
-		for (auto& layoutAndTechnique : layoutAndTechniques)
+		vector<Renderable::RenderablePack> const& renderablePacks = renderable->GetRenderablePack(cameraObject);
+		for (auto& renderablePack : renderablePacks)
 		{
-			allLayoutAndTechniqueNeedToRender.push_back(layoutAndTechnique);
+			allRenderableNeedToRender.push_back(renderablePack);
 		}
 	}
 	// TODO do some sorting works
 
-	for (auto& layoutAndTechnique : allLayoutAndTechniqueNeedToRender)
+	for (auto& renderablePack : allRenderableNeedToRender)
 	{
-		Renderable& ownerRenderable = layoutAndTechnique.renderable;
-		RenderingTechniqueSP const& technique = layoutAndTechnique.technique;
-		RenderingLayoutSP const& layout = layoutAndTechnique.layout;
+		Renderable& ownerRenderable = renderablePack.renderable;
+		RenderingTechniqueSP const& technique = renderablePack.technique;
+		RenderingLayoutSP const& layout = renderablePack.layout;
 
-		floatM44 const& modelMatrix = ownerRenderable.GetOwnerSceneObject()->GetComponent<Transformation>()->GetModelMatrix();
+		floatM44 const& modelMatrix = ownerRenderable.GetOwnerSceneObject()->GetComponent<Transformation>()->GetWorldMatrix();
 
 		RenderingEffect const& effect = technique->GetEffect();
+
 		// are these too hard coded?
 		EffectParameterSP const& model = effect.GetParameterByName(GetUniformString(DefinedUniform::ModelMatrix));
 		if (model)
@@ -124,7 +126,11 @@ void RenderingEngine::RenderACamera(SceneObjectSP const& cameraObject)
 			projection->SetValue(projectionMatrix);
 		}
 
-		ownerRenderable.OnLayoutBeforeRendered(layoutAndTechnique);
+		if (renderablePack.material)
+		{
+			renderablePack.material->BindToEffect(renderablePack.technique->GetEffect().shared_from_this());
+			renderablePack.material->SetAllEffectParameterValues();
+		}
 
 		uint32 passCount = technique->GetPassCount();
 

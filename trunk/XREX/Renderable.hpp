@@ -7,22 +7,22 @@
 
 
 class Renderable
-	: public TemplateComponent<Renderable>
+	: public TemplateComponent<Renderable>, public std::enable_shared_from_this<Renderable>
 {
 public:
-	struct LayoutAndTechnique
+	struct RenderablePack
 	{
 		Renderable& renderable;
+		MaterialSP material;
 		RenderingLayoutSP layout;
 		RenderingTechniqueSP technique;
-		int32 userCustomData;
 
-		LayoutAndTechnique(Renderable& ownerRenderable)
+		explicit RenderablePack(Renderable& ownerRenderable)
 			: renderable(ownerRenderable)
 		{
 		}
-		LayoutAndTechnique(Renderable& ownerRenderable, RenderingLayoutSP const& renderingLayout, RenderingTechniqueSP const& renderingTechnique)
-			: renderable(ownerRenderable), layout(renderingLayout), technique(renderingTechnique)
+		RenderablePack(Renderable& ownerRenderable, MaterialSP const& theMaterial, RenderingLayoutSP const& renderingLayout, RenderingTechniqueSP const& renderingTechnique)
+			: renderable(ownerRenderable), material(theMaterial), layout(renderingLayout), technique(renderingTechnique)
 		{
 		}
 	};
@@ -30,7 +30,7 @@ public:
 	Renderable();
 	virtual ~Renderable() override;
 
-	virtual std::vector<LayoutAndTechnique> GetLayoutsAndTechniques(SceneObjectSP const& camera) const = 0;
+	virtual std::vector<RenderablePack> GetRenderablePack(SceneObjectSP const& camera) const = 0;
 
 	bool IsVisible() const
 	{
@@ -41,9 +41,11 @@ public:
 		visible_ = visible;
 	}
 
-	virtual void OnLayoutBeforeRendered(LayoutAndTechnique& layoutAndTechnique)
-	{
-	}
+	/*
+	 *	Copy
+	 */
+	virtual RenderableSP ShallowClone() const = 0;
+
 
 private:
 	bool visible_;

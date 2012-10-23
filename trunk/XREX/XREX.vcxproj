@@ -183,6 +183,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Effects\Test.glsl" />
+    <None Include="..\Effects\TestCube.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

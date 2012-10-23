@@ -14,17 +14,25 @@ float const RadianToDegree = static_cast<float>(180.0 / D_PI);
 float const DegreeToRadian = static_cast<float>(D_PI / 180.0);
 
 template <typename T>
-inline T ToRadian(T degree);
+inline T RadianFromDegree(T degree);
 template <>
-inline float ToRadian<float>(float degree)
+inline float RadianFromDegree<float>(float degree)
+{
+	return DegreeToRadian * degree;
+}
+inline float RadianFromDegree(int degree)
 {
 	return DegreeToRadian * degree;
 }
 
 template <typename T>
-inline T ToDegree(T radian);
+inline T DegreeFromRadian(T radian);
 template <>
-inline float ToDegree<float>(float radian)
+inline float DegreeFromRadian<float>(float radian)
+{
+	return RadianToDegree * radian;
+}
+inline float DegreeFromRadian(int radian)
 {
 	return RadianToDegree * radian;
 }

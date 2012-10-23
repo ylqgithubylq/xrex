@@ -45,16 +45,13 @@ public:
 
 	virtual void ClearAllObject() override
 	{
-		objects_.clear();
-		cameras_.clear();
+		objects_ = std::vector<SceneObjectSP>();
+		cameras_ = std::vector<SceneObjectSP>();
 	}
 
 	virtual std::vector<SceneObjectSP> GetRenderableQueue(SceneObjectSP const& camera) override;
 
-	virtual std::vector<SceneObjectSP> GetCameras() override
-	{
-		return cameras_; // a copy of cameras_
-	}
+	virtual std::vector<SceneObjectSP> GetCameras() override;
 
 private:
 	std::vector<SceneObjectSP> objects_;

@@ -29,16 +29,21 @@ EffectParameterSP const& Material::GetParameter(std::string const& parameterName
 
 void Material::BindToEffect(RenderingEffectSP const& effect)
 {
-	boundEffect_ = effect;
-	parameterMappingCache_.clear();
-	if (boundEffect_ != nullptr)
+	if (boundEffect_.lock() == effect)
 	{
-		for (auto& effectParameter : boundEffect_->GetAllParameters())
+		return;
+	}
+	boundEffect_ = effect;
+	RenderingEffectSP boundEffect = boundEffect_.lock();
+	parameterMappingCache_.clear();
+	if (boundEffect != nullptr)
+	{
+		for (auto& effectParameter : boundEffect->GetAllParameters())
 		{
 			EffectParameterSP materialParameter = GetParameter(effectParameter->GetName());
 			if (materialParameter)
 			{
-				parameterMappingCache_.push_back(std::make_pair(materialParameter, effectParameter));
+				parameterMappingCache_.push_back(std::make_pair(materialParameter, std::weak_ptr<EffectParameter>(effectParameter)));
 			}
 		}
 	}
@@ -48,6 +53,7 @@ void Material::SetAllEffectParameterValues()
 {
 	for (auto& parameterPair : parameterMappingCache_)
 	{
-		parameterPair.second->GetValueFrom(*parameterPair.first);
+		assert(!parameterPair.second.expired());
+		parameterPair.second.lock()->GetValueFrom(*parameterPair.first);
 	}
 }

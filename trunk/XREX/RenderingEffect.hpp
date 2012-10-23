@@ -31,6 +31,7 @@ public:
 
 	virtual ElementType GetType() const;
 
+
 	virtual void SetValue(bool const& value);
 	virtual void SetValue(int32 const& value);
 	virtual void SetValue(float const& value);
@@ -39,6 +40,7 @@ public:
 	virtual void SetValue(floatV4 const& value);
 	virtual void SetValue(floatM44 const& value);
 	virtual void SetValue(TextureSP const& value);
+// 	
 // 	virtual void SetValue(std::vector<bool> const& value);
 // 	virtual void SetValue(std::vector<int32> const& value);
 // 	virtual void SetValue(std::vector<float> const& value);
@@ -46,6 +48,8 @@ public:
 // 	virtual void SetValue(std::vector<floatV3> const& value);
 // 	virtual void SetValue(std::vector<floatV4> const& value);
 // 	virtual void SetValue(std::vector<floatM44> const& value);
+
+	// the mass above is due to no template virtual member functions
 
 	// a little brain fucking...
 	// a helper struct to help return value automatically convert to sorts of types.
@@ -68,6 +72,7 @@ public:
 // 		virtual operator std::vector<floatV4> const&() const;
 	};
 
+	// a bit magic, do it this way can overload functions by return value.
 	template <typename T>
 	T const& GetValue() const
 	{
@@ -155,7 +160,7 @@ protected:
 
 
 class RenderingEffect
-	: Noncopyable
+	: public std::enable_shared_from_this<RenderingEffect>, Noncopyable
 {
 
 public:

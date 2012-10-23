@@ -21,5 +21,14 @@ void Transformation::Update() const
 		modelMatrix_ = TranslationMatrix(position_) * MatrixFromQuaternion(orientation_) * ScalingMatrix(scaling_);
 		dirty_ = false;
 	}
+	// TODO how to know parent is dirty or not?
+	if (parent_.expired()) // no parent
+	{
+		worldMatrix_ = modelMatrix_;
+	}
+	else
+	{
+		worldMatrix_ = parent_.lock()->GetWorldMatrix() * modelMatrix_;
+	}
 }
 

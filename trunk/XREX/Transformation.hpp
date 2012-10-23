@@ -15,10 +15,32 @@ public:
 	Transformation();
 	virtual ~Transformation() override;
 
+	/*
+	 *	@return: model matrix contains only this transformation.
+	 */
 	floatM44 const& GetModelMatrix() const
 	{
 		Update();
 		return modelMatrix_;
+	}
+
+	/*
+	 *	@return: model matrix includes parent transformation.
+	 */
+	floatM44 const& GetWorldMatrix() const
+	{
+		Update();
+		return worldMatrix_;
+	}
+
+	void SetParent(TransformationSP const& parent)
+	{
+		parent_ = parent;
+		dirty_ = true;
+	}
+	TransformationSP GetParent() const
+	{
+		return parent_.lock();
 	}
 
 	void SetPosition(float x, float y, float z)
@@ -170,6 +192,8 @@ private:
 	void Update() const;
 
 private:
+	std::weak_ptr<Transformation> parent_;
+
 	floatV3 position_;
 	floatQ orientation_;
 	floatV3 scaling_;
@@ -178,6 +202,7 @@ private:
 	floatV3 up_;
 
 	floatM44 mutable modelMatrix_;
+	floatM44 mutable worldMatrix_;
 
 	bool mutable dirty_;
 };

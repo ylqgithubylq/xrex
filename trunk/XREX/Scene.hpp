@@ -28,6 +28,7 @@ public:
 	 */
 	virtual bool HasObject(SceneObjectSP const& sceneObject) = 0;
 	/*
+	 *	@sceneObject: name of scene object must unique.
 	 *	@return: true if succeed.
 	 */
 	virtual bool AddObject(SceneObjectSP const& sceneObject) = 0;

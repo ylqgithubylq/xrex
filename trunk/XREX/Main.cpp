@@ -58,34 +58,7 @@ struct TempScene
 		//gl::Enable(gl::GL_BLEND);
 
 
-		ProgramObjectSP program = Application::GetInstance().GetRenderingFactory().CreateProgramObject();
-		string shaderString;
-		string shaderFile = "../../Effects/Test.glsl";
-		if (!Application::GetInstance().GetResourceLoader().LoadString(shaderFile, &shaderString))
-		{
-			cerr << "file not found. file: " << shaderFile << endl;
-		}
 
-		ShaderObjectSP vs = Application::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::VertexShader, shaderString);
-		ShaderObjectSP fs = Application::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::FragmentShader, shaderString);
-		
-
-		if (!vs->IsValidate())
-		{
-			cerr << vs->GetCompileError() << endl;
-		}
-		if (!fs->IsValidate())
-		{
-			cerr << fs->GetCompileError() << endl;
-		}
-		program->AttachShader(vs);
-		program->AttachShader(fs);
-		program->Link();
-		if (!program->IsValidate())
-		{
-			cerr << program->GetLinkError() << endl;
-			return;
-		}
 
 
 		vector<floatV3> vertexData;
@@ -144,21 +117,83 @@ struct TempScene
 
 		assert(indexData.size() == 36);
 
+		ProgramObjectSP program = Application::GetInstance().GetRenderingFactory().CreateProgramObject();
+		string shaderString;
+		string shaderFile = "../../Effects/Test.glsl";
+		if (!Application::GetInstance().GetResourceLoader().LoadString(shaderFile, &shaderString))
+		{
+			cerr << "file not found. file: " << shaderFile << endl;
+		}
+
+		ShaderObjectSP vs = Application::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::VertexShader, shaderString);
+		ShaderObjectSP fs = Application::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::FragmentShader, shaderString);
+
+
+		if (!vs->IsValidate())
+		{
+			cerr << vs->GetCompileError() << endl;
+		}
+		if (!fs->IsValidate())
+		{
+			cerr << fs->GetCompileError() << endl;
+		}
+		program->AttachShader(vs);
+		program->AttachShader(fs);
+		program->Link();
+		if (!program->IsValidate())
+		{
+			cerr << program->GetLinkError() << endl;
+			return;
+		}
+
+		ProgramObjectSP cubeProgram = Application::GetInstance().GetRenderingFactory().CreateProgramObject();
+		shaderFile = "../../Effects/TestCube.glsl";
+		if (!Application::GetInstance().GetResourceLoader().LoadString(shaderFile, &shaderString))
+		{
+			cerr << "file not found. file: " << shaderFile << endl;
+		}
+
+		vs = Application::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::VertexShader, shaderString);
+		fs = Application::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::FragmentShader, shaderString);
+
+
+		if (!vs->IsValidate())
+		{
+			cerr << vs->GetCompileError() << endl;
+		}
+		if (!fs->IsValidate())
+		{
+			cerr << fs->GetCompileError() << endl;
+		}
+		cubeProgram->AttachShader(vs);
+		cubeProgram->AttachShader(fs);
+		cubeProgram->Link();
+		if (!cubeProgram->IsValidate())
+		{
+			cerr << cubeProgram->GetLinkError() << endl;
+			return;
+		}
+
+
 		GraphicsBufferSP vertices = Application::GetInstance().GetRenderingFactory().CreateGraphicsVertexBuffer(GraphicsBuffer::Usage::Static, vertexData, "position");
 		GraphicsBufferSP indices = Application::GetInstance().GetRenderingFactory().CreateGraphicsIndexBuffer(GraphicsBuffer::Usage::Static, indexData);
 		RenderingLayoutSP layout = MakeSP<RenderingLayout>(vector<GraphicsBufferSP>(1, vertices), indices, RenderingLayout::DrawingMode::Triangles);
 
-		MeshSP cubeMesh = MakeSP<Mesh>("cube");
+		MeshSP cubeMesh = MakeSP<Mesh>("cube mesh");
 
-		centerPosition_ = floatV3(0, 0, 60000);
+		centerPosition_ = floatV3(0, 0, 0000);
 
+		RenderingEffectSP cubeEffect = MakeSP<RenderingEffect>("test cube effect");
+		RenderingTechniqueSP cubeTechnique = cubeEffect->CreateTechnique();
+		RenderingPassSP cubePass = cubeTechnique->CreatePass();
+		cubePass->Initialize(cubeProgram);
 
 		RenderingEffectSP effect = MakeSP<RenderingEffect>("test effect");
 		RenderingTechniqueSP technique = effect->CreateTechnique();
 		RenderingPassSP pass = technique->CreatePass();
 		pass->Initialize(program);
 
-		SubMeshSP const& subMesh = cubeMesh->CreateSubMesh("cube", nullptr, layout, effect);
+		SubMeshSP const& subMesh = cubeMesh->CreateSubMesh("cube submesh", nullptr, layout, cubeEffect);
 
 		EffectParameterSP const& centerPosition = effect->GetParameterByName("centerPosition");
 		if (centerPosition)
@@ -166,7 +201,6 @@ struct TempScene
 			centerPosition->SetValue(centerPosition_);
 			centerPosition_ = centerPosition->GetValue<floatV3>();
 		}
-
 		camera_ = MakeSP<SceneObject>("camera");
 		Settings const& settings = Application::GetInstance().GetSettings();
 		CameraSP camera = MakeSP<Camera>(PI / 4, static_cast<float>(settings.renderingSettings.width) / settings.renderingSettings.height, 1.f, 10000.0f);
@@ -188,31 +222,61 @@ struct TempScene
 		float intervalSize = 4.0f;
 		float center = static_cast<float>(edgeCount - 1) / 2;
 		int32 totalCount = edgeCount * edgeCount * edgeCount;
-// 		objects_.resize(totalCount);
-// 		for (int32 i = 1; i < edgeCount - 1; ++i) // set to this because the cube left are not cube form...
-// 		{
-// 			for (int32 j = 0; j < edgeCount; ++j) // TODO try to find what's wrong with the cube left
-// 			{
-// 				for (int32 k = 1; k < edgeCount - 1; ++k) // set to this because cube left are not cube form...
-// 				{
-// 					SceneObjectSP& object = objects_[i];
-// 					stringstream objectNameStream;
-// 					objectNameStream << "cube" << i << j << k;
-// 					object = MakeSP<SceneObject>(objectNameStream.str());
-// 					object->SetComponent(cubeMesh);
-// 					scene_->AddObject(object);
-// 
-// 					TransformationSP cubeTransform = object->GetComponent<Transformation>();
-// 
-// 					floatV3 position = floatV3((k - center) * intervalSize, (j - center) * intervalSize, (i - center) * intervalSize);
-// 					cubeTransform->SetPosition(position + centerPosition_);
-// 					cubeTransform->SetScaling(2);
-// 					cubeTransform->SetFrontDirection(floatV3(1, 0, 0));
-// 					cubeTransform->FaceToPosition(floatV3::Zero + centerPosition_, floatV3(0, 1, 0));
-// 					floatQ orientation = cubeTransform->GetOrientation();
-// 				}
-// 			}
-// 		}
+		objects_.resize(totalCount);
+		for (int32 i = 1; i < edgeCount - 1; ++i) // set to this because the cube left are not cube form...
+		{
+			for (int32 j = 0; j < edgeCount; ++j) // TODO try to find what's wrong with the cube left
+			{
+				for (int32 k = 1; k < edgeCount - 1; ++k) // set to this because cube left are not cube form...
+				{
+					SceneObjectSP& object = objects_[i];
+					stringstream objectNameStream;
+					objectNameStream << "cube" << i << j << k;
+					object = MakeSP<SceneObject>(objectNameStream.str());
+					object->SetComponent(cubeMesh->GetShallowClone());
+					assert(scene_->AddObject(object));
+
+					TransformationSP cubeTransform = object->GetComponent<Transformation>();
+
+					floatV3 position = floatV3((k - center) * intervalSize, (j - center) * intervalSize, (i - center) * intervalSize);
+					cubeTransform->SetPosition(position + centerPosition_);
+					cubeTransform->SetScaling(1);
+					cubeTransform->SetFrontDirection(floatV3(1, 0, 0));
+					cubeTransform->FaceToPosition(floatV3::Zero + centerPosition_, floatV3(0, 1, 0));
+					floatQ orientation = cubeTransform->GetOrientation();
+				}
+			}
+		}
+
+		rootObj = MakeSP<SceneObject>("root");
+		rootObj->SetComponent(cubeMesh->GetShallowClone());
+		assert(scene_->AddObject(rootObj));
+		TransformationSP rootTransform = rootObj->GetComponent<Transformation>();
+		rootTransform->Translate(0, 50, 0);
+		rootTransform->SetScaling(3);
+
+		obj1 = MakeSP<SceneObject>("obj1");
+		obj1->SetComponent(cubeMesh->GetShallowClone());
+		assert(scene_->AddObject(obj1));
+		TransformationSP obj1Trans = obj1->GetComponent<Transformation>();
+		obj1Trans->Translate(15, 0, 0);
+		obj1Trans->SetScaling(2);
+		obj1Trans->SetParent(rootTransform);
+
+		obj2 = MakeSP<SceneObject>("obj2");
+		obj2->SetComponent(cubeMesh->GetShallowClone());
+		assert(scene_->AddObject(obj2));
+		TransformationSP obj2Trans = obj2->GetComponent<Transformation>();
+		obj2Trans->Translate(0, 8, 0);
+		obj2Trans->SetScaling(2);
+		obj2Trans->SetParent(obj1Trans);
+
+		EffectParameterSP const& cubeCenterPosition = cubeEffect->GetParameterByName("centerPosition");
+		if (cubeCenterPosition)
+		{
+			cubeCenterPosition->SetValue(floatV3(0, 50, 0));
+		}
+
 
 
 		FreeRoamCameraControllerSP cameraController = MakeSP<FreeRoamCameraController>();
@@ -229,18 +293,26 @@ struct TempScene
 		{
 			subMesh->SetEffect(effect);
 		}
-		SceneObjectSP bannerObject = MakeSP<SceneObject>("model");
-		bannerObject->SetComponent(model);
-		bannerObject->GetComponent<Transformation>()->SetPosition(centerPosition_);
-		scene_->AddObject(bannerObject);
+		SceneObjectSP sceneObject = MakeSP<SceneObject>("model");
+		sceneObject->SetComponent(model);
+		sceneObject->GetComponent<Transformation>()->SetPosition(centerPosition_);
+		scene_->AddObject(sceneObject);
 		
 	}
-
+	SceneObjectSP rootObj;
+	SceneObjectSP obj1;
+	SceneObjectSP obj2;
 
 	void Render(double current, double delta)
 	{
 // 		cout << "Timer.Elapsed: " << timer_.Elapsed() << endl;
 // 		cout << "Timer.CurrentTime: " << timer_.CurrentTime() << endl;
+		if (rootObj)
+		{
+			rootObj->GetComponent<Transformation>()->Rotate(delta * 0.2, 0, 0, 1);
+			obj1->GetComponent<Transformation>()->Rotate(delta * 0.5, 1, 0, 0);
+			obj2->GetComponent<Transformation>()->Rotate(delta * 1, 0, 1, 0);
+		}
 	}
 	void operator ()(double current, double delta)
 	{
@@ -280,7 +352,7 @@ void Main()
 	{
 		s(current, delta);
 	};
-	//Application::GetInstance().GetRenderingEngine().SetRenderingFunction(f);
+	Application::GetInstance().GetRenderingEngine().SetRenderingFunction(f);
 
 	//assert(testmain(0, nullptr) == 0);
 	//Application::GetInstance().GetRenderingEngine().SetRenderingFunction(function<void(double,double)>(DrawHelper));
@@ -300,6 +372,8 @@ int main()
 	//TestMath();
 	//SQRTSpeedTest();
 	//return 0;
+	TestFile t;
+	t.TestTransformation();
 	Main();
 
 	

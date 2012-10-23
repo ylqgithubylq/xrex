@@ -2,8 +2,8 @@ using regular expressions(Ctrl+Shift+F):
 ^:b*[^:b*#/{}]+.*$
 
 TODO:
-texture class
-texture loading
-mesh.material
-effect texture binding
-program texture binding
+state objects
+effect loading with macro
+effect-macro selection by material?
+sampler
+thread for logic/rendering call generation/rendering api calls

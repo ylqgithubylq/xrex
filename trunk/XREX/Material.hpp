@@ -42,8 +42,8 @@ private:
 
 	std::unordered_map<std::string, EffectParameterSP> parameters_;
 
-	RenderingEffectSP boundEffect_;
-	std::vector<std::pair<EffectParameterSP, EffectParameterSP>> parameterMappingCache_;
+	std::weak_ptr<RenderingEffect> boundEffect_;
+	std::vector<std::pair<EffectParameterSP, std::weak_ptr<EffectParameter>>> parameterMappingCache_;
 
 };
 

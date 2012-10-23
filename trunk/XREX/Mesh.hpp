@@ -25,11 +25,21 @@ public:
 
 	SubMeshSP const& CreateSubMesh(std::string const& name, MaterialSP const& material, RenderingLayoutSP const& layout, RenderingEffectSP const& effect);
 
-	virtual std::vector<LayoutAndTechnique> GetLayoutsAndTechniques(SceneObjectSP const& camera) const override;
+	virtual std::vector<RenderablePack> GetRenderablePack(SceneObjectSP const& camera) const override;
 
-	virtual void OnLayoutBeforeRendered(LayoutAndTechnique& layoutAndTechnique) override;
+	/*
+	 *	Only mesh and sub meshes are cloned. Material, layout, effect are shared.
+	 */
+	virtual RenderableSP ShallowClone() const override;
 
-
+	/*
+	 *	Short cut for ShallowClone().
+	 *	Only mesh and sub meshes are cloned. Material, layout, effect are shared.
+	 */
+	MeshSP GetShallowClone() const
+	{
+		return std::dynamic_pointer_cast<Mesh>(ShallowClone());
+	}
 
 private:
 	std::string name_;
@@ -57,12 +67,10 @@ public:
 		return material_;
 	}
 
-	Renderable::LayoutAndTechnique GetLayoutAndTechnique(SceneObjectSP const& camera) const;
+	Renderable::RenderablePack GetRenderablePack(SceneObjectSP const& camera) const;
 
 private:
 	SubMesh(Mesh& mesh, std::string const& name, MaterialSP const& material, RenderingLayoutSP const& layout, RenderingEffectSP const& effect);
-
-	void BindAllParameterValue();
 
 private:
 	Mesh& mesh_;
@@ -70,5 +78,6 @@ private:
 	MaterialSP material_;
 	RenderingLayoutSP layout_;
 	RenderingEffectSP effect_;
+
 };
 

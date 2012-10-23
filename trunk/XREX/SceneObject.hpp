@@ -32,6 +32,25 @@ public:
 		return components_[static_cast<uint32>(Component::TypeToComponentType<T>::Type)] != nullptr;
 	}
 
+	ComponentSP RemoveComponent(Component::ComponentType type)
+	{
+		ComponentSP component = components_[static_cast<uint32>(type)];
+		components_[static_cast<uint32>(type)] = nullptr;
+		return component;
+	}
+
+	template <typename T>
+	std::shared_ptr<T> RemoveComponent()
+	{
+		ComponentSP component = components_[static_cast<uint32>(Component::TypeToComponentType<T>::Type)];
+		components_[static_cast<uint32>(Component::TypeToComponentType<T>::Type)] = nullptr;
+		return CheckedSPCast<T>(component);
+	}
+
+	/*
+	 *	Set an instance of a subclass of Component into this object, one instance per a subclass can be set in.
+	 *	@component: component's owner object will be set to this object, so component cannot be shared by multiple SceneObjects.
+	 */
 	void SetComponent(ComponentSP const& component);
 
 	ComponentSP const& GetComponent(Component::ComponentType type) const

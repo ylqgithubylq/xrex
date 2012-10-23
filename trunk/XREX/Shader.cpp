@@ -92,7 +92,7 @@ bool ShaderObject::Compile()
 
 	string const& macroToDefine = ShaderDefineMacroFromShaderType(type_);
 
-	char const * cstring[] = { VersionMacro().c_str(), macroToDefine.c_str(), source_.c_str() };
+	char const* cstring[] = { VersionMacro().c_str(), macroToDefine.c_str(), source_.c_str() };
 	gl::ShaderSource(shaderID_, sizeof(cstring) / sizeof(cstring[0]), cstring, nullptr);
 	gl::CompileShader(shaderID_);
 	
