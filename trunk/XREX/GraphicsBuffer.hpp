@@ -84,9 +84,6 @@ public:
 
 	};
 
-private:
-	static uint32 GLUsageFromUsage(Usage usage);
-
 public:
 	/*
 	 *	For single-channel buffer.
@@ -143,8 +140,8 @@ private:
 	BufferType type_;
 	Usage usage_;
 	DataDescription description_;
-	uint32 bindingTarget_; // gl binding target
-	uint32 bufferID_; // gl buffer ID
+	uint32 glBindingTarget_;
+	uint32 glBufferID_;
 	std::vector<int32> lastAttributeLocations_; // used to store attribute binding location temporarily
 };
 

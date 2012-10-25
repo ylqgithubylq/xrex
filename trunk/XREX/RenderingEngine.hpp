@@ -25,7 +25,7 @@ public:
 	{
 		scene_ = scene;
 	}
-	SceneSP const& GetCurrentScene() const
+	SceneSP const& GetScene() const
 	{
 		return scene_;
 	}
@@ -36,7 +36,7 @@ public:
 		lastTime_ = timer_.Elapsed();
 	}
 
-	void Update();
+	void RenderAFrame();
 
 	void RenderScene();
 

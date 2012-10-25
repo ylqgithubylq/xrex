@@ -94,7 +94,7 @@ namespace
 				}
 				MaterialSP material = MakeSP<Material>(name.C_Str());
 				materials_[i] = material;
-				static_assert(sizeof(aiColor3D) / 3 == sizeof(Color) / 4, "size not match.");
+				static_assert(sizeof(aiColor3D) == sizeof(floatV3), "size not match.");
 				aiColor3D aiColor;
 				if (AI_SUCCESS == loaderMaterial->Get(AI_MATKEY_COLOR_DIFFUSE, aiColor))
 				{
@@ -348,7 +348,6 @@ namespace
 						}
 					}
 				}
-
 
 
 				GraphicsBufferSP vertices = Application::GetInstance().GetRenderingFactory().CreateGraphicsVertexBuffer(GraphicsBuffer::Usage::Static, data, std::move(dataDescription));

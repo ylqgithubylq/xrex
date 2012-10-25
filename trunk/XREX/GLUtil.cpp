@@ -4,17 +4,15 @@
 
 #include <CoreGL.hpp>
 
-#include <vector>
+#include <array>
 
-
-using std::vector;
 
 
 uint32 GLTypeFromElementType(ElementType type)
 {
-	static vector<uint32> const mapping = [] ()
+	static std::array<uint32, static_cast<uint32>(ElementType::ParameterTypeCount)> const mapping = [] ()
 	{
-		vector<uint32> parameterMap(static_cast<uint32>(ElementType::ParameterTypeCount));
+		std::array<uint32, static_cast<uint32>(ElementType::ParameterTypeCount)> parameterMap;
 		parameterMap[static_cast<uint32>(ElementType::Bool)] = gl::GL_BOOL;
 		parameterMap[static_cast<uint32>(ElementType::Uint8)] = gl::GL_UNSIGNED_BYTE;
 		parameterMap[static_cast<uint32>(ElementType::Uint16)] = gl::GL_UNSIGNED_SHORT;
@@ -33,4 +31,18 @@ uint32 GLTypeFromElementType(ElementType type)
 		return parameterMap;
 	} ();
 	return mapping[static_cast<uint32>(type)];
+}
+
+void SetGLState(uint32 glState, bool on)
+{
+// 	static decltype(&gl::Enable) Functions[] = { gl::Enable, gl::Disable };
+// 	Functions[on](glState);
+	if (on)
+	{
+		gl::Enable(glState);
+	}
+	else
+	{
+		gl::Disable(glState);
+	}
 }

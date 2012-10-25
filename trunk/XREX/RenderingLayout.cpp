@@ -6,26 +6,30 @@
 
 #include <CoreGL.hpp>
 
+#include <array>
 
 using std::vector;
 
-
-uint32 RenderingLayout::GLDrawModeFromDrawMode(DrawingMode mode)
+namespace
 {
-	static vector<uint32> const mapping = [] ()
+	uint32 GLDrawModeFromDrawMode(RenderingLayout::DrawingMode mode)
 	{
-		vector<uint32> mapping(static_cast<uint32>(DrawingMode::DrawingModeCount));
-		mapping[static_cast<uint32>(DrawingMode::Points)] = gl::GL_POINTS;
-		mapping[static_cast<uint32>(DrawingMode::LineStrip)] = gl::GL_LINE_STRIP;
-		mapping[static_cast<uint32>(DrawingMode::LineLoop)] = gl::GL_LINE_LOOP;
-		mapping[static_cast<uint32>(DrawingMode::Lines)] = gl::GL_LINES;
-		mapping[static_cast<uint32>(DrawingMode::TriangleStrip)] = gl::GL_TRIANGLE_STRIP;
-		mapping[static_cast<uint32>(DrawingMode::TriangleFan)] = gl::GL_TRIANGLE_FAN;
-		mapping[static_cast<uint32>(DrawingMode::Triangles)] = gl::GL_TRIANGLES;
-		return mapping;
-	} ();
-	return mapping[static_cast<uint32>(mode)];
-};
+		static std::array<uint32, static_cast<uint32>(RenderingLayout::DrawingMode::DrawingModeCount)> const mapping = [] ()
+		{
+			std::array<uint32, static_cast<uint32>(RenderingLayout::DrawingMode::DrawingModeCount)> mapping;
+			mapping[static_cast<uint32>(RenderingLayout::DrawingMode::Points)] = gl::GL_POINTS;
+			mapping[static_cast<uint32>(RenderingLayout::DrawingMode::LineStrip)] = gl::GL_LINE_STRIP;
+			mapping[static_cast<uint32>(RenderingLayout::DrawingMode::LineLoop)] = gl::GL_LINE_LOOP;
+			mapping[static_cast<uint32>(RenderingLayout::DrawingMode::Lines)] = gl::GL_LINES;
+			mapping[static_cast<uint32>(RenderingLayout::DrawingMode::TriangleStrip)] = gl::GL_TRIANGLE_STRIP;
+			mapping[static_cast<uint32>(RenderingLayout::DrawingMode::TriangleFan)] = gl::GL_TRIANGLE_FAN;
+			mapping[static_cast<uint32>(RenderingLayout::DrawingMode::Triangles)] = gl::GL_TRIANGLES;
+			return mapping;
+		} ();
+		return mapping[static_cast<uint32>(mode)];
+	};
+}
+
 
 
 
@@ -33,8 +37,11 @@ uint32 RenderingLayout::GLDrawModeFromDrawMode(DrawingMode mode)
 
 
 RenderingLayout::RenderingLayout(vector<GraphicsBufferSP> const& buffers, GraphicsBufferSP const& indexBuffer, DrawingMode mode)
-	: buffers_(buffers), indexBuffer_(indexBuffer), mode_(mode)
+	: buffers_(buffers), indexBuffer_(indexBuffer), mode_(mode),
+	glDrawingMode_(GLDrawModeFromDrawMode(mode))
 {
+	 glIndexBufferElementType_ = GLTypeFromElementType(GetIndexElementType());
+
 #ifdef XREX_DEBUG
 	int32 elementCount = -1;
 	for (auto& buffer : buffers_)
@@ -103,5 +110,5 @@ ElementType RenderingLayout::GetIndexElementType() const
 
 void RenderingLayout::Draw()
 {
-	gl::DrawElements(GLDrawModeFromDrawMode(GetDrawingMode()), GetElementCount(), GLTypeFromElementType(GetIndexElementType()), reinterpret_cast<void const*>(0));
+	gl::DrawElements(glDrawingMode_, GetElementCount(), glIndexBufferElementType_, reinterpret_cast<void const*>(0));
 }

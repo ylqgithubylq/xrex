@@ -49,7 +49,6 @@ public:
 
 	/*
 	 *	Set an instance of a subclass of Component into this object, one instance per a subclass can be set in.
-	 *	@component: component's owner object will be set to this object, so component cannot be shared by multiple SceneObjects.
 	 */
 	void SetComponent(ComponentSP const& component);
 

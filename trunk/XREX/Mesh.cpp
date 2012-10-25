@@ -66,6 +66,7 @@ RenderableSP Mesh::ShallowClone() const
 SubMesh::SubMesh(Mesh& mesh, string const& name, MaterialSP const& material, RenderingLayoutSP const& layout, RenderingEffectSP const& effect)
 	: mesh_(mesh), name_(name), material_(material), layout_(layout)
 {
+	assert(layout_ != nullptr);
 	SetEffect(effect);
 }
 

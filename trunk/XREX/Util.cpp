@@ -2,19 +2,18 @@
 
 #include "Util.hpp"
 
-#include <vector>
+#include <array>
 
-
-using std::vector;
+using std::array;
 
 //std::hash<void*> const PointerHasher::hasher_ = std::hash<void*>();
 
 
 uint32 GetElementPrimitiveCount(ElementType type)
 {
-	static vector<uint32> const counts = [] ()
+	static array<uint32, static_cast<uint32>(ElementType::ParameterTypeCount)> const counts = [] ()
 	{
-		vector<uint32> temp(static_cast<uint32>(ElementType::ParameterTypeCount));
+		array<uint32, static_cast<uint32>(ElementType::ParameterTypeCount)> temp;
 		temp[static_cast<uint32>(ElementType::Void)] = 0;
 		temp[static_cast<uint32>(ElementType::Bool)] = 1;
 		temp[static_cast<uint32>(ElementType::Uint8)] = 1;
@@ -40,9 +39,9 @@ uint32 GetElementPrimitiveCount(ElementType type)
 
 uint32 GetElementSizeInByte(ElementType type)
 {
-	static vector<uint32> const sizes = [] ()
+	static array<uint32, static_cast<uint32>(ElementType::ParameterTypeCount)> const sizes = [] ()
 	{
-		vector<uint32> temp(static_cast<uint32>(ElementType::ParameterTypeCount));
+		array<uint32, static_cast<uint32>(ElementType::ParameterTypeCount)> temp;
 		temp[static_cast<uint32>(ElementType::Void)] = 0;
 		temp[static_cast<uint32>(ElementType::Bool)] = sizeof(bool);
 		temp[static_cast<uint32>(ElementType::Uint8)] = sizeof(uint8);
@@ -68,9 +67,9 @@ uint32 GetElementSizeInByte(ElementType type)
 
 ElementType GetElementPrimitiveType(ElementType type)
 {
-	static vector<ElementType> const primitiveTypes = [] ()
+	static array<ElementType, static_cast<uint32>(ElementType::ParameterTypeCount)> const primitiveTypes = [] ()
 	{
-		vector<ElementType> temp(static_cast<uint32>(ElementType::ParameterTypeCount));
+		array<ElementType, static_cast<uint32>(ElementType::ParameterTypeCount)> temp;
 		temp[static_cast<uint32>(ElementType::Void)] = ElementType::Void;
 		temp[static_cast<uint32>(ElementType::Bool)] = ElementType::Bool;
 		temp[static_cast<uint32>(ElementType::Uint8)] = ElementType::Uint8;

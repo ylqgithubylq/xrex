@@ -6,6 +6,7 @@
 #include "GraphicsBuffer.hpp"
 #include "RenderingLayout.hpp"
 #include "Texture.hpp"
+#include "RenderingPipelineState.hpp"
 
 class RenderingFactory
 	: Noncopyable
@@ -14,6 +15,18 @@ public:
 	RenderingFactory();
 	virtual ~RenderingFactory();
 
+	RasterizerStateObjectSP CreateRasterizerStateObject(RasterizerState const& rasterizerState)
+	{
+		return MakeSP<RasterizerStateObject>(rasterizerState);
+	}
+	DepthStencilStateObjectSP CreateDepthStencilStateObject(DepthStencilState const& depthStencilState)
+	{
+		return MakeSP<DepthStencilStateObject>(depthStencilState);
+	}
+	BlendStateObjectSP CreateBlendStateObject(BlendState const& blendState)
+	{
+		return MakeSP<BlendStateObject>(blendState);
+	}
 	ShaderObjectSP CreateShaderObject(ShaderObject::ShaderType type, std::string const& source)
 	{
 		return MakeSP<ShaderObject>(type, source);
@@ -56,6 +69,10 @@ public:
 		return MakeSP<RenderingLayout>(buffers, indexBuffer, mode);
 	}
 
+	SamplerStateObjectSP CreateSamplerStateObject(SamplerState const& samplerState)
+	{
+		return MakeSP<SamplerStateObject>(samplerState);
+	}
 	template <typename T>
 	TextureSP CreateTexture1D(Texture::DataDescription<1> const& description, std::vector<std::vector<T>> const& data)
 	{

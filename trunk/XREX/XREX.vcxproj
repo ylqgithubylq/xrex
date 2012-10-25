@@ -119,6 +119,7 @@
     <ClCompile Include="RenderingEngine.cpp" />
     <ClCompile Include="RenderingFactory.cpp" />
     <ClCompile Include="RenderingLayout.cpp" />
+    <ClCompile Include="RenderingPipelineState.cpp" />
     <ClCompile Include="ResourceManager.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Settings.cpp" />
@@ -164,6 +165,7 @@
     <ClInclude Include="RenderingEngine.hpp" />
     <ClInclude Include="RenderingFactory.hpp" />
     <ClInclude Include="RenderingLayout.hpp" />
+    <ClInclude Include="RenderingPipelineState.hpp" />
     <ClInclude Include="ResourceManager.hpp" />
     <ClInclude Include="Scene.hpp" />
     <ClInclude Include="Settings.hpp" />

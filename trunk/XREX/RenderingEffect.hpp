@@ -227,7 +227,8 @@ public:
 	{
 		return passes_[passIndex];
 	}
-	RenderingPassSP const& CreatePass();
+	RenderingPassSP const& CreatePass(ProgramObjectSP& program,
+		RasterizerStateObjectSP& rasterizerState, DepthStencilStateObjectSP& depthStencilState, BlendStateObjectSP& blendState);
 
 private:
 	RenderingEffect& effect_;
@@ -238,7 +239,8 @@ class RenderingPass
 	: Noncopyable
 {
 	friend class RenderingTechnique;
-	explicit RenderingPass(RenderingTechnique& technique);
+	RenderingPass(RenderingTechnique& technique, ProgramObjectSP& program,
+		RasterizerStateObjectSP& rasterizerState, DepthStencilStateObjectSP& depthStencilState, BlendStateObjectSP& blendState);
 
 public:
 	~RenderingPass();
@@ -248,10 +250,7 @@ public:
 		return technique_;
 	}
 
-	void Initialize(ProgramObjectSP& program); // TODO add pipeline states
-
-
-	void Bind();
+	void Use();
 
 	ProgramObjectSP const& GetProgram() const
 	{
@@ -261,6 +260,12 @@ public:
 private:
 	RenderingTechnique& technique_;
 	ProgramObjectSP program_;
-	// TODO pipeline states
-	bool initialized_;
+	RasterizerStateObjectSP rasterizerState_;
+	DepthStencilStateObjectSP depthStencilState_;
+	BlendStateObjectSP blendState_;
+	
+	// TODO should these located here?
+	uint16 frontStencilReference_;
+	uint16 backStencilReference_;
+	Color blendFactor_;
 };

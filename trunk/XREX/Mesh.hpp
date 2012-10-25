@@ -38,7 +38,7 @@ public:
 	 */
 	MeshSP GetShallowClone() const
 	{
-		return std::dynamic_pointer_cast<Mesh>(ShallowClone());
+		return std::static_pointer_cast<Mesh>(ShallowClone());
 	}
 
 private:
