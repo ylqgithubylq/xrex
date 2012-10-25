@@ -43,16 +43,12 @@ public:
 	virtual ComponentType GetComponentType() const = 0;
 
 	/*
-	 *	Used for SceneObject. Don't use this.
+	 *	Provided for SceneObject. Don't use this.
 	 */
 	void SetOwnerSceneObject(SceneObjectSP const& owner)
 	{
 		SceneObjectSP oldOwner = GetOwnerSceneObject();
 		sceneObject_ = owner;
-		if (oldOwner != owner)
-		{
-			OnOwnerObjectChanged(oldOwner, owner);
-		}
 	}
 	SceneObjectSP GetOwnerSceneObject() const
 	{
@@ -60,9 +56,7 @@ public:
 	}
 
 protected:
-	virtual void OnOwnerObjectChanged(SceneObjectSP const& oldOwnerObject, SceneObjectSP const& newOwnerObject)
-	{
-	}
+
 
 protected:
 	std::weak_ptr<SceneObject> sceneObject_;

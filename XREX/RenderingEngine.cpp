@@ -27,19 +27,15 @@ RenderingEngine::RenderingEngine()
 
 RenderingEngine::~RenderingEngine()
 {
+	scene_.reset(); // release scene first
 }
 
 
 void RenderingEngine::Initialize()
 {
-	gl::PolygonMode(gl::GL_FRONT_AND_BACK, gl::GL_FILL);
-	gl::Enable(gl::GL_CULL_FACE);
-	gl::Enable(gl::GL_DEPTH_TEST);
-	gl::BlendFunc(gl::GL_SRC_ALPHA, gl::GL_ONE_MINUS_SRC_ALPHA);
-	gl::Enable(gl::GL_BLEND);
 }
 
-void RenderingEngine::Update()
+void RenderingEngine::RenderAFrame()
 {
 	double currentTime = timer_.Elapsed();
 	double delta = currentTime - lastTime_;
@@ -137,7 +133,7 @@ void RenderingEngine::RenderACamera(SceneObjectSP const& cameraObject)
 		for (uint32 passIndex = 0; passIndex < passCount; ++passIndex)
 		{
 			RenderingPassSP pass = technique->GetPass(passIndex);
-			pass->Bind();
+			pass->Use();
 			layout->BindToProgram(pass->GetProgram());
 			layout->Draw();
 			layout->Unbind();

@@ -3,11 +3,13 @@
 #include "RenderingEffect.hpp"
 #include "Shader.hpp"
 #include "Texture.hpp"
+#include "RenderingPipelineState.hpp"
 
 #include <CoreGL.hpp>
 
 
 #include <algorithm>
+
 
 
 using std::string;
@@ -169,9 +171,10 @@ RenderingTechnique::~RenderingTechnique()
 
 }
 
-RenderingPassSP const& RenderingTechnique::CreatePass()
+RenderingPassSP const& RenderingTechnique::CreatePass(ProgramObjectSP& program,
+	RasterizerStateObjectSP& rasterizerState, DepthStencilStateObjectSP& depthStencilState, BlendStateObjectSP& blendState)
 {
-	passes_.emplace_back(new RenderingPass(*this));
+	passes_.emplace_back(new RenderingPass(*this, program, rasterizerState, depthStencilState, blendState));
 	return passes_.back();
 }
 
@@ -182,24 +185,23 @@ RenderingPassSP const& RenderingTechnique::CreatePass()
 
 
 
-RenderingPass::RenderingPass(RenderingTechnique& technique)
-	: technique_(technique), initialized_(false)
+RenderingPass::RenderingPass(RenderingTechnique& technique, ProgramObjectSP& program,
+	RasterizerStateObjectSP& rasterizerState, DepthStencilStateObjectSP& depthStencilState, BlendStateObjectSP& blendState)
+	: technique_(technique), program_(program), rasterizerState_(rasterizerState), depthStencilState_(depthStencilState), blendState_(blendState),
+	// TODO get variable values below from out side
+	frontStencilReference_(0), backStencilReference_(0), blendFactor_(1.f, 1.f, 1.f, 1.f)
 {
+	program->InitializeParameterSetters(technique_.GetEffect());
 }
 RenderingPass::~RenderingPass()
 {
 }
 
-void RenderingPass::Initialize(ProgramObjectSP& program)
+void RenderingPass::Use()
 {
-	program_ = program;
-	program->InitializeParameterSetters(technique_.GetEffect());
-	initialized_ = true;
-}
-
-void RenderingPass::Bind()
-{
-	assert(initialized_);
+	rasterizerState_->Bind();
+	depthStencilState_->Bind(frontStencilReference_, backStencilReference_);
+	blendState_->Bind(blendFactor_);
 	program_->Bind();
 }
 

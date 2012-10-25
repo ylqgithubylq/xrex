@@ -20,6 +20,14 @@ Application::Application()
 
 Application::~Application()
 {
+	resourceLoader_.reset();
+	resourceManager_.reset();
+	inputCenter_.reset();
+	renderingFactory_.reset();
+
+	// make these two released last
+	renderingEngine_.reset();
+	mainWindow_.reset();
 }
 
 
@@ -52,5 +60,5 @@ void Application::ExecuteALogicFrame()
 void Application::RenderAFrame()
 {
 	ExecuteALogicFrame(); // temp, remove when using separate thread to do logic.
-	renderingEngine_->Update();
+	renderingEngine_->RenderAFrame();
 }

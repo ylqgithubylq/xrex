@@ -8,23 +8,28 @@
 
 
 #include <algorithm>
+#include <array>
 
 
 using std::string;
 using std::vector;
 
-uint32 GraphicsBuffer::GLUsageFromUsage(Usage usage)
+namespace
 {
-	static vector<uint32> const mapping = [] ()
+	uint32 GLUsageFromUsage(GraphicsBuffer::Usage usage)
 	{
-		vector<uint32> temp(static_cast<uint32>(GraphicsBuffer::Usage::UsageCount));
-		temp[static_cast<uint32>(GraphicsBuffer::Usage::Static)] = gl::GL_STATIC_DRAW;
-		temp[static_cast<uint32>(GraphicsBuffer::Usage::Dynamic)] = gl::GL_DYNAMIC_DRAW;
-		temp[static_cast<uint32>(GraphicsBuffer::Usage::Stream)] = gl::GL_STREAM_DRAW;
-		return temp;
-	} ();
-	return mapping[static_cast<uint32>(usage)];
+		static std::array<uint32, static_cast<uint32>(GraphicsBuffer::Usage::UsageCount)> const mapping = [] ()
+		{
+			std::array<uint32, static_cast<uint32>(GraphicsBuffer::Usage::UsageCount)> temp;
+			temp[static_cast<uint32>(GraphicsBuffer::Usage::Static)] = gl::GL_STATIC_DRAW;
+			temp[static_cast<uint32>(GraphicsBuffer::Usage::Dynamic)] = gl::GL_DYNAMIC_DRAW;
+			temp[static_cast<uint32>(GraphicsBuffer::Usage::Stream)] = gl::GL_STREAM_DRAW;
+			return temp;
+		} ();
+		return mapping[static_cast<uint32>(usage)];
+	}
 }
+
 
 
 bool GraphicsBuffer::DataDescription::AddChannelLayout(ElementLayoutDescription&& elementLayout)
@@ -47,21 +52,21 @@ auto GraphicsBuffer::DataDescription::GetChannelLayout(string const& channel) co
 
 void GraphicsBuffer::DoConsctruct(void const* data, uint32 dataSize)
 {
-	gl::GenBuffers(1, &bufferID_);
-	assert(bufferID_ != 0); // 0 is reserved by GL
-	bindingTarget_ = type_ == BufferType::Vertex ? gl::GL_ARRAY_BUFFER : gl::GL_ELEMENT_ARRAY_BUFFER;
-	gl::BindBuffer(bindingTarget_, bufferID_);
-	gl::BufferData(bindingTarget_, dataSize, data, GLUsageFromUsage(usage_));
+	gl::GenBuffers(1, &glBufferID_);
+	assert(glBufferID_ != 0); // 0 is reserved by GL
+	glBindingTarget_ = type_ == BufferType::Vertex ? gl::GL_ARRAY_BUFFER : gl::GL_ELEMENT_ARRAY_BUFFER;
+	gl::BindBuffer(glBindingTarget_, glBufferID_);
+	gl::BufferData(glBindingTarget_, dataSize, data, GLUsageFromUsage(usage_));
 }
 
 GraphicsBuffer::~GraphicsBuffer()
 {
-	gl::DeleteBuffers(1, &bufferID_);
+	gl::DeleteBuffers(1, &glBufferID_);
 }
 
 void GraphicsBuffer::Bind()
 {
-	gl::BindBuffer(bindingTarget_, bufferID_);
+	gl::BindBuffer(glBindingTarget_, glBufferID_);
 }
 
 void GraphicsBuffer::BindToProgram(ProgramObjectSP const& program)
@@ -99,7 +104,7 @@ void GraphicsBuffer::Unbind()
 		lastAttributeLocations_.clear();
 	}
 
-	gl::BindBuffer(bindingTarget_, 0);
+	gl::BindBuffer(glBindingTarget_, 0);
 
 }
 

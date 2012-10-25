@@ -55,6 +55,14 @@ typedef std::shared_ptr<Mesh> MeshSP;
 class SubMesh;
 typedef std::shared_ptr<SubMesh> SubMeshSP;
 
+class RasterizerStateObject;
+typedef std::shared_ptr<RasterizerStateObject> RasterizerStateObjectSP;
+class DepthStencilStateObject;
+typedef std::shared_ptr<DepthStencilStateObject> DepthStencilStateObjectSP;
+class BlendStateObject;
+typedef std::shared_ptr<BlendStateObject> BlendStateObjectSP;
+class SamplerStateObject;
+typedef std::shared_ptr<SamplerStateObject> SamplerStateObjectSP;
 class ShaderObject;
 typedef std::shared_ptr<ShaderObject> ShaderObjectSP;
 class ProgramObject;
@@ -95,7 +103,7 @@ typedef std::shared_ptr<Camera> CameraSP;
 // temp
 #include <CoreGL.hpp>
 
-uint32 GetGLError()
+inline uint32 GetGLError()
 {
 	return gl::GetError();
 }

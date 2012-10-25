@@ -74,9 +74,8 @@ public:
 	};
 
 protected:
-	static uint32 GLBindingTargetFromTextureType(TextureType type);
 	struct GLTextureFormat;
-	static GLTextureFormat const& GLGLTextureFormatFromTexelFormat(TexelFormat format);
+	static GLTextureFormat const& GLTextureFormatFromTexelFormat(TexelFormat format);
 
 public:
 	explicit Texture(TextureType type);
@@ -93,8 +92,8 @@ public:
 protected:
 	TextureType type_;
 	uint32 mipmapCount_;
-	uint32 bindingTarget_; // gl binding target
-	uint32 textureID_; // gl texture ID
+	uint32 glBindingTarget_;
+	uint32 glTextureID_;
 };
 
 

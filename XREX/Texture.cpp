@@ -5,78 +5,108 @@
 #include <CoreGL.hpp>
 
 #include <algorithm>
+#include <array>
 
 using std::vector;
 
-uint32 Texture::GLBindingTargetFromTextureType(TextureType type)
+namespace
 {
-	static vector<uint32> const mapping = [] ()
+	uint32 GLBindingTargetFromTextureType(Texture::TextureType type)
 	{
-		vector<uint32> temp(static_cast<uint32>(TextureType::TextureTypeCount));
-		temp[static_cast<uint32>(TextureType::Texture1D)] = gl::GL_TEXTURE_1D;
-		temp[static_cast<uint32>(TextureType::Texture2D)] = gl::GL_TEXTURE_2D;
-		temp[static_cast<uint32>(TextureType::Texture3D)] = gl::GL_TEXTURE_3D;
-		return temp;
-	} ();
-	return mapping[static_cast<uint32>(type)];
+		static std::array<uint32, static_cast<uint32>(Texture::TextureType::TextureTypeCount)> const mapping = [] ()
+		{
+			std::array<uint32, static_cast<uint32>(Texture::TextureType::TextureTypeCount)> temp;
+			temp[static_cast<uint32>(Texture::TextureType::Texture1D)] = gl::GL_TEXTURE_1D;
+			temp[static_cast<uint32>(Texture::TextureType::Texture2D)] = gl::GL_TEXTURE_2D;
+			temp[static_cast<uint32>(Texture::TextureType::Texture3D)] = gl::GL_TEXTURE_3D;
+			return temp;
+		} ();
+		return mapping[static_cast<uint32>(type)];
+	}
 }
+
 
 struct Texture::GLTextureFormat
 {
-	uint32 internalFormat;
-	uint32 sourceFormat;
-	uint32 textureElementType;
+	uint32 glInternalFormat;
+	uint32 glSourceFormat;
+	uint32 glTextureElementType;
 	/*
-	 *	Do not use this constructor.
+	 *	For std::array initialization, do not use this constructor.
 	 */
 	GLTextureFormat()
+		: glInternalFormat(0), glSourceFormat(0), glTextureElementType(0)
 	{
 	}
-	GLTextureFormat(uint32 theInternalFormat, uint32 theSourceFormat, uint32 theTextureElementType)
-		: internalFormat(theInternalFormat), sourceFormat(theSourceFormat), textureElementType(theTextureElementType)
+	GLTextureFormat(uint32 internalFormat, uint32 sourceFormat, uint32 textureElementType)
+		: glInternalFormat(internalFormat), glSourceFormat(sourceFormat), glTextureElementType(textureElementType)
 	{
 	}
 };
 
-Texture::GLTextureFormat const& Texture::GLGLTextureFormatFromTexelFormat(TexelFormat format)
+Texture::GLTextureFormat const& Texture::GLTextureFormatFromTexelFormat(TexelFormat format)
 {
-	static vector<GLTextureFormat> const mapping = [] ()
+	switch (format)
 	{
-		vector<GLTextureFormat> temp(static_cast<uint32>(TexelFormat::TexelFormatCount));
-		temp[static_cast<uint32>(TexelFormat::RGB8)] = GLTextureFormat(gl::GL_RGBA8, gl::GL_RGB, gl::GL_UNSIGNED_BYTE);
-		temp[static_cast<uint32>(TexelFormat::BGR8)] = GLTextureFormat(gl::GL_RGBA8, gl::GL_BGR, gl::GL_UNSIGNED_BYTE);
-		temp[static_cast<uint32>(TexelFormat::RGBA8)] = GLTextureFormat(gl::GL_RGBA8, gl::GL_RGBA, gl::GL_UNSIGNED_BYTE);
-		temp[static_cast<uint32>(TexelFormat::BGRA8)] = GLTextureFormat(gl::GL_RGBA8, gl::GL_BGRA, gl::GL_UNSIGNED_BYTE);
-		return temp;
-	} ();
-	return mapping[static_cast<uint32>(format)];
+	case Texture::TexelFormat::RGB8:
+		{
+			static GLTextureFormat const Format(gl::GL_RGBA8, gl::GL_RGB, gl::GL_UNSIGNED_BYTE);
+			return Format;
+		}
+	case Texture::TexelFormat::BGR8:
+		{
+			static GLTextureFormat const Format(gl::GL_RGBA8, gl::GL_BGR, gl::GL_UNSIGNED_BYTE);
+			return Format;
+		}
+	case Texture::TexelFormat::RGBA8:
+		{
+			static GLTextureFormat const Format(gl::GL_RGBA8, gl::GL_RGBA, gl::GL_UNSIGNED_BYTE);
+			return Format;
+		}
+	case Texture::TexelFormat::BGRA8:
+		{
+			static GLTextureFormat const Format(gl::GL_RGBA8, gl::GL_BGRA, gl::GL_UNSIGNED_BYTE);
+			return Format;
+		}
+	case Texture::TexelFormat::R8:
+		{
+			static GLTextureFormat const Format(gl::GL_R8, gl::GL_RED, gl::GL_UNSIGNED_BYTE);
+			return Format;
+		}
+	default:
+		{
+			static GLTextureFormat const Format;
+			assert(false);
+			return Format;
+		}
+	}
 }
 
 
 
 Texture::Texture(TextureType type)
-	: type_(type), textureID_(0), mipmapCount_(0)
+	: type_(type), glTextureID_(0), mipmapCount_(0)
 {
 }
 
 Texture::~Texture()
 {
-	if (textureID_ != 0)
+	if (glTextureID_ != 0)
 	{
-		gl::DeleteTextures(1, &textureID_);
-		textureID_ = 0;
+		gl::DeleteTextures(1, &glTextureID_);
+		glTextureID_ = 0;
 	}
 }
 
 void Texture::BindTexture(uint32 textureChannel)
 {
 	gl::ActiveTexture(gl::GL_TEXTURE0 + textureChannel);
-	gl::BindTexture(bindingTarget_, textureID_);
+	gl::BindTexture(glBindingTarget_, glTextureID_);
 }
 
 void Texture::UnbindTexture()
 {
-	gl::BindTexture(bindingTarget_, 0);
+	gl::BindTexture(glBindingTarget_, 0);
 }
 
 
@@ -86,17 +116,17 @@ void Texture::UnbindTexture()
 template <>
 void ConcreteTexture<1>::DoFillTexture(uint32 mipmapLevel, GLTextureFormat const& glFormat, DataDescription<1> const& description, void const* data)
 {
-	gl::TexImage1D(bindingTarget_, mipmapLevel, glFormat.internalFormat, description.GetSizes()[0], 0, glFormat.sourceFormat, glFormat.textureElementType, data);
+	gl::TexImage1D(glBindingTarget_, mipmapLevel, glFormat.glInternalFormat, description.GetSizes()[0], 0, glFormat.glSourceFormat, glFormat.glTextureElementType, data);
 }
 template <>
 void ConcreteTexture<2>::DoFillTexture(uint32 mipmapLevel, GLTextureFormat const& glFormat, DataDescription<2> const& description, void const* data)
 {
-	gl::TexImage2D(bindingTarget_, mipmapLevel, glFormat.internalFormat, description.GetSizes()[0], description.GetSizes()[1], 0, glFormat.sourceFormat, glFormat.textureElementType, data);
+	gl::TexImage2D(glBindingTarget_, mipmapLevel, glFormat.glInternalFormat, description.GetSizes()[0], description.GetSizes()[1], 0, glFormat.glSourceFormat, glFormat.glTextureElementType, data);
 }
 template <>
 void ConcreteTexture<3>::DoFillTexture(uint32 mipmapLevel, GLTextureFormat const& glFormat, DataDescription<3> const& description, void const* data)
 {
-	gl::TexImage3D(bindingTarget_, mipmapLevel, glFormat.internalFormat, description.GetSizes()[0], description.GetSizes()[1], description.GetSizes()[2], 0, glFormat.sourceFormat, glFormat.textureElementType, data);
+	gl::TexImage3D(glBindingTarget_, mipmapLevel, glFormat.glInternalFormat, description.GetSizes()[0], description.GetSizes()[1], description.GetSizes()[2], 0, glFormat.glSourceFormat, glFormat.glTextureElementType, data);
 }
 
 
@@ -111,13 +141,12 @@ template <uint32 Dimension>
 void ConcreteTexture<Dimension>::DoConstructTexture(std::vector<void const*>& rawData, DataDescription<Dimension> const& description, bool generateMipmap)
 {
 	assert(rawData.size() > 0);
-	bindingTarget_ = GLBindingTargetFromTextureType(type_);
-	gl::GenTextures(1, &textureID_);
-	assert(textureID_ != 0);
-	gl::BindTexture(bindingTarget_, textureID_);
+	glBindingTarget_ = GLBindingTargetFromTextureType(type_);
+	gl::GenTextures(1, &glTextureID_);
+	assert(glTextureID_ != 0);
+	gl::BindTexture(glBindingTarget_, glTextureID_);
 
-
-	GLTextureFormat const& glFormat = GLGLTextureFormatFromTexelFormat(description.GetFormat());
+	GLTextureFormat const& glFormat = GLTextureFormatFromTexelFormat(description.GetFormat());
 	if (!generateMipmap)
 	{
 		DataDescription<Dimension> descriptionOfALevel = description;
@@ -150,14 +179,13 @@ void ConcreteTexture<Dimension>::DoConstructTexture(std::vector<void const*>& ra
 			}
 			++mipmapCount_;
 		}
-		gl::GenerateMipmap(bindingTarget_);
+		gl::GenerateMipmap(glBindingTarget_);
 	}
 	else
 	{
 		mipmapCount_ = rawData.size();
 	}
-
-	gl::BindTexture(bindingTarget_, 0);
+	gl::BindTexture(glBindingTarget_, 0);
 }
 
 

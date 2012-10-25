@@ -2,8 +2,14 @@ using regular expressions(Ctrl+Shift+F):
 ^:b*[^:b*#/{}]+.*$
 
 TODO:
-state objects
+state objects: operator <()
+
+create new texture constructor without 2 dimension data parameter, remove constructor parameter generateMipmap of the one with 2 dimension data parameter
 effect loading with macro
 effect-macro selection by material?
-sampler
+light
+
+optional:
 thread for logic/rendering call generation/rendering api calls
+using input device caputre to do input event generation, refactor Window to subclass device interface.
+separate indexBuffer and vertexBuffer

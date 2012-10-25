@@ -41,9 +41,6 @@ public:
 		visible_ = visible;
 	}
 
-	/*
-	 *	Copy
-	 */
 	virtual RenderableSP ShallowClone() const = 0;
 
 

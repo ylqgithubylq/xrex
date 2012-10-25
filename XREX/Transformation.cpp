@@ -20,13 +20,13 @@ void Transformation::Update() const
 		// TODO add a GetMatrixFromTQS(v3, q, v3) to math.hpp
 		modelMatrix_ = TranslationMatrix(position_) * MatrixFromQuaternion(orientation_) * ScalingMatrix(scaling_);
 		dirty_ = false;
+		if (parent_.expired()) // no parent
+		{
+			worldMatrix_ = modelMatrix_;
+		}
 	}
-	// TODO how to know parent is dirty or not?
-	if (parent_.expired()) // no parent
-	{
-		worldMatrix_ = modelMatrix_;
-	}
-	else
+	// TODO how to know parent is dirty or not? dirty flag of parent will be cleared when updated.
+	if (!parent_.expired())
 	{
 		worldMatrix_ = parent_.lock()->GetWorldMatrix() * modelMatrix_;
 	}

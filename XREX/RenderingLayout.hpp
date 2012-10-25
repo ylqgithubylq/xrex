@@ -47,12 +47,11 @@ public:
 	void Draw();
 
 private:
-	static uint32 GLDrawModeFromDrawMode(DrawingMode mode);
-
-private:
 	std::vector<GraphicsBufferSP> buffers_;
 	GraphicsBufferSP indexBuffer_;
 	DrawingMode mode_;
+	uint32 glDrawingMode_;
+	uint32 glIndexBufferElementType_;
 	std::unordered_map<ProgramObjectSP, uint32> programBindingVAOCache_;
 };
 

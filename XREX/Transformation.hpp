@@ -36,7 +36,6 @@ public:
 	void SetParent(TransformationSP const& parent)
 	{
 		parent_ = parent;
-		dirty_ = true;
 	}
 	TransformationSP GetParent() const
 	{
@@ -183,10 +182,6 @@ public:
 	}
 
 protected:
-	void OnOwnerObjectChanged(SceneObjectSP const& oldOwnerObject, SceneObjectSP const& newOwnerObject) override
-	{
-		dirty_ = true;
-	}
 
 private:
 	void Update() const;

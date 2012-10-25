@@ -11,47 +11,52 @@
 
 #include <iostream>
 #include <algorithm>
-
+#include <array>
 
 
 using std::string;
 using std::vector;
 
-string const& ShaderObject::ShaderDefineMacroFromShaderType(ShaderType type)
+
+namespace
 {
-	static vector<string> const mapping = [] ()
+	string const& ShaderDefineMacroFromShaderType(ShaderObject::ShaderType type)
 	{
-		vector<string> macros(static_cast<uint32>(ShaderObject::ShaderType::CountOfShaderTypes));
-		macros[static_cast<uint32>(ShaderObject::ShaderType::VertexShader)] = "#define VS\n";
-		macros[static_cast<uint32>(ShaderObject::ShaderType::FragmentShader)] = "#define FS\n";
-		macros[static_cast<uint32>(ShaderObject::ShaderType::GeometryShader)] = "#define GS\n";
-		macros[static_cast<uint32>(ShaderObject::ShaderType::TessellationControlShader)] = "#define TCS\n";
-		macros[static_cast<uint32>(ShaderObject::ShaderType::TessellationEvaluationShader)] = "#define TES\n";
-		return macros;
-	} ();
-	return mapping[static_cast<uint32>(type)];
+		static std::array<string, static_cast<uint32>(ShaderObject::ShaderType::CountOfShaderTypes)> const mapping = [] ()
+		{
+			std::array<string, static_cast<uint32>(ShaderObject::ShaderType::CountOfShaderTypes)> macros;
+			macros[static_cast<uint32>(ShaderObject::ShaderType::VertexShader)] = "#define VS\n";
+			macros[static_cast<uint32>(ShaderObject::ShaderType::FragmentShader)] = "#define FS\n";
+			macros[static_cast<uint32>(ShaderObject::ShaderType::GeometryShader)] = "#define GS\n";
+			macros[static_cast<uint32>(ShaderObject::ShaderType::TessellationControlShader)] = "#define TCS\n";
+			macros[static_cast<uint32>(ShaderObject::ShaderType::TessellationEvaluationShader)] = "#define TES\n";
+			return macros;
+		} ();
+		return mapping[static_cast<uint32>(type)];
+	}
+
+	string const& VersionMacro()
+	{
+		static string const macro = "#version 420\n\n";
+		return macro;
+	}
+
+	uint32 GLShaderTypeFromShaderType(ShaderObject::ShaderType type)
+	{
+		static std::array<uint32, static_cast<uint32>(ShaderObject::ShaderType::CountOfShaderTypes)> const mapping = [] ()
+		{
+			std::array<uint32, static_cast<uint32>(ShaderObject::ShaderType::CountOfShaderTypes)> mapping;
+			mapping[static_cast<uint32>(ShaderObject::ShaderType::VertexShader)] = gl::GL_VERTEX_SHADER;
+			mapping[static_cast<uint32>(ShaderObject::ShaderType::FragmentShader)] = gl::GL_FRAGMENT_SHADER;
+			mapping[static_cast<uint32>(ShaderObject::ShaderType::GeometryShader)] = gl::GL_GEOMETRY_SHADER;
+			mapping[static_cast<uint32>(ShaderObject::ShaderType::TessellationControlShader)] = gl::GL_TESS_CONTROL_SHADER;
+			mapping[static_cast<uint32>(ShaderObject::ShaderType::TessellationEvaluationShader)] = gl::GL_TESS_EVALUATION_SHADER;
+			return mapping;
+		} ();
+		return mapping[static_cast<uint32>(type)];
+	};
 }
 
-string const& ShaderObject::VersionMacro()
-{
-	static string const macro = "#version 420\n\n";
-	return macro;
-}
-
-uint32 ShaderObject::GLShaderTypeFromShaderType(ShaderType type)
-{
-	static vector<uint32> const mapping = [] ()
-	{
-		vector<uint32> mapping(static_cast<uint32>(ShaderObject::ShaderType::CountOfShaderTypes));
-		mapping[static_cast<uint32>(ShaderObject::ShaderType::VertexShader)] = gl::GL_VERTEX_SHADER;
-		mapping[static_cast<uint32>(ShaderObject::ShaderType::FragmentShader)] = gl::GL_FRAGMENT_SHADER;
-		mapping[static_cast<uint32>(ShaderObject::ShaderType::GeometryShader)] = gl::GL_GEOMETRY_SHADER;
-		mapping[static_cast<uint32>(ShaderObject::ShaderType::TessellationControlShader)] = gl::GL_TESS_CONTROL_SHADER;
-		mapping[static_cast<uint32>(ShaderObject::ShaderType::TessellationEvaluationShader)] = gl::GL_TESS_EVALUATION_SHADER;
-		return mapping;
-	} ();
-	return mapping[static_cast<uint32>(type)];
-};
 
 
 
@@ -136,7 +141,7 @@ bool ShaderObject::Compile()
 ProgramObject::ProgramObject()
 	: shaders_(static_cast<uint32>(ShaderObject::ShaderType::CountOfShaderTypes)), validate_(false)
 {
-	programID_ = gl::CreateProgram();
+	glProgramID_ = gl::CreateProgram();
 }
 ProgramObject::~ProgramObject()
 {
@@ -150,42 +155,42 @@ void ProgramObject::Destory()
 		if (shaders_[i])
 		{
 			uint32 id = shaders_[i]->GetID();
-			gl::DetachShader(programID_, id);
+			gl::DetachShader(glProgramID_, id);
 		}
 	}
-	gl::DeleteProgram(programID_);
-	programID_ = 0;
+	gl::DeleteProgram(glProgramID_);
+	glProgramID_ = 0;
 }
 
 void ProgramObject::AttachShader(ShaderObjectSP& shader)
 {
-	gl::AttachShader(programID_, shader->GetID());
+	gl::AttachShader(glProgramID_, shader->GetID());
 	shaders_[static_cast<uint32>(shader->GetType())] = shader;
 }
 
 
 bool ProgramObject::Link()
 {
-	if (programID_ == 0)
+	if (glProgramID_ == 0)
 	{
 		errorString_ = "Program creation failed.";
 		return false;
 	}
-	gl::LinkProgram(programID_);
+	gl::LinkProgram(glProgramID_);
 
 	int32 linked = 0;
-	gl::GetProgramiv(programID_, gl::GL_LINK_STATUS, &linked);
+	gl::GetProgramiv(glProgramID_, gl::GL_LINK_STATUS, &linked);
 	validate_ = linked == 1;
 
 #ifdef XREX_DEBUG
 	if (!validate_)
 	{
 		int32 length = 0;
-		gl::GetProgramiv(programID_, gl::GL_INFO_LOG_LENGTH, &length);
+		gl::GetProgramiv(glProgramID_, gl::GL_INFO_LOG_LENGTH, &length);
 		if (length > 0)
 		{
 			errorString_.resize(length, 0);
-			gl::GetProgramInfoLog(programID_, length, &length, &errorString_[0]);
+			gl::GetProgramInfoLog(glProgramID_, length, &length, &errorString_[0]);
 		}
 		else
 		{
@@ -201,7 +206,7 @@ bool ProgramObject::Link()
 void ProgramObject::Bind()
 {
 	assert(validate_);
-	gl::UseProgram(programID_);
+	gl::UseProgram(glProgramID_);
 
 	for (auto i = uniformBinders_.begin(); i != uniformBinders_.end(); ++i)
 	{
@@ -210,19 +215,19 @@ void ProgramObject::Bind()
 
 
 #ifdef XREX_DEBUG
-	gl::ValidateProgram(programID_);
+	gl::ValidateProgram(glProgramID_);
 
 	int32 validated = false;
-	gl::GetProgramiv(programID_, gl::GL_VALIDATE_STATUS, &validated);
+	gl::GetProgramiv(glProgramID_, gl::GL_VALIDATE_STATUS, &validated);
 	if (!validated)
 	{
 		int32 length = 0;
-		gl::GetProgramiv(programID_, gl::GL_INFO_LOG_LENGTH, &length);
+		gl::GetProgramiv(glProgramID_, gl::GL_INFO_LOG_LENGTH, &length);
 		if (length > 0)
 		{
 			// use string::resize to do like this in other place.
 			errorString_.resize(length, 0);
-			gl::GetProgramInfoLog(programID_, length, &length, &errorString_[0]);
+			gl::GetProgramInfoLog(glProgramID_, length, &length, &errorString_[0]);
 			std::cerr << errorString_ << std::endl;
 		}
 	}
@@ -239,7 +244,7 @@ int32 ProgramObject::GetAttributeLocation(string const& channel) const
 	{
 		return -1;
 	}
-	return found->location;
+	return found->glLocation;
 }
 
 
@@ -252,9 +257,9 @@ void ProgramObject::InitializeParameterSetters(RenderingEffect& effect)
 	uint32 availableSamplerLocation = 0;
 
 	int32 uniformCount = 0;
-	gl::GetProgramiv(programID_, gl::GL_ACTIVE_UNIFORMS, &uniformCount);
+	gl::GetProgramiv(glProgramID_, gl::GL_ACTIVE_UNIFORMS, &uniformCount);
 	int32 maxUniformNameLength = 0;
-	gl::GetProgramiv(programID_, gl::GL_ACTIVE_UNIFORM_MAX_LENGTH, &maxUniformNameLength);
+	gl::GetProgramiv(glProgramID_, gl::GL_ACTIVE_UNIFORM_MAX_LENGTH, &maxUniformNameLength);
 
 	// don't change the size of uniformBinders_ after this, reference to elements in it will be kept in uniform binder.
 	uniformBinders_.resize(uniformCount);
@@ -268,13 +273,13 @@ void ProgramObject::InitializeParameterSetters(RenderingEffect& effect)
 		uint32 glType;
 		string name;
 		name.resize(maxUniformNameLength);
-		gl::GetActiveUniform(programID_, i, maxUniformNameLength, &nameLength, &uniformSize, &glType, &name[0]);
-		int32 location = gl::GetUniformLocation(programID_, name.c_str());
+		gl::GetActiveUniform(glProgramID_, i, maxUniformNameLength, &nameLength, &uniformSize, &glType, &name[0]);
+		int32 location = gl::GetUniformLocation(glProgramID_, name.c_str());
 		name = name.substr(0, nameLength); // no '\0' included
 
 		binder.glType = glType;
 		binder.elementCount = uniformSize;
-		binder.location = location;
+		binder.glLocation = location;
 
 
 		auto resultIter = std::find_if(parameters.begin(), parameters.end(), [&name] (EffectParameterSP const& parameter)
@@ -350,9 +355,9 @@ void ProgramObject::InitializeParameterSetters(RenderingEffect& effect)
 	// attributes
 
 	int32 attributeCount;
-	gl::GetProgramiv(programID_, gl::GL_ACTIVE_ATTRIBUTES, &attributeCount);
+	gl::GetProgramiv(glProgramID_, gl::GL_ACTIVE_ATTRIBUTES, &attributeCount);
 	int32 maxAttributeNameLength;
-	gl::GetProgramiv(programID_, gl::GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, &maxAttributeNameLength);
+	gl::GetProgramiv(glProgramID_, gl::GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, &maxAttributeNameLength);
 
 	// don't change the size of attributeBindingInformation_ after this, reference to elements in it will be kept in uniform binder.
 	attributeBindingInformation_.resize(attributeCount);
@@ -365,14 +370,14 @@ void ProgramObject::InitializeParameterSetters(RenderingEffect& effect)
 		uint32 glType;
 		string name;
 		name.resize(maxAttributeNameLength);
-		gl::GetActiveAttrib(programID_, i, maxAttributeNameLength, &nameLength, &attributeSize, &glType, &name[0]);
-		int32 location = gl::GetAttribLocation(programID_, name.c_str());
+		gl::GetActiveAttrib(glProgramID_, i, maxAttributeNameLength, &nameLength, &attributeSize, &glType, &name[0]);
+		int32 location = gl::GetAttribLocation(glProgramID_, name.c_str());
 		name = name.substr(0, nameLength); // no '\0' included
 		
 		bindingInformation.channel = std::move(name);
 		bindingInformation.glType = glType;
 		bindingInformation.elementCount = attributeSize;
-		bindingInformation.location = location;
+		bindingInformation.glLocation = location;
 	}
 	return;
 }
@@ -399,7 +404,7 @@ void ProgramObject::InitializeUniformBinder(UniformBinder& binder, EffectParamet
 					if (texture)
 					{
 						texture->BindTexture(samplerLocation);
-						gl::Uniform1i(binder.location, samplerLocation);
+						gl::Uniform1i(binder.glLocation, samplerLocation);
 					}
 				};
 			}
@@ -417,7 +422,7 @@ void ProgramObject::InitializeUniformBinder(UniformBinder& binder, EffectParamet
 			{
 				binder.setter = [&binder, parameter] ()
 				{
-					gl::Uniform1i(binder.location, parameter->GetValue<bool>());
+					gl::Uniform1i(binder.glLocation, parameter->GetValue<bool>());
 				};
 			}
 			break;
@@ -425,7 +430,7 @@ void ProgramObject::InitializeUniformBinder(UniformBinder& binder, EffectParamet
 			{
 				binder.setter = [&binder, parameter] ()
 				{
-					gl::Uniform1i(binder.location, parameter->GetValue<int32>());
+					gl::Uniform1i(binder.glLocation, parameter->GetValue<int32>());
 				};
 			}
 			break;
@@ -433,7 +438,7 @@ void ProgramObject::InitializeUniformBinder(UniformBinder& binder, EffectParamet
 			{
 				binder.setter = [&binder, parameter] ()
 				{
-					gl::Uniform1f(binder.location, parameter->GetValue<float>());
+					gl::Uniform1f(binder.glLocation, parameter->GetValue<float>());
 				};
 			}
 			break;
@@ -441,7 +446,7 @@ void ProgramObject::InitializeUniformBinder(UniformBinder& binder, EffectParamet
 			{
 				binder.setter = [&binder, parameter] ()
 				{
-					gl::Uniform2fv(binder.location, 1, parameter->GetValue<floatV2>().GetArray());
+					gl::Uniform2fv(binder.glLocation, 1, parameter->GetValue<floatV2>().GetArray());
 				};
 			}
 			break;
@@ -449,7 +454,7 @@ void ProgramObject::InitializeUniformBinder(UniformBinder& binder, EffectParamet
 			{
 				binder.setter = [&binder, parameter] ()
 				{
-					gl::Uniform3fv(binder.location, 1, parameter->GetValue<floatV3>().GetArray());
+					gl::Uniform3fv(binder.glLocation, 1, parameter->GetValue<floatV3>().GetArray());
 				};
 			}
 			break;
@@ -457,7 +462,7 @@ void ProgramObject::InitializeUniformBinder(UniformBinder& binder, EffectParamet
 			{
 				binder.setter = [&binder, parameter] ()
 				{
-					gl::Uniform4fv(binder.location, 1, parameter->GetValue<floatV4>().GetArray());
+					gl::Uniform4fv(binder.glLocation, 1, parameter->GetValue<floatV4>().GetArray());
 				};
 			}
 			break;
@@ -465,7 +470,7 @@ void ProgramObject::InitializeUniformBinder(UniformBinder& binder, EffectParamet
 			{
 				binder.setter = [&binder, parameter] ()
 				{
-					gl::UniformMatrix4fv(binder.location, 1, false, parameter->GetValue<floatM44>().GetArray());
+					gl::UniformMatrix4fv(binder.glLocation, 1, false, parameter->GetValue<floatM44>().GetArray());
 				};
 			}
 			break;

@@ -27,16 +27,13 @@ SceneObject::~SceneObject()
 
 void SceneObject::SetComponent(ComponentSP const& component)
 {
+	assert(component->GetOwnerSceneObject() == nullptr);
 	ComponentSP const& original = components_[static_cast<uint32>(component->GetComponentType())];
 	if (original != nullptr)
 	{
 		original->SetOwnerSceneObject(SceneObject::NullSceneObject);
 	}
-	SceneObjectSP oldSceneObject = component->GetOwnerSceneObject();
-	if (oldSceneObject)
-	{
-		oldSceneObject->RemoveComponent(component->GetComponentType());
-	}
+
 	components_[static_cast<uint32>(component->GetComponentType())] = component;
 	component->SetOwnerSceneObject(shared_from_this());
 }

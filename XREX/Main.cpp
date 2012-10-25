@@ -54,13 +54,6 @@ struct TempScene
 
 	void InitializeScene()
 	{
-		gl::Enable(gl::GL_DEPTH_TEST);
-		//gl::Enable(gl::GL_BLEND);
-
-
-
-
-
 		vector<floatV3> vertexData;
 		vector<uint16> indexData;
 
@@ -128,7 +121,6 @@ struct TempScene
 		ShaderObjectSP vs = Application::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::VertexShader, shaderString);
 		ShaderObjectSP fs = Application::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::FragmentShader, shaderString);
 
-
 		if (!vs->IsValidate())
 		{
 			cerr << vs->GetCompileError() << endl;
@@ -145,7 +137,6 @@ struct TempScene
 			cerr << program->GetLinkError() << endl;
 			return;
 		}
-
 		ProgramObjectSP cubeProgram = Application::GetInstance().GetRenderingFactory().CreateProgramObject();
 		shaderFile = "../../Effects/TestCube.glsl";
 		if (!Application::GetInstance().GetResourceLoader().LoadString(shaderFile, &shaderString))
@@ -174,6 +165,20 @@ struct TempScene
 			return;
 		}
 
+		RasterizerState resterizerState;
+		DepthStencilState depthStencilState;
+		BlendState blendState;
+		blendState.blendEnable = true;
+		blendState.blendOperation = RenderingPipelineState::BlendOperation::Add;
+		blendState.blendOperationAlpha = RenderingPipelineState::BlendOperation::Add;
+		blendState.sourceBlend = RenderingPipelineState::AlphaBlendFactor::SourceAlpha;
+		blendState.sourceBlendAlpha = RenderingPipelineState::AlphaBlendFactor::SourceAlpha;
+		blendState.destinationBlend = RenderingPipelineState::AlphaBlendFactor::OneMinusSourceAlpha;
+		blendState.destinationBlendAlpha = RenderingPipelineState::AlphaBlendFactor::OneMinusSourceAlpha;
+		RasterizerStateObjectSP rso = Application::GetInstance().GetRenderingFactory().CreateRasterizerStateObject(resterizerState);
+		DepthStencilStateObjectSP dsso = Application::GetInstance().GetRenderingFactory().CreateDepthStencilStateObject(depthStencilState);
+		BlendStateObjectSP bso = Application::GetInstance().GetRenderingFactory().CreateBlendStateObject(blendState);
+		
 
 		GraphicsBufferSP vertices = Application::GetInstance().GetRenderingFactory().CreateGraphicsVertexBuffer(GraphicsBuffer::Usage::Static, vertexData, "position");
 		GraphicsBufferSP indices = Application::GetInstance().GetRenderingFactory().CreateGraphicsIndexBuffer(GraphicsBuffer::Usage::Static, indexData);
@@ -185,15 +190,13 @@ struct TempScene
 
 		RenderingEffectSP cubeEffect = MakeSP<RenderingEffect>("test cube effect");
 		RenderingTechniqueSP cubeTechnique = cubeEffect->CreateTechnique();
-		RenderingPassSP cubePass = cubeTechnique->CreatePass();
-		cubePass->Initialize(cubeProgram);
+		RenderingPassSP cubePass = cubeTechnique->CreatePass(cubeProgram, rso, dsso, bso);
 
 		RenderingEffectSP effect = MakeSP<RenderingEffect>("test effect");
 		RenderingTechniqueSP technique = effect->CreateTechnique();
-		RenderingPassSP pass = technique->CreatePass();
-		pass->Initialize(program);
+		RenderingPassSP pass = technique->CreatePass(program, rso, dsso, bso);
 
-		SubMeshSP const& subMesh = cubeMesh->CreateSubMesh("cube submesh", nullptr, layout, cubeEffect);
+		SubMeshSP const& subMesh = cubeMesh->CreateSubMesh("cube sub mesh", nullptr, layout, cubeEffect);
 
 		EffectParameterSP const& centerPosition = effect->GetParameterByName("centerPosition");
 		if (centerPosition)
@@ -206,7 +209,7 @@ struct TempScene
 		CameraSP camera = MakeSP<Camera>(PI / 4, static_cast<float>(settings.renderingSettings.width) / settings.renderingSettings.height, 1.f, 10000.0f);
 		camera_->SetComponent(camera);
 
-		scene_ = Application::GetInstance().GetRenderingEngine().GetCurrentScene();
+		scene_ = Application::GetInstance().GetRenderingEngine().GetScene();
 		scene_->AddObject(camera_);
 
 
@@ -277,14 +280,11 @@ struct TempScene
 			cubeCenterPosition->SetValue(floatV3(0, 50, 0));
 		}
 
-
-
 		FreeRoamCameraControllerSP cameraController = MakeSP<FreeRoamCameraController>();
 		cameraController->InitializeActionMap();
 		cameraController->AttachToCamera(camera_);
 		Application::GetInstance().GetInputCenter().AddInputHandler(cameraController);
 		// 		wMatrix->SetValue(translate * rotation);
-
 		Application::GetInstance().GetResourceManager().AddResourceLocation("Data/");
 		MeshSP model = Application::GetInstance().GetResourceManager().GetModel("crytek-sponza/sponza.obj");
 		//MeshSP model = Application::GetInstance().GetResourceManager().GetModel("sibenik/sibenik.obj");
@@ -296,6 +296,7 @@ struct TempScene
 		SceneObjectSP sceneObject = MakeSP<SceneObject>("model");
 		sceneObject->SetComponent(model);
 		sceneObject->GetComponent<Transformation>()->SetPosition(centerPosition_);
+		sceneObject->GetComponent<Transformation>()->Scale(0.1f);
 		scene_->AddObject(sceneObject);
 		
 	}
@@ -342,14 +343,13 @@ void Main()
 	settings.renderingSettings.width = 800;
 	settings.renderingSettings.height = 600;
 
-
 	Application::GetInstance().Initialize(settings);
-
 	TempScene s;
 	s.InitializeScene();
 
 	function<void(double current, double delta)> f = [&s] (double current, double delta)
 	{
+		assert(gl::GetError() == gl::GL_NO_ERROR);
 		s(current, delta);
 	};
 	Application::GetInstance().GetRenderingEngine().SetRenderingFunction(f);
@@ -376,12 +376,19 @@ int main()
 	t.TestTransformation();
 	Main();
 
-	
-
+// 	struct LeakTest
+// 	{
+// 		shared_ptr<LeakTest> p;
+// 	};
+// 	shared_ptr<LeakTest> ltp0 = MakeSP<LeakTest>();
+// 	shared_ptr<LeakTest> ltp1 = MakeSP<LeakTest>();
+// 	ltp0->p = ltp1;
+// 	ltp1->p = ltp0;
 	return 0;
 }
 
 //memory leak check
+// 
 // #define _CRTDBG_MAP_ALLOC
 // #include <crtdbg.h>
 // 

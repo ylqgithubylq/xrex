@@ -47,15 +47,6 @@ public:
 		return errorString_;
 	}
 
-private:
-
-	static std::string const& VersionMacro();
-
-	static std::string const& ShaderDefineMacroFromShaderType(ShaderType type);
-
-	static uint32 GLShaderTypeFromShaderType(ShaderType type);
-
-	static uint32 GetGLShaderType(ShaderType type);
 
 
 private:
@@ -114,7 +105,7 @@ private:
 	{
 		uint32 glType;
 		int32 elementCount;
-		int32 location;
+		int32 glLocation;
 		std::function<void()> setter;
 	};
 	struct AttributeBindingInformation
@@ -122,7 +113,7 @@ private:
 		std::string channel;
 		uint32 glType;
 		int32 elementCount; // always 1?
-		int32 location;
+		int32 glLocation;
 	};
 private:
 	void InitializeUniformBinder(UniformBinder& binder, EffectParameterSP& parameter, uint32& availableSamplerLocation);
@@ -132,7 +123,7 @@ private:
 	std::vector<ShaderObjectSP> shaders_;
 	bool validate_;
 	std::string errorString_;
-	uint32 programID_;
+	uint32 glProgramID_;
 	
 	std::vector<UniformBinder> uniformBinders_;
 	std::vector<AttributeBindingInformation> attributeBindingInformation_;
