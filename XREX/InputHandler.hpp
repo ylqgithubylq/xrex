@@ -16,7 +16,6 @@ namespace XREX
 		: Noncopyable
 	{
 	public:
-		// TODO replace all map by unordered_map
 		class ActionMap
 			: Noncopyable
 		{
@@ -89,6 +88,9 @@ namespace XREX
 
 		virtual ActionMap GenerateActionMap() = 0;
 
+		/*
+		 *	Override this if something need to do before a logic frame begin.
+		 */
 		virtual bool DoOnBeforeLogicFrame(double currentTime, std::function<void()>* generatedAction)
 		{
 			return false;
