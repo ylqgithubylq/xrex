@@ -1,5 +1,5 @@
 #pragma once
-#include "Declare.hpp"
+
 class TestFile
 {
 public:

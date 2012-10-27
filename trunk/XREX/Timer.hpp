@@ -2,27 +2,34 @@
 
 #include "Declare.hpp"
 
-class Timer
-	: Noncopyable
+namespace XREX
 {
-public:
-	Timer();
+
+	class XREX_API Timer
+		: Noncopyable
+	{
+	public:
+		Timer();
 	
-	~Timer();
+		~Timer();
 
-	void Restart();
-
-	double Elapsed() const;
+		void Restart();
+		/*
+		 *	@return: time span since last call to Restart, or since creation.
+		 */
+		double Elapsed() const;
 	
-	/*
-	 *	Maximum elapsed time can be supported.
-	 */
-	double MaxElapseTime() const;
+		/*
+		 *	Maximum elapsed time can be supported.
+		 */
+		double MaxElapseTime() const;
 	
-	double MinElapseTimeSpan() const;
+		double MinElapseTimeSpan() const;
 
-	double CurrentTime() const;
+		double CurrentTime() const;
 
-private:
-	double startTime_;
-};
+	private:
+		double startTime_;
+	};
+
+}

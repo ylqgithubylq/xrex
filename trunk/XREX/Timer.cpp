@@ -9,53 +9,63 @@
 #endif
 #include <windows.h>
 
-namespace
+#ifdef max // windows.h defined this...
+#undef max
+
+namespace XREX
 {
-	uint64 CPS()
+
+	namespace
 	{
-		static uint64 cps = 0;
-		if (0 == cps)
+		uint64 CPS()
 		{
-			LARGE_INTEGER frequency;
-			QueryPerformanceFrequency(&frequency);
-			cps = static_cast<uint64>(frequency.QuadPart);
+			static uint64 cps = 0;
+			if (0 == cps)
+			{
+				LARGE_INTEGER frequency;
+				QueryPerformanceFrequency(&frequency);
+				cps = static_cast<uint64>(frequency.QuadPart);
+			}
+			return cps;
 		}
-		return cps;
 	}
-}
 
 
-Timer::Timer()
-{
-	this->Restart();
-}
-Timer::~Timer()
-{
+	Timer::Timer()
+	{
+		this->Restart();
+	}
+	Timer::~Timer()
+	{
+	}
+
+	void Timer::Restart()
+	{
+		startTime_ = this->CurrentTime();
+	}
+
+	double Timer::Elapsed() const
+	{
+		return this->CurrentTime() - startTime_;
+	}
+
+	double Timer::MaxElapseTime() const
+	{
+		return static_cast<double>(std::numeric_limits<uint64>::max()) / CPS() - startTime_;
+	}
+
+	double Timer::MinElapseTimeSpan() const
+	{
+		return 1.0 / CPS();
+	}
+
+	double Timer::CurrentTime() const
+	{
+		LARGE_INTEGER count;
+		QueryPerformanceCounter(&count);
+		return static_cast<double>(count.QuadPart) / CPS();
+	}
+
 }
 
-void Timer::Restart()
-{
-	startTime_ = this->CurrentTime();
-}
-
-double Timer::Elapsed() const
-{
-	return this->CurrentTime() - startTime_;
-}
-
-double Timer::MaxElapseTime() const
-{
-	return static_cast<double>(std::numeric_limits<uint64>::max()) / CPS() - startTime_;
-}
-
-double Timer::MinElapseTimeSpan() const
-{
-	return 1.0 / CPS();
-}
-
-double Timer::CurrentTime() const
-{
-	LARGE_INTEGER count;
-	QueryPerformanceCounter(&count);
-	return static_cast<double>(count.QuadPart) / CPS();
-}
+#endif

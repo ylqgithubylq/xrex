@@ -14,81 +14,82 @@
 
 #include <limits>
 
+namespace XREX
+{
+	
+	struct Settings;
+	struct RenderingSettings;
 
+	class XREXContext;
+	class LocalResourceLoader;
+	class MeshLoader;
+	class TextureLoader;
+	class ResourceManager;
+	class RenderingFactory;
+	class RenderingEngine;
+	class InputCenter;
+	class Window;
+	class GLWindow;
 
-struct Settings;
-struct RenderingSettings;
+	class InputHandler;
+	typedef std::shared_ptr<InputHandler> InputHandlerSP;
+	class FreeRoamCameraController;
+	typedef std::shared_ptr<FreeRoamCameraController> FreeRoamCameraControllerSP;
 
-class Application;
-class LocalResourceLoader;
-class MeshLoader;
-class TextureLoader;
-class ResourceManager;
-class RenderingFactory;
-class RenderingEngine;
-class InputCenter;
-class Window;
-class GLWindow;
+	class Scene;
+	typedef std::shared_ptr<Scene> SceneSP;
+	class NaiveManagedScene;
+	typedef std::shared_ptr<NaiveManagedScene> NaiveManagedSceneSP;
 
-class InputHandler;
-typedef std::shared_ptr<InputHandler> InputHandlerSP;
-class FreeRoamCameraController;
-typedef std::shared_ptr<FreeRoamCameraController> FreeRoamCameraControllerSP;
+	class SceneObject;
+	typedef std::shared_ptr<SceneObject> SceneObjectSP;
+	class Component;
+	typedef std::shared_ptr<Component> ComponentSP;
 
-class Scene;
-typedef std::shared_ptr<Scene> SceneSP;
-class NaiveManagedScene;
-typedef std::shared_ptr<NaiveManagedScene> NaiveManagedSceneSP;
+	class Transformation;
+	typedef std::shared_ptr<Transformation> TransformationSP;
 
-class SceneObject;
-typedef std::shared_ptr<SceneObject> SceneObjectSP;
-class Component;
-typedef std::shared_ptr<Component> ComponentSP;
+	class Renderable;
+	typedef std::shared_ptr<Renderable> RenderableSP;
+	class Mesh;
+	typedef std::shared_ptr<Mesh> MeshSP;
+	class SubMesh;
+	typedef std::shared_ptr<SubMesh> SubMeshSP;
 
-class Transformation;
-typedef std::shared_ptr<Transformation> TransformationSP;
+	class RasterizerStateObject;
+	typedef std::shared_ptr<RasterizerStateObject> RasterizerStateObjectSP;
+	class DepthStencilStateObject;
+	typedef std::shared_ptr<DepthStencilStateObject> DepthStencilStateObjectSP;
+	class BlendStateObject;
+	typedef std::shared_ptr<BlendStateObject> BlendStateObjectSP;
+	class SamplerStateObject;
+	typedef std::shared_ptr<SamplerStateObject> SamplerStateObjectSP;
+	class ShaderObject;
+	typedef std::shared_ptr<ShaderObject> ShaderObjectSP;
+	class ProgramObject;
+	typedef std::shared_ptr<ProgramObject> ProgramObjectSP;
+	class EffectParameter;
+	typedef std::shared_ptr<EffectParameter> EffectParameterSP;
+	class RenderingEffect;
+	typedef std::shared_ptr<RenderingEffect> RenderingEffectSP;
+	class RenderingTechnique;
+	typedef std::shared_ptr<RenderingTechnique> RenderingTechniqueSP;
+	class RenderingPass;
+	typedef std::shared_ptr<RenderingPass> RenderingPassSP;
+	class Material;
+	typedef std::shared_ptr<Material> MaterialSP;
 
-class Renderable;
-typedef std::shared_ptr<Renderable> RenderableSP;
-class Mesh;
-typedef std::shared_ptr<Mesh> MeshSP;
-class SubMesh;
-typedef std::shared_ptr<SubMesh> SubMeshSP;
+	class RenderingLayout;
+	typedef std::shared_ptr<RenderingLayout> RenderingLayoutSP;
+	class GraphicsBuffer;
+	typedef std::shared_ptr<GraphicsBuffer> GraphicsBufferSP;
+	class Texture;
+	typedef std::shared_ptr<Texture> TextureSP;
 
-class RasterizerStateObject;
-typedef std::shared_ptr<RasterizerStateObject> RasterizerStateObjectSP;
-class DepthStencilStateObject;
-typedef std::shared_ptr<DepthStencilStateObject> DepthStencilStateObjectSP;
-class BlendStateObject;
-typedef std::shared_ptr<BlendStateObject> BlendStateObjectSP;
-class SamplerStateObject;
-typedef std::shared_ptr<SamplerStateObject> SamplerStateObjectSP;
-class ShaderObject;
-typedef std::shared_ptr<ShaderObject> ShaderObjectSP;
-class ProgramObject;
-typedef std::shared_ptr<ProgramObject> ProgramObjectSP;
-class EffectParameter;
-typedef std::shared_ptr<EffectParameter> EffectParameterSP;
-class RenderingEffect;
-typedef std::shared_ptr<RenderingEffect> RenderingEffectSP;
-class RenderingTechnique;
-typedef std::shared_ptr<RenderingTechnique> RenderingTechniqueSP;
-class RenderingPass;
-typedef std::shared_ptr<RenderingPass> RenderingPassSP;
-class Material;
-typedef std::shared_ptr<Material> MaterialSP;
+	class Camera;
+	typedef std::shared_ptr<Camera> CameraSP;
 
-class RenderingLayout;
-typedef std::shared_ptr<RenderingLayout> RenderingLayoutSP;
-class GraphicsBuffer;
-typedef std::shared_ptr<GraphicsBuffer> GraphicsBufferSP;
-class Texture;
-typedef std::shared_ptr<Texture> TextureSP;
-
-class Camera;
-typedef std::shared_ptr<Camera> CameraSP;
-
-
+}
 
 
 #include "BasicType.hpp"
@@ -98,14 +99,4 @@ typedef std::shared_ptr<Camera> CameraSP;
 #include "Color.hpp"
 
 #include "Util.hpp"
-
-
-// temp
-#include <CoreGL.hpp>
-
-inline uint32 GetGLError()
-{
-	return gl::GetError();
-}
-
 

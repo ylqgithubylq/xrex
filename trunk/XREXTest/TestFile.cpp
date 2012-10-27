@@ -1,17 +1,12 @@
-#include "XREX.hpp"
+#include <XREXAll.hpp>
 
 #include "TestFile.hpp"
-
-#include "Timer.hpp"
-
-#include "Transformation.hpp"
-
 
 #include <iostream>
 
 
 
-
+using namespace XREX;
 using namespace std;
 
 void TestFile::SQRTSpeedTest()

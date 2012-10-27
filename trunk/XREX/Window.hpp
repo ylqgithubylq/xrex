@@ -8,78 +8,87 @@
 #include <vector>
 
 
-
-
-class Window
-	: Noncopyable
+namespace XREX
 {
-public:
-	Window(std::wstring const& name, int32 left, int32 top, int32 width, int32 height);
-	virtual ~Window();
 
-	void StartHandlingMessages();
-
-	bool IsRendering() const
+	class XREX_API Window
+		: Noncopyable
 	{
-		return rendering_;
-	}
-	void SetRendering(bool rendering)
-	{
-		rendering_ = rendering;
-	}
+	public:
+		Window(std::wstring const& name, int32 left, int32 top, int32 width, int32 height);
+		virtual ~Window();
 
-protected:
-	void Recreate();
+		void StartHandlingMessages();
 
-	virtual void OnMessageIdle()
-	{
-	}
+		bool IsRendering() const
+		{
+			return rendering_;
+		}
+		void SetRendering(bool rendering)
+		{
+			rendering_ = rendering;
+		}
+		bool IsRunning() const
+		{
+			return running_;
+		}
+		void SetRunning(bool running)
+		{
+			running_ = running;
+		}
+	protected:
+		void Recreate();
 
-	/*
-	 *	@return: actual type is HWND, return void* to remove windows.h dependency from hpp.
-	 */
-	void* GetHWND() const;
+		virtual void OnMessageIdle()
+		{
+		}
+
+		/*
+		 *	@return: actual type is HWND, return void* to remove windows.h dependency from hpp.
+		 */
+		void* GetHWND() const;
 
 
-private:
-	static InputCenter::InputSemantic InputSemanticFromWindowsVK(uint32 winKey);
+	private:
+		static InputCenter::InputSemantic InputSemanticFromWindowsVK(uint32 winKey);
 
-private:
+	private:
 
-	void OnResize(uint32 width, uint32 height);
+		void OnResize(uint32 width, uint32 height);
 
-	void OnKeyDown(uint32 winKey);
-	void OnKeyUp(uint32 winKey);
-	void OnMouseDown(uint32 winKey, uint32 x, uint32 y);
-	void OnMouseUp(uint32 winKey, uint32 x, uint32 y);
-	void OnMouseWheel(uint32 winKey, uint32 x, uint32 y, int32 wheelDelta);
-	void OnMouseMove(uint32 winKey, uint32 x, uint32 y);
+		void OnKeyDown(uint32 winKey);
+		void OnKeyUp(uint32 winKey);
+		void OnMouseDown(uint32 winKey, uint32 x, uint32 y);
+		void OnMouseUp(uint32 winKey, uint32 x, uint32 y);
+		void OnMouseWheel(uint32 winKey, uint32 x, uint32 y, int32 wheelDelta);
+		void OnMouseMove(uint32 winKey, uint32 x, uint32 y);
 
-	uint32 DistinguishLeftRightShiftCtrlAlt(uint32 winKey, bool down);
+		uint32 DistinguishLeftRightShiftCtrlAlt(uint32 winKey, bool down);
 
-protected:
-	 // used to hide windows.h to the cpp file
-	struct HideWindows_;
-	std::unique_ptr<HideWindows_> hideWindows_;
+	protected:
+		 // used to hide windows.h to the cpp file
+		struct HideWindows_;
+		std::unique_ptr<HideWindows_> hideWindows_;
 
-	bool leftShift_;
-	bool rightShift_;
-	bool leftCtrl_;
-	bool rightCtrl_;
-	bool leftAlt_;
-	bool rightAlt_;
+		bool leftShift_;
+		bool rightShift_;
+		bool leftCtrl_;
+		bool rightCtrl_;
+		bool leftAlt_;
+		bool rightAlt_;
 
-	bool active_;
-	bool running_;
-	bool rendering_;
+		bool active_;
+		bool running_;
+		bool rendering_;
 
-	uint32 height_;
-	uint32 width_;
+		uint32 height_;
+		uint32 width_;
 
-	uint32 left_;
-	uint32 top_;
+		uint32 left_;
+		uint32 top_;
 
-	std::wstring name_;
+		std::wstring name_;
 
-};
+	};
 
+}

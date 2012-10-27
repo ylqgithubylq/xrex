@@ -2,13 +2,17 @@
 
 #include "Renderable.hpp"
 
-
-Renderable::Renderable()
-	: visible_(true)
+namespace XREX
 {
-};
+
+	Renderable::Renderable()
+		: visible_(true)
+	{
+	};
 
 
-Renderable::~Renderable()
-{
+	Renderable::~Renderable()
+	{
+	}
+
 }

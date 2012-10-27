@@ -2,12 +2,16 @@
 
 #include "Scene.hpp"
 
-
-Scene::Scene()
+namespace XREX
 {
-}
+
+	Scene::Scene()
+	{
+	}
 
 
-Scene::~Scene()
-{
+	Scene::~Scene()
+	{
+	}
+
 }

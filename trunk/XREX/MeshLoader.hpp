@@ -2,16 +2,20 @@
 
 #include "Declare.hpp"
 
-class MeshLoader
-	: Noncopyable
+namespace XREX
 {
-public:
-	MeshLoader();
-	~MeshLoader();
 
-	/*
-	 *	@return nullptr if failed.
-	 */
-	MeshSP LoadMesh(std::string const& fileName);
-};
+	class XREX_API MeshLoader
+		: Noncopyable
+	{
+	public:
+		MeshLoader();
+		~MeshLoader();
 
+		/*
+		 *	@return nullptr if failed.
+		 */
+		MeshSP LoadMesh(std::string const& fileName);
+	};
+
+}

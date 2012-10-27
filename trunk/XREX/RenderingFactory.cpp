@@ -2,12 +2,16 @@
 
 #include "RenderingFactory.hpp"
 
-
-RenderingFactory::RenderingFactory()
+namespace XREX
 {
-}
+
+	RenderingFactory::RenderingFactory()
+	{
+	}
 
 
-RenderingFactory::~RenderingFactory()
-{
+	RenderingFactory::~RenderingFactory()
+	{
+	}
+
 }

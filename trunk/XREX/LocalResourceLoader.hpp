@@ -4,24 +4,28 @@
 
 #include <string>
 
-class LocalResourceLoader
-	: Noncopyable
+namespace XREX
 {
-public:
-	LocalResourceLoader();
-	~LocalResourceLoader();
 
-	bool LoadString(std::string const& fileName, std::string* result);
-	bool LoadWString(std::string const& fileName, std::wstring* result);
+	class XREX_API LocalResourceLoader
+		: Noncopyable
+	{
+	public:
+		LocalResourceLoader();
+		~LocalResourceLoader();
 
-	MeshSP LoadMesh(std::string const& fileName);
-	TextureSP LoadTexture1D(std::string const& fileName);
-	TextureSP LoadTexture2D(std::string const& fileName);
-	TextureSP LoadTexture3D(std::string const& fileName);
-	TextureSP LoadTextureCube(std::string const& fileName);
+		bool LoadString(std::string const& fileName, std::string* result);
+		bool LoadWString(std::string const& fileName, std::wstring* result);
 
-private:
-	std::unique_ptr<MeshLoader> meshLoader_;
-	std::unique_ptr<TextureLoader> textureLoader_;
-};
+		MeshSP LoadMesh(std::string const& fileName);
+		TextureSP LoadTexture1D(std::string const& fileName);
+		TextureSP LoadTexture2D(std::string const& fileName);
+		TextureSP LoadTexture3D(std::string const& fileName);
+		TextureSP LoadTextureCube(std::string const& fileName);
 
+	private:
+		std::unique_ptr<MeshLoader> meshLoader_;
+		std::unique_ptr<TextureLoader> textureLoader_;
+	};
+
+}

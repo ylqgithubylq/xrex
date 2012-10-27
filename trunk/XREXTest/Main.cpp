@@ -1,29 +1,6 @@
-#include "XREX.hpp"
+#include <XREXAll.hpp>
 
-
-#include "Settings.hpp"
-#include "GLWindow.hpp"
-#include "RenderingFactory.hpp"
-#include "RenderingEngine.hpp"
-#include "LocalResourceLoader.hpp"
-#include "Shader.hpp"
-#include "RenderingEffect.hpp"
-#include "GraphicsBuffer.hpp"
-#include "RenderingLayout.hpp"
-#include "Mesh.hpp"
-#include "GLUtil.hpp"
-#include "SceneObject.hpp"
-#include "Transformation.hpp"
-#include "Camera.hpp"
-#include "Scene.hpp"
-#include "NaiveManagedScene.hpp"
-#include "Timer.hpp"
-#include "FreeRoamCameraController.hpp"
-#include "InputCenter.hpp"
-#include "Material.hpp"
-#include "ResourceManager.hpp"
-
-#include <CoreGL.hpp>
+//#include <CoreGL.hpp>
 
 //#include <CoreGL.h>
 
@@ -37,7 +14,7 @@
 
 
 
-
+using namespace XREX;
 using namespace std;
 
 
@@ -110,16 +87,16 @@ struct TempScene
 
 		assert(indexData.size() == 36);
 
-		ProgramObjectSP program = Application::GetInstance().GetRenderingFactory().CreateProgramObject();
+		ProgramObjectSP program = XREXContext::GetInstance().GetRenderingFactory().CreateProgramObject();
 		string shaderString;
 		string shaderFile = "../../Effects/Test.glsl";
-		if (!Application::GetInstance().GetResourceLoader().LoadString(shaderFile, &shaderString))
+		if (!XREXContext::GetInstance().GetResourceLoader().LoadString(shaderFile, &shaderString))
 		{
 			cerr << "file not found. file: " << shaderFile << endl;
 		}
 
-		ShaderObjectSP vs = Application::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::VertexShader, shaderString);
-		ShaderObjectSP fs = Application::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::FragmentShader, shaderString);
+		ShaderObjectSP vs = XREXContext::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::VertexShader, shaderString);
+		ShaderObjectSP fs = XREXContext::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::FragmentShader, shaderString);
 
 		if (!vs->IsValidate())
 		{
@@ -137,15 +114,15 @@ struct TempScene
 			cerr << program->GetLinkError() << endl;
 			return;
 		}
-		ProgramObjectSP cubeProgram = Application::GetInstance().GetRenderingFactory().CreateProgramObject();
+		ProgramObjectSP cubeProgram = XREXContext::GetInstance().GetRenderingFactory().CreateProgramObject();
 		shaderFile = "../../Effects/TestCube.glsl";
-		if (!Application::GetInstance().GetResourceLoader().LoadString(shaderFile, &shaderString))
+		if (!XREXContext::GetInstance().GetResourceLoader().LoadString(shaderFile, &shaderString))
 		{
 			cerr << "file not found. file: " << shaderFile << endl;
 		}
 
-		vs = Application::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::VertexShader, shaderString);
-		fs = Application::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::FragmentShader, shaderString);
+		vs = XREXContext::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::VertexShader, shaderString);
+		fs = XREXContext::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::FragmentShader, shaderString);
 
 
 		if (!vs->IsValidate())
@@ -175,13 +152,13 @@ struct TempScene
 		blendState.sourceBlendAlpha = RenderingPipelineState::AlphaBlendFactor::SourceAlpha;
 		blendState.destinationBlend = RenderingPipelineState::AlphaBlendFactor::OneMinusSourceAlpha;
 		blendState.destinationBlendAlpha = RenderingPipelineState::AlphaBlendFactor::OneMinusSourceAlpha;
-		RasterizerStateObjectSP rso = Application::GetInstance().GetRenderingFactory().CreateRasterizerStateObject(resterizerState);
-		DepthStencilStateObjectSP dsso = Application::GetInstance().GetRenderingFactory().CreateDepthStencilStateObject(depthStencilState);
-		BlendStateObjectSP bso = Application::GetInstance().GetRenderingFactory().CreateBlendStateObject(blendState);
+		RasterizerStateObjectSP rso = XREXContext::GetInstance().GetRenderingFactory().CreateRasterizerStateObject(resterizerState);
+		DepthStencilStateObjectSP dsso = XREXContext::GetInstance().GetRenderingFactory().CreateDepthStencilStateObject(depthStencilState);
+		BlendStateObjectSP bso = XREXContext::GetInstance().GetRenderingFactory().CreateBlendStateObject(blendState);
 		
 
-		GraphicsBufferSP vertices = Application::GetInstance().GetRenderingFactory().CreateGraphicsVertexBuffer(GraphicsBuffer::Usage::Static, vertexData, "position");
-		GraphicsBufferSP indices = Application::GetInstance().GetRenderingFactory().CreateGraphicsIndexBuffer(GraphicsBuffer::Usage::Static, indexData);
+		GraphicsBufferSP vertices = XREXContext::GetInstance().GetRenderingFactory().CreateGraphicsVertexBuffer(GraphicsBuffer::Usage::Static, vertexData, "position");
+		GraphicsBufferSP indices = XREXContext::GetInstance().GetRenderingFactory().CreateGraphicsIndexBuffer(GraphicsBuffer::Usage::Static, indexData);
 		RenderingLayoutSP layout = MakeSP<RenderingLayout>(vector<GraphicsBufferSP>(1, vertices), indices, RenderingLayout::DrawingMode::Triangles);
 
 		MeshSP cubeMesh = MakeSP<Mesh>("cube mesh");
@@ -205,11 +182,11 @@ struct TempScene
 			centerPosition_ = centerPosition->GetValue<floatV3>();
 		}
 		camera_ = MakeSP<SceneObject>("camera");
-		Settings const& settings = Application::GetInstance().GetSettings();
+		Settings const& settings = XREXContext::GetInstance().GetSettings();
 		CameraSP camera = MakeSP<Camera>(PI / 4, static_cast<float>(settings.renderingSettings.width) / settings.renderingSettings.height, 1.f, 10000.0f);
 		camera_->SetComponent(camera);
 
-		scene_ = Application::GetInstance().GetRenderingEngine().GetScene();
+		scene_ = XREXContext::GetInstance().GetRenderingEngine().GetScene();
 		scene_->AddObject(camera_);
 
 
@@ -283,12 +260,12 @@ struct TempScene
 		FreeRoamCameraControllerSP cameraController = MakeSP<FreeRoamCameraController>();
 		cameraController->InitializeActionMap();
 		cameraController->AttachToCamera(camera_);
-		Application::GetInstance().GetInputCenter().AddInputHandler(cameraController);
+		XREXContext::GetInstance().GetInputCenter().AddInputHandler(cameraController);
 		// 		wMatrix->SetValue(translate * rotation);
-		Application::GetInstance().GetResourceManager().AddResourceLocation("Data/");
-		MeshSP model = Application::GetInstance().GetResourceManager().GetModel("crytek-sponza/sponza.obj");
-		//MeshSP model = Application::GetInstance().GetResourceManager().GetModel("sibenik/sibenik.obj");
-		//MeshSP model = Application::GetInstance().GetResourceManager().GetModel("rungholt/rungholt.obj");
+		XREXContext::GetInstance().GetResourceManager().AddResourceLocation("Data/");
+		MeshSP model = XREXContext::GetInstance().GetResourceManager().GetModel("crytek-sponza/sponza.obj");
+		//MeshSP model = XREXContext::GetInstance().GetResourceManager().GetModel("sibenik/sibenik.obj");
+		//MeshSP model = XREXContext::GetInstance().GetResourceManager().GetModel("rungholt/rungholt.obj");
 		for (auto& subMesh : model->GetAllSubMeshes())
 		{
 			subMesh->SetEffect(effect);
@@ -330,7 +307,7 @@ struct TempScene
 
 void Main() 
 {
-	Settings settings;
+	Settings settings("../../");
 	settings.windowTitle = L"GL4 window";
 
 	settings.renderingSettings.colorBits = 32;
@@ -343,22 +320,22 @@ void Main()
 	settings.renderingSettings.width = 800;
 	settings.renderingSettings.height = 600;
 
-	Application::GetInstance().Initialize(settings);
+	XREXContext::GetInstance().Initialize(settings);
 	TempScene s;
 	s.InitializeScene();
 
 	function<void(double current, double delta)> f = [&s] (double current, double delta)
 	{
-		assert(gl::GetError() == gl::GL_NO_ERROR);
+		//assert(gl::GetError() == gl::GL_NO_ERROR);
 		s(current, delta);
 	};
-	Application::GetInstance().GetRenderingEngine().SetRenderingFunction(f);
+	XREXContext::GetInstance().GetRenderingEngine().SetRenderingFunction(f);
 
 	//assert(testmain(0, nullptr) == 0);
-	//Application::GetInstance().GetRenderingEngine().SetRenderingFunction(function<void(double,double)>(DrawHelper));
+	//XREXContext::GetInstance().GetRenderingEngine().SetRenderingFunction(function<void(double,double)>(DrawHelper));
 
 
-	Application::GetInstance().Start();
+	XREXContext::GetInstance().Start();
 
 
 }
