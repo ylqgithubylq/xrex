@@ -3,54 +3,56 @@
 
 #include "Window.hpp"
 
-#include "Application.hpp"
+#include "XREXContext.hpp"
 #include "RenderingEngine.hpp"
 
 #include <memory>
 
 
-
-
-
-class GLWindow
-	: public Window
+namespace XREX
 {
-public:
-	GLWindow(std::wstring const& name, RenderingSettings const& settings);
-	virtual ~GLWindow() override;
 
-	void Destory();
 
-	void SwapBuffers();
-
-	int32 GetMajorVersion() const
+	class XREX_API GLWindow
+		: public Window
 	{
-		return majorVersion_;
-	}
-	int32 GetMinorVersion() const
-	{
-		return minorVersion_;
-	}
-protected:
-	virtual void OnMessageIdle() override
-	{
-		Application::GetInstance().RenderAFrame();
-		SwapBuffers();
-	}
+	public:
+		GLWindow(std::wstring const& name, RenderingSettings const& settings);
+		virtual ~GLWindow() override;
 
-private:
-	// used to hide windows.h to the cpp file
-	struct GLHideWindows_;
-	std::unique_ptr<GLHideWindows_> glHideWindows_;
+		void Destory();
 
-	int32 majorVersion_;
-	int32 minorVersion_;
+		void SwapBuffers();
 
-	uint32 colorBits_;
-	uint32 depthBits_;
-	uint32 stencilBits_;
-	uint32 sampleCount_;
+		int32 GetMajorVersion() const
+		{
+			return majorVersion_;
+		}
+		int32 GetMinorVersion() const
+		{
+			return minorVersion_;
+		}
+	protected:
+		virtual void OnMessageIdle() override
+		{
+			XREXContext::GetInstance().RenderAFrame();
+			SwapBuffers();
+		}
 
-	std::string description_;
-};
+	private:
+		// used to hide windows.h to the cpp file
+		struct GLHideWindows_;
+		std::unique_ptr<GLHideWindows_> glHideWindows_;
 
+		int32 majorVersion_;
+		int32 minorVersion_;
+
+		uint32 colorBits_;
+		uint32 depthBits_;
+		uint32 stencilBits_;
+		uint32 sampleCount_;
+
+		std::string description_;
+	};
+
+}

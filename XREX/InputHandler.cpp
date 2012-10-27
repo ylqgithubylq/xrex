@@ -2,32 +2,35 @@
 
 #include "InputHandler.hpp"
 
-
-InputHandler::InputHandler()
-	: initialized_(false)
+namespace XREX
 {
-}
 
-
-InputHandler::~InputHandler()
-{
-}
-
-void InputHandler::OnAction(uint32 mappedSemantic, int32 data, VectorT<int32, 2> pointerPosition, double currentTime)
-{
-	std::function<void()> action;
-	if (GenerateAction(mappedSemantic, data, pointerPosition, currentTime, &action))
+	InputHandler::InputHandler()
+		: initialized_(false)
 	{
-		Application::GetInstance().GetInputCenter().EnqueueAction(std::move(action));
 	}
-}
 
-void InputHandler::OnBeforeLogicFrame(double currentTime)
-{
-	std::function<void()> action;
-	if (DoOnBeforeLogicFrame(currentTime, &action))
+
+	InputHandler::~InputHandler()
 	{
-		Application::GetInstance().GetInputCenter().EnqueueAction(std::move(action));
 	}
-}
 
+	void InputHandler::OnAction(uint32 mappedSemantic, int32 data, VectorT<int32, 2> pointerPosition, double currentTime)
+	{
+		std::function<void()> action;
+		if (GenerateAction(mappedSemantic, data, pointerPosition, currentTime, &action))
+		{
+			XREXContext::GetInstance().GetInputCenter().EnqueueAction(std::move(action));
+		}
+	}
+
+	void InputHandler::OnBeforeLogicFrame(double currentTime)
+	{
+		std::function<void()> action;
+		if (DoOnBeforeLogicFrame(currentTime, &action))
+		{
+			XREXContext::GetInstance().GetInputCenter().EnqueueAction(std::move(action));
+		}
+	}
+
+}

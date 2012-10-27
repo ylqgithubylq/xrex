@@ -5,66 +5,68 @@
 
 #include <vector>
 
-
-
-class SceneObject
-	: public std::enable_shared_from_this<SceneObject>, Noncopyable
+namespace XREX
 {
-public:
-	static SceneObjectSP const NullSceneObject;
-public:
-	SceneObject();
-	explicit SceneObject(std::string const& name);
-	~SceneObject();
 
-	std::string const& GetName() const
+	class XREX_API SceneObject
+		: public std::enable_shared_from_this<SceneObject>, Noncopyable
 	{
-		return name_;
-	}
+	public:
+		static SceneObjectSP const NullSceneObject;
+	public:
+		SceneObject();
+		explicit SceneObject(std::string const& name);
+		~SceneObject();
 
-	bool HasComponent(Component::ComponentType type) const
-	{
-		return components_[static_cast<uint32>(type)] != nullptr;
-	}
-	template <typename T>
-	bool HasComponent() const
-	{
-		return components_[static_cast<uint32>(Component::TypeToComponentType<T>::Type)] != nullptr;
-	}
+		std::string const& GetName() const
+		{
+			return name_;
+		}
 
-	ComponentSP RemoveComponent(Component::ComponentType type)
-	{
-		ComponentSP component = components_[static_cast<uint32>(type)];
-		components_[static_cast<uint32>(type)] = nullptr;
-		return component;
-	}
+		bool HasComponent(Component::ComponentType type) const
+		{
+			return components_[static_cast<uint32>(type)] != nullptr;
+		}
+		template <typename T>
+		bool HasComponent() const
+		{
+			return components_[static_cast<uint32>(Component::TypeToComponentType<T>::Type)] != nullptr;
+		}
 
-	template <typename T>
-	std::shared_ptr<T> RemoveComponent()
-	{
-		ComponentSP component = components_[static_cast<uint32>(Component::TypeToComponentType<T>::Type)];
-		components_[static_cast<uint32>(Component::TypeToComponentType<T>::Type)] = nullptr;
-		return CheckedSPCast<T>(component);
-	}
+		ComponentSP RemoveComponent(Component::ComponentType type)
+		{
+			ComponentSP component = components_[static_cast<uint32>(type)];
+			components_[static_cast<uint32>(type)] = nullptr;
+			return component;
+		}
 
-	/*
-	 *	Set an instance of a subclass of Component into this object, one instance per a subclass can be set in.
-	 */
-	void SetComponent(ComponentSP const& component);
+		template <typename T>
+		std::shared_ptr<T> RemoveComponent()
+		{
+			ComponentSP component = components_[static_cast<uint32>(Component::TypeToComponentType<T>::Type)];
+			components_[static_cast<uint32>(Component::TypeToComponentType<T>::Type)] = nullptr;
+			return CheckedSPCast<T>(component);
+		}
 
-	ComponentSP const& GetComponent(Component::ComponentType type) const
-	{
-		return	components_[static_cast<uint32>(type)];
-	}
-	template <typename T>
-	std::shared_ptr<T> GetComponent() const
-	{
-		ComponentSP const& comonent = components_[static_cast<uint32>(Component::TypeToComponentType<T>::Type)];
-		return CheckedSPCast<T>(comonent); // shared_ptr_cast create a new shared_ptr object.
-	}
+		/*
+		 *	Set an instance of a subclass of Component into this object, one instance per a subclass can be set in.
+		 */
+		void SetComponent(ComponentSP const& component);
 
-private:
-	std::vector<ComponentSP> components_;
-	std::string name_;
-};
+		ComponentSP const& GetComponent(Component::ComponentType type) const
+		{
+			return	components_[static_cast<uint32>(type)];
+		}
+		template <typename T>
+		std::shared_ptr<T> GetComponent() const
+		{
+			ComponentSP const& comonent = components_[static_cast<uint32>(Component::TypeToComponentType<T>::Type)];
+			return CheckedSPCast<T>(comonent); // shared_ptr_cast create a new shared_ptr object.
+		}
 
+	private:
+		std::vector<ComponentSP> components_;
+		std::string name_;
+	};
+
+}

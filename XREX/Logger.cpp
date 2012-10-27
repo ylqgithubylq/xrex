@@ -2,12 +2,16 @@
 
 #include "Logger.hpp"
 
-
-Logger::Logger()
+namespace XREX
 {
-}
+
+	Logger::Logger()
+	{
+	}
 
 
-Logger::~Logger()
-{
+	Logger::~Logger()
+	{
+	}
+
 }

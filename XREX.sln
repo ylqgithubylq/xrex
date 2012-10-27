@@ -1,0 +1,51 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CPPTest", "CPPTest\CPPTest.vcxproj", "{D4CD4D33-D488-4177-9D07-2AF8BC8E30EB}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "XREX", "XREX\XREX.vcxproj", "{A6418138-949C-4E1A-AD48-36B5BAC8CCAE}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "XREXTest", "XREXTest\XREXTest.vcxproj", "{EE954CC3-2258-4AD7-9EF6-3491D023E24C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8DBC71BB-9530-48EC-8924-2A4ACC8B7D74}"
+	ProjectSection(SolutionItems) = preProject
+		TempNote.txt = TempNote.txt
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Debug-Static|Win32 = Debug-Static|Win32
+		Release|Win32 = Release|Win32
+		Release-Static|Win32 = Release-Static|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D4CD4D33-D488-4177-9D07-2AF8BC8E30EB}.Debug|Win32.ActiveCfg = Debug|Win32
+		{D4CD4D33-D488-4177-9D07-2AF8BC8E30EB}.Debug|Win32.Build.0 = Debug|Win32
+		{D4CD4D33-D488-4177-9D07-2AF8BC8E30EB}.Debug-Static|Win32.ActiveCfg = Debug|Win32
+		{D4CD4D33-D488-4177-9D07-2AF8BC8E30EB}.Debug-Static|Win32.Build.0 = Debug|Win32
+		{D4CD4D33-D488-4177-9D07-2AF8BC8E30EB}.Release|Win32.ActiveCfg = Release|Win32
+		{D4CD4D33-D488-4177-9D07-2AF8BC8E30EB}.Release|Win32.Build.0 = Release|Win32
+		{D4CD4D33-D488-4177-9D07-2AF8BC8E30EB}.Release-Static|Win32.ActiveCfg = Release|Win32
+		{D4CD4D33-D488-4177-9D07-2AF8BC8E30EB}.Release-Static|Win32.Build.0 = Release|Win32
+		{A6418138-949C-4E1A-AD48-36B5BAC8CCAE}.Debug|Win32.ActiveCfg = Debug|Win32
+		{A6418138-949C-4E1A-AD48-36B5BAC8CCAE}.Debug|Win32.Build.0 = Debug|Win32
+		{A6418138-949C-4E1A-AD48-36B5BAC8CCAE}.Debug-Static|Win32.ActiveCfg = Debug-Static|Win32
+		{A6418138-949C-4E1A-AD48-36B5BAC8CCAE}.Debug-Static|Win32.Build.0 = Debug-Static|Win32
+		{A6418138-949C-4E1A-AD48-36B5BAC8CCAE}.Release|Win32.ActiveCfg = Release|Win32
+		{A6418138-949C-4E1A-AD48-36B5BAC8CCAE}.Release|Win32.Build.0 = Release|Win32
+		{A6418138-949C-4E1A-AD48-36B5BAC8CCAE}.Release-Static|Win32.ActiveCfg = Release-Static|Win32
+		{A6418138-949C-4E1A-AD48-36B5BAC8CCAE}.Release-Static|Win32.Build.0 = Release-Static|Win32
+		{EE954CC3-2258-4AD7-9EF6-3491D023E24C}.Debug|Win32.ActiveCfg = Debug|Win32
+		{EE954CC3-2258-4AD7-9EF6-3491D023E24C}.Debug|Win32.Build.0 = Debug|Win32
+		{EE954CC3-2258-4AD7-9EF6-3491D023E24C}.Debug-Static|Win32.ActiveCfg = Debug|Win32
+		{EE954CC3-2258-4AD7-9EF6-3491D023E24C}.Debug-Static|Win32.Build.0 = Debug|Win32
+		{EE954CC3-2258-4AD7-9EF6-3491D023E24C}.Release|Win32.ActiveCfg = Release|Win32
+		{EE954CC3-2258-4AD7-9EF6-3491D023E24C}.Release|Win32.Build.0 = Release|Win32
+		{EE954CC3-2258-4AD7-9EF6-3491D023E24C}.Release-Static|Win32.ActiveCfg = Release|Win32
+		{EE954CC3-2258-4AD7-9EF6-3491D023E24C}.Release-Static|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

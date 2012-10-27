@@ -2,17 +2,21 @@
 
 #include "Declare.hpp"
 
-class Logger
-	: Noncopyable
+namespace XREX
 {
 
-public:
-	Logger();
-	virtual ~Logger();
+	class XREX_API Logger
+		: Noncopyable
+	{
 
-	void Log(std::string const& message);
-	void Warn(std::string const& message);
-	void Error(std::string const& message);
+	public:
+		Logger();
+		virtual ~Logger();
 
-};
+		void Log(std::string const& message);
+		void Warn(std::string const& message);
+		void Error(std::string const& message);
 
+	};
+
+}

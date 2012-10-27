@@ -4,6 +4,11 @@
 
 #include "Util.hpp"
 
-uint32 GLTypeFromElementType(ElementType type);
+namespace XREX
+{
 
-void SetGLState(uint32 glState, bool on);
+	XREX_API uint32 GLTypeFromElementType(ElementType type);
+
+	XREX_API void SetGLState(uint32 glState, bool on);
+
+}

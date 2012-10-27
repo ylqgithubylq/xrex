@@ -2,12 +2,16 @@
 
 #include "Component.hpp"
 
-
-Component::Component()
+namespace XREX
 {
-}
+
+	Component::Component()
+	{
+	}
 
 
-Component::~Component()
-{
+	Component::~Component()
+	{
+	}
+
 }

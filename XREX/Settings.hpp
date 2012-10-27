@@ -4,30 +4,37 @@
 
 #include <string>
 
-
-
-struct RenderingSettings
+namespace XREX
 {
-public:
 
-	bool fullScreen;
+	struct XREX_API RenderingSettings
+	{
 
-	int32 left;
-	int32 top;
-	int32 width;
-	int32 height;
+		bool fullScreen;
 
-	uint32 colorBits;
-	uint32 depthBits;
-	uint32 stencilBits;
+		int32 left;
+		int32 top;
+		int32 width;
+		int32 height;
 
-	uint32 sampleCount;
+		uint32 colorBits;
+		uint32 depthBits;
+		uint32 stencilBits;
 
-};
+		uint32 sampleCount;
 
-struct Settings
-{
-	RenderingSettings renderingSettings;
-	std::wstring windowTitle;
-};
+		RenderingSettings();
+	};
 
+	struct XREX_API Settings
+	{
+		RenderingSettings renderingSettings;
+		std::wstring windowTitle;
+		std::string rootPath;
+		Settings(std::string const& theRootPath)
+			: rootPath(theRootPath)
+		{
+		}
+	};
+
+}

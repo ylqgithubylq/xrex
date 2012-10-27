@@ -6,69 +6,74 @@
 #include "SceneObject.hpp"
 #include "Transformation.hpp"
 
-/*
- *	+z is the front direction.
- */
-class Camera
-	: public TemplateComponent<Camera>
+
+namespace XREX
 {
-public:
-	static Color const DefaultBackgroundColor;
-public:
-	Camera(float fieldOfView, float aspectRatio, float near, float far);
-	virtual ~Camera() override;
-
-	bool IsActive() const
+	/*
+	 *	+z is the front direction.
+	 */
+	class XREX_API Camera
+		: public TemplateComponent<Camera>
 	{
-		return active_;
-	}
-	void SetActive(bool active)
-	{
-		active_ = active;
-	}
+	public:
+		static Color const DefaultBackgroundColor;
+	public:
+		Camera(float fieldOfView, float aspectRatio, float near, float far);
+		virtual ~Camera() override;
 
-	floatM44 GetViewMatrix() const
-	{
-		Update();
-		return viewMatrix_;
-	}
+		bool IsActive() const
+		{
+			return active_;
+		}
+		void SetActive(bool active)
+		{
+			active_ = active;
+		}
 
-	floatM44 GetProjectionMatrix() const
-	{
-		Update();
-		return projectionMatrix_;
-	}
+		floatM44 GetViewMatrix() const
+		{
+			Update();
+			return viewMatrix_;
+		}
 
-
-
-	void SetBackgroundColor(Color const& color)
-	{
-		backgroundColor_ = color;
-	}
-	Color const& GetBackgroundColor() const
-	{
-		return backgroundColor_;
-	}
-
-private:
-	void Update() const;
+		floatM44 GetProjectionMatrix() const
+		{
+			Update();
+			return projectionMatrix_;
+		}
 
 
-private:
-	float fieldOfView_;
-	float aspectRatio_;
-	float near_;
-	float far_;
 
-	floatM44 mutable viewMatrix_;
-	floatM44 mutable projectionMatrix_;
+		void SetBackgroundColor(Color const& color)
+		{
+			backgroundColor_ = color;
+		}
+		Color const& GetBackgroundColor() const
+		{
+			return backgroundColor_;
+		}
+
+	private:
+		void Update() const;
 
 
-	Color backgroundColor_;
+	private:
+		float fieldOfView_;
+		float aspectRatio_;
+		float near_;
+		float far_;
 
-	bool active_;
+		floatM44 mutable viewMatrix_;
+		floatM44 mutable projectionMatrix_;
 
-	bool mutable dirty_;
 
-};
+		Color backgroundColor_;
+
+		bool active_;
+
+		bool mutable dirty_;
+
+	};
+
+}
 

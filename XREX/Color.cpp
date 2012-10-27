@@ -2,3 +2,7 @@
 
 #include "Color.hpp"
 
+namespace XREX
+{
+
+}
