@@ -324,6 +324,7 @@ void Main()
 	TempScene s;
 	s.InitializeScene();
 
+
 	function<void(double current, double delta)> f = [&s] (double current, double delta)
 	{
 		//assert(gl::GetError() == gl::GL_NO_ERROR);
@@ -353,6 +354,9 @@ int main()
 	t.TestTransformation();
 	Main();
 
+	shared_ptr<int> isp = MakeSP<int>(1);
+	unique_ptr<int> iup = MakeUP<int>(1);
+	
 // 	struct LeakTest
 // 	{
 // 		shared_ptr<LeakTest> p;
@@ -365,22 +369,22 @@ int main()
 }
 
 //memory leak check
-// 
-// #define _CRTDBG_MAP_ALLOC
-// #include <crtdbg.h>
-// 
-// struct DML
-// {
-// 	~DML()
-// 	{
-// 		if (_CrtDumpMemoryLeaks())
-// 		{
-// 			cout << "memory leaks." << endl;
-// 		}
-// 		else
-// 		{
-// 			cout << "no memeory leaks." << endl;
-// 		}
-// 		cin.get();
-// 	}
-// } _dml;
+
+#define _CRTDBG_MAP_ALLOC
+#include <crtdbg.h>
+
+struct DML
+{
+	~DML()
+	{
+		if (_CrtDumpMemoryLeaks())
+		{
+			cout << "memory leaks." << endl;
+		}
+		else
+		{
+			cout << "no memeory leaks." << endl;
+		}
+		cin.get();
+	}
+} _dml;

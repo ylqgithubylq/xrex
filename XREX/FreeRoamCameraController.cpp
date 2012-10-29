@@ -31,7 +31,7 @@ namespace XREX
 		return true;
 	}
 
-	bool FreeRoamCameraController::GenerateAction(uint32 mappedSemantic, int32 data, VectorT<int32, 2> pointerPosition,
+	bool FreeRoamCameraController::GenerateAction(uint32 mappedSemantic, int32 data, intV2 pointerPosition,
 		double currentTime, function<void()>* generatedAction)
 	{
 		switch (static_cast<RoamSemantic>(mappedSemantic))

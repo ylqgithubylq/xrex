@@ -32,7 +32,7 @@ namespace XREX
 		Renderable();
 		virtual ~Renderable() override;
 
-		virtual std::vector<RenderablePack> GetRenderablePack(SceneObjectSP const& camera) const = 0;
+		virtual std::vector<RenderablePack> GetRenderablePack(SceneObjectSP const& camera) = 0;
 
 		bool IsVisible() const
 		{

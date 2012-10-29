@@ -77,7 +77,7 @@ namespace XREX
 			return actionMap_;
 		}
 
-		void OnAction(uint32 mappedSemantic, int32 data, VectorT<int32, 2> pointerPosition, double currentTime);
+		void OnAction(uint32 mappedSemantic, int32 data, intV2 pointerPosition, double currentTime);
 
 		void OnBeforeLogicFrame(double currentTime);
 
@@ -99,7 +99,7 @@ namespace XREX
 		 *	@data: if event is Key/Mouse Down, data is 1, Key/Mouse Up, data is 0. else if event is mouse wheel, data is the wheel delta.
 		 *	@return: true indicates action generated.
 		 */
-		virtual bool GenerateAction(uint32 mappedSemantic, int32 data, VectorT<int32, 2> pointerPosition, double currentTime, std::function<void()>* generatedAction) = 0;
+		virtual bool GenerateAction(uint32 mappedSemantic, int32 data, intV2 pointerPosition, double currentTime, std::function<void()>* generatedAction) = 0;
 
 		ActionMap& GetMutableActionMap()
 		{
