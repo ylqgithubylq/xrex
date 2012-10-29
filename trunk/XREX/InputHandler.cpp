@@ -15,7 +15,7 @@ namespace XREX
 	{
 	}
 
-	void InputHandler::OnAction(uint32 mappedSemantic, int32 data, VectorT<int32, 2> pointerPosition, double currentTime)
+	void InputHandler::OnAction(uint32 mappedSemantic, int32 data, intV2 pointerPosition, double currentTime)
 	{
 		std::function<void()> action;
 		if (GenerateAction(mappedSemantic, data, pointerPosition, currentTime, &action))

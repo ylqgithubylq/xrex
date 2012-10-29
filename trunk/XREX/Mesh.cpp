@@ -42,7 +42,7 @@ namespace XREX
 
 
 
-	vector<Renderable::RenderablePack> Mesh::GetRenderablePack(SceneObjectSP const& camera) const 
+	vector<Renderable::RenderablePack> Mesh::GetRenderablePack(SceneObjectSP const& camera)
 	{
 		std::vector<RenderablePack> renderablePacks;
 		for (uint32 i = 0; i < subMeshes_.size(); ++i)

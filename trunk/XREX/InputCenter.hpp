@@ -205,12 +205,12 @@ namespace XREX
 			return semanticStates_[static_cast<uint32>(semantic)];
 		}
 
-		VectorT<int32, 2> GetPointerPosition() const
+		intV2 GetPointerPosition() const
 		{
 			return pointerPosition_;
 		}
 
-		VectorT<int32, 2> GetPreviousPointerPosition() const
+		intV2 GetPreviousPointerPosition() const
 		{
 			return previousPointerPosition_;
 		}
@@ -270,8 +270,8 @@ namespace XREX
 
 	private:
 		std::vector<bool> semanticStates_;
-		VectorT<int32, 2> previousPointerPosition_;
-		VectorT<int32, 2> pointerPosition_;
+		intV2 previousPointerPosition_;
+		intV2 pointerPosition_;
 
 		std::unordered_set<InputHandlerSP> inputHandlers_;
 

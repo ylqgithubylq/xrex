@@ -45,7 +45,7 @@ namespace XREX
 
 		virtual ActionMap GenerateActionMap() override;
 
-		virtual bool GenerateAction(uint32 mappedSemantic, int32 data, VectorT<int32, 2> pointerPosition,
+		virtual bool GenerateAction(uint32 mappedSemantic, int32 data, intV2 pointerPosition,
 			double currentTime, std::function<void()>* generatedAction) override;
 
 	private:
@@ -63,7 +63,7 @@ namespace XREX
 		float speedScaler_;
 
 		double previousFrameTime_;
-		VectorT<int32, 2> previousPointerPosition_;
+		intV2 previousPointerPosition_;
 
 		std::vector<int32> semanticStates_;
 		int32 forward_;

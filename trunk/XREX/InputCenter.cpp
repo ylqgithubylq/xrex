@@ -73,7 +73,7 @@ namespace XREX
 	{
 		semanticStates_[static_cast<uint32>(semantic)] = true;
 		previousPointerPosition_ = pointerPosition_;
-		pointerPosition_ = VectorT<int32, 2>(x, y);
+		pointerPosition_ = intV2(x, y);
 		DispatchInputEvent(semantic, static_cast<uint32>(true));
 	}
 
@@ -81,21 +81,21 @@ namespace XREX
 	{
 		semanticStates_[static_cast<uint32>(semantic)] = false;
 		previousPointerPosition_ = pointerPosition_;
-		pointerPosition_ = VectorT<int32, 2>(x, y);
+		pointerPosition_ = intV2(x, y);
 		DispatchInputEvent(semantic, static_cast<uint32>(false));
 	}
 
 	void InputCenter::GenerateMouseWheel(InputSemantic semantic, int32 x, int32 y, int32 wheelDelta)
 	{
 		previousPointerPosition_ = pointerPosition_;
-		pointerPosition_ = VectorT<int32, 2>(x, y);
+		pointerPosition_ = intV2(x, y);
 		DispatchInputEvent(semantic, wheelDelta);
 	}
 
 	void InputCenter::GenerateMouseMove(InputSemantic semantic, int32 x, int32 y)
 	{
 		previousPointerPosition_ = pointerPosition_;
-		pointerPosition_ = VectorT<int32, 2>(x, y);
+		pointerPosition_ = intV2(x, y);
 		DispatchInputEvent(semantic, 0);
 	}
 

@@ -258,4 +258,19 @@ namespace XREX
 	typedef VectorT<float, 3> floatV3;
 	typedef VectorT<float, 4> floatV4;
 
+	typedef VectorT<double, 1> doubleV1;
+	typedef VectorT<double, 2> doubleV2;
+	typedef VectorT<double, 3> doubleV3;
+	typedef VectorT<double, 4> doubleV4;
+
+	typedef VectorT<int32, 1> intV1;
+	typedef VectorT<int32, 2> intV2;
+	typedef VectorT<int32, 3> intV3;
+	typedef VectorT<int32, 4> intV4;
+
+	typedef VectorT<uint32, 1> uintV1;
+	typedef VectorT<uint32, 2> uintV2;
+	typedef VectorT<uint32, 3> uintV3;
+	typedef VectorT<uint32, 4> uintV4;
+
 }
