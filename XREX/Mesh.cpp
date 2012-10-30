@@ -81,6 +81,7 @@ namespace XREX
 	Renderable::RenderablePack SubMesh::GetRenderablePack(SceneObjectSP const& camera) const
 	{
 		// TODO camera dependence technique
+		assert(effect_ != nullptr);
 		return Renderable::RenderablePack(this->mesh_, material_, layout_, effect_->GetAvailableTechnique(0));
 	}
 

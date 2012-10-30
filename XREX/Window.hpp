@@ -36,6 +36,12 @@ namespace XREX
 		{
 			running_ = running;
 		}
+		/*
+		 *	@hook: pointer is type: std::function<void(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)>*
+		 *		the pointer will be cast to the type above and make a copy of the function object.
+		 */
+		void SetRawWindowsMessageHook(void const* hook);
+
 	protected:
 		void Recreate();
 

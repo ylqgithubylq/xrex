@@ -161,7 +161,9 @@ namespace XREX
 
 
 		uint32 flags = 0;
-		// flags = WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB; // no deprecated GL API
+#ifndef USE_OPENGL_COMPATIBILITY_PROFILE
+		flags = WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB; // no deprecated GL API
+#endif
 	#ifdef XREX_DEBUG
 		flags |= WGL_CONTEXT_DEBUG_BIT_ARB;
 	#endif
@@ -174,7 +176,13 @@ namespace XREX
 		};
 
 		int32 attribs[] = { WGL_CONTEXT_MAJOR_VERSION_ARB, versions[0][0], WGL_CONTEXT_MINOR_VERSION_ARB, versions[0][1], WGL_CONTEXT_FLAGS_ARB, flags,
-			WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB/*WGL_CONTEXT_CORE_PROFILE_BIT_ARB*/, 0 };
+			WGL_CONTEXT_PROFILE_MASK_ARB,
+#ifdef USE_OPENGL_COMPATIBILITY_PROFILE
+			WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB
+#else
+			WGL_CONTEXT_CORE_PROFILE_BIT_ARB
+#endif
+			, 0 };
 		for (int32 i = 0; i < 3; ++ i)
 		{
 			attribs[1] = versions[i][0];

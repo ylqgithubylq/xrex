@@ -224,7 +224,7 @@ namespace XREX
 
 
 		uint32 bpp = FreeImage_GetBPP(bitmap);
-		handler(height, width, bpp / 8 * height * width, TexelFormatFromFreeImageFormat(imageFormat, bitmap), bits);
+		handler(width, height, bpp / 8 * height * width, TexelFormatFromFreeImageFormat(imageFormat, bitmap), bits);
 
 		//Free FreeImage's copy of the data
 		FreeImage_Unload(bitmap);

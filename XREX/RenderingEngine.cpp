@@ -73,6 +73,9 @@ namespace XREX
 				}
 			}
 		}
+#ifdef USE_OPENGL_COMPATIBILITY_PROFILE
+		gl::UseProgram(0);
+#endif
 	}
 
 	void RenderingEngine::RenderACamera(SceneObjectSP const& cameraObject)

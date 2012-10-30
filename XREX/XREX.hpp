@@ -14,6 +14,7 @@
 #define XREX_DEBUG
 #endif
 
+#define USE_OPENGL_COMPATIBILITY_PROFILE
 
 #include "Declare.hpp"
 
