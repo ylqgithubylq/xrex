@@ -27,7 +27,7 @@ namespace XREX
 
 		Window& window_;
 		HWND hWnd_;
-
+		std::function<void(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)> messageHook_;
 	};
 
 	//  FUNCTION: WndProc(HWND, UINT, WPARAM, LPARAM)
@@ -54,6 +54,11 @@ namespace XREX
 
 	LRESULT Window::HideWindows_::InstanceWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
+		if (messageHook_ != nullptr)
+		{
+			messageHook_(hWnd, message, wParam, lParam);
+		}
+
 		switch (message)
 		{
 			// Add all windows message handling here
@@ -119,6 +124,11 @@ namespace XREX
 			}
 			break;
 
+		case WM_MOUSELEAVE:
+			{
+
+			}
+			break;
 
 		case WM_ACTIVATE:
 			{
@@ -159,6 +169,11 @@ namespace XREX
 	}
 
 
+
+	void Window::SetRawWindowsMessageHook(void const* hook)
+	{
+		hideWindows_->messageHook_ = *static_cast<std::function<void(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)> const*>(hook);
+	}
 
 
 	void* Window::GetHWND() const
@@ -506,33 +521,33 @@ namespace XREX
 	void Window::OnKeyDown(uint32 winKey)
 	{
 		winKey = DistinguishLeftRightShiftCtrlAlt(winKey, true);
-		XREXContext::GetInstance().GetInputCenter().GenerateKeyDown(InputSemanticFromWindowsVK(winKey));
+		XREXContext::GetInstance().GetInputCenter().InjectKeyDown(InputSemanticFromWindowsVK(winKey));
 	}
 
 	void Window::OnKeyUp(uint32 winKey)
 	{
 		winKey = DistinguishLeftRightShiftCtrlAlt(winKey, false);
-		XREXContext::GetInstance().GetInputCenter().GenerateKeyUp(InputSemanticFromWindowsVK(winKey));
+		XREXContext::GetInstance().GetInputCenter().InjectKeyUp(InputSemanticFromWindowsVK(winKey));
 	}
 
 	void Window::OnMouseDown(uint32 winKey, uint32 x, uint32 y)
 	{
-		XREXContext::GetInstance().GetInputCenter().GenerateMouseDown(InputSemanticFromWindowsVK(winKey), x, height_ - y);
+		XREXContext::GetInstance().GetInputCenter().InjectMouseDown(InputSemanticFromWindowsVK(winKey), x, height_ - y);
 	}
 
 	void Window::OnMouseUp(uint32 winKey, uint32 x, uint32 y)
 	{
-		XREXContext::GetInstance().GetInputCenter().GenerateMouseUp(InputSemanticFromWindowsVK(winKey), x, height_ - y);
+		XREXContext::GetInstance().GetInputCenter().InjectMouseUp(InputSemanticFromWindowsVK(winKey), x, height_ - y);
 	}
 
 	void Window::OnMouseWheel(uint32 winKey, uint32 x, uint32 y, int32 wheelDelta)
 	{
-		XREXContext::GetInstance().GetInputCenter().GenerateMouseWheel(InputCenter::InputSemantic::M_Wheel, x, height_ - y, wheelDelta);
+		XREXContext::GetInstance().GetInputCenter().InjectMouseWheel(InputCenter::InputSemantic::M_Wheel, x, height_ - y, wheelDelta);
 	}
 
 	void Window::OnMouseMove(uint32 winKey, uint32 x, uint32 y)
 	{
-		XREXContext::GetInstance().GetInputCenter().GenerateMouseMove(InputCenter::InputSemantic::M_Move, x, height_ - y);
+		XREXContext::GetInstance().GetInputCenter().InjectMouseMove(InputCenter::InputSemantic::M_Move, x, height_ - y);
 	}
 
 	uint32 Window::DistinguishLeftRightShiftCtrlAlt(uint32 winKey, bool down)

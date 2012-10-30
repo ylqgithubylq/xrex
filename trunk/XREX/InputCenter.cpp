@@ -57,19 +57,19 @@ namespace XREX
 
 
 
-	void InputCenter::GenerateKeyDown(InputSemantic semantic)
+	void InputCenter::InjectKeyDown(InputSemantic semantic)
 	{
 		semanticStates_[static_cast<uint32>(semantic)] = true;
 		DispatchInputEvent(semantic, static_cast<uint32>(true));
 	}
 
-	void InputCenter::GenerateKeyUp(InputSemantic semantic)
+	void InputCenter::InjectKeyUp(InputSemantic semantic)
 	{
 		semanticStates_[static_cast<uint32>(semantic)] = false;
 		DispatchInputEvent(semantic, static_cast<uint32>(false));
 	}
 
-	void InputCenter::GenerateMouseDown(InputSemantic semantic, int32 x, int32 y)
+	void InputCenter::InjectMouseDown(InputSemantic semantic, int32 x, int32 y)
 	{
 		semanticStates_[static_cast<uint32>(semantic)] = true;
 		previousPointerPosition_ = pointerPosition_;
@@ -77,7 +77,7 @@ namespace XREX
 		DispatchInputEvent(semantic, static_cast<uint32>(true));
 	}
 
-	void InputCenter::GenerateMouseUp(InputSemantic semantic, int32 x, int32 y)
+	void InputCenter::InjectMouseUp(InputSemantic semantic, int32 x, int32 y)
 	{
 		semanticStates_[static_cast<uint32>(semantic)] = false;
 		previousPointerPosition_ = pointerPosition_;
@@ -85,14 +85,14 @@ namespace XREX
 		DispatchInputEvent(semantic, static_cast<uint32>(false));
 	}
 
-	void InputCenter::GenerateMouseWheel(InputSemantic semantic, int32 x, int32 y, int32 wheelDelta)
+	void InputCenter::InjectMouseWheel(InputSemantic semantic, int32 x, int32 y, int32 wheelDelta)
 	{
 		previousPointerPosition_ = pointerPosition_;
 		pointerPosition_ = intV2(x, y);
 		DispatchInputEvent(semantic, wheelDelta);
 	}
 
-	void InputCenter::GenerateMouseMove(InputSemantic semantic, int32 x, int32 y)
+	void InputCenter::InjectMouseMove(InputSemantic semantic, int32 x, int32 y)
 	{
 		previousPointerPosition_ = pointerPosition_;
 		pointerPosition_ = intV2(x, y);

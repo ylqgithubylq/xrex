@@ -3,6 +3,9 @@
 #include "LocalResourceLoader.hpp"
 #include "MeshLoader.hpp"
 #include "TextureLoader.hpp"
+#include "ResourceManager.hpp"
+#include "XREXContext.hpp"
+#include "RenderingFactory.hpp"
 
 #include <fstream>
 #include <vector>
@@ -70,6 +73,42 @@ namespace XREX
 		return false;
 	}
 
+	XREX::ProgramObjectSP LocalResourceLoader::LoadProgram(std::string const& fileName, std::vector<std::string> const& macros)
+	{
+		ProgramObjectSP program = XREXContext::GetInstance().GetRenderingFactory().CreateProgramObject();
+		string shaderString;
+		string fullPath;
+		if (!XREXContext::GetInstance().GetResourceManager().LocatePath(fileName, &fullPath))
+		{
+			return nullptr;
+		}
+		if (!XREXContext::GetInstance().GetResourceLoader().LoadString(fullPath, &shaderString))
+		{
+			assert(false); // impossible, if happened, find the bug in the LocatePath
+			return nullptr;
+		}
+
+		ShaderObjectSP vs =XREXContext::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::VertexShader, shaderString);
+		ShaderObjectSP fs = XREXContext::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::FragmentShader, shaderString);
+
+		if (!vs->IsValidate())
+		{
+			assert(false);
+		}
+		if (!fs->IsValidate())
+		{
+			assert(false);
+		}
+		program->AttachShader(vs);
+		program->AttachShader(fs);
+		program->Link();
+		if (!program->IsValidate())
+		{
+			assert(false);
+		}
+		return program;
+	}
+
 	MeshSP LocalResourceLoader::LoadMesh(std::string const& fileName)
 	{
 		return meshLoader_->LoadMesh(fileName);
@@ -91,5 +130,6 @@ namespace XREX
 	{
 		return textureLoader_->LoadTextureCube(fileName);
 	}
+
 
 }

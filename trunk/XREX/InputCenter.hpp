@@ -229,17 +229,17 @@ namespace XREX
 		void ExecuteAllQueuedActions();
 
 
-		void GenerateKeyDown(InputSemantic semantic);
+		void InjectKeyDown(InputSemantic semantic);
 
-		void GenerateKeyUp(InputSemantic semantic);
+		void InjectKeyUp(InputSemantic semantic);
 
-		void GenerateMouseDown(InputSemantic semantic, int32 x, int32 y);
+		void InjectMouseDown(InputSemantic semantic, int32 x, int32 y);
 
-		void GenerateMouseUp(InputSemantic semantic, int32 x, int32 y);
+		void InjectMouseUp(InputSemantic semantic, int32 x, int32 y);
 
-		void GenerateMouseWheel(InputSemantic semantic, int32 x, int32 y, int32 wheelDelta);
+		void InjectMouseWheel(InputSemantic semantic, int32 x, int32 y, int32 wheelDelta);
 
-		void GenerateMouseMove(InputSemantic semantic, int32 x, int32 y);
+		void InjectMouseMove(InputSemantic semantic, int32 x, int32 y);
 
 	private:
 		void DispatchInputEvent(InputSemantic semantic, int32 data);
