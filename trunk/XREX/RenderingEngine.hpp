@@ -19,6 +19,7 @@ namespace XREX
 
 		void Initialize();
 
+		uint32 GetGLError();
 		/*
 		 *	@scene: set to nullptr to make no scene to render.
 		 */
@@ -42,10 +43,13 @@ namespace XREX
 		void RenderScene();
 
 
-		// Temp function for convenience
-		void SetRenderingFunction(std::function<void(double current, double delta)> const& renderingFunction)
+		void OnBeforeRendering(std::function<void(double current, double delta)> const& beforeRenderingFunction)
 		{
-			renderingFunction_ = renderingFunction;
+			beforeRenderingFunction_ = beforeRenderingFunction;
+		}
+		void OnAfterRendering(std::function<void(double current, double delta)> const& afterRenderingFunction)
+		{
+			afterRenderingFunction_ = afterRenderingFunction;
 		}
 
 
@@ -53,7 +57,8 @@ namespace XREX
 		void RenderACamera(SceneObjectSP const& cameraObject);
 
 	private:
-		std::function<void(double current, double delta)> renderingFunction_;
+		std::function<void(double current, double delta)> beforeRenderingFunction_;
+		std::function<void(double current, double delta)> afterRenderingFunction_;
 		SceneSP scene_;
 		Timer timer_;
 		double lastTime_;
