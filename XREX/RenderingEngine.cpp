@@ -31,6 +31,11 @@ namespace XREX
 		scene_.reset(); // release scene first
 	}
 
+	XREX::uint32 RenderingEngine::GetGLError()
+	{
+		return gl::GetError();
+	}
+
 
 	void RenderingEngine::Initialize()
 	{
@@ -40,11 +45,17 @@ namespace XREX
 	{
 		double currentTime = timer_.Elapsed();
 		double delta = currentTime - lastTime_;
-		if (renderingFunction_ != nullptr)
+		if (beforeRenderingFunction_ != nullptr)
 		{
-			renderingFunction_(currentTime, delta);
+			beforeRenderingFunction_(currentTime, delta);
 		}
+
 		RenderScene();
+
+		if (afterRenderingFunction_ != nullptr)
+		{
+			afterRenderingFunction_(currentTime, delta);
+		}
 		lastTime_ = currentTime;
 	}
 

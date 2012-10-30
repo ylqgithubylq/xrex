@@ -330,10 +330,10 @@ void Main()
 		//assert(gl::GetError() == gl::GL_NO_ERROR);
 		s(current, delta);
 	};
-	XREXContext::GetInstance().GetRenderingEngine().SetRenderingFunction(f);
+	XREXContext::GetInstance().GetRenderingEngine().OnBeforeRendering(f);
 
 	//assert(testmain(0, nullptr) == 0);
-	//XREXContext::GetInstance().GetRenderingEngine().SetRenderingFunction(function<void(double,double)>(DrawHelper));
+	//XREXContext::GetInstance().GetRenderingEngine().OnBeforeRendering(function<void(double,double)>(DrawHelper));
 
 
 	XREXContext::GetInstance().Start();
