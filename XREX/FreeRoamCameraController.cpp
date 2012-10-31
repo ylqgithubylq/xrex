@@ -9,9 +9,29 @@ using std::function;
 
 namespace XREX
 {
-
+	namespace
+	{
+		InputHandler::ActionMap GenerateActionMap()
+		{
+			InputHandler::ActionMap map;
+			map.Set(InputCenter::InputSemantic::K_W, static_cast<uint32>(FreeRoamCameraController::RoamSemantic::MoveForward));
+			map.Set(InputCenter::InputSemantic::K_S, static_cast<uint32>(FreeRoamCameraController::RoamSemantic::MoveBack));
+			map.Set(InputCenter::InputSemantic::K_A, static_cast<uint32>(FreeRoamCameraController::RoamSemantic::MoveLeft));
+			map.Set(InputCenter::InputSemantic::K_D, static_cast<uint32>(FreeRoamCameraController::RoamSemantic::MoveRight));
+			map.Set(InputCenter::InputSemantic::K_Q, static_cast<uint32>(FreeRoamCameraController::RoamSemantic::RollLeft));
+			map.Set(InputCenter::InputSemantic::K_E, static_cast<uint32>(FreeRoamCameraController::RoamSemantic::RollRight));
+			map.Set(InputCenter::InputSemantic::K_V, static_cast<uint32>(FreeRoamCameraController::RoamSemantic::MoveUp));
+			map.Set(InputCenter::InputSemantic::K_C, static_cast<uint32>(FreeRoamCameraController::RoamSemantic::MoveDown));
+			map.Set(InputCenter::InputSemantic::M_Move, static_cast<uint32>(FreeRoamCameraController::RoamSemantic::Turn));
+			map.Set(InputCenter::InputSemantic::K_LeftShift, static_cast<uint32>(FreeRoamCameraController::RoamSemantic::SpeedUp));
+			map.Set(InputCenter::InputSemantic::K_RightShift, static_cast<uint32>(FreeRoamCameraController::RoamSemantic::SpeedUp));
+			map.Set(InputCenter::InputSemantic::M_Button0, static_cast<uint32>(FreeRoamCameraController::RoamSemantic::TriggerTurn));
+			return map;
+		}
+	}
 	FreeRoamCameraController::FreeRoamCameraController(float moveScaler, float rotateScaler, float speedScaler)
-		: moveScaler_(moveScaler), rotateScaler_(rotateScaler), speedScaler_(speedScaler), semanticStates_(static_cast<uint32>(RoamSemantic::FPSSemanticCount)), previousFrameTime_(0),
+		: InputHandler(GenerateActionMap()),
+		moveScaler_(moveScaler), rotateScaler_(rotateScaler), speedScaler_(speedScaler), semanticStates_(static_cast<uint32>(RoamSemantic::FPSSemanticCount)), previousFrameTime_(0),
 		previousPointerPosition_(0, 0), forward_(0), left_(0), up_(0), roll_(0), turnTriggered_(false), spedUp_(false)
 	{
 	}
@@ -31,10 +51,9 @@ namespace XREX
 		return true;
 	}
 
-	bool FreeRoamCameraController::GenerateAction(uint32 mappedSemantic, int32 data, intV2 pointerPosition,
-		double currentTime, function<void()>* generatedAction)
+	bool FreeRoamCameraController::GenerateAction(InputCenter::InputEvent const& inputEvent, function<void()>* generatedAction)
 	{
-		switch (static_cast<RoamSemantic>(mappedSemantic))
+		switch (static_cast<RoamSemantic>(inputEvent.mappedSemantic))
 		{
 		case RoamSemantic::MoveForward:
 		case RoamSemantic::MoveBack:
@@ -43,7 +62,7 @@ namespace XREX
 		case RoamSemantic::MoveUp:
 		case RoamSemantic::MoveDown:
 			{
-				semanticStates_[static_cast<uint32>(mappedSemantic)] = data;
+				semanticStates_[static_cast<uint32>(inputEvent.mappedSemantic)] = inputEvent.data;
 				forward_ = semanticStates_[static_cast<uint32>(RoamSemantic::MoveForward)] - semanticStates_[static_cast<uint32>(RoamSemantic::MoveBack)];
 				left_ = semanticStates_[static_cast<uint32>(RoamSemantic::MoveLeft)] - semanticStates_[static_cast<uint32>(RoamSemantic::MoveRight)];
 				up_ = semanticStates_[static_cast<uint32>(RoamSemantic::MoveUp)] - semanticStates_[static_cast<uint32>(RoamSemantic::MoveDown)];
@@ -52,7 +71,7 @@ namespace XREX
 		case RoamSemantic::RollLeft:
 		case RoamSemantic::RollRight:
 			{
-				semanticStates_[static_cast<uint32>(mappedSemantic)] = data;
+				semanticStates_[static_cast<uint32>(inputEvent.mappedSemantic)] = inputEvent.data;
 				roll_ = semanticStates_[static_cast<uint32>(RoamSemantic::RollLeft)] - semanticStates_[static_cast<uint32>(RoamSemantic::RollRight)];
 			}
 			break;
@@ -61,8 +80,8 @@ namespace XREX
 				if (turnTriggered_)
 				{
 					// negative x because screen coordinate is 180 rotated by Y axis of camera coordinate
-					floatV2 deltaTurn(-(pointerPosition - previousPointerPosition_).X() * rotateScaler_, (pointerPosition - previousPointerPosition_).Y() * rotateScaler_);
-					previousPointerPosition_ = pointerPosition;
+					floatV2 deltaTurn(-(inputEvent.pointerPosition - previousPointerPosition_).X() * rotateScaler_, (inputEvent.pointerPosition - previousPointerPosition_).Y() * rotateScaler_);
+					previousPointerPosition_ = inputEvent.pointerPosition;
 
 					XREXContext::GetInstance().GetInputCenter().EnqueueAction(GenerateRotateAction(deltaTurn));
 				}
@@ -72,14 +91,14 @@ namespace XREX
 			{
 				if (!turnTriggered_)
 				{
-					previousPointerPosition_ = pointerPosition;
+					previousPointerPosition_ = inputEvent.pointerPosition;
 				}
-				turnTriggered_ = !!data;
+				turnTriggered_ = !!inputEvent.data;
 			}
 			break;
 		case RoamSemantic::SpeedUp:
 			{
-				spedUp_ = !!data;
+				spedUp_ = !!inputEvent.data;
 			}
 			break;
 		default:
@@ -90,23 +109,6 @@ namespace XREX
 		return false;
 	}
 
-	auto FreeRoamCameraController::GenerateActionMap() -> ActionMap
-	{
-		ActionMap map;
-		map.Set(InputCenter::InputSemantic::K_W, static_cast<uint32>(RoamSemantic::MoveForward));
-		map.Set(InputCenter::InputSemantic::K_S, static_cast<uint32>(RoamSemantic::MoveBack));
-		map.Set(InputCenter::InputSemantic::K_A, static_cast<uint32>(RoamSemantic::MoveLeft));
-		map.Set(InputCenter::InputSemantic::K_D, static_cast<uint32>(RoamSemantic::MoveRight));
-		map.Set(InputCenter::InputSemantic::K_Q, static_cast<uint32>(RoamSemantic::RollLeft));
-		map.Set(InputCenter::InputSemantic::K_E, static_cast<uint32>(RoamSemantic::RollRight));
-		map.Set(InputCenter::InputSemantic::K_V, static_cast<uint32>(RoamSemantic::MoveUp));
-		map.Set(InputCenter::InputSemantic::K_C, static_cast<uint32>(RoamSemantic::MoveDown));
-		map.Set(InputCenter::InputSemantic::M_Move, static_cast<uint32>(RoamSemantic::Turn));
-		map.Set(InputCenter::InputSemantic::K_LeftShift, static_cast<uint32>(RoamSemantic::SpeedUp));
-		map.Set(InputCenter::InputSemantic::K_RightShift, static_cast<uint32>(RoamSemantic::SpeedUp));
-		map.Set(InputCenter::InputSemantic::M_Button0, static_cast<uint32>(RoamSemantic::TriggerTurn));
-		return map;
-	}
 
 	void FreeRoamCameraController::AttachToCamera(SceneObjectSP const& cameraObject)
 	{

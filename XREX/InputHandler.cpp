@@ -5,8 +5,8 @@
 namespace XREX
 {
 
-	InputHandler::InputHandler()
-		: initialized_(false)
+	InputHandler::InputHandler(ActionMap&& actionMap)
+		: actionMap_(std::move(actionMap))
 	{
 	}
 
@@ -15,10 +15,10 @@ namespace XREX
 	{
 	}
 
-	void InputHandler::OnAction(uint32 mappedSemantic, int32 data, intV2 pointerPosition, double currentTime)
+	void InputHandler::OnAction(InputCenter::InputEvent const& inputEvent)
 	{
 		std::function<void()> action;
-		if (GenerateAction(mappedSemantic, data, pointerPosition, currentTime, &action))
+		if (GenerateAction(inputEvent, &action))
 		{
 			XREXContext::GetInstance().GetInputCenter().EnqueueAction(std::move(action));
 		}

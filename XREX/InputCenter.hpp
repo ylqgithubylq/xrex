@@ -189,7 +189,18 @@ namespace XREX
 			InputSemanticInvalid
 		};
 
+		struct InputEvent
+		{
+			uint32 mappedSemantic;
+			int32 data;
+			intV2 pointerPosition;
+			double currentTime;
 
+			InputEvent(uint32 theMappedSemantic, int32 theData, intV2 thePointerPosition, double theCurrentTime)
+				: mappedSemantic(theMappedSemantic), data(theData), pointerPosition(thePointerPosition), currentTime(theCurrentTime)
+			{
+			}
+		};
 
 
 	public:

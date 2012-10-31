@@ -1,6 +1,7 @@
 #include "XREX.hpp"
 #include "NaiveManagedScene.hpp"
-
+#include "Renderable.hpp"
+#include "Camera.hpp"
 
 using std::vector;
 
@@ -15,6 +16,7 @@ namespace XREX
 	NaiveManagedScene::~NaiveManagedScene()
 	{
 	}
+
 	bool NaiveManagedScene::RemoveObject(std::string const& sceneObjectName)
 	{
 
@@ -41,6 +43,7 @@ namespace XREX
 
 	bool NaiveManagedScene::AddObject(SceneObjectSP const& sceneObject)
 	{
+		assert(sceneObject != nullptr);
 		if (HasObject(sceneObject))
 		{
 			return false;
@@ -72,6 +75,7 @@ namespace XREX
 
 	bool NaiveManagedScene::RemoveObject(SceneObjectSP const& sceneObject)
 	{
+		assert(sceneObject != nullptr);
 		auto found = std::find(objects_.begin(), objects_.end(), sceneObject);
 		if (found == objects_.end())
 		{
@@ -93,20 +97,27 @@ namespace XREX
 	vector<SceneObjectSP> NaiveManagedScene::GetRenderableQueue(SceneObjectSP const& camera)
 	{
 		vector<SceneObjectSP> resultObjects;
-		std::_For_each(objects_.begin(), objects_.end(), [&resultObjects] (SceneObjectSP const& sceneObject)
+		for(auto& sceneObject : objects_)
 		{
-			if (sceneObject->HasComponent<Renderable>())
+			if (sceneObject->HasComponent<Renderable>() && sceneObject->GetComponent<Renderable>()->IsVisible())
 			{
 				resultObjects.push_back(sceneObject);
 			}
-		});
+		}
 		return resultObjects;
 	}
 
 	std::vector<SceneObjectSP> NaiveManagedScene::GetCameras()
 	{
-		// TODO remove all objects that do not contain camera.
-		return cameras_; // a copy of cameras_
+		vector<SceneObjectSP> cameras;
+		for(auto& camera : cameras_)
+		{
+			if (camera->HasComponent<Camera>() && camera->GetComponent<Camera>()->IsActive())
+			{
+				cameras.push_back(camera);
+			}
+		}
+		return cameras;
 	}
 
 }
