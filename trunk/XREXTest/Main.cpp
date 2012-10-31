@@ -258,7 +258,6 @@ struct TempScene
 		}
 
 		FreeRoamCameraControllerSP cameraController = MakeSP<FreeRoamCameraController>();
-		cameraController->InitializeActionMap();
 		cameraController->AttachToCamera(camera_);
 		XREXContext::GetInstance().GetInputCenter().AddInputHandler(cameraController);
 		// 		wMatrix->SetValue(translate * rotation);

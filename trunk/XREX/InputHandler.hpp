@@ -65,28 +65,19 @@ namespace XREX
 	public:
 		virtual ~InputHandler();
 
-		void InitializeActionMap()
-		{
-			actionMap_ = GenerateActionMap(); // better using polymorphism constructor trick?
-			initialized_ = true;
-		}
-
 		ActionMap const& GetActionMap() const
 		{
-			assert(initialized_);
 			return actionMap_;
 		}
 
-		void OnAction(uint32 mappedSemantic, int32 data, intV2 pointerPosition, double currentTime);
+		void OnAction(InputCenter::InputEvent const& inputEvent);
 
 		void OnBeforeLogicFrame(double currentTime);
 
 
 	protected:
 
-		InputHandler();
-
-		virtual ActionMap GenerateActionMap() = 0;
+		InputHandler(ActionMap&& actionMap);
 
 		/*
 		 *	Override this if something need to do before a logic frame begin.
@@ -99,7 +90,7 @@ namespace XREX
 		 *	@data: if event is Key/Mouse Down, data is 1, Key/Mouse Up, data is 0. else if event is mouse wheel, data is the wheel delta.
 		 *	@return: true indicates action generated.
 		 */
-		virtual bool GenerateAction(uint32 mappedSemantic, int32 data, intV2 pointerPosition, double currentTime, std::function<void()>* generatedAction) = 0;
+		virtual bool GenerateAction(InputCenter::InputEvent const& inputEvent, std::function<void()>* generatedAction) = 0;
 
 		ActionMap& GetMutableActionMap()
 		{
@@ -108,7 +99,6 @@ namespace XREX
 
 	private:
 		ActionMap actionMap_;
-		bool initialized_;
 	};
 
 }

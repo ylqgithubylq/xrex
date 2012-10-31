@@ -110,7 +110,8 @@ namespace XREX
 			auto found = mapData.find(semantic);
 			if (found != mapData.end())
 			{
-				(*i)->OnAction(found->second, data, pointerPosition_, currentTime);
+				InputEvent event(found->second, data, pointerPosition_, currentTime);
+				(*i)->OnAction(event);
 			}
 		}
 	}

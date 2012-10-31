@@ -43,10 +43,7 @@ namespace XREX
 
 		virtual bool DoOnBeforeLogicFrame(double currentTime, std::function<void()>* generatedAction) override;
 
-		virtual ActionMap GenerateActionMap() override;
-
-		virtual bool GenerateAction(uint32 mappedSemantic, int32 data, intV2 pointerPosition,
-			double currentTime, std::function<void()>* generatedAction) override;
+		virtual bool GenerateAction(InputCenter::InputEvent const& inputEvent, std::function<void()>* generatedAction) override;
 
 	private:
 		std::function<void()> GenerateFrameAction(float delta);
