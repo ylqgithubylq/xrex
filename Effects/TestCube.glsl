@@ -18,7 +18,7 @@ void main()
 		viewMatrix *
 		modelMatrix *
 		vec4(position, 1.0);
-	color = vec4(((modelMatrix * vec4(position, 1)).xyz) / length(centerPosition) / 2, 1);
+	color = vec4(((modelMatrix * vec4(position, 1)).xyz) / length(centerPosition) / 2, 0.5);
 }
 
 #endif

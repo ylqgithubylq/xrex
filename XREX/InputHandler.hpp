@@ -32,7 +32,7 @@ namespace XREX
 				actionMap_ = std::move(rhs.actionMap_);
 				return *this;
 			}
-			void Set(InputCenter::InputSemantic inputSemantic, uint32 mappedSemantic)
+			void Set(InputCenter::InputSemantic inputSemantic, int32 mappedSemantic)
 			{
 				actionMap_[inputSemantic] = mappedSemantic;
 			}
@@ -40,7 +40,7 @@ namespace XREX
 			{
 				return actionMap_.find(inputSemantic) != actionMap_.end();
 			}
-			uint32 Get(InputCenter::InputSemantic inputSemantic) const
+			int32 Get(InputCenter::InputSemantic inputSemantic) const
 			{
 				assert(Contains(inputSemantic));
 				return actionMap_.at(inputSemantic);
@@ -51,13 +51,13 @@ namespace XREX
 				actionMap_.erase(inputSemantic);
 			}
 
-			std::unordered_map<InputCenter::InputSemantic, uint32> const& GetAllActions() const
+			std::unordered_map<InputCenter::InputSemantic, int32> const& GetAllActions() const
 			{
 				return actionMap_;
 			}
 
 		private:
-			std::unordered_map<InputCenter::InputSemantic, uint32> actionMap_;
+			std::unordered_map<InputCenter::InputSemantic, int32> actionMap_;
 		};
 
 
@@ -87,7 +87,6 @@ namespace XREX
 			return false;
 		}
 		/*
-		 *	@data: if event is Key/Mouse Down, data is 1, Key/Mouse Up, data is 0. else if event is mouse wheel, data is the wheel delta.
 		 *	@return: true indicates action generated.
 		 */
 		virtual bool GenerateAction(InputCenter::InputEvent const& inputEvent, std::function<void()>* generatedAction) = 0;

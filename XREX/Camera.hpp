@@ -10,7 +10,7 @@
 namespace XREX
 {
 	/*
-	 *	+z is the front direction.
+	 *	+z is the front direction. +y is the up direction.
 	 */
 	class XREX_API Camera
 		: public TemplateComponent<Camera>

@@ -497,21 +497,22 @@ namespace XREX
 
 
 	template <typename T>
-	Matrix4T<T> LookAtMatrix(VectorT<T, 3> const& eye, VectorT<T, 3> const& at, VectorT<T, 3> const& up)
+	Matrix4T<T> LookToViewMatrix(VectorT<T, 3> const& eye, VectorT<T, 3> const& to, VectorT<T, 3> const& up)
 	{
-		// -z is localFront direction
-		VectorT<T, 3> zAxis((eye - at).Normalize());
-		VectorT<T, 3> xAxis(Cross(up, zAxis).Normalize());
-		VectorT<T, 3> yAxis(Cross(zAxis, xAxis));
-
-		if (eye == at)
+		if (to.LengthSquared() == 0)
 		{
 			return Matrix4T<T>::Identity;
 		}
+
 		if (up.LengthSquared() == 0)
 		{
 			return Matrix4T<T>::Identity;
 		}
+
+		
+		VectorT<T, 3> zAxis(-to.Normalize());
+		VectorT<T, 3> xAxis(Cross(up, zAxis).Normalize());
+		VectorT<T, 3> yAxis(Cross(zAxis, xAxis));
 
 		Matrix4T<T> temp;
 		T* resultArray = const_cast<T*>(temp.GetArray());
@@ -535,7 +536,7 @@ namespace XREX
 
 		return temp;
 	}
-	template XREX_API floatM44 LookAtMatrix(floatV3 const& eye, floatV3 const& at, floatV3 const& up);
+	template XREX_API floatM44 LookToViewMatrix(floatV3 const& eye, floatV3 const& at, floatV3 const& up);
 
 	template <typename T>
 	Matrix4T<T> FrustumMatrix(T const& fieldOfView, T const& aspectRatio, T const& near, T const& far)
@@ -577,5 +578,7 @@ namespace XREX
 		return temp;
 	};
 	template XREX_API floatM44 FrustumMatrix(float const& top, float const& bottom, float const& left, float const& right, float const& near, float const& far);
+
+
 
 }

@@ -28,7 +28,7 @@ namespace XREX
 		}
 
 		/*
-		 *	@return: model matrix includes parent transformation.
+		 *	@return: model matrix includes all parent transformation.
 		 */
 		floatM44 const& GetWorldMatrix() const
 		{
@@ -36,10 +36,7 @@ namespace XREX
 			return worldMatrix_;
 		}
 
-		void SetParent(TransformationSP const& parent)
-		{
-			parent_ = parent;
-		}
+		void SetParent(TransformationSP const& parent);
 		TransformationSP GetParent() const
 		{
 			return parent_.lock();
@@ -72,16 +69,19 @@ namespace XREX
 
 		void SetScaling(float s)
 		{
+			assert(s > 0);
 			SetScaling(floatV3(s, s, s));
 			dirty_ = true;
 		}
 		void SetScaling(float sx, float sy, float sz)
 		{
+			assert(sx > 0 && sy > 0 && sz > 0);
 			SetScaling(floatV3(sx, sy, sz));
 			dirty_ = true;
 		}
 		void SetScaling(floatV3 const& scaling)
 		{
+			assert(scaling.X() > 0 && scaling.Y() > 0 && scaling.Z() > 0);
 			scaling_ = scaling;
 			dirty_ = true;
 		}
@@ -108,16 +108,19 @@ namespace XREX
 
 		void Scale(float s)
 		{
+			assert(s > 0);
 			Scale(floatV3(s, s, s));
 			dirty_ = true;
 		}
 		void Scale(float sx, float sy, float sz)
 		{
+			assert(sx > 0 && sy > 0 && sz > 0);
 			Scale(floatV3(sx, sy, sz));
 			dirty_ = true;
 		}
 		void Scale(floatV3 const& s)
 		{
+			assert(s.X() > 0 && s.Y() > 0 && s.Z() > 0);
 			scaling_ = scaling_ * s;
 			dirty_ = true;
 		}
@@ -139,20 +142,29 @@ namespace XREX
 			dirty_ = true;
 		}
 
+		floatV3 const& GetModelFrontDirection() const
+		{
+			return front_;
+		}
 		/*
 		 *	Used by FaceTo.
 		 *	Default value is +z.
 		 */
-		void SetFrontDirection(floatV3 const& front)
+		void SetModelFrontDirection(floatV3 const& front)
 		{
 			front_ = front;
 			dirty_ = true;
+		}
+
+		floatV3 const& GetModelUpDirection() const
+		{
+			return up_;
 		}
 		/*
 		 *	Used by FaceTo.
 		 *	Default value is +y.
 		 */
-		void SetUpDirection(floatV3 const& up)
+		void SetModelUpDirection(floatV3 const& up)
 		{
 			up_ = up;
 			dirty_ = true;
@@ -176,14 +188,6 @@ namespace XREX
 			dirty_ = true;
 		}
 
-		/*
-		 * @return: whether the underlaying representation need to be updated. (the underlaying representation updating only affect performance)
-		 */
-		bool NeedUpdate() const
-		{
-			return dirty_;
-		}
-
 	protected:
 
 	private:
@@ -201,6 +205,8 @@ namespace XREX
 
 		floatM44 mutable modelMatrix_;
 		floatM44 mutable worldMatrix_;
+
+		floatM44 mutable parentWorldMatrix_;
 
 		bool mutable dirty_;
 	};

@@ -6,7 +6,8 @@ namespace XREX
 {
 
 	Transformation::Transformation()
-		: position_(floatV3::Zero), orientation_(floatQ::Identity), scaling_(floatV3(1.0f, 1.0f, 1.0f)), front_(0.0f, 0.0f, 1.0f), up_(0.0f, 1.0f, 0.0f)
+		: position_(floatV3::Zero), orientation_(floatQ::Identity), scaling_(floatV3(1.0f, 1.0f, 1.0f)),
+		front_(0.0f, 0.0f, 1.0f), up_(0.0f, 1.0f, 0.0f), parentWorldMatrix_(floatM44::Identity)
 	{
 	}
 
@@ -15,23 +16,45 @@ namespace XREX
 	{
 	}
 
+	void Transformation::SetParent(TransformationSP const& parent)
+	{
+		assert(parent.get() != this);
+		parent_ = parent;
+		if (parent)
+		{
+			parentWorldMatrix_ = parent->GetWorldMatrix();
+		}
+		else
+		{
+			parentWorldMatrix_ = floatM44::Identity;
+		}
+	}
+
 	void Transformation::Update() const
 	{
 		if (dirty_)
 		{
 			// TODO add a GetMatrixFromTQS(v3, q, v3) to math.hpp
 			modelMatrix_ = TranslationMatrix(position_) * MatrixFromQuaternion(orientation_) * ScalingMatrix(scaling_);
-			dirty_ = false;
-			if (parent_.expired()) // no parent
+		}
+		if (!parent_.expired()) // parent exist
+		{
+			floatM44 const& parentMatrix = parent_.lock()->GetWorldMatrix();
+			if (parentWorldMatrix_ != parentMatrix)
+			{ // need update
+				worldMatrix_ = parentMatrix * modelMatrix_;
+				parentWorldMatrix_ = parentMatrix;
+			}
+			else if (dirty_)
 			{
-				worldMatrix_ = modelMatrix_;
+				worldMatrix_ = parentMatrix * modelMatrix_;
 			}
 		}
-		// TODO how to know parent is dirty or not? dirty flag of parent will be cleared when updated.
-		if (!parent_.expired())
+		else if (dirty_)
 		{
-			worldMatrix_ = parent_.lock()->GetWorldMatrix() * modelMatrix_;
+			worldMatrix_ = modelMatrix_;
 		}
+		dirty_ = false;
 	}
 
 }

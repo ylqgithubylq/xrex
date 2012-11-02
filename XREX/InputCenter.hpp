@@ -189,14 +189,21 @@ namespace XREX
 			InputSemanticInvalid
 		};
 
+
 		struct InputEvent
 		{
-			uint32 mappedSemantic;
+			/*
+			 *	User defined semantic.
+			 */
+			int32 mappedSemantic;
+			/*
+			 *	If event is Key/Mouse Down, data is 1, Key/Mouse Up, data is 0. else if event is mouse wheel, data is the wheel delta.
+			 */
 			int32 data;
 			intV2 pointerPosition;
 			double currentTime;
 
-			InputEvent(uint32 theMappedSemantic, int32 theData, intV2 thePointerPosition, double theCurrentTime)
+			InputEvent(int32 theMappedSemantic, int32 theData, intV2 thePointerPosition, double theCurrentTime)
 				: mappedSemantic(theMappedSemantic), data(theData), pointerPosition(thePointerPosition), currentTime(theCurrentTime)
 			{
 			}

@@ -21,14 +21,14 @@ namespace XREX
 
 	void Camera::Update() const
 	{
+		static floatV3 const LocalTo = floatV3(0, 0, 1);
+		static floatV3 const LocalUp = floatV3(0, 1, 0);
 		TransformationSP transformation = GetOwnerSceneObject()->GetComponent<Transformation>();
-		dirty_ = transformation->NeedUpdate();
-		if (dirty_)
-		{
-			// RotationMatrixY(PI) make +z as the view direction
-			viewMatrix_ = RotationMatrixY(PI) * MatrixFromQuaternion(transformation->GetOrientation().Conjugate()) * TranslationMatrix(-transformation->GetPosition());
-			dirty_ = false;
-		}
+		floatV3 position = Transform(transformation->GetWorldMatrix(), floatV3::Zero);
+		floatV3 to = TransformNormal(transformation->GetWorldMatrix(), LocalTo);
+		floatV3 up = TransformNormal(transformation->GetWorldMatrix(), LocalUp);
+		viewMatrix_ = LookToViewMatrix(position, to, up);
+		dirty_ = false;
 	}
 
 }
