@@ -258,12 +258,4 @@
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
-  <ItemGroup>
-    <None Include="..\Effects\TestCube.glsl">
-      <Filter>Effect Files</Filter>
-    </None>
-    <None Include="..\Effects\Test.glsl">
-      <Filter>Effect Files</Filter>
-    </None>
-  </ItemGroup>
 </Project>

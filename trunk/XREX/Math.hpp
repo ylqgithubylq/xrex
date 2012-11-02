@@ -59,7 +59,7 @@ namespace XREX
 	/*
 	 *	Have fast float hack implementation.
 	 */
-	template<typename T>
+	template <typename T>
 	T ReciprocalSqrt(T number);
 
 	/*
@@ -134,9 +134,13 @@ namespace XREX
 
 	/*
 	 *	For creation of view matrix of camera.
+	 *	@eye: eye position.
+	 *	@to: look to direction.
+	 *	@up: up direction in world space.
+	 *	@return: view matrix.
 	 */
 	template <typename T>
-	Matrix4T<T> LookAtMatrix(VectorT<T, 3> const& eye, VectorT<T, 3> const& at, VectorT<T, 3> const& up);
+	Matrix4T<T> LookToViewMatrix(VectorT<T, 3> const& eye, VectorT<T, 3> const& to, VectorT<T, 3> const& up);
 
 
 	template <typename T>

@@ -364,7 +364,8 @@ namespace XREX
 		// don't change the size of attributeBindingInformation_ after this, reference to elements in it will be kept in uniform binder.
 		attributeBindingInformation_.resize(attributeCount);
 
-		for (int32 i = 0; i < attributeCount; ++i) {
+		for (int32 i = 0; i < attributeCount; ++i)
+		{
 			AttributeBindingInformation& bindingInformation = attributeBindingInformation_[i];
 
 			int32 nameLength;

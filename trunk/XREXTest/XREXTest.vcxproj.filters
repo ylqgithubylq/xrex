@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Effect Files">
+      <UniqueIdentifier>{80d9d6b1-b5fc-4dc2-94b7-efdeb288fcd2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="TestFile.hpp">
@@ -29,5 +32,13 @@
     <ClCompile Include="PrecompiledHeaderHost.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Effects\Test.glsl">
+      <Filter>Effect Files</Filter>
+    </None>
+    <None Include="..\Effects\TestCube.glsl">
+      <Filter>Effect Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

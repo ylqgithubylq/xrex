@@ -18,7 +18,7 @@ in vec3 position;
 in vec3 normal;
 in vec3 textureCoordinate0;
 out vec3 wNormal;
-out vec3 pixelTextureCoordinate;
+out vec2 pixelTextureCoordinate;
 
 void main()
 {
@@ -31,7 +31,7 @@ void main()
 		viewMatrix *
 		modelMatrix *
 		vec4(position, 1.0);
-	pixelTextureCoordinate = textureCoordinate0;
+	pixelTextureCoordinate = textureCoordinate0.st;
 }
 
 #endif
@@ -40,14 +40,14 @@ void main()
 #ifdef FS
 
 in vec3 wNormal;
-in vec3 pixelTextureCoordinate;
+in vec2 pixelTextureCoordinate;
 
 layout(location = 0) out vec4 finalColor;
 
 void main()
 {
 	vec3 normal = normalize(wNormal) * 0.5 + 0.5;
-	finalColor = vec4(normal, 1.0) * 0.1 + texture(diffuseMap, pixelTextureCoordinate.xy);
+	finalColor = vec4(normal, 1.0) * 0.1 + texture(diffuseMap, pixelTextureCoordinate);
 }
 
 #endif

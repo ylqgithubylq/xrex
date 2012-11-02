@@ -106,7 +106,7 @@ namespace XREX
 		for (auto i = inputHandlers_.begin(); i != inputHandlers_.end(); ++i)
 		{
 			InputHandler::ActionMap const& actionMap = (*i)->GetActionMap();
-			unordered_map<InputSemantic, uint32> const& mapData = actionMap.GetAllActions();
+			unordered_map<InputSemantic, int32> const& mapData = actionMap.GetAllActions();
 			auto found = mapData.find(semantic);
 			if (found != mapData.end())
 			{

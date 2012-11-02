@@ -106,11 +106,11 @@ namespace XREX
 		if (sampleCount_ > 1)
 		{
 			uint32 numberFormats;
-			float float_attrs[] = { 0, 0 };
+			float floatAttributes[] = { 0, 0 };
 			BOOL valid = FALSE;
 			do
 			{
-				int32 int_attrs[] =
+				int32 intAttributes[] =
 				{
 					WGL_DRAW_TO_WINDOW_ARB, gl::GL_TRUE,
 					WGL_SUPPORT_OPENGL_ARB, gl::GL_TRUE,
@@ -124,7 +124,7 @@ namespace XREX
 					0, 0
 				};
 
-				valid = wglChoosePixelFormatARB(glHideWindows_->hDC_, int_attrs, float_attrs, 1, &pixelFormat, &numberFormats);
+				valid = wglChoosePixelFormatARB(glHideWindows_->hDC_, intAttributes, floatAttributes, 1, &pixelFormat, &numberFormats);
 				if (!valid || (numberFormats < 1))
 				{
 					--sampleCount_;
@@ -140,7 +140,7 @@ namespace XREX
 				::wglDeleteContext(glHideWindows_->hRC_);
 				::ReleaseDC(glHideWindows_->GetHWND(), glHideWindows_->hDC_);
 
-				Recreate(); // this will lead to WM_QUIT message in the main message loop, why?
+				Recreate();
 
 				glHideWindows_->hDC_ = ::GetDC(glHideWindows_->GetHWND());
 
@@ -164,9 +164,9 @@ namespace XREX
 #ifndef USE_OPENGL_COMPATIBILITY_PROFILE
 		flags = WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB; // no deprecated GL API
 #endif
-	#ifdef XREX_DEBUG
+#ifdef XREX_DEBUG
 		flags |= WGL_CONTEXT_DEBUG_BIT_ARB;
-	#endif
+#endif
 
 		int32 versions[3][2] =
 		{
@@ -178,11 +178,11 @@ namespace XREX
 		int32 attribs[] = { WGL_CONTEXT_MAJOR_VERSION_ARB, versions[0][0], WGL_CONTEXT_MINOR_VERSION_ARB, versions[0][1], WGL_CONTEXT_FLAGS_ARB, flags,
 			WGL_CONTEXT_PROFILE_MASK_ARB,
 #ifdef USE_OPENGL_COMPATIBILITY_PROFILE
-			WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB
+			WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB,
 #else
-			WGL_CONTEXT_CORE_PROFILE_BIT_ARB
+			WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
 #endif
-			, 0 };
+			0 };
 		for (int32 i = 0; i < 3; ++ i)
 		{
 			attribs[1] = versions[i][0];

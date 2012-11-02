@@ -19,7 +19,28 @@ using namespace std;
 
 
 
+struct CameraCubeController
+	: public InputHandler
+{
+	static ActionMap GenerateActionMap()
+	{
+		ActionMap actions;
+		actions.Set(InputCenter::InputSemantic::K_LeftArrow, 1);
+		actions.Set(InputCenter::InputSemantic::K_RightArrow, -1);
+		return actions;
+	}
+	CameraCubeController(SceneObjectSP& theCameraCube)
+		: InputHandler(GenerateActionMap()), cameraCube(theCameraCube)
+	{
 
+	}
+	virtual bool GenerateAction(InputCenter::InputEvent const& inputEvent, std::function<void()>* generatedAction) override
+	{
+		cameraCube->GetComponent<Transformation>()->Translate(floatV3(inputEvent.mappedSemantic * 0.1f, 0, 0));
+		return false;
+	}
+	SceneObjectSP cameraCube;
+};
 
 struct TempScene
 {
@@ -185,17 +206,25 @@ struct TempScene
 		Settings const& settings = XREXContext::GetInstance().GetSettings();
 		CameraSP camera = MakeSP<Camera>(PI / 4, static_cast<float>(settings.renderingSettings.width) / settings.renderingSettings.height, 1.f, 10000.0f);
 		camera_->SetComponent(camera);
-
+		camera_->SetComponent(cubeMesh->GetShallowClone());
+		SceneObjectSP cameraCube = MakeSP<SceneObject>("camera cube");
+		cameraCube->GetComponent<Transformation>()->SetParent(camera_->GetComponent<Transformation>());
+		cameraCube->GetComponent<Transformation>()->Translate(0, 0, 20);
+		cameraCube->SetComponent(cubeMesh->GetShallowClone());
 		scene_ = XREXContext::GetInstance().GetRenderingEngine().GetScene();
 		scene_->AddObject(camera_);
-
+		scene_->AddObject(cameraCube);
+		
+		shared_ptr<CameraCubeController> controller = MakeSP<CameraCubeController>(cameraCube);
+		XREXContext::GetInstance().GetInputCenter().AddInputHandler(controller);
+		
 
 		floatV3 eye = floatV3(0.0f, 5.5f, -10.0f);
 		floatV3 up = floatV3(0.3f, 1.0f, 0.0f);
 		TransformationSP cameraTransformation = camera_->GetComponent<Transformation>();
 		cameraTransformation->SetPosition(eye + centerPosition_);
-		cameraTransformation->SetUpDirection(up);
-		cameraTransformation->SetFrontDirection(floatV3(0, 0, -1));
+		cameraTransformation->SetModelUpDirection(up);
+		cameraTransformation->SetModelFrontDirection(floatV3(0, 0, -1));
 		cameraTransformation->FaceToDirection(floatV3(0.0, 0.0, -1), floatV3(0, 1, 0));
 
 		int32 edgeCount = 3;
@@ -221,7 +250,7 @@ struct TempScene
 					floatV3 position = floatV3((k - center) * intervalSize, (j - center) * intervalSize, (i - center) * intervalSize);
 					cubeTransform->SetPosition(position + centerPosition_);
 					cubeTransform->SetScaling(1);
-					cubeTransform->SetFrontDirection(floatV3(1, 0, 0));
+					cubeTransform->SetModelFrontDirection(floatV3(1, 0, 0));
 					cubeTransform->FaceToPosition(floatV3::Zero + centerPosition_, floatV3(0, 1, 0));
 					floatQ orientation = cubeTransform->GetOrientation();
 				}
@@ -251,6 +280,8 @@ struct TempScene
 		obj2Trans->SetScaling(2);
 		obj2Trans->SetParent(obj1Trans);
 
+		camera_->GetComponent<Transformation>()->SetParent(rootTransform);
+
 		EffectParameterSP const& cubeCenterPosition = cubeEffect->GetParameterByName("centerPosition");
 		if (cubeCenterPosition)
 		{
@@ -272,8 +303,8 @@ struct TempScene
 		SceneObjectSP sceneObject = MakeSP<SceneObject>("model");
 		sceneObject->SetComponent(model);
 		sceneObject->GetComponent<Transformation>()->SetPosition(centerPosition_);
-		sceneObject->GetComponent<Transformation>()->Scale(0.1f);
-		scene_->AddObject(sceneObject);
+		sceneObject->GetComponent<Transformation>()->Scale(1.f);
+		assert(scene_->AddObject(sceneObject));
 		
 	}
 	SceneObjectSP rootObj;
@@ -369,21 +400,21 @@ int main()
 
 //memory leak check
 
-#define _CRTDBG_MAP_ALLOC
-#include <crtdbg.h>
-
-struct DML
-{
-	~DML()
-	{
-		if (_CrtDumpMemoryLeaks())
-		{
-			cout << "memory leaks." << endl;
-		}
-		else
-		{
-			cout << "no memeory leaks." << endl;
-		}
-		cin.get();
-	}
-} _dml;
+// #define _CRTDBG_MAP_ALLOC
+// #include <crtdbg.h>
+// 
+// struct DML
+// {
+// 	~DML()
+// 	{
+// 		if (_CrtDumpMemoryLeaks())
+// 		{
+// 			cout << "memory leaks." << endl;
+// 		}
+// 		else
+// 		{
+// 			cout << "no memeory leaks." << endl;
+// 		}
+// 		cin.get();
+// 	}
+// } _dml;

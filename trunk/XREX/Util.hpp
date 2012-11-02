@@ -46,12 +46,12 @@ namespace XREX
 
 
 
-	template<typename T>
+	template <typename T>
 	std::unique_ptr<T> MakeUP()
 	{
 		return std::unique_ptr<T>(new T());
 	}
-	template<typename T, typename A0>
+	template <typename T, typename A0>
 	std::unique_ptr<T> MakeUP(A0&& a0)
 	{
 		return std::unique_ptr<T>(new T(std::forward<A0>(a0)));

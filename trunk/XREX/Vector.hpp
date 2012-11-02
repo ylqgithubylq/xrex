@@ -19,6 +19,8 @@ namespace XREX
 	template <typename T, uint32 N>
 	class VectorT
 	{
+		static_assert(N >= 1 && N <= 4, "");
+
 		template <typename U, uint32 M>
 		friend class VectorT;
 
@@ -70,14 +72,14 @@ namespace XREX
 		}
 		VectorT(T const& x, T const& y)
 		{
-			static_assert(Dimension == 2, "");
+			static_assert(Dimension == 2, "Dimension 2 only");
 
 			values_[0] = x;
 			values_[1] = y;
 		}
 		VectorT(T const& x, T const& y, T const& z)
 		{
-			static_assert(Dimension == 3, "");
+			static_assert(Dimension == 3, "Dimension 3 only");
 
 			values_[0] = x;
 			values_[1] = y;
@@ -85,7 +87,7 @@ namespace XREX
 		}
 		VectorT(T const& x, T const& y, T const& z, T const& w)
 		{
-			static_assert(Dimension == 4, "");
+			static_assert(Dimension == 4, "Dimension 4 only");
 
 			values_[0] = x;
 			values_[1] = y;
