@@ -43,6 +43,10 @@ namespace XREX
 
 	void RenderingEngine::RenderAFrame()
 	{
+
+		// clear framebuffer globally first.
+		gl::ClearColor(0, 0, 0, 0);
+		gl::Clear(gl::GL_COLOR_BUFFER_BIT | gl::GL_DEPTH_BUFFER_BIT | gl::GL_STENCIL_BUFFER_BIT);
 		double currentTime = timer_.Elapsed();
 		double delta = currentTime - lastTime_;
 		if (beforeRenderingFunction_ != nullptr)
@@ -51,11 +55,16 @@ namespace XREX
 		}
 
 		RenderScene();
-
+#ifdef USE_OPENGL_COMPATIBILITY_PROFILE
+		gl::UseProgram(0);
+		// TODO temp hack for CEGUI. it seems CEGUI do not disable depth test itself
+		gl::Disable(gl::GL_DEPTH_TEST);
+#endif
 		if (afterRenderingFunction_ != nullptr)
 		{
 			afterRenderingFunction_(currentTime, delta);
 		}
+
 		lastTime_ = currentTime;
 	}
 

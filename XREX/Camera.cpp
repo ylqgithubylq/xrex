@@ -24,10 +24,9 @@ namespace XREX
 		static floatV3 const LocalTo = floatV3(0, 0, 1);
 		static floatV3 const LocalUp = floatV3(0, 1, 0);
 		TransformationSP transformation = GetOwnerSceneObject()->GetComponent<Transformation>();
-		floatV3 position = Transform(transformation->GetWorldMatrix(), floatV3::Zero);
 		floatV3 to = TransformNormal(transformation->GetWorldMatrix(), LocalTo);
 		floatV3 up = TransformNormal(transformation->GetWorldMatrix(), LocalUp);
-		viewMatrix_ = LookToViewMatrix(position, to, up);
+		viewMatrix_ = LookToViewMatrix(transformation->GetGlobalPosition(), to, up);
 		dirty_ = false;
 	}
 

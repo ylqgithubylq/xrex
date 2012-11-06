@@ -36,7 +36,7 @@ namespace XREX
 		virtual RenderableSP ShallowClone() const override;
 
 		/*
-		 *	Short cut for ShallowClone().
+		 *	Short cut for ShallowClone() because shared_ptr<Mesh> are not a covariance of shared_ptr<Renderable>.
 		 *	Only mesh and sub meshes are cloned. Material, layout, effect are shared.
 		 */
 		MeshSP GetShallowClone() const

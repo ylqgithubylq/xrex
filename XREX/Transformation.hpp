@@ -57,6 +57,12 @@ namespace XREX
 			return position_;
 		}
 
+		floatV3 const& GetGlobalPosition() const
+		{
+			Update();
+			return globalPosition_;
+		}
+
 		void SetOrientation(floatQ const& orientation)
 		{
 			orientation_ = orientation;
@@ -199,6 +205,8 @@ namespace XREX
 		floatV3 position_;
 		floatQ orientation_;
 		floatV3 scaling_;
+
+		floatV3 mutable globalPosition_;
 
 		floatV3 front_;
 		floatV3 up_;
