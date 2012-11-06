@@ -293,18 +293,23 @@ struct TempScene
 		XREXContext::GetInstance().GetInputCenter().AddInputHandler(cameraController);
 		// 		wMatrix->SetValue(translate * rotation);
 		XREXContext::GetInstance().GetResourceManager().AddResourceLocation("Data/");
-		MeshSP model = XREXContext::GetInstance().GetResourceManager().GetModel("crytek-sponza/sponza.obj");
-		//MeshSP model = XREXContext::GetInstance().GetResourceManager().GetModel("sibenik/sibenik.obj");
-		//MeshSP model = XREXContext::GetInstance().GetResourceManager().GetModel("rungholt/rungholt.obj");
-		for (auto& subMesh : model->GetAllSubMeshes())
+		MeshSP model;
+		//model = XREXContext::GetInstance().GetResourceManager().GetModel("crytek-sponza/sponza.obj");
+		//model = XREXContext::GetInstance().GetResourceManager().GetModel("sibenik/sibenik.obj");
+		//model = XREXContext::GetInstance().GetResourceManager().GetModel("rungholt/rungholt.obj");
+		if (model)
 		{
-			subMesh->SetEffect(effect);
+			for (auto& subMesh : model->GetAllSubMeshes())
+			{
+				subMesh->SetEffect(effect);
+			}
+			SceneObjectSP sceneObject = MakeSP<SceneObject>("model");
+			sceneObject->SetComponent(model);
+			sceneObject->GetComponent<Transformation>()->SetPosition(centerPosition_);
+			sceneObject->GetComponent<Transformation>()->Scale(1.f);
+			assert(scene_->AddObject(sceneObject));
 		}
-		SceneObjectSP sceneObject = MakeSP<SceneObject>("model");
-		sceneObject->SetComponent(model);
-		sceneObject->GetComponent<Transformation>()->SetPosition(centerPosition_);
-		sceneObject->GetComponent<Transformation>()->Scale(1.f);
-		assert(scene_->AddObject(sceneObject));
+
 		
 	}
 	SceneObjectSP rootObj;

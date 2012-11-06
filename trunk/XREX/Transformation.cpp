@@ -6,8 +6,8 @@ namespace XREX
 {
 
 	Transformation::Transformation()
-		: position_(floatV3::Zero), orientation_(floatQ::Identity), scaling_(floatV3(1.0f, 1.0f, 1.0f)),
-		front_(0.0f, 0.0f, 1.0f), up_(0.0f, 1.0f, 0.0f), parentWorldMatrix_(floatM44::Identity)
+		: position_(floatV3::Zero), orientation_(floatQ::Identity), scaling_(1, 1, 1), globalPosition_(0, 0, 0),
+		front_(0, 0, 1), up_(0, 1, 0), parentWorldMatrix_(floatM44::Identity), dirty_(true)
 	{
 	}
 
@@ -43,16 +43,19 @@ namespace XREX
 			if (parentWorldMatrix_ != parentMatrix)
 			{ // need update
 				worldMatrix_ = parentMatrix * modelMatrix_;
+				globalPosition_ = Transform(worldMatrix_, floatV3::Zero);
 				parentWorldMatrix_ = parentMatrix;
 			}
 			else if (dirty_)
 			{
 				worldMatrix_ = parentMatrix * modelMatrix_;
+				globalPosition_ = Transform(worldMatrix_, floatV3::Zero);
 			}
 		}
 		else if (dirty_)
 		{
 			worldMatrix_ = modelMatrix_;
+			globalPosition_ = position_;
 		}
 		dirty_ = false;
 	}
