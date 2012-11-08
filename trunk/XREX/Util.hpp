@@ -43,8 +43,18 @@ namespace XREX
 		return std::static_pointer_cast<To>(p);
 	}
 
-
-
+	template <typename EnumType>
+	std::underlying_type<EnumType> ValueFromEnum(EnumType enumInstance)
+	{
+		static_assert(std::is_enum<EnumType>::value, "parameter must be enum type.");
+		return static_cast<std::underlying_type<EnumType>>(enumInstance);
+	}
+	template <typename EnumType, typename ValueType>
+	EnumType EnumFromValue(ValueType value)
+	{
+		static_assert(std::is_enum<EnumType>::value, "EnumType must be enum type.");
+		return static_cast<EnumType>(value);
+	}
 
 	template <typename T>
 	std::unique_ptr<T> MakeUP()

@@ -59,12 +59,29 @@ namespace XREX
 			: values_(rhs.values_)
 		{
 		}
+	private:
+		struct SmallerSizeTag
+		{
+		};
+		struct LargerSizeTag
+		{
+		};
+		template <typename U, uint32 M>
+		void DoConstructFromOtherSizedVector(VectorT<U, M> const& rhs, SmallerSizeTag)
+		{
+			MathHelper::VectorHelper<T, M>::DoCopy(&values_[0], &rhs[0]);
+			MathHelper::VectorHelper<T, N - M>::DoAssign(&values_[M], 0); // fill rest with 0
+		}
+		template <typename U, uint32 M>
+		void DoConstructFromOtherSizedVector(VectorT<U, M> const& rhs, LargerSizeTag)
+		{
+			MathHelper::VectorHelper<T, N>::DoCopy(&values_[0], &rhs[0]);
+		}
+	public:
 		template <typename U, uint32 M>
 		explicit VectorT(VectorT<U, M> const& rhs)
 		{
-			static_assert(M >= N, "");
-
-			MathHelper::VectorHelper<T, N>::DoCopy(&values_[0], &rhs[0]);
+			DoConstructFromOtherSizedVector(rhs, std::conditional<M >= N, LargerSizeTag, SmallerSizeTag>::type());
 		}
 		explicit VectorT(T const& rhs)
 		{

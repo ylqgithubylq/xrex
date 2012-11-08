@@ -1,5 +1,7 @@
 #include "XREX.hpp"
 
+#include "XREXContext.hpp"
+#include "RenderingFactory.hpp"
 #include "Shader.hpp"
 #include "RenderingEffect.hpp"
 #include "GLUtil.hpp"
@@ -304,6 +306,41 @@ namespace XREX
 						parameter = MakeSP<ConcreteEffectParameter<int32>>(name);
 					}
 					break;
+				case gl::GL_INT_VEC2:
+					{
+						parameter = MakeSP<ConcreteEffectParameter<intV2>>(name);
+					}
+					break;
+				case gl::GL_INT_VEC3:
+					{
+						parameter = MakeSP<ConcreteEffectParameter<intV3>>(name);
+					}
+					break;
+				case gl::GL_INT_VEC4:
+					{
+						parameter = MakeSP<ConcreteEffectParameter<intV4>>(name);
+					}
+					break;
+				case gl::GL_UNSIGNED_INT:
+					{
+						parameter = MakeSP<ConcreteEffectParameter<uint32>>(name);
+					}
+					break;
+				case gl::GL_UNSIGNED_INT_VEC2:
+					{
+						parameter = MakeSP<ConcreteEffectParameter<uintV2>>(name);
+					}
+					break;
+				case gl::GL_UNSIGNED_INT_VEC3:
+					{
+						parameter = MakeSP<ConcreteEffectParameter<uintV3>>(name);
+					}
+					break;
+				case gl::GL_UNSIGNED_INT_VEC4:
+					{
+						parameter = MakeSP<ConcreteEffectParameter<uintV4>>(name);
+					}
+					break;
 				case gl::GL_FLOAT:
 					{
 						parameter = MakeSP<ConcreteEffectParameter<float>>(name);
@@ -397,8 +434,59 @@ namespace XREX
 			switch(glType)
 			{
 			case gl::GL_SAMPLER_1D:
+				{
+					binder.setter = [&binder, parameter, samplerLocation] ()
+					{
+						TextureSP const& texture = parameter->GetValue<TextureSP>();
+						if (texture)
+						{
+							texture->BindTexture(samplerLocation);
+							gl::Uniform1i(binder.glLocation, samplerLocation);
+						}
+						else
+						{
+							XREXContext::GetInstance().GetRenderingFactory().GetBlackTexture1D()->BindTexture(samplerLocation);
+							gl::Uniform1i(binder.glLocation, samplerLocation);
+						}
+					};
+				}
+				break;
 			case gl::GL_SAMPLER_2D:
+				{
+					binder.setter = [&binder, parameter, samplerLocation] ()
+					{
+						TextureSP const& texture = parameter->GetValue<TextureSP>();
+						if (texture)
+						{
+							texture->BindTexture(samplerLocation);
+							gl::Uniform1i(binder.glLocation, samplerLocation);
+						}
+						else
+						{
+							XREXContext::GetInstance().GetRenderingFactory().GetBlackTexture2D()->BindTexture(samplerLocation);
+							gl::Uniform1i(binder.glLocation, samplerLocation);
+						}
+					};
+				}
+				break;
 			case gl::GL_SAMPLER_3D:
+				{
+					binder.setter = [&binder, parameter, samplerLocation] ()
+					{
+						TextureSP const& texture = parameter->GetValue<TextureSP>();
+						if (texture)
+						{
+							texture->BindTexture(samplerLocation);
+							gl::Uniform1i(binder.glLocation, samplerLocation);
+						}
+						else
+						{
+							XREXContext::GetInstance().GetRenderingFactory().GetBlackTexture3D()->BindTexture(samplerLocation);
+							gl::Uniform1i(binder.glLocation, samplerLocation);
+						}
+					};
+				}
+				break;
 			case gl::GL_SAMPLER_CUBE:
 				{
 					binder.setter = [&binder, parameter, samplerLocation] ()
@@ -407,6 +495,11 @@ namespace XREX
 						if (texture)
 						{
 							texture->BindTexture(samplerLocation);
+							gl::Uniform1i(binder.glLocation, samplerLocation);
+						}
+						else
+						{
+							XREXContext::GetInstance().GetRenderingFactory().GetBlackTextureCube()->BindTexture(samplerLocation);
 							gl::Uniform1i(binder.glLocation, samplerLocation);
 						}
 					};
@@ -434,6 +527,62 @@ namespace XREX
 					binder.setter = [&binder, parameter] ()
 					{
 						gl::Uniform1i(binder.glLocation, parameter->GetValue<int32>());
+					};
+				}
+				break;
+			case gl::GL_INT_VEC2:
+				{
+					binder.setter = [&binder, parameter] ()
+					{
+						gl::Uniform2iv(binder.glLocation, 1, parameter->GetValue<intV2>().GetArray());
+					};
+				}
+				break;
+			case gl::GL_INT_VEC3:
+				{
+					binder.setter = [&binder, parameter] ()
+					{
+						gl::Uniform3iv(binder.glLocation, 1, parameter->GetValue<intV3>().GetArray());
+					};
+				}
+				break;
+			case gl::GL_INT_VEC4:
+				{
+					binder.setter = [&binder, parameter] ()
+					{
+						gl::Uniform4iv(binder.glLocation, 1, parameter->GetValue<intV4>().GetArray());
+					};
+				}
+				break;
+			case gl::GL_UNSIGNED_INT:
+				{
+					binder.setter = [&binder, parameter] ()
+					{
+						gl::Uniform1ui(binder.glLocation, parameter->GetValue<uint32>());
+					};
+				}
+				break;
+			case gl::GL_UNSIGNED_INT_VEC2:
+				{
+					binder.setter = [&binder, parameter] ()
+					{
+						gl::Uniform2uiv(binder.glLocation, 1, parameter->GetValue<uintV2>().GetArray());
+					};
+				}
+				break;
+			case gl::GL_UNSIGNED_INT_VEC3:
+				{
+					binder.setter = [&binder, parameter] ()
+					{
+						gl::Uniform3uiv(binder.glLocation, 1, parameter->GetValue<uintV3>().GetArray());
+					};
+				}
+				break;
+			case gl::GL_UNSIGNED_INT_VEC4:
+				{
+					binder.setter = [&binder, parameter] ()
+					{
+						gl::Uniform4uiv(binder.glLocation, 1, parameter->GetValue<uintV4>().GetArray());
 					};
 				}
 				break;

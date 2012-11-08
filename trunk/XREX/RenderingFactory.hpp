@@ -18,6 +18,28 @@ namespace XREX
 		RenderingFactory();
 		virtual ~RenderingFactory();
 
+		void Initialize();
+
+		TextureSP const& GetBlackTexture1D() const
+		{
+			return blackTexture1D_;
+		}
+		TextureSP const& GetBlackTexture2D() const
+		{
+			return blackTexture2D_;
+		}
+		TextureSP const& GetBlackTexture3D() const
+		{
+			return blackTexture3D_;
+		}
+		TextureSP const& GetBlackTextureCube() const
+		{
+			assert(false); // not implemented
+			return blackTextureCube_;
+		}
+
+		RenderingEngine& GetRenderingEngine();
+
 		RasterizerStateObjectSP CreateRasterizerStateObject(RasterizerState const& rasterizerState)
 		{
 			return MakeSP<RasterizerStateObject>(rasterizerState);
@@ -116,6 +138,14 @@ namespace XREX
 		{
 			return MakeSP<TextureCube>(description, data, generateMipmap);
 		}
+
+	private:
+		TextureSP blackTexture1D_;
+		TextureSP blackTexture2D_;
+		TextureSP blackTexture3D_;
+		TextureSP blackTextureCube_;
+		std::unique_ptr<RenderingEngine> renderingEngine_;
+
 	};
 
 }

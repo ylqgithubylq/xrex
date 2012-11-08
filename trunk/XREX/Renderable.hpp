@@ -13,12 +13,17 @@ namespace XREX
 	{
 	public:
 		struct RenderablePack
+			: XREX::Noncopyable
 		{
 			Renderable& renderable;
 			MaterialSP material;
 			RenderingLayoutSP layout;
 			RenderingTechniqueSP technique;
 
+			RenderablePack(RenderablePack&& rhs)
+				: renderable(rhs.renderable), material(std::move(rhs.material)), layout(std::move(rhs.layout)), technique(std::move(rhs.technique))
+			{
+			}
 			explicit RenderablePack(Renderable& ownerRenderable)
 				: renderable(ownerRenderable)
 			{
@@ -30,6 +35,7 @@ namespace XREX
 		};
 	public:
 		Renderable();
+
 		virtual ~Renderable() override;
 
 		virtual std::vector<RenderablePack> GetRenderablePack(SceneObjectSP const& camera) = 0;

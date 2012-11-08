@@ -48,6 +48,7 @@ namespace XREX
 		template <typename T, uint32 N>
 		struct VectorHelper
 		{
+			static_assert(N <= 4, "Vector larger than 4 are not support.");
 			template <typename U>
 			static void DoCopy(T out[N], U const rhs[N])
 			{

@@ -30,6 +30,34 @@ namespace XREX
 	{
 		assert(false);
 	}
+	void EffectParameter::SetValue(intV2 const& value)
+	{
+		assert(false);
+	}
+	void EffectParameter::SetValue(intV3 const& value)
+	{
+		assert(false);
+	}
+	void EffectParameter::SetValue(intV4 const& value)
+	{
+		assert(false);
+	}
+	void EffectParameter::SetValue(uint32 const& value)
+	{
+		assert(false);
+	}
+	void EffectParameter::SetValue(uintV2 const& value)
+	{
+		assert(false);
+	}
+	void EffectParameter::SetValue(uintV3 const& value)
+	{
+		assert(false);
+	}
+	void EffectParameter::SetValue(uintV4 const& value)
+	{
+		assert(false);
+	}
 	void EffectParameter::SetValue(float const& value)
 	{
 		assert(false);
@@ -62,8 +90,8 @@ namespace XREX
 	// 	void EffectParameter::SetValue(std::vector<floatV4> const& value) { assert(false); }
 	// 	void EffectParameter::SetValue(std::vector<floatM44> const& value) { assert(false); }
 
-	#pragma warning(push)
-	#pragma warning(disable: 4172) // return address of local variable
+#pragma warning(push)
+#pragma warning(disable: 4172) // return address of local variable
 
 	EffectParameter::ParameterValueAutoConverter::operator bool const&() const
 	{
@@ -75,10 +103,45 @@ namespace XREX
 		assert(false);
 		return 0;
 	}
+	EffectParameter::ParameterValueAutoConverter::operator intV2 const&() const
+	{
+		assert(false);
+		return intV2();
+	}
+	EffectParameter::ParameterValueAutoConverter::operator intV3 const&() const
+	{
+		assert(false);
+		return intV3();
+	}
+	EffectParameter::ParameterValueAutoConverter::operator intV4 const&() const
+	{
+		assert(false);
+		return intV4();
+	}
+	EffectParameter::ParameterValueAutoConverter::operator uint32 const&() const
+	{
+		assert(false);
+		return 0;
+	}
+	EffectParameter::ParameterValueAutoConverter::operator uintV2 const&() const
+	{
+		assert(false);
+		return uintV2();
+	}
+	EffectParameter::ParameterValueAutoConverter::operator uintV3 const&() const
+	{
+		assert(false);
+		return uintV3();
+	}
+	EffectParameter::ParameterValueAutoConverter::operator uintV4 const&() const
+	{
+		assert(false);
+		return uintV4();
+	}
 	EffectParameter::ParameterValueAutoConverter::operator float const&() const
 	{
 		assert(false);
-		return 0.0;
+		return 0.f;
 	}
 	EffectParameter::ParameterValueAutoConverter::operator floatV2 const&() const
 	{
@@ -118,8 +181,14 @@ namespace XREX
 	// 	return ParameterValueAutoConverter();
 	// }
 
-	#pragma warning(pop)
+#pragma warning(pop)
 
+
+
+	EffectPipelineParameters::EffectPipelineParameters()
+		: polygonOffsetFactor(0), polygonOffsetUnits(0), frontStencilReference(0), backStencilReference(0), blendFactor(1.f, 1.f, 1.f, 1.f)
+	{
+	}
 
 
 
@@ -184,9 +253,7 @@ namespace XREX
 
 	RenderingPass::RenderingPass(RenderingTechnique& technique, ProgramObjectSP& program,
 		RasterizerStateObjectSP& rasterizerState, DepthStencilStateObjectSP& depthStencilState, BlendStateObjectSP& blendState)
-		: technique_(technique), program_(program), rasterizerState_(rasterizerState), depthStencilState_(depthStencilState), blendState_(blendState),
-		// TODO get variable values below from out side
-		frontStencilReference_(0), backStencilReference_(0), blendFactor_(1.f, 1.f, 1.f, 1.f)
+		: technique_(technique), program_(program), rasterizerState_(rasterizerState), depthStencilState_(depthStencilState), blendState_(blendState)
 	{
 		program->InitializeParameterSetters(technique_.GetEffect());
 	}
@@ -196,9 +263,9 @@ namespace XREX
 
 	void RenderingPass::Use()
 	{
-		rasterizerState_->Bind();
-		depthStencilState_->Bind(frontStencilReference_, backStencilReference_);
-		blendState_->Bind(blendFactor_);
+		rasterizerState_->Bind(pipelineParameters_.polygonOffsetFactor, pipelineParameters_.polygonOffsetUnits);
+		depthStencilState_->Bind(pipelineParameters_.frontStencilReference, pipelineParameters_.backStencilReference);
+		blendState_->Bind(pipelineParameters_.blendFactor);
 		program_->Bind();
 	}
 

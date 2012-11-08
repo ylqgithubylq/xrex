@@ -14,10 +14,8 @@ namespace XREX
 {
 
 	XREXContext::XREXContext()
-		: settings_(""), // temp root path
-		renderingFactory_(MakeUP<RenderingFactory>()), renderingEngine_(MakeUP<RenderingEngine>()), inputCenter_(MakeUP<InputCenter>()), resourceLoader_(MakeUP<LocalResourceLoader>())
+		: settings_("") // temp root path
 	{
-
 	}
 
 
@@ -26,10 +24,9 @@ namespace XREX
 		resourceLoader_.reset();
 		resourceManager_.reset();
 		inputCenter_.reset();
-		renderingFactory_.reset();
 
 		// make these two released last
-		renderingEngine_.reset();
+		renderingFactory_.reset();
 		mainWindow_.reset();
 	}
 
@@ -37,8 +34,14 @@ namespace XREX
 	void XREXContext::Initialize(Settings const& settings)
 	{
 		settings_ = settings;
-		resourceManager_ = (MakeUP<ResourceManager>(settings.rootPath));
+		resourceManager_ = MakeUP<ResourceManager>(settings.rootPath);
+		renderingFactory_ = MakeUP<RenderingFactory>();
+		inputCenter_ = MakeUP<InputCenter>();
+		resourceLoader_ = MakeUP<LocalResourceLoader>();
+
 		InitializeMainWindow(settings.windowTitle, settings.renderingSettings);
+		renderingFactory_->Initialize();
+		renderingEngine_ = &renderingFactory_->GetRenderingEngine();
 		renderingEngine_->Initialize();
 	}
 

@@ -35,6 +35,13 @@ namespace XREX
 
 		virtual void SetValue(bool const& value);
 		virtual void SetValue(int32 const& value);
+		virtual void SetValue(intV2 const& value);
+		virtual void SetValue(intV3 const& value);
+		virtual void SetValue(intV4 const& value);
+		virtual void SetValue(uint32 const& value);
+		virtual void SetValue(uintV2 const& value);
+		virtual void SetValue(uintV3 const& value);
+		virtual void SetValue(uintV4 const& value);
 		virtual void SetValue(float const& value);
 		virtual void SetValue(floatV2 const& value);
 		virtual void SetValue(floatV3 const& value);
@@ -59,6 +66,13 @@ namespace XREX
 		{
 			virtual operator bool const&() const;
 			virtual operator int32 const&() const;
+			virtual operator intV2 const&() const;
+			virtual operator intV3 const&() const;
+			virtual operator intV4 const&() const;
+			virtual operator uint32 const&() const;
+			virtual operator uintV2 const&() const;
+			virtual operator uintV3 const&() const;
+			virtual operator uintV4 const&() const;
 			virtual operator float const&() const;
 			virtual operator floatV2 const&() const;
 			virtual operator floatV3 const&() const;
@@ -99,13 +113,13 @@ namespace XREX
 	public:
 		typedef T ValueType;
 
-	#pragma warning(push)
-	#pragma warning(disable: 4355) // 'this' used in base member initializer list
+#pragma warning(push)
+#pragma warning(disable: 4355) // 'this' used in base member initializer list
 		explicit ConcreteEffectParameter(std::string const& name)
 			: EffectParameter(name), converter_(this)
 		{
 		}
-	#pragma warning(pop)
+#pragma warning(pop)
 
 		virtual ElementType GetType() const override
 		{
@@ -156,6 +170,16 @@ namespace XREX
 		ConcreteParameterValueAutoConverter converter_;
 	};
 
+	struct XREX_API EffectPipelineParameters
+		: Noncopyable
+	{
+		float polygonOffsetFactor;
+		float polygonOffsetUnits;
+		uint16 frontStencilReference;
+		uint16 backStencilReference;
+		Color blendFactor;
+		EffectPipelineParameters();
+	};
 
 
 
@@ -260,6 +284,11 @@ namespace XREX
 			return program_;
 		}
 
+		EffectPipelineParameters& GetEffectPipelineParameters()
+		{
+			return pipelineParameters_;
+		}
+
 	private:
 		RenderingTechnique& technique_;
 		ProgramObjectSP program_;
@@ -267,10 +296,7 @@ namespace XREX
 		DepthStencilStateObjectSP depthStencilState_;
 		BlendStateObjectSP blendState_;
 	
-		// TODO should these located here?
-		uint16 frontStencilReference_;
-		uint16 backStencilReference_;
-		Color blendFactor_;
+		EffectPipelineParameters pipelineParameters_;
 	};
 
 }

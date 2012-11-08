@@ -294,7 +294,7 @@ struct TempScene
 		// 		wMatrix->SetValue(translate * rotation);
 		XREXContext::GetInstance().GetResourceManager().AddResourceLocation("Data/");
 		MeshSP model;
-		//model = XREXContext::GetInstance().GetResourceManager().GetModel("crytek-sponza/sponza.obj");
+		model = XREXContext::GetInstance().GetResourceManager().GetModel("crytek-sponza/sponza.obj");
 		//model = XREXContext::GetInstance().GetResourceManager().GetModel("sibenik/sibenik.obj");
 		//model = XREXContext::GetInstance().GetResourceManager().GetModel("rungholt/rungholt.obj");
 		if (model)

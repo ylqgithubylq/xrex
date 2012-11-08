@@ -28,7 +28,9 @@ namespace XREX
 
 	RenderingEngine::~RenderingEngine()
 	{
-		scene_.reset(); // release scene first
+		beforeRenderingFunction_.swap(std::function<void(double, double)>());
+		afterRenderingFunction_.swap(std::function<void(double, double)>());
+		scene_.reset(); // release scene
 	}
 
 	XREX::uint32 RenderingEngine::GetGLError()
@@ -39,12 +41,16 @@ namespace XREX
 
 	void RenderingEngine::Initialize()
 	{
+		// move gl context creation here?
+		gl::Enable(gl::GL_POLYGON_OFFSET_FILL);
+		gl::Enable(gl::GL_POLYGON_OFFSET_POINT);
+		gl::Enable(gl::GL_POLYGON_OFFSET_LINE);
 	}
 
 	void RenderingEngine::RenderAFrame()
 	{
 
-		// clear framebuffer globally first.
+		// clear frame buffer globally first.
 		gl::ClearColor(0, 0, 0, 0);
 		gl::Clear(gl::GL_COLOR_BUFFER_BIT | gl::GL_DEPTH_BUFFER_BIT | gl::GL_STENCIL_BUFFER_BIT);
 		double currentTime = timer_.Elapsed();
@@ -111,10 +117,10 @@ namespace XREX
 			assert(renderable != nullptr);
 			assert(renderable->IsVisible());
 
-			vector<Renderable::RenderablePack> const& renderablePacks = renderable->GetRenderablePack(cameraObject);
+			vector<Renderable::RenderablePack> renderablePacks = renderable->GetRenderablePack(cameraObject);
 			for (auto& renderablePack : renderablePacks)
 			{
-				allRenderableNeedToRender.push_back(renderablePack);
+				allRenderableNeedToRender.push_back(std::move(renderablePack));
 			}
 		}
 		// TODO do some sorting works
