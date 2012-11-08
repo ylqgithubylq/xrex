@@ -83,10 +83,12 @@ namespace XREX
 		std::function<bool(double currentTime, double deltaTime)> logicFunction_;
 		std::unique_ptr<Window> mainWindow_;
 		std::unique_ptr<RenderingFactory> renderingFactory_;
-		std::unique_ptr<RenderingEngine> renderingEngine_;
 		std::unique_ptr<InputCenter> inputCenter_;
 		std::unique_ptr<ResourceManager> resourceManager_;
 		std::unique_ptr<LocalResourceLoader> resourceLoader_;
+
+		RenderingEngine* renderingEngine_;
+
 		Settings settings_;
 		Timer timer_;
 		double lastTime_;

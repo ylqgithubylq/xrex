@@ -89,8 +89,6 @@ namespace XREX
 	{
 		PolygonMode polygonMode;
 		CullMode cullMode;
-		float polygonOffsetFactor;
-		float polygonOffsetUnits;
 		bool frontFaceCCW;
 		bool scissorEnable;
 		bool multisampleEnable;
@@ -168,7 +166,7 @@ namespace XREX
 	{
 	public:
 		explicit RasterizerStateObject(RasterizerState const& state);
-		void Bind();
+		void Bind(float polygonOffsetFactor, float polygonOffsetUnits);
 	private:
 		RasterizerState state_;
 

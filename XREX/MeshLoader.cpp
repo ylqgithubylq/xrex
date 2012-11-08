@@ -200,30 +200,6 @@ namespace XREX
 					// 				mesh->mBones;
 
 
-					static std::array<std::string, AI_MAX_NUMBER_OF_TEXTURECOORDS> TextureCoordinateNames = [] ()
-					{
-						std::array<std::string, AI_MAX_NUMBER_OF_TEXTURECOORDS> TextureCoordinateNames;
-						for (uint32 j = 0; j < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++j)
-						{
-							std::stringstream ss;
-							ss << "textureCoordinate" << j;
-							TextureCoordinateNames[j] = ss.str();
-						}
-						return TextureCoordinateNames;
-					} ();
-
-					static std::array<std::string, AI_MAX_NUMBER_OF_COLOR_SETS> ColorNames = [] ()
-					{
-						std::array<std::string, AI_MAX_NUMBER_OF_COLOR_SETS> ColorNames;
-						for (uint32 j = 0; j < AI_MAX_NUMBER_OF_COLOR_SETS; ++j)
-						{
-							std::stringstream ss;
-							ss << "color" << j;
-							ColorNames[j] = ss.str();
-						}
-						return ColorNames;
-					} ();
-
 					uint32 totalLengthPerElement = 0;
 					uint32 textureCoordinateCount = 0;
 					uint32 vertexColorCount = 0;
@@ -267,22 +243,24 @@ namespace XREX
 					GraphicsBuffer::DataDescription dataDescription = GraphicsBuffer::DataDescription(mesh->mNumVertices);
 					if (mesh->HasPositions())
 					{
-						dataDescription.AddChannelLayout(GraphicsBuffer::DataDescription::ElementLayoutDescription(startLocation, totalLengthPerElement, ElementType::FloatV3, "position"));
+						dataDescription.AddChannelLayout(GraphicsBuffer::DataDescription::ElementLayoutDescription(startLocation, totalLengthPerElement, ElementType::FloatV3, GetAttributeString(DefinedAttribute::Position)));
 						startLocation += sizeof(*mesh->mVertices);
 					}
 					if (mesh->HasNormals())
 					{
-						dataDescription.AddChannelLayout(GraphicsBuffer::DataDescription::ElementLayoutDescription(startLocation, totalLengthPerElement, ElementType::FloatV3, "normal"));
+						dataDescription.AddChannelLayout(GraphicsBuffer::DataDescription::ElementLayoutDescription(startLocation, totalLengthPerElement, ElementType::FloatV3, GetAttributeString(DefinedAttribute::Normal)));
 						startLocation += sizeof(*mesh->mNormals);
 					}
 					for (uint32 j = 0; j < textureCoordinateCount; ++j)
 					{
-						dataDescription.AddChannelLayout(GraphicsBuffer::DataDescription::ElementLayoutDescription(startLocation, totalLengthPerElement, ElementType::FloatV3, TextureCoordinateNames[j]));
+						dataDescription.AddChannelLayout(GraphicsBuffer::DataDescription::ElementLayoutDescription(startLocation, totalLengthPerElement, ElementType::FloatV3,
+							GetAttributeString(static_cast<DefinedAttribute>(static_cast<uint32>(DefinedAttribute::TextureCoordinate0) + j))));
 						startLocation += sizeof(*mesh->mTextureCoords[0]);
 					}
 					for (uint32 j = 0; j < vertexColorCount; ++j)
 					{
-						dataDescription.AddChannelLayout(GraphicsBuffer::DataDescription::ElementLayoutDescription(startLocation, totalLengthPerElement, ElementType::FloatV4, ColorNames[j]));
+						dataDescription.AddChannelLayout(GraphicsBuffer::DataDescription::ElementLayoutDescription(startLocation, totalLengthPerElement, ElementType::FloatV4,
+							GetAttributeString(static_cast<DefinedAttribute>(static_cast<uint32>(DefinedAttribute::Color0) + j))));
 						startLocation += sizeof(*mesh->mColors[0]);
 					}
 

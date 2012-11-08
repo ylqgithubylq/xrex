@@ -2,6 +2,8 @@ using regular expressions(Ctrl+Shift+F):
 ^:b*[^:b*#/{}]+.*$
 
 TODO:
+change EffectParameter to use something like boost::any, change to use type EffectParameter, remove type EffectParameterSP.
+change all enum cast to use: ValueFromEnum, EnumFromValue
 state objects: operator <()
 
 create new texture constructor without 2 dimension data parameter, remove constructor parameter generateMipmap of the one with 2 dimension data parameter

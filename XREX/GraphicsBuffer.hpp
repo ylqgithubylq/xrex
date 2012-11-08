@@ -105,7 +105,6 @@ namespace XREX
 		GraphicsBuffer(BufferType type, Usage usage, std::vector<T> const& data, DataDescription&& description)
 			: type_(type), usage_(usage), description_(std::move(description))
 		{
-			assert(sizeof(T) == GetElementSizeInByte(TypeToElementType<T>::Type));
 			DoConsctruct(data.data(), data.size() * sizeof(T));
 		}
 

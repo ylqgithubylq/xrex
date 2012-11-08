@@ -131,8 +131,7 @@ namespace XREX
 	}
 
 	RasterizerState::RasterizerState()
-		: polygonMode(PolygonMode::Fill), cullMode(CullMode::Back), polygonOffsetFactor(0), polygonOffsetUnits(0),
-		frontFaceCCW(true), scissorEnable(false), multisampleEnable(false)
+		: polygonMode(PolygonMode::Fill), cullMode(CullMode::Back), frontFaceCCW(true), scissorEnable(false), multisampleEnable(false)
 	{
 	}
 
@@ -192,13 +191,13 @@ namespace XREX
 		}
 	}
 
-	void RasterizerStateObject::Bind()
+	void RasterizerStateObject::Bind(float polygonOffsetFactor, float polygonOffsetUnits)
 	{
 		gl::PolygonMode(gl::GL_FRONT_AND_BACK, glPolygonMode_);
 		gl::FrontFace(glFrontFace_);
 		SetGLState(gl::GL_CULL_FACE, glCullFaceEnable_);
 		gl::CullFace(glCullFace_);
-		gl::PolygonOffset(state_.polygonOffsetFactor, state_.polygonOffsetUnits);
+		gl::PolygonOffset(polygonOffsetFactor, polygonOffsetUnits);
 		SetGLState(gl::GL_SCISSOR_TEST, state_.scissorEnable);
 		SetGLState(gl::GL_MULTISAMPLE, state_.multisampleEnable);
 	}

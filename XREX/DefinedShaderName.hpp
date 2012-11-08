@@ -67,10 +67,64 @@ namespace XREX
 		return mapping[static_cast<uint32>(definedUniform)];
 	}
 
-	enum class DefinedAttribute // not used
+	enum class XREX_API DefinedAttribute
 	{
 		Position,
 		Normal,
+
+		TextureCoordinate0,
+		TextureCoordinate1,
+		TextureCoordinate2,
+		TextureCoordinate3,
+		TextureCoordinate4,
+		TextureCoordinate5,
+		TextureCoordinate6,
+		TextureCoordinate7,
+
+		Color0,
+		Color1,
+		Color2,
+		Color3,
+		Color4,
+		Color5,
+		Color6,
+		Color7,
+
+		DefinedAttributeCount,
+
+		DefinedTextureCoordinateCount = TextureCoordinate7 - TextureCoordinate0 + 1,
+		DefinedColorCount = Color7 - Color0 + 1,
 	};
+
+	XREX_API inline std::string const& GetAttributeString(DefinedAttribute definedAttribute)
+	{
+		static std::array<std::string, static_cast<uint32>(DefinedAttribute::DefinedAttributeCount)> const mapping = [] ()
+		{
+			std::array<std::string, static_cast<uint32>(DefinedAttribute::DefinedAttributeCount)> temp;
+			temp[static_cast<uint32>(DefinedAttribute::Position)] = "position";
+			temp[static_cast<uint32>(DefinedAttribute::Normal)] = "normal";
+			
+			temp[static_cast<uint32>(DefinedAttribute::TextureCoordinate0)] = "textureCoordinate0";
+			temp[static_cast<uint32>(DefinedAttribute::TextureCoordinate1)] = "textureCoordinate1";
+			temp[static_cast<uint32>(DefinedAttribute::TextureCoordinate2)] = "textureCoordinate2";
+			temp[static_cast<uint32>(DefinedAttribute::TextureCoordinate3)] = "textureCoordinate3";
+			temp[static_cast<uint32>(DefinedAttribute::TextureCoordinate4)] = "textureCoordinate4";
+			temp[static_cast<uint32>(DefinedAttribute::TextureCoordinate5)] = "textureCoordinate5";
+			temp[static_cast<uint32>(DefinedAttribute::TextureCoordinate6)] = "textureCoordinate6";
+			temp[static_cast<uint32>(DefinedAttribute::TextureCoordinate7)] = "textureCoordinate7";
+
+			temp[static_cast<uint32>(DefinedAttribute::Color0)] = "color0";
+			temp[static_cast<uint32>(DefinedAttribute::Color1)] = "color1";
+			temp[static_cast<uint32>(DefinedAttribute::Color2)] = "color2";
+			temp[static_cast<uint32>(DefinedAttribute::Color3)] = "color3";
+			temp[static_cast<uint32>(DefinedAttribute::Color4)] = "color4";
+			temp[static_cast<uint32>(DefinedAttribute::Color5)] = "color5";
+			temp[static_cast<uint32>(DefinedAttribute::Color6)] = "color6";
+			temp[static_cast<uint32>(DefinedAttribute::Color7)] = "color7";
+
+			return temp;
+		} ();
+		return mapping[static_cast<uint32>(definedAttribute)];
+	}
 
 }

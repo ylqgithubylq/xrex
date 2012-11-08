@@ -46,7 +46,6 @@ namespace XREX
 	{
 		float delta = static_cast<float>(currentTime - previousFrameTime_);
 		previousFrameTime_ = currentTime;
-		delta *= moveScaler_;
 		*generatedAction = GenerateFrameAction(delta);
 		return true;
 	}
@@ -132,7 +131,7 @@ namespace XREX
 				roll_();
 			}
 		};
-		float spedUpDelta = delta * ((spedUp_ ? 1 : 0) * speedScaler_ + 1);
+		float spedUpDelta = moveScaler_ * delta * ((spedUp_ ? 1 : 0) * speedScaler_ + 1);
 		FrameAction action(GenerateMoveAction(spedUpDelta * forward_, spedUpDelta * left_, spedUpDelta * up_), GenerateRollAction(delta * roll_));
 
 		return action;
