@@ -62,6 +62,10 @@ namespace XREX
 		SceneSP scene_;
 		Timer timer_;
 		double lastTime_;
+		RasterizerStateObjectSP defaultRasterizerState_;
+		DepthStencilStateObjectSP defaultDepthStencilState_;
+		BlendStateObjectSP defaultBlendState_;
+		Color defaultBlendColor_;
 	};
 
 }
