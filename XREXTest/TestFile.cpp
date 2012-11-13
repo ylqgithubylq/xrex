@@ -107,9 +107,9 @@ void TestFile::TestMath()
 	resultTrans = Transform(m1, resultTrans);
 
 	floatV3 normal(1, 0, 0);
-	floatV3 resultNormal = TransformNormal(m1, normal);
-	resultNormal = TransformNormal(m1, resultNormal);
-	resultNormal = TransformNormal(m1, resultNormal);
+	floatV3 resultNormal = TransformDirection(m1, normal);
+	resultNormal = TransformDirection(m1, resultNormal);
+	resultNormal = TransformDirection(m1, resultNormal);
 
 	floatM44 trans = TranslationMatrix(floatV3(1, 2, 3));
 	floatM44 rot = RotationMatrix(PI / 4, floatV3(0, 1, 0));

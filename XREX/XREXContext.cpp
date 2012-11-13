@@ -21,12 +21,15 @@ namespace XREX
 
 	XREXContext::~XREXContext()
 	{
+		mainWindow_->SetRunning(false);
+
 		resourceLoader_.reset();
 		resourceManager_.reset();
 		inputCenter_.reset();
 
 		// make these two released last
 		renderingFactory_.reset();
+		renderingEngine_ = nullptr;
 		mainWindow_.reset();
 	}
 

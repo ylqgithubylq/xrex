@@ -25,10 +25,10 @@ namespace XREX
 		ProgramObjectSP LoadProgram(std::string const& fileName, std::vector<std::string> const& macros);
 
 		MeshSP LoadMesh(std::string const& fileName);
-		TextureSP LoadTexture1D(std::string const& fileName);
-		TextureSP LoadTexture2D(std::string const& fileName);
-		TextureSP LoadTexture3D(std::string const& fileName);
-		TextureSP LoadTextureCube(std::string const& fileName);
+		TextureSP LoadTexture1D(std::string const& fileName, bool generateMipmap);
+		TextureSP LoadTexture2D(std::string const& fileName, bool generateMipmap);
+		TextureSP LoadTexture3D(std::string const& fileName, bool generateMipmap);
+		TextureSP LoadTextureCube(std::string const& fileName, bool generateMipmap);
 
 	private:
 		std::unique_ptr<MeshLoader> meshLoader_;

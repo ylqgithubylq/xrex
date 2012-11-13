@@ -4,6 +4,7 @@
 
 #include "Math.hpp"
 
+#include <utility>
 #include <memory>
 #include <vector>
 
@@ -29,9 +30,20 @@ namespace XREX
 		Noncopyable& operator =(Noncopyable const&);
 	};
 
+	template <typename First, typename Second>
+	struct STLPairHasher // std::pair do not have a hash specialization...
+	{
+		size_t operator ()(std::pair<First, Second> const& value)
+		{
+			return std::hash<First>()(value.first) * 31 + std::hash<Second>()(value.second);
+		}
+	};
+
 	template <typename To, typename From>
 	inline To CheckedCast(From p)
 	{
+		static_assert(std::is_pointer<To>::value, "type To must be a pointer.");
+		static_assert(std::is_pointer<From>::value, "type From must be a pointer.");
 		assert(dynamic_cast<To>(p) == static_cast<To>(p));
 		return static_cast<To>(p);
 	}

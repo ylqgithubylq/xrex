@@ -150,13 +150,13 @@ namespace XREX
 	template XREX_API floatV3 RotateByQuaternion(floatQ const& quaternion, floatV3 const& vector);
 
 	template <typename T, uint32 N>
-	VectorT<T, N> TransformNormal(Matrix4T<T> const& matrix, VectorT<T, N> const& vector)
+	VectorT<T, N> TransformDirection(Matrix4T<T> const& matrix, VectorT<T, N> const& vector)
 	{
 		return Transform(matrix, vector, T(0));
 	}
-	template XREX_API floatV2 TransformNormal(floatM44 const& matrix, floatV2 const& vector);
-	template XREX_API floatV3 TransformNormal(floatM44 const& matrix, floatV3 const& vector);
-	template XREX_API floatV4 TransformNormal(floatM44 const& matrix, floatV4 const& vector);
+	template XREX_API floatV2 TransformDirection(floatM44 const& matrix, floatV2 const& vector);
+	template XREX_API floatV3 TransformDirection(floatM44 const& matrix, floatV3 const& vector);
+	template XREX_API floatV4 TransformDirection(floatM44 const& matrix, floatV4 const& vector);
 
 
 	template <typename T>

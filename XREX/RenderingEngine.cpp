@@ -72,7 +72,6 @@ namespace XREX
 		}
 
 #ifdef USE_OPENGL_COMPATIBILITY_PROFILE
-		// TODO temp hack for CEGUI. it seems CEGUI do not disable depth test itself
 		gl::Enable(gl::GL_POLYGON_OFFSET_FILL);
 		gl::Enable(gl::GL_POLYGON_OFFSET_POINT);
 		gl::Enable(gl::GL_POLYGON_OFFSET_LINE);
@@ -118,9 +117,6 @@ namespace XREX
 				}
 			}
 		}
-#ifdef USE_OPENGL_COMPATIBILITY_PROFILE
-		gl::UseProgram(0);
-#endif
 	}
 
 	void RenderingEngine::RenderACamera(SceneObjectSP const& cameraObject)

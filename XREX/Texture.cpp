@@ -18,7 +18,7 @@ namespace XREX
 		{
 			static std::array<uint32, static_cast<uint32>(Texture::TextureType::TextureTypeCount)> const mapping = [] ()
 			{
-				std::array<uint32, static_cast<uint32>(Texture::TextureType::TextureTypeCount)> temp;
+				std::remove_const<decltype(mapping)>::type temp;
 				temp[static_cast<uint32>(Texture::TextureType::Texture1D)] = gl::GL_TEXTURE_1D;
 				temp[static_cast<uint32>(Texture::TextureType::Texture2D)] = gl::GL_TEXTURE_2D;
 				temp[static_cast<uint32>(Texture::TextureType::Texture3D)] = gl::GL_TEXTURE_3D;
@@ -51,27 +51,31 @@ namespace XREX
 	{
 		switch (format)
 		{
-		case Texture::TexelFormat::RGB8:
+		case TexelFormat::RGB8:
 			{
-				static GLTextureFormat const Format(gl::GL_RGBA8, gl::GL_RGB, gl::GL_UNSIGNED_BYTE);
+				// TODO why BGR?
+				//static GLTextureFormat const Format(gl::GL_RGBA8, gl::GL_RGB, gl::GL_UNSIGNED_BYTE);
+				static GLTextureFormat const Format(gl::GL_RGBA8, gl::GL_BGR, gl::GL_UNSIGNED_BYTE);
 				return Format;
 			}
-		case Texture::TexelFormat::BGR8:
+		case TexelFormat::BGR8:
 			{
 				static GLTextureFormat const Format(gl::GL_RGBA8, gl::GL_BGR, gl::GL_UNSIGNED_BYTE);
 				return Format;
 			}
-		case Texture::TexelFormat::RGBA8:
+		case TexelFormat::RGBA8:
 			{
-				static GLTextureFormat const Format(gl::GL_RGBA8, gl::GL_RGBA, gl::GL_UNSIGNED_BYTE);
+				// TODO why BGRA?
+				//static GLTextureFormat const Format(gl::GL_RGBA8, gl::GL_RGBA, gl::GL_UNSIGNED_BYTE);
+				static GLTextureFormat const Format(gl::GL_RGBA8, gl::GL_BGRA, gl::GL_UNSIGNED_BYTE);
 				return Format;
 			}
-		case Texture::TexelFormat::BGRA8:
+		case TexelFormat::BGRA8:
 			{
 				static GLTextureFormat const Format(gl::GL_RGBA8, gl::GL_BGRA, gl::GL_UNSIGNED_BYTE);
 				return Format;
 			}
-		case Texture::TexelFormat::R8:
+		case TexelFormat::R8:
 			{
 				static GLTextureFormat const Format(gl::GL_R8, gl::GL_RED, gl::GL_UNSIGNED_BYTE);
 				return Format;

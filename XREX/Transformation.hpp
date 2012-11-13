@@ -57,7 +57,7 @@ namespace XREX
 			return position_;
 		}
 
-		floatV3 const& GetGlobalPosition() const
+		floatV3 const& GetWorldPosition() const
 		{
 			Update();
 			return globalPosition_;

@@ -103,9 +103,10 @@ namespace XREX
 
 	namespace
 	{
-
+		template <typename LoadingFunction>
 		TextureSP DoGetTexture(std::vector<std::tr2::sys::path> const& paths, std::unordered_map<std::string, TextureSP>& textures, std::string const& fileName,
-			TextureSP (LocalResourceLoader::* loadFunction)(std::string const& fileName)) // pointer to member function, a little brain fucking...
+			LoadingFunction const& loadingFunction)
+			//TextureSP (LocalResourceLoader::* loadFunction)(std::string const& fileName, bool generateMipmap)) // pointer to member function, a little brain fucking...
 		{
 			std::tr2::sys::path resourceLocation;
 			if (!Locate(paths, false, std::tr2::sys::path(fileName), &resourceLocation))
@@ -116,7 +117,7 @@ namespace XREX
 			auto found = textures.find(fullPath);
 			if (found == textures.end())
 			{
-				TextureSP texture = (XREXContext::GetInstance().GetResourceLoader().*loadFunction)(fullPath);
+				TextureSP texture = loadingFunction(fullPath, true);
 
 				if (texture != nullptr)
 				{
@@ -134,19 +135,28 @@ namespace XREX
 	TextureSP ResourceManager::GetTexture1D(std::string const& fileName)
 	{
 		auto loadFunction = &LocalResourceLoader::LoadTexture1D;
-		return DoGetTexture(hideFileSystemHeader_->paths, texture1Ds_, fileName, loadFunction);
+		return DoGetTexture(hideFileSystemHeader_->paths, texture1Ds_, fileName, [] (std::string const& fileName, bool generateMipmap)
+		{
+			return XREXContext::GetInstance().GetResourceLoader().LoadTexture1D(fileName, generateMipmap);
+		});
 	}
 
 	TextureSP ResourceManager::GetTexture2D(std::string const& fileName)
 	{
 		auto loadFunction = &LocalResourceLoader::LoadTexture2D;
-		return DoGetTexture(hideFileSystemHeader_->paths, texture2Ds_, fileName, loadFunction);
+		return DoGetTexture(hideFileSystemHeader_->paths, texture2Ds_, fileName, [] (std::string const& fileName, bool generateMipmap)
+		{
+			return XREXContext::GetInstance().GetResourceLoader().LoadTexture2D(fileName, generateMipmap);
+		});
 	}
 
 	TextureSP ResourceManager::GetTexture3D(std::string const& fileName)
 	{
 		auto loadFunction = &LocalResourceLoader::LoadTexture3D;
-		return DoGetTexture(hideFileSystemHeader_->paths, texture3Ds_, fileName, loadFunction);
+		return DoGetTexture(hideFileSystemHeader_->paths, texture3Ds_, fileName, [] (std::string const& fileName, bool generateMipmap)
+		{
+			return XREXContext::GetInstance().GetResourceLoader().LoadTexture3D(fileName, generateMipmap);
+		});
 	}
 
 	MeshSP ResourceManager::GetModel(std::string const& fileName)

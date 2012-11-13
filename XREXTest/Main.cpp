@@ -227,6 +227,7 @@ struct TempScene
 		cameraTransformation->SetModelFrontDirection(floatV3(0, 0, -1));
 		cameraTransformation->FaceToDirection(floatV3(0.0, 0.0, -1), floatV3(0, 1, 0));
 
+		bool b;
 		int32 edgeCount = 3;
 		float intervalSize = 4.0f;
 		float center = static_cast<float>(edgeCount - 1) / 2;
@@ -243,7 +244,8 @@ struct TempScene
 					objectNameStream << "cube" << i << j << k;
 					object = MakeSP<SceneObject>(objectNameStream.str());
 					object->SetComponent(cubeMesh->GetShallowClone());
-					assert(scene_->AddObject(object));
+					b = scene_->AddObject(object);
+					assert(b);
 
 					TransformationSP cubeTransform = object->GetComponent<Transformation>();
 
@@ -259,14 +261,16 @@ struct TempScene
 
 		rootObj = MakeSP<SceneObject>("root");
 		rootObj->SetComponent(cubeMesh->GetShallowClone());
-		assert(scene_->AddObject(rootObj));
+		b = scene_->AddObject(rootObj);
+		assert(b);
 		TransformationSP rootTransform = rootObj->GetComponent<Transformation>();
 		rootTransform->Translate(0, 50, 0);
 		rootTransform->SetScaling(3);
 
 		obj1 = MakeSP<SceneObject>("obj1");
 		obj1->SetComponent(cubeMesh->GetShallowClone());
-		assert(scene_->AddObject(obj1));
+		b = scene_->AddObject(obj1);
+		assert(b);
 		TransformationSP obj1Trans = obj1->GetComponent<Transformation>();
 		obj1Trans->Translate(15, 0, 0);
 		obj1Trans->SetScaling(2);
@@ -274,7 +278,8 @@ struct TempScene
 
 		obj2 = MakeSP<SceneObject>("obj2");
 		obj2->SetComponent(cubeMesh->GetShallowClone());
-		assert(scene_->AddObject(obj2));
+		b = scene_->AddObject(obj2);
+		assert(b);
 		TransformationSP obj2Trans = obj2->GetComponent<Transformation>();
 		obj2Trans->Translate(0, 8, 0);
 		obj2Trans->SetScaling(2);
@@ -307,7 +312,8 @@ struct TempScene
 			sceneObject->SetComponent(model);
 			sceneObject->GetComponent<Transformation>()->SetPosition(centerPosition_);
 			sceneObject->GetComponent<Transformation>()->Scale(1.f);
-			assert(scene_->AddObject(sceneObject));
+			b = scene_->AddObject(sceneObject);
+			assert(b);
 		}
 
 		
@@ -315,6 +321,19 @@ struct TempScene
 	SceneObjectSP rootObj;
 	SceneObjectSP obj1;
 	SceneObjectSP obj2;
+
+	void Logic(double currentTime, double deltaTime)
+	{
+		auto& transformation = camera_->GetComponent<Transformation>();
+		floatV3 const& position = transformation->GetWorldPosition();
+		floatV3 to = TransformDirection(transformation->GetWorldMatrix(), transformation->GetModelFrontDirection());
+		floatV3 up = TransformDirection(transformation->GetWorldMatrix(), transformation->GetModelUpDirection());
+		wstringstream wss;
+		wss << "position: (" << position.X() << ", " << position.Y() << ", " << position.Z() << "), ";
+		wss << "direction: (" << to.X() << ", " << to.Y() << ", " << to.Z() << "), ";
+		wss << "up: (" << up.X() << ", " << up.Y() << ", " << up.Z() << "), ";
+		XREXContext::GetInstance().GetMainWindow().SetTitleText(wss.str());
+	}
 
 	void Render(double current, double delta)
 	{
@@ -366,6 +385,13 @@ void Main()
 		s(current, delta);
 	};
 	XREXContext::GetInstance().GetRenderingEngine().OnBeforeRendering(f);
+	function<bool(double current, double delta)> l = [&s] (double current, double delta)
+	{
+		//assert(gl::GetError() == gl::GL_NO_ERROR);
+		s.Logic(current, delta);
+		return true;
+	};
+	XREXContext::GetInstance().SetLogicFunction(l);
 
 	//assert(testmain(0, nullptr) == 0);
 	//XREXContext::GetInstance().GetRenderingEngine().OnBeforeRendering(function<void(double,double)>(DrawHelper));
