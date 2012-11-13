@@ -80,7 +80,7 @@ namespace XREX
 	VectorT<T, 3> RotateByQuaternion(QuaternionT<T> const& quaternion, VectorT<T, 3> const& vector);
 
 	template <typename T, uint32 N>
-	VectorT<T, N> TransformNormal(Matrix4T<T> const& matrix, VectorT<T, N> const& vector);
+	VectorT<T, N> TransformDirection(Matrix4T<T> const& matrix, VectorT<T, N> const& vector);
 
 	template <typename T>
 	Matrix4T<T> TranslationMatrix(T const& x, T const& y, T const& z);

@@ -655,4 +655,18 @@ namespace XREX
 		return winKey;
 	}
 
+	std::wstring Window::GetTitleText() const
+	{
+		int32 length = ::GetWindowTextLength(hideWindows_->hWnd_);
+		std::wstring title;
+		title.resize(length + 1);
+		::GetWindowText(hideWindows_->hWnd_, &title[0], title.size());
+		return title;
+	}
+
+	void Window::SetTitleText(std::wstring const& text)
+	{
+		::SetWindowText(hideWindows_->hWnd_, text.c_str());
+	}
+
 }
