@@ -90,7 +90,6 @@ namespace XREX
 		PolygonMode polygonMode;
 		CullMode cullMode;
 		bool frontFaceCCW;
-		bool scissorEnable;
 		bool multisampleEnable;
 
 		RasterizerState();

@@ -96,6 +96,7 @@ namespace XREX
 		int32 GetAttributeLocation(std::string const& channel) const;
 
 		/*
+		 *	Do not call this. Used by RenderingPass.
 		 *	@effect: new parameters will be added to it if this shader have uniform names that not in parameters of effect.
 		 */
 		void InitializeParameterSetters(RenderingEffect& effect);

@@ -131,7 +131,7 @@ namespace XREX
 	}
 
 	RasterizerState::RasterizerState()
-		: polygonMode(PolygonMode::Fill), cullMode(CullMode::Back), frontFaceCCW(true), scissorEnable(false), multisampleEnable(false)
+		: polygonMode(PolygonMode::Fill), cullMode(CullMode::Back), frontFaceCCW(true), multisampleEnable(false)
 	{
 	}
 
@@ -198,7 +198,6 @@ namespace XREX
 		SetGLState(gl::GL_CULL_FACE, glCullFaceEnable_);
 		gl::CullFace(glCullFace_);
 		gl::PolygonOffset(polygonOffsetFactor, polygonOffsetUnits);
-		SetGLState(gl::GL_SCISSOR_TEST, state_.scissorEnable);
 		SetGLState(gl::GL_MULTISAMPLE, state_.multisampleEnable);
 	}
 

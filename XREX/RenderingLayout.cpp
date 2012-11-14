@@ -102,7 +102,7 @@ namespace XREX
 
 	ElementType RenderingLayout::GetIndexElementType() const
 	{
-		return indexBuffer_->GetDataDescription().GetChannelLayout("").elementType;
+		return indexBuffer_->GetDataLayout().GetChannelLayout("").elementType;
 	}
 
 

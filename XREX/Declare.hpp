@@ -89,6 +89,9 @@ namespace XREX
 	class Camera;
 	typedef std::shared_ptr<Camera> CameraSP;
 
+	class Viewport;
+	typedef std::shared_ptr<Viewport> ViewportSP;
+
 }
 
 

@@ -12,9 +12,10 @@
 #include "RenderingLayout.hpp"
 #include "Material.hpp"
 #include "RenderingPipelineState.hpp"
+#include "Viewport.hpp"
 
-#include "GLUtil.hpp"
 #include "DefinedShaderName.hpp"
+#include "GLUtil.hpp"
 
 #include <CoreGL.hpp>
 
@@ -46,6 +47,11 @@ namespace XREX
 	{
 		// move gl context creation here?
 		//gl::Enable(gl::GL_DEBUG_OUTPUT); // ogl 4.3
+		RenderingSettings const& settings = XREXContext::GetInstance().GetSettings().renderingSettings;
+		auto depthOrder = std::numeric_limits<decltype(std::declval<Viewport>().GetDepthOrder())>::max();
+		defaultViewport_ = XREXContext::GetInstance().GetRenderingFactory().CreateViewport(depthOrder, 0, 0, settings.width, settings.height);
+
+		gl::Enable(gl::GL_SCISSOR_TEST);
 
 		gl::Enable(gl::GL_POLYGON_OFFSET_FILL);
 		gl::Enable(gl::GL_POLYGON_OFFSET_POINT);
@@ -108,12 +114,23 @@ namespace XREX
 		if (scene_ != nullptr)
 		{
 			vector<SceneObjectSP> cameras_ = scene_->GetCameras();
-
-			for (uint32 i = 0; i < cameras_.size(); ++ i)
+			for (auto& camera : cameras_)
 			{
-				if (cameras_[i]->GetComponent<Camera>()->IsActive())
+				assert(camera->GetComponent<Camera>() != nullptr);
+			}
+			// sort by depth order of viewport, larger first.
+			std::sort(cameras_.begin(), cameras_.end(), [] (SceneObjectSP const& lhs, SceneObjectSP const& rhs)
+			{
+				auto depthL = lhs->GetComponent<Camera>()->GetViewport()->GetDepthOrder();
+				auto depthR = rhs->GetComponent<Camera>()->GetViewport()->GetDepthOrder();
+				return depthL > depthR;
+			});
+
+			for (auto& camera : cameras_)
+			{
+				if (camera->GetComponent<Camera>()->IsActive())
 				{
-					RenderACamera(cameras_[i]);
+					RenderACamera(camera);
 				}
 			}
 		}
@@ -122,7 +139,8 @@ namespace XREX
 	void RenderingEngine::RenderACamera(SceneObjectSP const& cameraObject)
 	{
 		CameraSP camera = cameraObject->GetComponent<Camera>();
-		assert(camera != nullptr);
+		RenderingSettings const& settings = XREXContext::GetInstance().GetSettings().renderingSettings;
+		camera->GetViewport()->Bind(settings.width, settings.height);
 
 		Color const& backgroundColor = camera->GetBackgroundColor();
 		// TODO viewport and scissor rectangle

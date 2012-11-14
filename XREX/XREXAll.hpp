@@ -1,4 +1,8 @@
 #pragma once
+/*
+ *	This header file is provided for convenience of creating precompiled header in other projects using XREX.
+ */
+
 
 #include "XREX.hpp"
 
@@ -39,3 +43,5 @@
 #include "RenderingEffect.hpp"
 #include "RenderingPipelineState.hpp"
 #include "Texture.hpp"
+
+#include "Viewport.hpp"
