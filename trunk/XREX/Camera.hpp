@@ -42,8 +42,6 @@ namespace XREX
 			return projectionMatrix_;
 		}
 
-
-
 		void SetBackgroundColor(Color const& color)
 		{
 			backgroundColor_ = color;
@@ -51,6 +49,16 @@ namespace XREX
 		Color const& GetBackgroundColor() const
 		{
 			return backgroundColor_;
+		}
+
+		void AttachToViewport(ViewportSP const& viewport)
+		{
+			viewport_ = viewport;
+		}
+
+		ViewportSP const& GetViewport() const
+		{
+			return viewport_;
 		}
 
 	private:
@@ -68,6 +76,8 @@ namespace XREX
 
 
 		Color backgroundColor_;
+
+		ViewportSP viewport_;
 
 		bool active_;
 

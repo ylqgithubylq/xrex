@@ -2,6 +2,10 @@
 
 #include "Camera.hpp"
 
+#include "Viewport.hpp"
+#include "XREXContext.hpp"
+#include "RenderingEngine.hpp"
+
 namespace XREX
 {
 
@@ -12,6 +16,7 @@ namespace XREX
 		backgroundColor_(DefaultBackgroundColor), active_(true), dirty_(true)
 	{
 		projectionMatrix_ = FrustumMatrix(fieldOfView, aspectRatio, near, far);
+		viewport_ = XREXContext::GetInstance().GetRenderingEngine().GetDefaultViewport();
 	}
 
 
@@ -29,5 +34,6 @@ namespace XREX
 		viewMatrix_ = LookToViewMatrix(transformation->GetWorldPosition(), to, up);
 		dirty_ = false;
 	}
+
 
 }

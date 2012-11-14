@@ -216,6 +216,7 @@
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="Transformation.cpp" />
     <ClCompile Include="Util.cpp" />
+    <ClCompile Include="Viewport.cpp" />
     <ClCompile Include="Window.cpp" />
     <ClCompile Include="XREX.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -265,6 +266,7 @@
     <ClInclude Include="Transformation.hpp" />
     <ClInclude Include="Util.hpp" />
     <ClInclude Include="Vector.hpp" />
+    <ClInclude Include="Viewport.hpp" />
     <ClInclude Include="Window.hpp" />
     <ClInclude Include="XREX.hpp" />
     <ClInclude Include="XREXAll.hpp" />

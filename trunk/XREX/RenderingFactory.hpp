@@ -7,6 +7,7 @@
 #include "RenderingLayout.hpp"
 #include "Texture.hpp"
 #include "RenderingPipelineState.hpp"
+#include "Viewport.hpp"
 
 namespace XREX
 {
@@ -80,7 +81,7 @@ namespace XREX
 			return MakeSP<GraphicsBuffer>(GraphicsBuffer::BufferType::Vertex, usage, data, channel, normalized);
 		}
 		template <typename T>
-		GraphicsBufferSP CreateGraphicsVertexBuffer(GraphicsBuffer::Usage usage, std::vector<T> const& data, GraphicsBuffer::DataDescription&& description)
+		GraphicsBufferSP CreateGraphicsVertexBuffer(GraphicsBuffer::Usage usage, std::vector<T> const& data, GraphicsBuffer::DataLayout&& description)
 		{
 			return MakeSP<GraphicsBuffer>(GraphicsBuffer::BufferType::Vertex, usage, data, std::move(description));
 		}
@@ -137,6 +138,15 @@ namespace XREX
 		TextureSP CreateTextureCube(Texture::DataDescription<2> const& description, std::array<std::vector<std::vector<T>>, 6> const& data, bool generateMipmap)
 		{
 			return MakeSP<TextureCube>(description, data, generateMipmap);
+		}
+
+		ViewportSP CreateViewport(int32 depthOrder, int32 left, int32 bottom, uint32 width, uint32 height)
+		{
+			return MakeSP<Viewport>(depthOrder, left, bottom, width, height);
+		}
+		ViewportSP CreateViewport(int32 depthOrder, float left, float bottom, float width, float height)
+		{
+			return MakeSP<Viewport>(depthOrder, left, bottom, width, height);
 		}
 
 	private:

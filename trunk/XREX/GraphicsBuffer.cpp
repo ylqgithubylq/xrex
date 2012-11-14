@@ -33,16 +33,16 @@ namespace XREX
 		}
 	}
 
-	bool GraphicsBuffer::DataDescription::AddChannelLayout(ElementLayoutDescription&& elementLayout)
+	bool GraphicsBuffer::DataLayout::AddChannelLayout(ElementLayout&& elementLayout)
 	{
 		channelLayouts_.push_back(std::move(elementLayout));
 		// TODO check if they overlaid each other
 		return true;
 	}
 
-	auto GraphicsBuffer::DataDescription::GetChannelLayout(string const& channel) const -> ElementLayoutDescription const&
+	auto GraphicsBuffer::DataLayout::GetChannelLayout(string const& channel) const -> ElementLayout const&
 	{
-		auto found = std::find_if(channelLayouts_.begin(), channelLayouts_.end(), [&channel] (ElementLayoutDescription const& elementLayout) 
+		auto found = std::find_if(channelLayouts_.begin(), channelLayouts_.end(), [&channel] (ElementLayout const& elementLayout) 
 		{
 			return elementLayout.channel == channel;
 		});
@@ -72,14 +72,15 @@ namespace XREX
 
 	void GraphicsBuffer::BindToProgram(ProgramObjectSP const& program)
 	{
+		// binding relations are saved in VAO in RenderingLayout.
 		Bind();
 		if (type_ == BufferType::Vertex)
 		{
 			assert(lastAttributeLocations_.size() == 0); // make sure this buffer is not binding to other programs
-			lastAttributeLocations_.resize(description_.GetChannelLayoutCount());
-			for (uint32 i = 0; i < description_.GetChannelLayoutCount(); ++i)
+			lastAttributeLocations_.resize(layout_.GetChannelLayoutCount());
+			for (uint32 i = 0; i < layout_.GetChannelLayoutCount(); ++i)
 			{
-				DataDescription::ElementLayoutDescription const& channelLayout = description_.GetChannelLayoutAtIndex(i);
+				DataLayout::ElementLayout const& channelLayout = layout_.GetChannelLayoutAtIndex(i);
 				lastAttributeLocations_[i] = program->GetAttributeLocation(channelLayout.channel);
 				if (lastAttributeLocations_[i] != -1)
 				{
@@ -95,7 +96,7 @@ namespace XREX
 	{
 		if (type_ == BufferType::Vertex)
 		{
-			for (uint32 i = 0; i < description_.GetChannelLayoutCount(); ++i)
+			for (uint32 i = 0; i < layout_.GetChannelLayoutCount(); ++i)
 			{
 				if (lastAttributeLocations_[i] != -1)
 				{

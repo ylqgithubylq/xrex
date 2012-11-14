@@ -240,26 +240,26 @@ namespace XREX
 					}
 
 					int startLocation = 0;
-					GraphicsBuffer::DataDescription dataDescription = GraphicsBuffer::DataDescription(mesh->mNumVertices);
+					GraphicsBuffer::DataLayout dataDescription = GraphicsBuffer::DataLayout(mesh->mNumVertices);
 					if (mesh->HasPositions())
 					{
-						dataDescription.AddChannelLayout(GraphicsBuffer::DataDescription::ElementLayoutDescription(startLocation, totalLengthPerElement, ElementType::FloatV3, GetAttributeString(DefinedAttribute::Position)));
+						dataDescription.AddChannelLayout(GraphicsBuffer::DataLayout::ElementLayout(startLocation, totalLengthPerElement, ElementType::FloatV3, GetAttributeString(DefinedAttribute::Position)));
 						startLocation += sizeof(*mesh->mVertices);
 					}
 					if (mesh->HasNormals())
 					{
-						dataDescription.AddChannelLayout(GraphicsBuffer::DataDescription::ElementLayoutDescription(startLocation, totalLengthPerElement, ElementType::FloatV3, GetAttributeString(DefinedAttribute::Normal)));
+						dataDescription.AddChannelLayout(GraphicsBuffer::DataLayout::ElementLayout(startLocation, totalLengthPerElement, ElementType::FloatV3, GetAttributeString(DefinedAttribute::Normal)));
 						startLocation += sizeof(*mesh->mNormals);
 					}
 					for (uint32 j = 0; j < textureCoordinateCount; ++j)
 					{
-						dataDescription.AddChannelLayout(GraphicsBuffer::DataDescription::ElementLayoutDescription(startLocation, totalLengthPerElement, ElementType::FloatV3,
+						dataDescription.AddChannelLayout(GraphicsBuffer::DataLayout::ElementLayout(startLocation, totalLengthPerElement, ElementType::FloatV3,
 							GetAttributeString(static_cast<DefinedAttribute>(static_cast<uint32>(DefinedAttribute::TextureCoordinate0) + j))));
 						startLocation += sizeof(*mesh->mTextureCoords[0]);
 					}
 					for (uint32 j = 0; j < vertexColorCount; ++j)
 					{
-						dataDescription.AddChannelLayout(GraphicsBuffer::DataDescription::ElementLayoutDescription(startLocation, totalLengthPerElement, ElementType::FloatV4,
+						dataDescription.AddChannelLayout(GraphicsBuffer::DataLayout::ElementLayout(startLocation, totalLengthPerElement, ElementType::FloatV4,
 							GetAttributeString(static_cast<DefinedAttribute>(static_cast<uint32>(DefinedAttribute::Color0) + j))));
 						startLocation += sizeof(*mesh->mColors[0]);
 					}
