@@ -190,7 +190,7 @@ namespace XREX
 		};
 
 
-		struct InputEvent
+		struct XREX_API InputEvent
 		{
 			/*
 			 *	User defined semantic.

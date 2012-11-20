@@ -121,10 +121,9 @@ namespace XREX
 	VectorT<T, N> Transform(Matrix4T<T> const& matrix, VectorT<T, N> const& vector, T const& lastComponent)
 	{
 		VectorT<T, N> temp;
-		MathHelper::TransformHelper<T, N>::Do(const_cast<T*>(&temp[0]), &matrix[0], &vector[0], lastComponent);
+		MathHelper::TransformHelper<T, N>::DoTransform(const_cast<T*>(&temp[0]), &matrix[0], &vector[0], lastComponent);
 		return temp;
 	}
-	template XREX_API floatV2 Transform(floatM44 const& matrix, floatV2 const& vector, float const& lastComponent);
 	template XREX_API floatV3 Transform(floatM44 const& matrix, floatV3 const& vector, float const& lastComponent);
 	template XREX_API floatV4 Transform(floatM44 const& matrix, floatV4 const& vector, float const& lastComponent);
 
@@ -133,16 +132,15 @@ namespace XREX
 	{
 		// see Mathematics for 3D Game Programming and Computer Graphics, 3rd. 4.6.2 Rotations with Quaternions
 
-		// result = a*vector + b*quaternion + c(quaternion.V CROSS vector)
+		// result = a * vector + b * quaternion + c * (quaternion.V CROSS vector)
 		// where
 		//  a = quaternion.W^2 - (quaternion.V DOT quaternion.V)
-		//  b = 2*(quaternion.V DOT vector)
-		//  c = 2*quaternion.W
+		//  b = 2 * (quaternion.V DOT vector)
+		//  c = 2 * quaternion.W
 		T const a(quaternion.W() * quaternion.W() - quaternion.V().LengthSquared());
 		T const b(2 * Dot(quaternion.V(), vector));
 		T const c(quaternion.W() + quaternion.W());
 
-		// Must store this, because result may alias vector
 		VectorT<T, 3> crossV(Cross(quaternion.V(), vector)); // quaternion.V CROSS vector
 
 		return a * vector + b * quaternion.V() + c * crossV;
@@ -152,9 +150,10 @@ namespace XREX
 	template <typename T, uint32 N>
 	VectorT<T, N> TransformDirection(Matrix4T<T> const& matrix, VectorT<T, N> const& vector)
 	{
-		return Transform(matrix, vector, T(0));
+		VectorT<T, N> temp;
+		MathHelper::TransformHelper<T, N>::DoTransformDirection(const_cast<T*>(&temp[0]), &matrix[0], &vector[0]);
+		return temp;
 	}
-	template XREX_API floatV2 TransformDirection(floatM44 const& matrix, floatV2 const& vector);
 	template XREX_API floatV3 TransformDirection(floatM44 const& matrix, floatV3 const& vector);
 	template XREX_API floatV4 TransformDirection(floatM44 const& matrix, floatV4 const& vector);
 

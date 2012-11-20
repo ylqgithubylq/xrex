@@ -133,7 +133,7 @@ namespace XREX
 
 
 
-	enum class XREX_API ElementType
+	enum class ElementType
 	{
 		Void, // for special use
 

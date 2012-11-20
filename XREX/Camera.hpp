@@ -61,6 +61,23 @@ namespace XREX
 			return viewport_;
 		}
 
+		enum class ViewportOrigin
+		{
+			/*
+			 *	Use viewport center as origin, position ranges: [(-1, -1), (1, 1)]
+			 */
+			ViewportCenter,
+			/*
+			 *	Use viewport lower left corner as origin, position ranges: [(0, 0), (1, 1)]
+			 */
+			ViewportLowerLeft,
+		};
+
+		/*
+		 *	@position: position in the camera image plane, different @origin have different range. See ViewportOrigin.
+		 */
+		Ray GetViewRay(floatV2 const& position, ViewportOrigin origin);
+
 	private:
 		void Update() const;
 

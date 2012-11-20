@@ -47,7 +47,7 @@ layout(location = 0) out vec4 finalColor;
 void main()
 {
 	vec3 normal = normalize(wNormal) * 0.5 + 0.5;
-	finalColor = vec4(normal, 1.0) * 0.1 + texture(diffuseMap, pixelTextureCoordinate) + texture(specularMap, pixelTextureCoordinate);
+	finalColor = /*vec4(normal, 1.0) * 0.1 +*/ texture(diffuseMap, pixelTextureCoordinate) + texture(specularMap, pixelTextureCoordinate);
 }
 
 #endif

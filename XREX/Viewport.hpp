@@ -79,7 +79,6 @@ namespace XREX
 
 			DataUnion(int32 left, int32 bottom, uint32 width, uint32 height);
 			DataUnion(float left, float bottom, float width, float height);
-
 		};
 
 	private:

@@ -14,15 +14,7 @@ namespace XREX
 	class XREX_API Material
 		: Noncopyable
 	{
-		// when use default parameters, material will not set corresponding parameters.
-		struct EffectPipelineParameterSettings
-		{
-			EffectPipelineParameters parameters;
-			bool useDefaultPolygonOffset;
-			bool useDefaultStencilReference;
-			bool useDefaultBlendFactor;
-			EffectPipelineParameterSettings();
-		};
+
 	public:
 		Material(std::string const& name);
 		~Material();
@@ -56,15 +48,24 @@ namespace XREX
 		}
 
 		void SetPolygonOffset(uint32 techniqueIndex, uint32 passIndex, float factor, float units);
-		bool GetPolygonOffset(uint32 techniqueIndex, uint32 passIndex, float* outFactor, float* outUnits) const;
+		/*
+		 *	@return: tuple<(success), (factor), (units)>
+		 */
+		std::tuple<bool, float, float> GetPolygonOffset(uint32 techniqueIndex, uint32 passIndex) const;
 		bool RemovePolygonOffset(uint32 techniqueIndex, uint32 passIndex);
 
 		void SetStencilReference(uint32 techniqueIndex, uint32 passIndex, uint16 front, uint16 back);
-		bool GetStencilReference(uint32 techniqueIndex, uint32 passIndex, uint16* outFront, uint16* outBack) const;
+		/*
+		 *	@return: tuple<(success), (front), (back)>
+		 */
+		std::tuple<bool, uint16, uint16> GetStencilReference(uint32 techniqueIndex, uint32 passIndex) const;
 		bool RemoveStencilReference(uint32 techniqueIndex, uint32 passIndex);
 
 		void SetBlendFactor(uint32 techniqueIndex, uint32 passIndex, Color value);
-		bool GetBlendFactor(uint32 techniqueIndex, uint32 passIndex, Color* outColor) const;
+		/*
+		 *	@return: tuple<(success), (factor)>
+		 */
+		std::tuple<bool, Color> GetBlendFactor(uint32 techniqueIndex, uint32 passIndex) const;
 		bool RemoveBlendFactor(uint32 techniqueIndex, uint32 passIndex);
 
 
@@ -77,7 +78,16 @@ namespace XREX
 		void ShrinkPipelineParameter(uint32 techniqueIndex, uint32 passIndex);
 		void ResizePipelineParameterOnRequest(uint32 techniqueIndex, uint32 passIndex);
 	private:
-
+		// when use default values, material will not set corresponding parameters.
+		struct EffectPipelineParameterSettings
+		{
+			EffectPipelineParameters parameters;
+			bool useDefaultPolygonOffset;
+			bool useDefaultStencilReference;
+			bool useDefaultBlendFactor;
+			EffectPipelineParameterSettings();
+		};
+	private:
 		std::string name_;
 
 		std::unordered_map<std::string, EffectParameterSP> parameters_;

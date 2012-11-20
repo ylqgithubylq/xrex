@@ -197,8 +197,8 @@ namespace XREX
 
 
 	// instantiate 1, 2, 3 Dimensional Texture specialization
-	template ConcreteTexture<1>;
-	template ConcreteTexture<2>;
-	template ConcreteTexture<3>;
+	template class XREX_API ConcreteTexture<1>;
+	template class XREX_API ConcreteTexture<2>;
+	template class XREX_API ConcreteTexture<3>;
 
 }

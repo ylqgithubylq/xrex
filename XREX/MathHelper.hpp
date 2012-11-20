@@ -7,43 +7,49 @@ namespace XREX
 {
 	namespace MathHelper
 	{
-
-		template <typename T, uint32 N>
+		template <typename T, uint32 N> // is a class due to template function cannot be partially specialized.
 		struct TransformHelper
 		{
-			static void Do(T out[N], T const m[16], T const v[N], T lastComponent);
+			static void DoTransform(T out[N], T const m[16], T const v[N], T lastComponent);
+			static void DoTransformDirection(T out[N], T const m[16], T const v[N]);
 		};
 
 		template <typename T>
 		struct TransformHelper<T, 4>
 		{
-			static void Do(T out[4], T const m[16], T const v[4], T lastComponent)
+			static void DoTransform(T out[4], T const m[16], T const v[4], T lastComponent)
 			{
 				out[0] = m[0] * v[0] + m[4] * v[1] + m[8] * v[2] + m[12] * v[3];
 				out[1] = m[1] * v[0] + m[5] * v[1] + m[9] * v[2] + m[13] * v[3];
 				out[2] = m[2] * v[0] + m[6] * v[1] + m[10] * v[2] + m[14] * v[3];
 				out[3] = m[3] * v[0] + m[7] * v[1] + m[11] * v[2] + m[15] * v[3];
 			}
+			static void DoTransformDirection(T out[4], T const m[16], T const v[4])
+			{
+				out[0] = m[0] * v[0] + m[4] * v[1] + m[8] * v[2];
+				out[1] = m[1] * v[0] + m[5] * v[1] + m[9] * v[2];
+				out[2] = m[2] * v[0] + m[6] * v[1] + m[10] * v[2];
+				out[3] = T(0);
+			}
 		};
 		template <typename T>
 		struct TransformHelper<T, 3>
 		{
-			static void Do(T out[3], T const m[16], T const v[3], T lastComponent)
+			static void DoTransform(T out[3], T const m[16], T const v[3], T lastComponent)
 			{
-				out[0] = m[0] * v[0] + m[4] * v[1] + m[8] * v[2] + m[12] * lastComponent;
-				out[1] = m[1] * v[0] + m[5] * v[1] + m[9] * v[2] + m[13] * lastComponent;
-				out[2] = m[2] * v[0] + m[6] * v[1] + m[10] * v[2] + m[14] * lastComponent;
+				T inverseW = T(1) / (m[3] * v[0] + m[7] * v[1] + m[11] * v[2] + m[15] * lastComponent);
+				out[0] = (m[0] * v[0] + m[4] * v[1] + m[8] * v[2] + m[12] * lastComponent) * inverseW;
+				out[1] = (m[1] * v[0] + m[5] * v[1] + m[9] * v[2] + m[13] * lastComponent) * inverseW;
+				out[2] = (m[2] * v[0] + m[6] * v[1] + m[10] * v[2] + m[14] * lastComponent) * inverseW;
+			}
+			static void DoTransformDirection(T out[3], T const m[16], T const v[3])
+			{
+				out[0] = m[0] * v[0] + m[4] * v[1] + m[8] * v[2];
+				out[1] = m[1] * v[0] + m[5] * v[1] + m[9] * v[2];
+				out[2] = m[2] * v[0] + m[6] * v[1] + m[10] * v[2];
 			}
 		};
-		template <typename T>
-		struct TransformHelper<T, 2>
-		{
-			static void Do(T out[2], T const m[16], T const v[2], T lastComponent)
-			{
-				out[0] = m[0] * v[0] + m[4] * v[1] + m[12] * lastComponent;
-				out[1] = m[1] * v[0] + m[5] * v[1] + m[13] * lastComponent;
-			}
-		};
+
 
 		template <typename T, uint32 N>
 		struct VectorHelper

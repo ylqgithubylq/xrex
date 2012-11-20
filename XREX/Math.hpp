@@ -5,6 +5,8 @@
 #include "Matrix.hpp"
 #include "Quaternion.hpp"
 
+#include "Geometry.hpp"
+
 #include <cmath>
 
 namespace XREX
@@ -23,7 +25,7 @@ namespace XREX
 	{
 		return DegreeToRadian * degree;
 	}
-	XREX_API inline float RadianFromDegree(int degree)
+	inline float RadianFromDegree(int degree)
 	{
 		return DegreeToRadian * degree;
 	}
@@ -35,18 +37,18 @@ namespace XREX
 	{
 		return RadianToDegree * radian;
 	}
-	XREX_API inline float DegreeFromRadian(int radian)
+	inline float DegreeFromRadian(int radian)
 	{
 		return RadianToDegree * radian;
 	}
 
 	template <typename T>
-	inline bool	Equal(T const& lhs, T const& rhs)
+	inline bool Equal(T const& lhs, T const& rhs)
 	{
 		return lhs == rhs;
 	}
 	template <>
-	inline bool	Equal<float>(float const& lhs, float const& rhs)
+	inline bool Equal<float>(float const& lhs, float const& rhs)
 	{
 		return std::abs(lhs - rhs) <= std::numeric_limits<float>::epsilon();
 	}
@@ -73,6 +75,9 @@ namespace XREX
 	template <typename T>
 	Matrix4T<T> MatrixFromQuaternion(QuaternionT<T> const& quaternion);
 
+	/*
+	 *	for 3 dimension vector, affine division will be done on the result vector.
+	 */
 	template <typename T, uint32 N>
 	VectorT<T, N> Transform(Matrix4T<T> const& matrix, VectorT<T, N> const& vector, T const& lastComponent = T(1));
 
@@ -133,7 +138,7 @@ namespace XREX
 	QuaternionT<T> FaceToQuaternion(VectorT<T, 3> const& to, VectorT<T, 3> const& up, VectorT<T, 3> const& localFront, VectorT<T, 3> const& localUp);
 
 	/*
-	 *	For creation of view matrix of camera.
+	 *	Creating view matrix of camera. With assumption of camera front is +z.
 	 *	@eye: eye position.
 	 *	@to: look to direction.
 	 *	@up: up direction in world space.

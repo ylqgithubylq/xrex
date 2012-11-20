@@ -12,7 +12,6 @@
 #include "RenderingLayout.hpp"
 #include "Material.hpp"
 #include "RenderingPipelineState.hpp"
-#include "Viewport.hpp"
 
 #include "DefinedShaderName.hpp"
 #include "GLUtil.hpp"
@@ -32,8 +31,8 @@ namespace XREX
 
 	RenderingEngine::~RenderingEngine()
 	{
-		beforeRenderingFunction_.swap(std::function<void(double, double)>());
-		afterRenderingFunction_.swap(std::function<void(double, double)>());
+		beforeRenderingFunction_.swap(decltype(beforeRenderingFunction_)());
+		afterRenderingFunction_.swap(decltype(afterRenderingFunction_)());
 		scene_.reset(); // release scene
 	}
 
@@ -47,21 +46,15 @@ namespace XREX
 	{
 		// move gl context creation here?
 		//gl::Enable(gl::GL_DEBUG_OUTPUT); // ogl 4.3
-		RenderingSettings const& settings = XREXContext::GetInstance().GetSettings().renderingSettings;
-		auto depthOrder = std::numeric_limits<decltype(std::declval<Viewport>().GetDepthOrder())>::max();
-		defaultViewport_ = XREXContext::GetInstance().GetRenderingFactory().CreateViewport(depthOrder, 0, 0, settings.width, settings.height);
 
 		gl::Enable(gl::GL_SCISSOR_TEST);
 
 		gl::Enable(gl::GL_POLYGON_OFFSET_FILL);
 		gl::Enable(gl::GL_POLYGON_OFFSET_POINT);
 		gl::Enable(gl::GL_POLYGON_OFFSET_LINE);
-		RasterizerState rasterizerState;
-		defaultRasterizerState_ = XREXContext::GetInstance().GetRenderingFactory().CreateRasterizerStateObject(rasterizerState);
-		DepthStencilState depthStencilState;
-		defaultDepthStencilState_ = XREXContext::GetInstance().GetRenderingFactory().CreateDepthStencilStateObject(depthStencilState);
-		BlendState blendState;
-		defaultBlendState_ = XREXContext::GetInstance().GetRenderingFactory().CreateBlendStateObject(blendState);
+		defaultRasterizerState_ = XREXContext::GetInstance().GetRenderingFactory().CreateRasterizerStateObject(RasterizerState());
+		defaultDepthStencilState_ = XREXContext::GetInstance().GetRenderingFactory().CreateDepthStencilStateObject(DepthStencilState());
+		defaultBlendState_ = XREXContext::GetInstance().GetRenderingFactory().CreateBlendStateObject(BlendState());
 	}
 
 	void RenderingEngine::RenderAFrame()
@@ -90,7 +83,7 @@ namespace XREX
 		gl::ActiveTexture(gl::GL_TEXTURE0);
 		gl::BindBuffer(gl::GL_ARRAY_BUFFER, 0);
 		gl::BindBuffer(gl::GL_ELEMENT_ARRAY_BUFFER, 0);
-		// TODO temp hack for CEGUI. it seems CEGUI do not disable depth test itself
+		// TODO temp hack for CEGUI.
 		defaultRasterizerState_->Bind(0, 0);
 		defaultDepthStencilState_->Bind(0, 0);
 		defaultBlendState_->Bind(defaultBlendColor_);
@@ -117,6 +110,7 @@ namespace XREX
 			for (auto& camera : cameras_)
 			{
 				assert(camera->GetComponent<Camera>() != nullptr);
+				assert(camera->GetComponent<Camera>()->IsActive());
 			}
 			// sort by depth order of viewport, larger first.
 			std::sort(cameras_.begin(), cameras_.end(), [] (SceneObjectSP const& lhs, SceneObjectSP const& rhs)
@@ -128,10 +122,7 @@ namespace XREX
 
 			for (auto& camera : cameras_)
 			{
-				if (camera->GetComponent<Camera>()->IsActive())
-				{
-					RenderACamera(camera);
-				}
+				RenderACamera(camera);
 			}
 		}
 	}

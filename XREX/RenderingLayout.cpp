@@ -61,7 +61,11 @@ namespace XREX
 	{
 		for (auto& vao : programBindingVAOCache_)
 		{
-			gl::DeleteVertexArrays(1, &vao.second);
+			if (vao.second != 0)
+			{
+				gl::DeleteVertexArrays(1, &vao.second);
+				vao.second = 0;
+			}
 		}
 	}
 

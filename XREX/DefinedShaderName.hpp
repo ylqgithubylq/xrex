@@ -7,7 +7,7 @@ namespace XREX
 	/*
 	 *	Using GetUniformString function to get the string representation.
 	 */
-	enum class XREX_API DefinedUniform
+	enum class DefinedUniform
 	{
 		ModelMatrix,
 		ViewMatrix,
@@ -67,7 +67,7 @@ namespace XREX
 		return mapping[static_cast<uint32>(definedUniform)];
 	}
 
-	enum class XREX_API DefinedAttribute
+	enum class DefinedAttribute
 	{
 		Position,
 		Normal,
