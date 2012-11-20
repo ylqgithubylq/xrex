@@ -8,6 +8,7 @@ namespace XREX
 	class XREX_API Component
 		: Noncopyable
 	{
+		friend class SceneObject;
 	public:
 		enum class ComponentType
 		{
@@ -45,6 +46,12 @@ namespace XREX
 
 		virtual ComponentType GetComponentType() const = 0;
 
+		SceneObjectSP GetOwnerSceneObject() const
+		{
+			return sceneObject_.lock();
+		}
+
+	private:
 		/*
 		 *	Provided for SceneObject. Don't use this.
 		 */
@@ -53,14 +60,6 @@ namespace XREX
 			SceneObjectSP oldOwner = GetOwnerSceneObject();
 			sceneObject_ = owner;
 		}
-		SceneObjectSP GetOwnerSceneObject() const
-		{
-			return sceneObject_.lock();
-		}
-
-	protected:
-
-
 	protected:
 		std::weak_ptr<SceneObject> sceneObject_;
 	};

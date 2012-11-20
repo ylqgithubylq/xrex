@@ -98,6 +98,7 @@ namespace XREX
 #include "BasicType.hpp"
 
 #include "Math.hpp"
+#include "GeometricalMath.hpp"
 
 #include "Color.hpp"
 

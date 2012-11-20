@@ -29,7 +29,7 @@ namespace XREX
 
 	public:
 		/*
-		 *	Used for intentionally make error.
+		 *	Used for making error intentionally.
 		 */
 		static QuaternionT const Zero;
 		static QuaternionT const Identity;
@@ -81,27 +81,27 @@ namespace XREX
 		/*
 		 *	Rotation component is at index 3.
 		 */
-		ConstReference operator [](uint32 index) const
+		T const& operator [](uint32 index) const
 		{
 			return values_[index];
 		}
 
-		ConstReference X() const
+		T const& X() const
 		{
 			return values_.X();
 		}
 
-		ConstReference Y() const
+		T const& Y() const
 		{
 			return values_.Y();
 		}
 
-		ConstReference Z() const
+		T const& Z() const
 		{
 			return values_.Z();
 		}
 
-		ConstReference W() const
+		T const& W() const
 		{
 			return values_.W();
 		}
@@ -184,12 +184,12 @@ namespace XREX
 			return QuaternionT(Conjugate() * (T(1) / LengthSquared()));
 		}
 
-		ValueType Length() const
+		T Length() const
 		{
 			return values_.Length();
 		}
 
-		ValueType LengthSquared() const
+		T LengthSquared() const
 		{
 			return values_.LengthSquared();
 		}

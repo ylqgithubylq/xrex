@@ -48,15 +48,15 @@ namespace XREX
 		parameters->useDefaultPolygonOffset = false;
 	}
 
-	bool Material::GetPolygonOffset(uint32 techniqueIndex, uint32 passIndex, float* outFactor, float* outUnits) const
+	std::tuple<bool, float, float> Material::GetPolygonOffset(uint32 techniqueIndex, uint32 passIndex) const
 	{
 		if (HavePipelineParameter(techniqueIndex, passIndex))
 		{
-			*outFactor = pipelineParameters_[techniqueIndex][passIndex]->parameters.polygonOffsetFactor;
-			*outUnits = pipelineParameters_[techniqueIndex][passIndex]->parameters.polygonOffsetUnits;
-			return true;
+			float outFactor = pipelineParameters_[techniqueIndex][passIndex]->parameters.polygonOffsetFactor;
+			float outUnits = pipelineParameters_[techniqueIndex][passIndex]->parameters.polygonOffsetUnits;
+			return std::make_tuple(true, outFactor, outUnits);
 		}
-		return false;
+		return std::make_tuple(false, 0.f, 0.f);
 	}
 
 	bool Material::RemovePolygonOffset(uint32 techniqueIndex, uint32 passIndex)
@@ -87,15 +87,15 @@ namespace XREX
 
 	}
 
-	bool Material::GetStencilReference(uint32 techniqueIndex, uint32 passIndex, uint16* outFront, uint16* outBack) const
+	std::tuple<bool, uint16, uint16> Material::GetStencilReference(uint32 techniqueIndex, uint32 passIndex) const
 	{
 		if (HavePipelineParameter(techniqueIndex, passIndex))
 		{
-			*outFront = pipelineParameters_[techniqueIndex][passIndex]->parameters.frontStencilReference;
-			*outBack = pipelineParameters_[techniqueIndex][passIndex]->parameters.backStencilReference;
-			return true;
+			uint16 outFront = pipelineParameters_[techniqueIndex][passIndex]->parameters.frontStencilReference;
+			uint16 outBack = pipelineParameters_[techniqueIndex][passIndex]->parameters.backStencilReference;
+			return std::make_tuple(true, outFront, outBack);
 		}
-		return false;
+		return std::make_tuple(false, 0, 0);
 	}
 
 	bool Material::RemoveStencilReference(uint32 techniqueIndex, uint32 passIndex)
@@ -125,14 +125,14 @@ namespace XREX
 
 	}
 
-	bool Material::GetBlendFactor(uint32 techniqueIndex, uint32 passIndex, Color* outColor) const
+	std::tuple<bool, Color> Material::GetBlendFactor(uint32 techniqueIndex, uint32 passIndex) const
 	{
 		if (HavePipelineParameter(techniqueIndex, passIndex))
 		{
-			*outColor = pipelineParameters_[techniqueIndex][passIndex]->parameters.blendFactor;
-			return true;
+			Color color = pipelineParameters_[techniqueIndex][passIndex]->parameters.blendFactor;
+			return std::make_tuple(true, color);
 		}
-		return false;
+		return std::make_tuple(false, Color());
 	}
 
 	bool Material::RemoveBlendFactor(uint32 techniqueIndex, uint32 passIndex)

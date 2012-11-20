@@ -16,7 +16,7 @@ namespace XREX
 		: Noncopyable
 	{
 	public:
-		class ActionMap
+		class XREX_API ActionMap
 			: Noncopyable
 		{
 		public:

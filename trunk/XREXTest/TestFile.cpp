@@ -204,6 +204,10 @@ struct MyStruct
 {
 	template <typename T>
 	MyStruct(T& a);
+	operator int() const
+	{
+		return 1;
+	}
 };
 
 template <uint32 N>
@@ -236,4 +240,13 @@ void Temp()
 	MyStruct<3> ms0(i);
 	floatV3 fv3;
 	MyStruct<4> ms1(fv3);
+	double da[] = {3.0};
+	sort(da, da + extent<decltype(da)>::value, [] (double, double) {return true;});
+	double d;
+	MyStruct<4> ms4(d);
+	//int msi = static_cast<int>(ms4);
+	if (ms4)
+	{
+		cout << "true" << endl;
+	}
 }

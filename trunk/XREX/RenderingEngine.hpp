@@ -32,11 +32,6 @@ namespace XREX
 			return scene_;
 		}
 
-		ViewportSP const& GetDefaultViewport() const
-		{
-			return defaultViewport_;
-		}
-
 		void Start()
 		{
 			timer_.Restart();
@@ -67,7 +62,6 @@ namespace XREX
 		SceneSP scene_;
 		Timer timer_;
 		double lastTime_;
-		ViewportSP defaultViewport_;
 		RasterizerStateObjectSP defaultRasterizerState_;
 		DepthStencilStateObjectSP defaultDepthStencilState_;
 		BlendStateObjectSP defaultBlendState_;

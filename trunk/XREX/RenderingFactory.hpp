@@ -21,6 +21,11 @@ namespace XREX
 
 		void Initialize();
 
+		ViewportSP const& GetDefaultViewport() const
+		{
+			return defaultViewport_;
+		}
+
 		TextureSP const& GetBlackTexture1D() const
 		{
 			return blackTexture1D_;
@@ -150,6 +155,7 @@ namespace XREX
 		}
 
 	private:
+		ViewportSP defaultViewport_;
 		TextureSP blackTexture1D_;
 		TextureSP blackTexture2D_;
 		TextureSP blackTexture3D_;

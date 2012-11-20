@@ -1,6 +1,6 @@
 #pragma once
 
-#ifdef DYNAMIC_BUILD
+#ifndef STATIC_BUILD
 #ifdef XREX_SOURCE
 #define XREX_API __declspec(dllexport)
 #else
@@ -9,6 +9,8 @@
 #else
 #define XREX_API
 #endif
+
+#pragma warning(disable: 4251) // have member do not dllexport-ed
 
 #if defined(DEBUG) || defined(_DEBUG)
 #define XREX_DEBUG

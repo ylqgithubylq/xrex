@@ -224,7 +224,6 @@ struct TempScene
 		TransformationSP cameraTransformation = camera_->GetComponent<Transformation>();
 		cameraTransformation->SetPosition(eye + centerPosition_);
 		cameraTransformation->SetModelUpDirection(up);
-		cameraTransformation->SetModelFrontDirection(floatV3(0, 0, -1));
 		cameraTransformation->FaceToDirection(floatV3(0.0, 0.0, -1), floatV3(0, 1, 0));
 
 		bool b;
@@ -285,7 +284,7 @@ struct TempScene
 		obj2Trans->SetScaling(2);
 		obj2Trans->SetParent(obj1Trans);
 
-		camera_->GetComponent<Transformation>()->SetParent(rootTransform);
+		//camera_->GetComponent<Transformation>()->SetParent(rootTransform);
 
 		EffectParameterSP const& cubeCenterPosition = cubeEffect->GetParameterByName("centerPosition");
 		if (cubeCenterPosition)
@@ -328,10 +327,15 @@ struct TempScene
 		floatV3 const& position = transformation->GetWorldPosition();
 		floatV3 to = TransformDirection(transformation->GetWorldMatrix(), transformation->GetModelFrontDirection());
 		floatV3 up = TransformDirection(transformation->GetWorldMatrix(), transformation->GetModelUpDirection());
+
+		Ray ray = camera_->GetComponent<Camera>()->GetViewRay(floatV2(0, 0), Camera::ViewportOrigin::ViewportCenter);
+
 		wstringstream wss;
 		wss << "position: (" << position.X() << ", " << position.Y() << ", " << position.Z() << "), ";
 		wss << "direction: (" << to.X() << ", " << to.Y() << ", " << to.Z() << "), ";
-		wss << "up: (" << up.X() << ", " << up.Y() << ", " << up.Z() << "), ";
+		wss << "ray: (" << ray.GetDirection().X() << ", " << ray.GetDirection().Y() << ", " << ray.GetDirection().Z() << "), ";
+		//wss << "up: (" << up.X() << ", " << up.Y() << ", " << up.Z() << "), ";
+
 		XREXContext::GetInstance().GetMainWindow().SetTitleText(wss.str());
 	}
 

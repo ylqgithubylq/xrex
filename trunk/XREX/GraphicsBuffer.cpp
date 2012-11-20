@@ -62,7 +62,11 @@ namespace XREX
 
 	GraphicsBuffer::~GraphicsBuffer()
 	{
-		gl::DeleteBuffers(1, &glBufferID_);
+		if (glBufferID_ != 0)
+		{
+			gl::DeleteBuffers(1, &glBufferID_);
+			glBufferID_ = 0;
+		}
 	}
 
 	void GraphicsBuffer::Bind()

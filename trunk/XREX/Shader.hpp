@@ -53,9 +53,9 @@ namespace XREX
 	private:
 		bool Compile();
 
-		uint32 GetID() const
+		uint32 GetGLID() const
 		{
-			return shaderID_;
+			return glShaderID_;
 		}
 
 
@@ -64,7 +64,7 @@ namespace XREX
 		std::string source_;
 		bool validate_;
 		std::string errorString_;
-		uint32 shaderID_;
+		uint32 glShaderID_;
 	};
 
 	class XREX_API ProgramObject

@@ -28,8 +28,6 @@ namespace XREX
 		template <typename T>
 		friend class Matrix4;
 
-		typedef std::array<T, N> ContainerType;
-
 	public:
 		static uint32 const Dimension = N;
 
@@ -122,37 +120,35 @@ namespace XREX
 		template <typename U, uint32 M>
 		VectorT& operator =(VectorT<U, M> const& rhs)
 		{
-			static_assert(M >= N, "");
-
-			MathHelper::VectorHelper<T, N>::DoCopy(&values_[0], &rhs.values_[0]);
+			DoConstructFromOtherSizedVector(rhs, std::conditional<M >= N, LargerSizeTag, SmallerSizeTag>::type());
 			return *this;
 		}
 
 
-		ConstReference operator [](uint32 index) const
+		T const& operator [](uint32 index) const
 		{
 			return values_[index];
 		}
 
-		ConstReference X() const
+		T const& X() const
 		{
 			static_assert(Dimension >= 1, "");
 			return values_[0];
 		}
 
-		ConstReference Y() const
+		T const& Y() const
 		{
 			static_assert(Dimension >= 2, "");
 			return values_[1];
 		}
 
-		ConstReference Z() const
+		T const& Z() const
 		{
 			static_assert(Dimension >= 3, "");
 			return values_[2];
 		}
 
-		ConstReference W() const
+		T const& W() const
 		{
 			static_assert(Dimension >= 4, "");
 			return values_[3];
@@ -234,28 +230,28 @@ namespace XREX
 			return *this * ReciprocalSqrt(LengthSquared());
 		}
 
-		ValueType Length() const // float only
+		T Length() const // float only
 		{
-			return ValueType(1) / ReciprocalSqrt(LengthSquared());
+			return T(1) / ReciprocalSqrt(LengthSquared());
 		}
 
-		ValueType LengthSquared() const
+		T LengthSquared() const
 		{
 			return Dot(*this, *this);
 		}
 
-		friend ValueType Dot(VectorT const& lhs, VectorT const& rhs)
+		friend T Dot(VectorT const& lhs, VectorT const& rhs)
 		{
 			return MathHelper::VectorHelper<T, N>::DoDot(&lhs.values_[0], &rhs.values_[0]);
 		}
 
-		ConstPointer GetArray() const
+		T const* GetArray() const
 		{
 			return &values_[0];
 		}
 
 	private:
-		ContainerType values_;
+		std::array<T, N> values_;
 	};
 
 	template <typename T, uint32 N>
@@ -266,7 +262,8 @@ namespace XREX
 	template <typename T>
 	VectorT<T, 3> Cross(VectorT<T, 3> const& lhs, VectorT<T, 3> const& rhs)
 	{
-		return VectorT<T, 3>(lhs.Y() * rhs.Z() - lhs.Z() * rhs.Y(),
+		return VectorT<T, 3>(
+			lhs.Y() * rhs.Z() - lhs.Z() * rhs.Y(),
 			lhs.Z() * rhs.X() - lhs.X() * rhs.Z(),
 			lhs.X() * rhs.Y() - lhs.Y() * rhs.X());
 	}

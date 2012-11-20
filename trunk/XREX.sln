@@ -38,12 +38,12 @@ Global
 		{A6418138-949C-4E1A-AD48-36B5BAC8CCAE}.Release-Static|Win32.Build.0 = Release-Static|Win32
 		{EE954CC3-2258-4AD7-9EF6-3491D023E24C}.Debug|Win32.ActiveCfg = Debug|Win32
 		{EE954CC3-2258-4AD7-9EF6-3491D023E24C}.Debug|Win32.Build.0 = Debug|Win32
-		{EE954CC3-2258-4AD7-9EF6-3491D023E24C}.Debug-Static|Win32.ActiveCfg = Debug|Win32
-		{EE954CC3-2258-4AD7-9EF6-3491D023E24C}.Debug-Static|Win32.Build.0 = Debug|Win32
+		{EE954CC3-2258-4AD7-9EF6-3491D023E24C}.Debug-Static|Win32.ActiveCfg = Debug-Static|Win32
+		{EE954CC3-2258-4AD7-9EF6-3491D023E24C}.Debug-Static|Win32.Build.0 = Debug-Static|Win32
 		{EE954CC3-2258-4AD7-9EF6-3491D023E24C}.Release|Win32.ActiveCfg = Release|Win32
 		{EE954CC3-2258-4AD7-9EF6-3491D023E24C}.Release|Win32.Build.0 = Release|Win32
-		{EE954CC3-2258-4AD7-9EF6-3491D023E24C}.Release-Static|Win32.ActiveCfg = Release|Win32
-		{EE954CC3-2258-4AD7-9EF6-3491D023E24C}.Release-Static|Win32.Build.0 = Release|Win32
+		{EE954CC3-2258-4AD7-9EF6-3491D023E24C}.Release-Static|Win32.ActiveCfg = Release-Static|Win32
+		{EE954CC3-2258-4AD7-9EF6-3491D023E24C}.Release-Static|Win32.Build.0 = Release-Static|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

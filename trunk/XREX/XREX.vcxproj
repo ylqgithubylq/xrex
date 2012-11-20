@@ -73,7 +73,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-Static|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <TargetName>$(ProjectName)_d</TargetName>
+    <TargetName>$(ProjectName)_static_d</TargetName>
     <OutDir>$(SolutionDir)Lib\$(Platform)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -83,13 +83,14 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-Static|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)Lib\$(Platform)\</OutDir>
+    <TargetName>$(ProjectName)_static</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;XREX_SOURCE;;BUILD_DYNAMIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;XREX_SOURCE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(SolutionDir)\Dependencies\Include</AdditionalIncludeDirectories>
       <PrecompiledHeaderFile>XREX.hpp</PrecompiledHeaderFile>
@@ -109,7 +110,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;XREX_SOURCE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;XREX_SOURCE;STATIC_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(SolutionDir)\Dependencies\Include</AdditionalIncludeDirectories>
       <PrecompiledHeaderFile>XREX.hpp</PrecompiledHeaderFile>
@@ -136,7 +137,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;XREX_SOURCE;BUILD_DYNAMIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;XREX_SOURCE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(SolutionDir)\Dependencies\Include</AdditionalIncludeDirectories>
       <PrecompiledHeaderFile>XREX.hpp</PrecompiledHeaderFile>
@@ -160,7 +161,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;XREX_SOURCE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;XREX_SOURCE;STATIC_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(SolutionDir)\Dependencies\Include</AdditionalIncludeDirectories>
       <PrecompiledHeaderFile>XREX.hpp</PrecompiledHeaderFile>
@@ -188,6 +189,7 @@
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="DLLMain.cpp" />
     <ClCompile Include="FreeRoamCameraController.cpp" />
+    <ClCompile Include="GeometricalMath.cpp" />
     <ClCompile Include="GLUtil.cpp" />
     <ClCompile Include="GLWindow.cpp" />
     <ClCompile Include="GraphicsBuffer.cpp" />
@@ -234,6 +236,8 @@
     <ClInclude Include="Declare.hpp" />
     <ClInclude Include="DefinedShaderName.hpp" />
     <ClInclude Include="FreeRoamCameraController.hpp" />
+    <ClInclude Include="GeometricalMath.hpp" />
+    <ClInclude Include="Geometry.hpp" />
     <ClInclude Include="GLUtil.hpp" />
     <ClInclude Include="GLWindow.hpp" />
     <ClInclude Include="GraphicsBuffer.hpp" />

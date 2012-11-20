@@ -14,6 +14,7 @@ namespace XREX
 
 	/*
 	 *	Column major matrix.
+	 *	Stored as [column][row].
 	 */
 	template <typename T>
 	class Matrix4T
@@ -139,7 +140,7 @@ namespace XREX
 		}
 
 
-		ConstReference operator ()(uint32 row, uint32 column) const
+		T const& operator ()(uint32 row, uint32 column) const
 		{
 			return vectors_[column][row];
 		}
@@ -147,7 +148,7 @@ namespace XREX
 		/*
 		 *	@index: column major index.
 		 */
-		ConstReference operator [](uint32 index) const
+		T const& operator [](uint32 index) const
 		{
 			return *(&vectors_[0][0] + index);
 		}
@@ -250,12 +251,12 @@ namespace XREX
 			return temp;
 		}
 
-		ValueType Determinant() const
+		T Determinant() const
 		{
 			return MathHelper::MatrixHepler<T>::CalculateDeterminant(&vectors_[0][0]);
 		}
 
-		ConstPointer GetArray() const
+		T const* GetArray() const
 		{
 			return &vectors_[0][0];
 		}

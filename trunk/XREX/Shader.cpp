@@ -28,7 +28,7 @@ namespace XREX
 		{
 			static std::array<string, static_cast<uint32>(ShaderObject::ShaderType::CountOfShaderTypes)> const mapping = [] ()
 			{
-				std::array<string, static_cast<uint32>(ShaderObject::ShaderType::CountOfShaderTypes)> macros;
+				std::remove_const<decltype(mapping)>::type macros;
 				macros[static_cast<uint32>(ShaderObject::ShaderType::VertexShader)] = "#define VS\n";
 				macros[static_cast<uint32>(ShaderObject::ShaderType::FragmentShader)] = "#define FS\n";
 				macros[static_cast<uint32>(ShaderObject::ShaderType::GeometryShader)] = "#define GS\n";
@@ -49,7 +49,7 @@ namespace XREX
 		{
 			static std::array<uint32, static_cast<uint32>(ShaderObject::ShaderType::CountOfShaderTypes)> const mapping = [] ()
 			{
-				std::array<uint32, static_cast<uint32>(ShaderObject::ShaderType::CountOfShaderTypes)> mapping;
+				std::remove_const<decltype(mapping)>::type mapping;
 				mapping[static_cast<uint32>(ShaderObject::ShaderType::VertexShader)] = gl::GL_VERTEX_SHADER;
 				mapping[static_cast<uint32>(ShaderObject::ShaderType::FragmentShader)] = gl::GL_FRAGMENT_SHADER;
 				mapping[static_cast<uint32>(ShaderObject::ShaderType::GeometryShader)] = gl::GL_GEOMETRY_SHADER;
@@ -67,13 +67,15 @@ namespace XREX
 
 	ShaderObject::ShaderObject(ShaderType type, string const& source) : type_(type), source_(source)
 	{
-		shaderID_ = gl::CreateShader(GLShaderTypeFromShaderType(type_));
+		glShaderID_ = gl::CreateShader(GLShaderTypeFromShaderType(type_));
+		assert(glShaderID_ != 0);
 		Compile();
 	}
 
 	ShaderObject::ShaderObject(ShaderType type, string&& source) : type_(type), source_(move(source))
 	{
-		shaderID_ = gl::CreateShader(GLShaderTypeFromShaderType(type_));
+		glShaderID_ = gl::CreateShader(GLShaderTypeFromShaderType(type_));
+		assert(glShaderID_ != 0);
 		Compile();
 	}
 
@@ -86,43 +88,40 @@ namespace XREX
 
 	void ShaderObject::Destory()
 	{
-		gl::DeleteShader(shaderID_);
-		shaderID_ = 0;
+		if (glShaderID_ != 0)
+		{
+			gl::DeleteShader(glShaderID_);
+			glShaderID_ = 0;
+		}
 	}
 
 
 	bool ShaderObject::Compile()
 	{
-		if (shaderID_ == 0)
-		{
-			errorString_ = "Shader creation failed.";
-			return false;
-		}
-
 		string const& macroToDefine = ShaderDefineMacroFromShaderType(type_);
 
 		char const* cstring[] = { VersionMacro().c_str(), macroToDefine.c_str(), source_.c_str() };
-		gl::ShaderSource(shaderID_, sizeof(cstring) / sizeof(cstring[0]), cstring, nullptr);
-		gl::CompileShader(shaderID_);
+		gl::ShaderSource(glShaderID_, sizeof(cstring) / sizeof(cstring[0]), cstring, nullptr);
+		gl::CompileShader(glShaderID_);
 	
 		int32 sourceLength;
-		gl::GetShaderiv(shaderID_, gl::GL_SHADER_SOURCE_LENGTH, &sourceLength); // '\0' included
+		gl::GetShaderiv(glShaderID_, gl::GL_SHADER_SOURCE_LENGTH, &sourceLength); // '\0' included
 		source_.resize(sourceLength);
-		gl::GetShaderSource(shaderID_, sourceLength, &sourceLength, &source_[0]); // write back actual source content
+		gl::GetShaderSource(glShaderID_, sourceLength, &sourceLength, &source_[0]); // write back actual source content
 
 		int32 compiled = 0;
-		gl::GetShaderiv(shaderID_, gl::GL_COMPILE_STATUS, &compiled);
+		gl::GetShaderiv(glShaderID_, gl::GL_COMPILE_STATUS, &compiled);
 		validate_ = compiled == 1;
 
 	#ifdef XREX_DEBUG
 		if (!validate_)
 		{
 			int32 length = 0;
-			gl::GetShaderiv(shaderID_, gl::GL_INFO_LOG_LENGTH, &length);
+			gl::GetShaderiv(glShaderID_, gl::GL_INFO_LOG_LENGTH, &length);
 			if (length > 0)
 			{
 				errorString_.resize(length, 0);
-				gl::GetShaderInfoLog(shaderID_, length, &length, &errorString_[0]);
+				gl::GetShaderInfoLog(glShaderID_, length, &length, &errorString_[0]);
 			}
 			else
 			{
@@ -146,6 +145,7 @@ namespace XREX
 		: shaders_(static_cast<uint32>(ShaderObject::ShaderType::CountOfShaderTypes)), validate_(false)
 	{
 		glProgramID_ = gl::CreateProgram();
+		assert(glProgramID_ != 0);
 	}
 	ProgramObject::~ProgramObject()
 	{
@@ -158,17 +158,20 @@ namespace XREX
 		{
 			if (shaders_[i])
 			{
-				uint32 id = shaders_[i]->GetID();
+				uint32 id = shaders_[i]->GetGLID();
 				gl::DetachShader(glProgramID_, id);
 			}
 		}
-		gl::DeleteProgram(glProgramID_);
-		glProgramID_ = 0;
+		if (glProgramID_ != 0)
+		{
+			gl::DeleteProgram(glProgramID_);
+			glProgramID_ = 0;
+		}
 	}
 
 	void ProgramObject::AttachShader(ShaderObjectSP& shader)
 	{
-		gl::AttachShader(glProgramID_, shader->GetID());
+		gl::AttachShader(glProgramID_, shader->GetGLID());
 		shaders_[static_cast<uint32>(shader->GetType())] = shader;
 	}
 
@@ -229,7 +232,6 @@ namespace XREX
 			gl::GetProgramiv(glProgramID_, gl::GL_INFO_LOG_LENGTH, &length);
 			if (length > 0)
 			{
-				// use string::resize to do like this in other place.
 				errorString_.resize(length, 0);
 				gl::GetProgramInfoLog(glProgramID_, length, &length, &errorString_[0]);
 				std::cerr << errorString_ << std::endl;
@@ -426,7 +428,6 @@ namespace XREX
 	void ProgramObject::InitializeUniformBinder(UniformBinder& binder, EffectParameterSP& parameter, uint32& availableSamplerLocation)
 	{
 		uint32 glType = binder.glType;
-		//EffectParameter* parameter = parameter.get();
 		if (glType == gl::GL_SAMPLER_1D || glType == gl::GL_SAMPLER_2D || glType == gl::GL_SAMPLER_3D || glType == gl::GL_SAMPLER_CUBE)
 		{
 			int32 samplerLocation = availableSamplerLocation++;
