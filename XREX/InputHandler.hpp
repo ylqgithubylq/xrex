@@ -81,15 +81,16 @@ namespace XREX
 
 		/*
 		 *	Override this if something need to do before a logic frame begin.
+		 *	@return: first component is true indicates action generated.
 		 */
-		virtual bool DoOnBeforeLogicFrame(double currentTime, std::function<void()>* generatedAction)
+		virtual std::pair<bool, std::function<void()>> DoOnBeforeLogicFrame(double currentTime)
 		{
-			return false;
+			return std::make_pair(false, std::function<void()>());
 		}
 		/*
-		 *	@return: true indicates action generated.
+		 *	@return: first component is true indicates action generated.
 		 */
-		virtual bool GenerateAction(InputCenter::InputEvent const& inputEvent, std::function<void()>* generatedAction) = 0;
+		virtual std::pair<bool, std::function<void()>> GenerateAction(InputCenter::InputEvent const& inputEvent) = 0;
 
 		ActionMap& GetMutableActionMap()
 		{

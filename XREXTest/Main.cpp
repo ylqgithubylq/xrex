@@ -34,10 +34,10 @@ struct CameraCubeController
 	{
 
 	}
-	virtual bool GenerateAction(InputCenter::InputEvent const& inputEvent, std::function<void()>* generatedAction) override
+	virtual std::pair<bool, function<void()>> GenerateAction(InputCenter::InputEvent const& inputEvent) override
 	{
 		cameraCube->GetComponent<Transformation>()->Translate(floatV3(inputEvent.mappedSemantic * 0.1f, 0, 0));
-		return false;
+		return std::make_pair(false, function<void()>());
 	}
 	SceneObjectSP cameraCube;
 };
