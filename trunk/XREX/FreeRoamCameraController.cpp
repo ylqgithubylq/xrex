@@ -31,9 +31,10 @@ namespace XREX
 	}
 	FreeRoamCameraController::FreeRoamCameraController(float moveScaler, float rotateScaler, float speedScaler)
 		: InputHandler(GenerateActionMap()),
-		moveScaler_(moveScaler), rotateScaler_(rotateScaler), speedScaler_(speedScaler), semanticStates_(static_cast<uint32>(RoamSemantic::FPSSemanticCount)), previousFrameTime_(0),
+		moveScaler_(moveScaler), rotateScaler_(rotateScaler), speedScaler_(speedScaler), previousFrameTime_(0),
 		previousPointerPosition_(0, 0), forward_(0), left_(0), up_(0), roll_(0), turnTriggered_(false), spedUp_(false)
 	{
+		semanticStates_.fill(0);
 	}
 
 
@@ -42,15 +43,21 @@ namespace XREX
 	}
 
 
-	bool FreeRoamCameraController::DoOnBeforeLogicFrame(double currentTime, std::function<void()>* generatedAction)
+	void FreeRoamCameraController::AttachToCamera(SceneObjectSP const& cameraObject)
+	{
+		assert(cameraObject->GetComponent<Camera>() != nullptr);
+		cameraObject_ = cameraObject;
+	}
+
+	std::pair<bool, std::function<void()>> FreeRoamCameraController::DoOnBeforeLogicFrame(double currentTime)
 	{
 		float delta = static_cast<float>(currentTime - previousFrameTime_);
 		previousFrameTime_ = currentTime;
-		*generatedAction = GenerateFrameAction(delta);
-		return true;
+		
+		return std::make_pair(true, GenerateFrameAction(delta));
 	}
 
-	bool FreeRoamCameraController::GenerateAction(InputCenter::InputEvent const& inputEvent, function<void()>* generatedAction)
+	std::pair<bool, std::function<void()>> FreeRoamCameraController::GenerateAction(InputCenter::InputEvent const& inputEvent)
 	{
 		switch (static_cast<RoamSemantic>(inputEvent.mappedSemantic))
 		{
@@ -105,15 +112,9 @@ namespace XREX
 				assert(false);
 			}
 		}
-		return false;
+		return std::make_pair(false, std::function<void()>());
 	}
 
-
-	void FreeRoamCameraController::AttachToCamera(SceneObjectSP const& cameraObject)
-	{
-		assert(cameraObject->GetComponent<Camera>() != nullptr);
-		cameraObject_ = cameraObject;
-	}
 
 	function<void()> FreeRoamCameraController::GenerateFrameAction(float delta)
 	{

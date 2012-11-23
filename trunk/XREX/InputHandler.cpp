@@ -17,19 +17,19 @@ namespace XREX
 
 	void InputHandler::OnAction(InputCenter::InputEvent const& inputEvent)
 	{
-		std::function<void()> action;
-		if (GenerateAction(inputEvent, &action))
+		std::pair<bool, std::function<void()>> result = GenerateAction(inputEvent);
+		if (result.first)
 		{
-			XREXContext::GetInstance().GetInputCenter().EnqueueAction(std::move(action));
+			XREXContext::GetInstance().GetInputCenter().EnqueueAction(std::move(result.second));
 		}
 	}
 
 	void InputHandler::OnBeforeLogicFrame(double currentTime)
 	{
-		std::function<void()> action;
-		if (DoOnBeforeLogicFrame(currentTime, &action))
+		std::pair<bool, std::function<void()>> result = DoOnBeforeLogicFrame(currentTime);
+		if (result.first)
 		{
-			XREXContext::GetInstance().GetInputCenter().EnqueueAction(std::move(action));
+			XREXContext::GetInstance().GetInputCenter().EnqueueAction(std::move(result.second));
 		}
 	}
 

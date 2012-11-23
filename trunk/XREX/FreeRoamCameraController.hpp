@@ -30,7 +30,7 @@ namespace XREX
 			TriggerTurn,
 			SpeedUp,
 
-			FPSSemanticCount,
+			RoamSemanticCount,
 		};
 
 	public:
@@ -41,9 +41,9 @@ namespace XREX
 
 	protected:
 
-		virtual bool DoOnBeforeLogicFrame(double currentTime, std::function<void()>* generatedAction) override;
+		virtual std::pair<bool, std::function<void()>> DoOnBeforeLogicFrame(double currentTime) override;
 
-		virtual bool GenerateAction(InputCenter::InputEvent const& inputEvent, std::function<void()>* generatedAction) override;
+		virtual std::pair<bool, std::function<void()>> GenerateAction(InputCenter::InputEvent const& inputEvent) override;
 
 	private:
 		std::function<void()> GenerateFrameAction(float delta);
@@ -62,7 +62,7 @@ namespace XREX
 		double previousFrameTime_;
 		intV2 previousPointerPosition_;
 
-		std::vector<int32> semanticStates_;
+		std::array<int32, static_cast<uint32>(RoamSemantic::RoamSemanticCount)> semanticStates_;
 		int32 forward_;
 		int32 left_;
 		int32 up_;
