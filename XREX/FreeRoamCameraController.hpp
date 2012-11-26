@@ -34,7 +34,7 @@ namespace XREX
 		};
 
 	public:
-		FreeRoamCameraController(float moveScaler = 5.0f, float rotateScaler = 1.0f,  float speedScaler = 10.0);
+		FreeRoamCameraController(float moveScaler = 1.0f, float rotateScaler = 1.0f,  float speedScaler = 10.0);
 		virtual ~FreeRoamCameraController() override;
 
 		void AttachToCamera(SceneObjectSP const& cameraObject);

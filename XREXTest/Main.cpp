@@ -213,14 +213,14 @@ struct TempScene
 		cameraCube->SetComponent(cubeMesh->GetShallowClone());
 		scene_ = XREXContext::GetInstance().GetRenderingEngine().GetScene();
 		scene_->AddObject(camera_);
-		scene_->AddObject(cameraCube);
+		//scene_->AddObject(cameraCube);
 		
 		shared_ptr<CameraCubeController> controller = MakeSP<CameraCubeController>(cameraCube);
 		XREXContext::GetInstance().GetInputCenter().AddInputHandler(controller);
 		
 
 		floatV3 eye = floatV3(0.0f, 5.5f, -10.0f);
-		floatV3 up = floatV3(0.3f, 1.0f, 0.0f);
+		floatV3 up = floatV3(0.0f, 1.0f, 0.0f);
 		TransformationSP cameraTransformation = camera_->GetComponent<Transformation>();
 		cameraTransformation->SetPosition(eye + centerPosition_);
 		cameraTransformation->SetModelUpDirection(up);
@@ -293,6 +293,7 @@ struct TempScene
 		}
 
 		FreeRoamCameraControllerSP cameraController = MakeSP<FreeRoamCameraController>();
+		//OrbitCameraControllerSP cameraController = MakeSP<OrbitCameraController>(rootObj);
 		cameraController->AttachToCamera(camera_);
 		XREXContext::GetInstance().GetInputCenter().AddInputHandler(cameraController);
 		// 		wMatrix->SetValue(translate * rotation);
@@ -345,9 +346,10 @@ struct TempScene
 // 		cout << "Timer.CurrentTime: " << timer_.CurrentTime() << endl;
 		if (rootObj)
 		{
-			rootObj->GetComponent<Transformation>()->Rotate(delta * 0.2, 0, 0, 1);
-			obj1->GetComponent<Transformation>()->Rotate(delta * 0.5, 1, 0, 0);
-			obj2->GetComponent<Transformation>()->Rotate(delta * 1, 0, 1, 0);
+			float deltaf = static_cast<float>(delta);
+			//rootObj->GetComponent<Transformation>()->Rotate(deltaf * 0.2f, 0, 0, 1);
+			obj1->GetComponent<Transformation>()->Rotate(deltaf * 0.5f, 1, 0, 0);
+			obj2->GetComponent<Transformation>()->Rotate(deltaf * 1, 0, 1, 0);
 		}
 	}
 	void operator ()(double current, double delta)

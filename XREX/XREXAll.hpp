@@ -19,6 +19,7 @@
 #include "InputCenter.hpp"
 #include "InputHandler.hpp"
 #include "FreeRoamCameraController.hpp"
+#include "OrbitCameraController.hpp"
 
 #include "Window.hpp"
 #include "GLWindow.hpp"
