@@ -127,6 +127,7 @@ namespace XREX
 
 		T const& operator [](uint32 index) const
 		{
+			assert(index < Dimension);
 			return values_[index];
 		}
 

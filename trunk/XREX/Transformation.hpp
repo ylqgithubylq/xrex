@@ -177,7 +177,8 @@ namespace XREX
 		}
 		/*
 		 *	Face to a direction, using front and up as reference.
-		 *	@up: up direction in world space as reference.
+		 *	@to: a direction in local space.
+		 *	@up: up direction in parent space as reference.
 		 */
 		void FaceToDirection(floatV3 const& to, floatV3 const& up)
 		{
@@ -186,7 +187,8 @@ namespace XREX
 		}
 		/*
 		 *	Face to a position, using front and up as reference.
-		 *	@up: up direction in world space as reference.
+		 *	@to: a position in local space.
+		 *	@up: up direction in parent space as reference.
 		 */
 		void FaceToPosition(floatV3 const& to, floatV3 const& up)
 		{

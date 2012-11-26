@@ -81,14 +81,14 @@ namespace XREX
 
 		/*
 		 *	Override this if something need to do before a logic frame begin.
-		 *	@return: first component is true indicates action generated.
+		 *	@return: first component is true indicates action generated. second component will be enqueued into InputCenter if first is true.
 		 */
 		virtual std::pair<bool, std::function<void()>> DoOnBeforeLogicFrame(double currentTime)
 		{
 			return std::make_pair(false, std::function<void()>());
 		}
 		/*
-		 *	@return: first component is true indicates action generated.
+		 *	@return: first component is true indicates action generated. second component will be enqueued into InputCenter if first is true.
 		 */
 		virtual std::pair<bool, std::function<void()>> GenerateAction(InputCenter::InputEvent const& inputEvent) = 0;
 

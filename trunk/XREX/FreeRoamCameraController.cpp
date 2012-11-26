@@ -28,6 +28,8 @@ namespace XREX
 			map.Set(InputCenter::InputSemantic::M_Button0, static_cast<uint32>(FreeRoamCameraController::RoamSemantic::TriggerTurn));
 			return map;
 		}
+
+		float const DefaultMoveSpeed = 5.0f;
 	}
 	FreeRoamCameraController::FreeRoamCameraController(float moveScaler, float rotateScaler, float speedScaler)
 		: InputHandler(GenerateActionMap()),
@@ -85,20 +87,17 @@ namespace XREX
 			{
 				if (turnTriggered_)
 				{
+					intV2 delta = inputEvent.pointerPosition - previousPointerPosition_;
 					// negative x because screen coordinate is 180 rotated by Y axis of camera coordinate
-					floatV2 deltaTurn(-(inputEvent.pointerPosition - previousPointerPosition_).X() * rotateScaler_, (inputEvent.pointerPosition - previousPointerPosition_).Y() * rotateScaler_);
-					previousPointerPosition_ = inputEvent.pointerPosition;
+					floatV2 deltaTurn(-delta.X() * rotateScaler_, delta.Y() * rotateScaler_);
 
 					XREXContext::GetInstance().GetInputCenter().EnqueueAction(GenerateRotateAction(deltaTurn));
 				}
+				previousPointerPosition_ = inputEvent.pointerPosition;
 			}
 			break;
 		case RoamSemantic::TriggerTurn:
 			{
-				if (!turnTriggered_)
-				{
-					previousPointerPosition_ = inputEvent.pointerPosition;
-				}
 				turnTriggered_ = !!inputEvent.data;
 			}
 			break;
@@ -132,7 +131,7 @@ namespace XREX
 				roll_();
 			}
 		};
-		float spedUpDelta = moveScaler_ * delta * ((spedUp_ ? 1 : 0) * speedScaler_ + 1);
+		float spedUpDelta = DefaultMoveSpeed * moveScaler_ * delta * ((spedUp_ ? 1 : 0) * speedScaler_ + 1);
 		FrameAction action(GenerateMoveAction(spedUpDelta * forward_, spedUpDelta * left_, spedUpDelta * up_), GenerateRollAction(delta * roll_));
 
 		return action;
@@ -180,7 +179,7 @@ namespace XREX
 			TransformationSP cameraTransformation = cameraObject->GetComponent<Transformation>();
 			floatV3 rotationAxis = floatV3(-deltaTurn.Y(), deltaTurn.X(), 0); // the one perpendicular to the deltaTurn axis
 			floatQ orientation = cameraTransformation->GetOrientation();
-			floatV3 rotationAxisRotated = RotateByQuaternion(orientation, rotationAxis.Normalize());
+			floatV3 rotationAxisRotated = RotateByQuaternion(orientation, rotationAxis.Normalize()); // transform the rotation axis to camera coordinate
 			floatQ rotation = RotationQuaternion(RadianFromDegree(rotationAxis.Length()), rotationAxisRotated); // think the rotationAxis.Length is the rotation in degree
 			orientation = rotation * orientation;
 			cameraTransformation->SetOrientation(orientation);

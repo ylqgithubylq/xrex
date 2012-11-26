@@ -58,6 +58,11 @@ namespace XREX
 		return std::abs(lhs - rhs) <= std::numeric_limits<double>::epsilon();
 	}
 
+	template <typename T>
+	inline T Square(T number)
+	{
+		return number * number;
+	}
 	/*
 	 *	Have fast float hack implementation.
 	 */
