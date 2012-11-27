@@ -4,19 +4,15 @@
 
 #include "InputHandler.hpp"
 
-#include "InputCenter.hpp"
-
 #include <functional>
 #include <array>
-
 namespace XREX
 {
-
-	class XREX_API FreeRoamCameraController
+	class XREX_API FirstPersonCameraController
 		: public InputHandler
 	{
 	public:
-		enum class RoamSemantic
+		enum class MoveSemantic
 		{
 			MoveForward,
 			MoveBack,
@@ -24,8 +20,6 @@ namespace XREX
 			MoveRight,
 			MoveUp,
 			MoveDown,
-			RollLeft,
-			RollRight,
 			Turn,
 			TriggerTurn,
 			SpeedUp,
@@ -34,9 +28,9 @@ namespace XREX
 		};
 
 	public:
-		FreeRoamCameraController(float moveScaler = 1.0f, float rotateScaler = 1.0f,  float speedScaler = 10.0);
-		virtual ~FreeRoamCameraController() override;
-
+		FirstPersonCameraController(float moveScaler = 1.0f, float rotateScaler = 1.0f,  float speedScaler = 10.0);
+		virtual ~FirstPersonCameraController() override;
+	
 		void AttachToCamera(SceneObjectSP const& cameraObject);
 
 	protected:
@@ -48,7 +42,6 @@ namespace XREX
 	private:
 		std::function<void()> GenerateFrameAction(float delta);
 		std::function<void()> GenerateMoveAction(float forward, float left, float up);
-		std::function<void()> GenerateRollAction(float roll);
 		std::function<void()> GenerateRotateAction(floatV2 const& deltaTurn);
 
 
@@ -62,14 +55,17 @@ namespace XREX
 		double previousFrameTime_;
 		intV2 previousPointerPosition_;
 
-		std::array<int32, static_cast<uint32>(RoamSemantic::RoamSemanticCount)> semanticStates_;
+		std::array<int32, static_cast<uint32>(MoveSemantic::RoamSemanticCount)> semanticStates_;
 		int32 forward_;
 		int32 left_;
 		int32 up_;
-		int32 roll_;
+
+		float azimuthAngle_; // camera to object
+		float elevationAngle_; // camera to object
 
 		bool turnTriggered_;
 		bool spedUp_;
 	};
-
 }
+
+

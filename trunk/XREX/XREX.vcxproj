@@ -188,6 +188,7 @@
     <ClCompile Include="Color.cpp" />
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="DLLMain.cpp" />
+    <ClCompile Include="FirstPersonCameraController.cpp" />
     <ClCompile Include="FreeRoamCameraController.cpp" />
     <ClCompile Include="GeometricalMath.cpp" />
     <ClCompile Include="GLUtil.cpp" />
@@ -236,6 +237,7 @@
     <ClInclude Include="Component.hpp" />
     <ClInclude Include="Declare.hpp" />
     <ClInclude Include="DefinedShaderName.hpp" />
+    <ClInclude Include="FirstPersonCameraController.hpp" />
     <ClInclude Include="FreeRoamCameraController.hpp" />
     <ClInclude Include="GeometricalMath.hpp" />
     <ClInclude Include="Geometry.hpp" />
