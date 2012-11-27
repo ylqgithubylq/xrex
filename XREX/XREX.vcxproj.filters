@@ -135,6 +135,9 @@
     <ClCompile Include="OrbitCameraController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="FirstPersonCameraController.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BasicType.hpp">
@@ -276,6 +279,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="OrbitCameraController.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FirstPersonCameraController.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

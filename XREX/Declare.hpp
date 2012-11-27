@@ -37,6 +37,8 @@ namespace XREX
 	typedef std::shared_ptr<FreeRoamCameraController> FreeRoamCameraControllerSP;
 	class OrbitCameraController;
 	typedef std::shared_ptr<OrbitCameraController> OrbitCameraControllerSP;
+	class FirstPersonCameraController;
+	typedef std::shared_ptr<FirstPersonCameraController> FirstPersonCameraControllerSP;
 
 	class Scene;
 	typedef std::shared_ptr<Scene> SceneSP;

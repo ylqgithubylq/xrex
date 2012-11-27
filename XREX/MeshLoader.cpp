@@ -18,6 +18,7 @@
 #include <vector>
 #include <sstream>
 #include <array>
+#include <iostream>
 
 #include <filesystem>
 
@@ -401,7 +402,7 @@ namespace XREX
 		if(!scene)
 		{
 			// TODO log the error?
-			// cout << importer.GetErrorString() << endl;
+			std::cout << importer.GetErrorString() << std::endl;
 			return nullptr;
 		}
 		MeshSP mesh = MakeSP<Mesh>(fileName);
