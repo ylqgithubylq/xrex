@@ -70,18 +70,6 @@ namespace XREX
 			DecreaseWarp,
 		};
 
-		enum class TextureAddressingMode
-		{
-			Wrap,
-			Mirror,
-			Clamp,
-			Border,
-		};
-
-		enum class TextureFilterOperation
-		{
-			Temp,
-		};
 	};
 
 	struct XREX_API RasterizerState
@@ -141,23 +129,6 @@ namespace XREX
 		BlendState();
 	};
 
-	struct XREX_API SamplerState
-		: public RenderingPipelineState
-	{
-		Color borderColor;
-		TextureAddressingMode addressingModeU;
-		TextureAddressingMode addressingModeV;
-		TextureAddressingMode addressingModeW;
-		TextureFilterOperation filterOperation;
-		uint8 maxAnisotropy;
-		float minLOD;
-		float maxLOD;
-		float mipmapLODBias;
-		CompareFunction compareFunction;
-
-		SamplerState();
-	};
-
 
 
 	class XREX_API RasterizerStateObject
@@ -215,14 +186,5 @@ namespace XREX
 	};
 
 
-	class XREX_API SamplerStateObject
-		: Noncopyable
-	{
-	public:
-		explicit SamplerStateObject(SamplerState const& state);
-		void Bind(); // TODO parameter?
-	private:
-		SamplerState state_;
-	};
 
 }

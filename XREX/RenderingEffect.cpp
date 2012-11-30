@@ -3,9 +3,8 @@
 #include "RenderingEffect.hpp"
 #include "Shader.hpp"
 #include "Texture.hpp"
+#include "Sampler.hpp"
 #include "RenderingPipelineState.hpp"
-
-#include <CoreGL.hpp>
 
 #include <algorithm>
 
@@ -78,7 +77,7 @@ namespace XREX
 	{
 		assert(false);
 	}
-	void EffectParameter::SetValue(TextureSP const& value)
+	void EffectParameter::SetValue(std::pair<TextureSP, SamplerSP> const& value)
 	{
 		assert(false);
 	}
@@ -163,10 +162,10 @@ namespace XREX
 		assert(false);
 		return floatM44();
 	}
-	EffectParameter::ParameterValueAutoConverter::operator TextureSP const&() const
+	EffectParameter::ParameterValueAutoConverter::operator std::pair<TextureSP, SamplerSP> const&() const
 	{
 		assert(false);
-		return nullptr;
+		return std::make_pair(nullptr, nullptr);
 	}
 	// 		EffectParameter::ParameterValueAutoConverter::operator std::vector<bool> const&()  const{ assert(false); return std::vector<bool>(); }
 	// 		EffectParameter::ParameterValueAutoConverter::operator std::vector<int32> const&()  const{ assert(false); return std::vector<int32>(); }

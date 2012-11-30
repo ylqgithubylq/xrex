@@ -105,7 +105,7 @@ namespace XREX
 		}
 	}
 
-	void Texture::BindTexture(uint32 textureChannel)
+	void Texture::Bind(uint32 textureChannel)
 	{
 		gl::ActiveTexture(gl::GL_TEXTURE0 + textureChannel);
 		gl::BindTexture(glBindingTarget_, glTextureID_);

@@ -50,6 +50,9 @@ namespace XREX
 		blackTexture3D_ = MakeSP<Texture3D>(description3, data3, true);
 
 		// TODO blackTextureCube
+
+		SamplerState samplerState;
+		defaultSampler_ = MakeSP<Sampler>(samplerState);
 	}
 
 	RenderingEngine& RenderingFactory::GetRenderingEngine()

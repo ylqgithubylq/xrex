@@ -81,6 +81,7 @@ namespace XREX
 #ifdef USE_OPENGL_COMPATIBILITY_PROFILE
 		gl::UseProgram(0);
 		gl::ActiveTexture(gl::GL_TEXTURE0);
+		gl::BindSampler(0, 0);
 		gl::BindBuffer(gl::GL_ARRAY_BUFFER, 0);
 		gl::BindBuffer(gl::GL_ELEMENT_ARRAY_BUFFER, 0);
 		// TODO temp hack for CEGUI.

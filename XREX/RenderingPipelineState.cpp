@@ -9,125 +9,7 @@ namespace XREX
 {
 	namespace
 	{
-		uint32 GLPolygonModeFromPolygonMode(RasterizerState::PolygonMode polygonMode)
-		{
-			switch (polygonMode)
-			{
-			case RasterizerState::PolygonMode::Point:
-				return gl::GL_POINT;
-			case RasterizerState::PolygonMode::Line:
-				return gl::GL_LINE;
-			case RasterizerState::PolygonMode::Fill:
-				return gl::GL_FILL;
-			default:
-				assert(false);
-				return gl::GL_FILL;
-			}
-		}
 
-		uint32 GLCompareFunctionFromCompareFunction(DepthStencilState::CompareFunction compareFunction)
-		{
-			switch (compareFunction)
-			{
-			case DepthStencilState::CompareFunction::AlwaysFail:
-				return gl::GL_NEVER;
-			case DepthStencilState::CompareFunction::AlwaysPass:
-				return gl::GL_ALWAYS;
-			case DepthStencilState::CompareFunction::Less:
-				return gl::GL_LESS;
-			case DepthStencilState::CompareFunction::LessEqual:
-				return gl::GL_LEQUAL;
-			case DepthStencilState::CompareFunction::Equal:
-				return gl::GL_EQUAL;
-			case DepthStencilState::CompareFunction::NotEqual:
-				return gl::GL_NOTEQUAL;
-			case DepthStencilState::CompareFunction::Greater:
-				return gl::GL_GREATER;
-			case DepthStencilState::CompareFunction::GreaterEqual:
-				return gl::GL_GEQUAL;
-			default:
-				assert(false);
-				return gl::GL_EQUAL;
-			}
-		}
-
-		uint32 GLStencilOperationFromStencilOperation(DepthStencilState::StencilOperation stencilOperation)
-		{
-			switch (stencilOperation)
-			{
-			case DepthStencilState::StencilOperation::Keep:
-				return gl::GL_KEEP;
-			case DepthStencilState::StencilOperation::Zero:
-				return gl::GL_ZERO;
-			case DepthStencilState::StencilOperation::Replace:
-				return gl::GL_REPLACE;
-			case DepthStencilState::StencilOperation::Increase:
-				return gl::GL_INCR;
-			case DepthStencilState::StencilOperation::Decrease:
-				return gl::GL_DECR;
-			case DepthStencilState::StencilOperation::Invert:
-				return gl::GL_INVERT;
-			case DepthStencilState::StencilOperation::IncreaseWarp:
-				return gl::GL_INCR_WRAP;
-			case DepthStencilState::StencilOperation::DecreaseWarp:
-				return gl::GL_DECR_WRAP;
-			default:
-				assert(false);
-				return gl::GL_KEEP;
-			}
-		}
-
-		uint32 GLBlendOperationFromBlendOperation(BlendState::BlendOperation blendOperation)
-		{
-			switch (blendOperation)
-			{
-			case RenderingPipelineState::BlendOperation::Add:
-				return gl::GL_FUNC_ADD;
-			case RenderingPipelineState::BlendOperation::Sub:
-				return gl::GL_FUNC_SUBTRACT;
-			case RenderingPipelineState::BlendOperation::ReverseSub:
-				return gl::GL_FUNC_REVERSE_SUBTRACT;
-			case RenderingPipelineState::BlendOperation::Min:
-				return gl::GL_MIN;
-			case RenderingPipelineState::BlendOperation::Max:
-				return gl::GL_MAX;
-			default:
-				assert(false);
-				return gl::GL_FUNC_ADD;
-			}
-		}
-
-		uint32 GLAlphaBlendFactorFromAlphaBlendFactor(BlendState::AlphaBlendFactor alphaBlendFactor)
-		{
-			switch (alphaBlendFactor)
-			{
-			case RenderingPipelineState::AlphaBlendFactor::Zero:
-				return gl::GL_ZERO;
-			case RenderingPipelineState::AlphaBlendFactor::One:
-				return gl::GL_ONE;
-			case RenderingPipelineState::AlphaBlendFactor::SourceAlpha:
-				return gl::GL_SRC_ALPHA;
-			case RenderingPipelineState::AlphaBlendFactor::DestinationAlpha:
-				return gl::GL_DST_ALPHA;
-			case RenderingPipelineState::AlphaBlendFactor::OneMinusSourceAlpha:
-				return gl::GL_ONE_MINUS_SRC_ALPHA;
-			case RenderingPipelineState::AlphaBlendFactor::OneMinusDestinationAlpha:
-				return gl::GL_ONE_MINUS_DST_ALPHA;
-			case RenderingPipelineState::AlphaBlendFactor::SourceColor:
-				return gl::GL_SRC_COLOR;
-			case RenderingPipelineState::AlphaBlendFactor::DestinationColor:
-				return gl::GL_DST_COLOR;
-			case RenderingPipelineState::AlphaBlendFactor::OneMinusSourceColor:
-				return gl::GL_ONE_MINUS_SRC_COLOR;
-			case RenderingPipelineState::AlphaBlendFactor::OneMinusDestinationColor:
-				return gl::GL_ONE_MINUS_DST_COLOR;
-			case RenderingPipelineState::AlphaBlendFactor::SourceAlphaSaturate:
-				return gl::GL_SRC_ALPHA_SATURATE;
-			default:
-				assert(false);
-				return gl::GL_ZERO;
-			}
-		}
 	}
 
 	RasterizerState::RasterizerState()
@@ -156,13 +38,6 @@ namespace XREX
 	{
 	}
 
-	SamplerState::SamplerState()
-		: borderColor(0.f, 0.f, 0.f, 0.f),
-		addressingModeU(TextureAddressingMode::Wrap), addressingModeV(TextureAddressingMode::Wrap), addressingModeW(TextureAddressingMode::Wrap),
-		filterOperation(TextureFilterOperation::Temp), maxAnisotropy(16), minLOD(0), maxLOD(std::numeric_limits<float>::max()), mipmapLODBias(0.f),
-		compareFunction(CompareFunction::AlwaysFail)
-	{
-	}
 
 
 
@@ -258,20 +133,5 @@ namespace XREX
 		gl::BlendColor(blendFactor.R(), blendFactor.G(), blendFactor.B(), blendFactor.A());
 	}
 
-
-
-
-	SamplerStateObject::SamplerStateObject(SamplerState const& state)
-		: state_(state)
-	{
-		// TODO implement me
-		assert(false);
-	}
-
-	void SamplerStateObject::Bind()
-	{
-		// TODO implement me
-		assert(false);
-	}
 
 }

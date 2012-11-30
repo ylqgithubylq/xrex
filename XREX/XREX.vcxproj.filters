@@ -138,6 +138,9 @@
     <ClCompile Include="FirstPersonCameraController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Sampler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BasicType.hpp">
@@ -282,6 +285,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="FirstPersonCameraController.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Sampler.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

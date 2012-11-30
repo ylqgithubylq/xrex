@@ -7,6 +7,7 @@
 #include "GLUtil.hpp"
 #include "GraphicsBuffer.hpp"
 #include "Texture.hpp"
+#include "Sampler.hpp"
 
 #include <CoreGL.hpp>
 
@@ -373,7 +374,7 @@ namespace XREX
 				case gl::GL_SAMPLER_3D:
 				case gl::GL_SAMPLER_CUBE:
 					{
-						parameter = MakeSP<ConcreteEffectParameter<TextureSP>>(name);
+						parameter = MakeSP<ConcreteEffectParameter<std::pair<TextureSP, SamplerSP>>>(name);
 					}
 					break;
 				default:
@@ -438,16 +439,23 @@ namespace XREX
 				{
 					binder.setter = [&binder, parameter, samplerLocation] ()
 					{
-						TextureSP const& texture = parameter->GetValue<TextureSP>();
-						if (texture)
+						std::pair<TextureSP, SamplerSP> const& texture = parameter->GetValue<std::pair<TextureSP, SamplerSP>>();
+						if (texture.first)
 						{
-							texture->BindTexture(samplerLocation);
-							gl::Uniform1i(binder.glLocation, samplerLocation);
+							texture.first->Bind(samplerLocation);
 						}
 						else
 						{
-							XREXContext::GetInstance().GetRenderingFactory().GetBlackTexture1D()->BindTexture(samplerLocation);
-							gl::Uniform1i(binder.glLocation, samplerLocation);
+							XREXContext::GetInstance().GetRenderingFactory().GetBlackTexture1D()->Bind(samplerLocation);
+						}
+						gl::Uniform1i(binder.glLocation, samplerLocation);
+						if (texture.second)
+						{
+							texture.second->Bind(samplerLocation);
+						}
+						else
+						{
+							XREXContext::GetInstance().GetRenderingFactory().GetDefaultSampler()->Bind(samplerLocation);
 						}
 					};
 				}
@@ -456,16 +464,23 @@ namespace XREX
 				{
 					binder.setter = [&binder, parameter, samplerLocation] ()
 					{
-						TextureSP const& texture = parameter->GetValue<TextureSP>();
-						if (texture)
+						std::pair<TextureSP, SamplerSP> const& texture = parameter->GetValue<std::pair<TextureSP, SamplerSP>>();
+						if (texture.first)
 						{
-							texture->BindTexture(samplerLocation);
-							gl::Uniform1i(binder.glLocation, samplerLocation);
+							texture.first->Bind(samplerLocation);
 						}
 						else
 						{
-							XREXContext::GetInstance().GetRenderingFactory().GetBlackTexture2D()->BindTexture(samplerLocation);
-							gl::Uniform1i(binder.glLocation, samplerLocation);
+							XREXContext::GetInstance().GetRenderingFactory().GetBlackTexture2D()->Bind(samplerLocation);
+						}
+						gl::Uniform1i(binder.glLocation, samplerLocation);
+						if (texture.second)
+						{
+							texture.second->Bind(samplerLocation);
+						}
+						else
+						{
+							XREXContext::GetInstance().GetRenderingFactory().GetDefaultSampler()->Bind(samplerLocation);
 						}
 					};
 				}
@@ -474,17 +489,25 @@ namespace XREX
 				{
 					binder.setter = [&binder, parameter, samplerLocation] ()
 					{
-						TextureSP const& texture = parameter->GetValue<TextureSP>();
-						if (texture)
+						std::pair<TextureSP, SamplerSP> const& texture = parameter->GetValue<std::pair<TextureSP, SamplerSP>>();
+						if (texture.first)
 						{
-							texture->BindTexture(samplerLocation);
-							gl::Uniform1i(binder.glLocation, samplerLocation);
+							texture.first->Bind(samplerLocation);
 						}
 						else
 						{
-							XREXContext::GetInstance().GetRenderingFactory().GetBlackTexture3D()->BindTexture(samplerLocation);
-							gl::Uniform1i(binder.glLocation, samplerLocation);
+							XREXContext::GetInstance().GetRenderingFactory().GetBlackTexture3D()->Bind(samplerLocation);
 						}
+						gl::Uniform1i(binder.glLocation, samplerLocation);
+						if (texture.second)
+						{
+							texture.second->Bind(samplerLocation);
+						}
+						else
+						{
+							XREXContext::GetInstance().GetRenderingFactory().GetDefaultSampler()->Bind(samplerLocation);
+						}
+
 					};
 				}
 				break;
@@ -492,17 +515,25 @@ namespace XREX
 				{
 					binder.setter = [&binder, parameter, samplerLocation] ()
 					{
-						TextureSP const& texture = parameter->GetValue<TextureSP>();
-						if (texture)
+						std::pair<TextureSP, SamplerSP> const& texture = parameter->GetValue<std::pair<TextureSP, SamplerSP>>();
+						if (texture.first)
 						{
-							texture->BindTexture(samplerLocation);
-							gl::Uniform1i(binder.glLocation, samplerLocation);
+							texture.first->Bind(samplerLocation);
 						}
 						else
 						{
-							XREXContext::GetInstance().GetRenderingFactory().GetBlackTextureCube()->BindTexture(samplerLocation);
-							gl::Uniform1i(binder.glLocation, samplerLocation);
+							XREXContext::GetInstance().GetRenderingFactory().GetBlackTextureCube()->Bind(samplerLocation);
 						}
+						gl::Uniform1i(binder.glLocation, samplerLocation);
+						if (texture.second)
+						{
+							texture.second->Bind(samplerLocation);
+						}
+						else
+						{
+							XREXContext::GetInstance().GetRenderingFactory().GetDefaultSampler()->Bind(samplerLocation);
+						}
+
 					};
 				}
 				break;

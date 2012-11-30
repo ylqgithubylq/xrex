@@ -45,5 +45,6 @@
 #include "RenderingEffect.hpp"
 #include "RenderingPipelineState.hpp"
 #include "Texture.hpp"
+#include "Sampler.hpp"
 
 #include "Viewport.hpp"

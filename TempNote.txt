@@ -2,7 +2,7 @@ using regular expressions(Ctrl+Shift+F):
 ^:b*[^:b*#/{}]+.*$
 
 TODO:
-sampler
+sampler: mesh loader, factory, shader, sampler itself
 state objects: operator <()
 
 create new texture constructor without 2 dimension data parameter, remove constructor parameter generateMipmap of the one with 2 dimension data parameter
