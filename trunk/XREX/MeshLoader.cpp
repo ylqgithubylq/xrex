@@ -10,6 +10,7 @@
 #include "RenderingFactory.hpp"
 #include "ResourceManager.hpp"
 #include "Material.hpp"
+#include "Sampler.hpp"
 
 #include <assimp/Importer.hpp>      // C++ importer interface
 #include <assimp/scene.h>           // Output data structure
@@ -159,16 +160,16 @@ namespace XREX
 					aiTextureMapping textureMapping;
 					uint32 uvIndex = 0;
 					float blend = 0.f;
-					aiTextureOp textureOp;
-					aiTextureMapMode textureMapMode;
-
+					aiTextureOp textureOp = _aiTextureOp_Force32Bit;
+					std::array<aiTextureMapMode, 3> textureMapModes;
+					textureMapModes.fill(_aiTextureMapMode_Force32Bit);
 					for (auto& textureType : TextureTypes)
 					{
 						textureCount = loaderMaterial->GetTextureCount(textureType.first);
 						assert(textureCount <= 1); // larger are not support
 						for (uint32 j = 0; j < textureCount; ++j)
 						{
-							if (AI_SUCCESS == loaderMaterial->GetTexture(textureType.first, j, &path, &textureMapping, &uvIndex, &blend, &textureOp, &textureMapMode))
+							if (AI_SUCCESS == loaderMaterial->GetTexture(textureType.first, j, &path, &textureMapping, &uvIndex, &blend, &textureOp, textureMapModes.data()))
 							{
 								TextureSP texture = XREXContext::GetInstance().GetResourceManager().GetTexture2D(path.C_Str());
 								if (!texture)
@@ -177,8 +178,41 @@ namespace XREX
 								}
 							
 								assert(textureType.second != ""); // TODO log failure rather than assert
-								material->SetParameter(textureType.second, texture);
-								// TODO generate sampler
+
+								SamplerState samplerState;
+								std::array<SamplerState::TextureAddressingMode, 3> addressingModes;
+								for (uint32 i = 0; i < 3; ++i)
+								{
+									switch (textureMapModes[i])
+									{
+									case aiTextureMapMode_Wrap:
+										addressingModes[i] = SamplerState::TextureAddressingMode::Repeat;
+										break;
+									case aiTextureMapMode_Clamp:
+										addressingModes[i] = SamplerState::TextureAddressingMode::ClampToEdge;
+										break;
+									case aiTextureMapMode_Decal:
+										addressingModes[i] = SamplerState::TextureAddressingMode::ClampToBorder;
+										break;
+									case aiTextureMapMode_Mirror:
+										addressingModes[i] = SamplerState::TextureAddressingMode::MirroredRepeat;
+										break;
+									case _aiTextureMapMode_Force32Bit:
+										addressingModes[i] = SamplerState::TextureAddressingMode::Repeat; // the default one
+										break;
+									default:
+										assert(false);
+										break;
+									}
+								}
+								samplerState.addressingModeS = addressingModes[0];
+								samplerState.addressingModeT = addressingModes[1];
+								samplerState.addressingModeR = addressingModes[2];
+								samplerState.magFilterOperation = SamplerState::TextureFilterOperation::Anisotropic;
+								samplerState.minFilterOperation = SamplerState::TextureFilterOperation::Anisotropic;
+
+								SamplerSP sampler = XREXContext::GetInstance().GetRenderingFactory().CreateSampler(samplerState);
+								material->SetParameter(textureType.second, std::make_pair(texture, sampler));
 							}
 						}
 					}

@@ -211,6 +211,7 @@
     <ClCompile Include="RenderingLayout.cpp" />
     <ClCompile Include="RenderingPipelineState.cpp" />
     <ClCompile Include="ResourceManager.cpp" />
+    <ClCompile Include="Sampler.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SceneObject.cpp" />
     <ClCompile Include="Settings.cpp" />
@@ -264,6 +265,7 @@
     <ClInclude Include="RenderingLayout.hpp" />
     <ClInclude Include="RenderingPipelineState.hpp" />
     <ClInclude Include="ResourceManager.hpp" />
+    <ClInclude Include="Sampler.hpp" />
     <ClInclude Include="Scene.hpp" />
     <ClInclude Include="SceneObject.hpp" />
     <ClInclude Include="Settings.hpp" />

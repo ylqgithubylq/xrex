@@ -7,6 +7,7 @@
 #include "RenderingLayout.hpp"
 #include "Texture.hpp"
 #include "RenderingPipelineState.hpp"
+#include "Sampler.hpp"
 #include "Viewport.hpp"
 
 namespace XREX
@@ -42,6 +43,11 @@ namespace XREX
 		{
 			assert(false); // not implemented
 			return blackTextureCube_;
+		}
+
+		SamplerSP const& GetDefaultSampler() const
+		{
+			return defaultSampler_;
 		}
 
 		RenderingEngine& GetRenderingEngine();
@@ -100,9 +106,9 @@ namespace XREX
 			return MakeSP<RenderingLayout>(buffers, indexBuffer, mode);
 		}
 
-		SamplerStateObjectSP CreateSamplerStateObject(SamplerState const& samplerState)
+		SamplerSP CreateSampler(SamplerState const& samplerState)
 		{
-			return MakeSP<SamplerStateObject>(samplerState);
+			return MakeSP<Sampler>(samplerState);
 		}
 		template <typename T>
 		TextureSP CreateTexture1D(Texture::DataDescription<1> const& description, std::vector<std::vector<T>> const& data)
@@ -160,6 +166,7 @@ namespace XREX
 		TextureSP blackTexture2D_;
 		TextureSP blackTexture3D_;
 		TextureSP blackTextureCube_;
+		SamplerSP defaultSampler_;
 		std::unique_ptr<RenderingEngine> renderingEngine_;
 
 	};

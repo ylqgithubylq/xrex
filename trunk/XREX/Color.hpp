@@ -102,6 +102,11 @@ namespace XREX
 			return lhs.value_ != rhs.value_;
 		}
 
+		float const* GetArray() const
+		{
+			return value_.GetArray();
+		}
+
 	private:
 		floatV4 value_;
 	};

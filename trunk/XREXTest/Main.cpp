@@ -292,7 +292,8 @@ struct TempScene
 			cubeCenterPosition->SetValue(floatV3(0, 50, 0));
 		}
 
-		FreeRoamCameraControllerSP cameraController = MakeSP<FreeRoamCameraController>();
+//		FreeRoamCameraControllerSP cameraController = MakeSP<FreeRoamCameraController>();
+		FirstPersonCameraControllerSP cameraController = MakeSP<FirstPersonCameraController>();
 		//OrbitCameraControllerSP cameraController = MakeSP<OrbitCameraController>(rootObj);
 		cameraController->AttachToCamera(camera_);
 		XREXContext::GetInstance().GetInputCenter().AddInputHandler(cameraController);

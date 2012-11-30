@@ -66,8 +66,6 @@ namespace XREX
 	typedef std::shared_ptr<DepthStencilStateObject> DepthStencilStateObjectSP;
 	class BlendStateObject;
 	typedef std::shared_ptr<BlendStateObject> BlendStateObjectSP;
-	class SamplerStateObject;
-	typedef std::shared_ptr<SamplerStateObject> SamplerStateObjectSP;
 	class ShaderObject;
 	typedef std::shared_ptr<ShaderObject> ShaderObjectSP;
 	class ProgramObject;
@@ -89,6 +87,9 @@ namespace XREX
 	typedef std::shared_ptr<GraphicsBuffer> GraphicsBufferSP;
 	class Texture;
 	typedef std::shared_ptr<Texture> TextureSP;
+	class Sampler;
+	typedef std::shared_ptr<Sampler> SamplerSP;
+
 
 	class Camera;
 	typedef std::shared_ptr<Camera> CameraSP;

@@ -89,7 +89,7 @@ namespace XREX
 			return type_;
 		}
 
-		void BindTexture(uint32 textureChannel);
+		void Bind(uint32 textureChannel);
 		void UnbindTexture();
 
 	protected:
