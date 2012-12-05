@@ -14,4 +14,3 @@ how to make a dll that can work correctly?
 (now have a lot of warning about stl class and may have some other warning, and exe using this dll cannot work)
 thread for logic/rendering call generation/rendering api calls
 using input device capture to do input event generation, refactor Window to subclass device interface.
-separate indexBuffer and vertexBuffer

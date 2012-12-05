@@ -364,9 +364,34 @@ namespace XREX
 						parameter = MakeSP<ConcreteEffectParameter<floatV4>>(name);
 					}
 					break;
+				case gl::GL_DOUBLE:
+					{
+						parameter = MakeSP<ConcreteEffectParameter<double>>(name);
+					}
+					break;
+				case gl::GL_DOUBLE_VEC2:
+					{
+						parameter = MakeSP<ConcreteEffectParameter<doubleV2>>(name);
+					}
+					break;
+				case gl::GL_DOUBLE_VEC3:
+					{
+						parameter = MakeSP<ConcreteEffectParameter<doubleV3>>(name);
+					}
+					break;
+				case gl::GL_DOUBLE_VEC4:
+					{
+						parameter = MakeSP<ConcreteEffectParameter<doubleV4>>(name);
+					}
+					break;
 				case gl::GL_FLOAT_MAT4:
 					{
 						parameter = MakeSP<ConcreteEffectParameter<floatM44>>(name);
+					}
+					break;
+				case gl::GL_DOUBLE_MAT4:
+					{
+						parameter = MakeSP<ConcreteEffectParameter<doubleM44>>(name);
 					}
 					break;
 				case gl::GL_SAMPLER_1D:
@@ -650,11 +675,51 @@ namespace XREX
 					};
 				}
 				break;
+			case gl::GL_DOUBLE:
+				{
+					binder.setter = [&binder, parameter] ()
+					{
+						gl::Uniform1d(binder.glLocation, parameter->GetValue<double>());
+					};
+				}
+				break;
+			case gl::GL_DOUBLE_VEC2:
+				{
+					binder.setter = [&binder, parameter] ()
+					{
+						gl::Uniform2dv(binder.glLocation, 1, parameter->GetValue<doubleV2>().GetArray());
+					};
+				}
+				break;
+			case gl::GL_DOUBLE_VEC3:
+				{
+					binder.setter = [&binder, parameter] ()
+					{
+						gl::Uniform3dv(binder.glLocation, 1, parameter->GetValue<doubleV3>().GetArray());
+					};
+				}
+				break;
+			case gl::GL_DOUBLE_VEC4:
+				{
+					binder.setter = [&binder, parameter] ()
+					{
+						gl::Uniform4dv(binder.glLocation, 1, parameter->GetValue<doubleV4>().GetArray());
+					};
+				}
+				break;
 			case gl::GL_FLOAT_MAT4:
 				{
 					binder.setter = [&binder, parameter] ()
 					{
 						gl::UniformMatrix4fv(binder.glLocation, 1, false, parameter->GetValue<floatM44>().GetArray());
+					};
+				}
+				break;
+			case gl::GL_DOUBLE_MAT4:
+				{
+					binder.setter = [&binder, parameter] ()
+					{
+						gl::UniformMatrix4dv(binder.glLocation, 1, false, parameter->GetValue<doubleM44>().GetArray());
 					};
 				}
 				break;

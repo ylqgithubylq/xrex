@@ -280,5 +280,6 @@ namespace XREX
 
 
 	typedef Matrix4T<float> floatM44;
+	typedef Matrix4T<double> doubleM44;
 
 }
