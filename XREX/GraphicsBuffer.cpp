@@ -21,35 +21,32 @@ namespace XREX
 	{
 		uint32 GLUsageFromUsage(GraphicsBuffer::Usage usage)
 		{
-			static std::array<uint32, static_cast<uint32>(GraphicsBuffer::Usage::UsageCount)> const mapping = [] ()
+			switch (usage)
 			{
-				std::array<uint32, static_cast<uint32>(GraphicsBuffer::Usage::UsageCount)> temp;
-				temp[static_cast<uint32>(GraphicsBuffer::Usage::Static)] = gl::GL_STATIC_DRAW;
-				temp[static_cast<uint32>(GraphicsBuffer::Usage::Dynamic)] = gl::GL_DYNAMIC_DRAW;
-				temp[static_cast<uint32>(GraphicsBuffer::Usage::Stream)] = gl::GL_STREAM_DRAW;
-				return temp;
-			} ();
-			return mapping[static_cast<uint32>(usage)];
+			case GraphicsBuffer::Usage::Static:
+				return gl::GL_STATIC_DRAW;
+			case GraphicsBuffer::Usage::Dynamic:
+				return gl::GL_DYNAMIC_DRAW;
+			case GraphicsBuffer::Usage::Stream:
+				return gl::GL_STREAM_DRAW;
+			case GraphicsBuffer::Usage::UsageCount:
+				assert(false);
+				return gl::GL_STATIC_DRAW;
+				break;
+			default:
+				assert(false);
+				return gl::GL_STATIC_DRAW;
+				break;
+			}
 		}
 	}
 
-	bool GraphicsBuffer::DataLayout::AddChannelLayout(ElementLayout&& elementLayout)
-	{
-		channelLayouts_.push_back(std::move(elementLayout));
-		// TODO check if they overlaid each other
-		return true;
-	}
 
-	auto GraphicsBuffer::DataLayout::GetChannelLayout(string const& channel) const -> ElementLayout const&
+	GraphicsBuffer::GraphicsBuffer(BufferType type, Usage usage, void const* data, uint32 bytes )
+		: type_(type), usage_(usage)
 	{
-		auto found = std::find_if(channelLayouts_.begin(), channelLayouts_.end(), [&channel] (ElementLayout const& elementLayout) 
-		{
-			return elementLayout.channel == channel;
-		});
-		assert(found != channelLayouts_.end());
-		return *found;
+		DoConsctruct(data, bytes);
 	}
-
 
 	void GraphicsBuffer::DoConsctruct(void const* data, uint32 dataSize)
 	{
@@ -74,44 +71,61 @@ namespace XREX
 		gl::BindBuffer(glBindingTarget_, glBufferID_);
 	}
 
-	void GraphicsBuffer::BindToProgram(ProgramObjectSP const& program)
+	void GraphicsBuffer::Unbind()
+	{
+		gl::BindBuffer(glBindingTarget_, 0);
+	}
+
+
+
+	bool VertexBuffer::DataLayout::AddChannelLayout(ElementLayout&& elementLayout)
+	{
+		channelLayouts_.push_back(std::move(elementLayout));
+		// TODO check if they overlaid each other
+		return true;
+	}
+
+	auto VertexBuffer::DataLayout::GetChannelLayout(string const& channel) const -> ElementLayout const&
+	{
+		auto found = std::find_if(channelLayouts_.begin(), channelLayouts_.end(), [&channel] (ElementLayout const& elementLayout) 
+		{
+			return elementLayout.channel == channel;
+		});
+		assert(found != channelLayouts_.end());
+		return *found;
+	}
+
+
+	void VertexBuffer::BindToProgram(ProgramObjectSP const& program)
 	{
 		// binding relations are saved in VAO in RenderingLayout.
 		Bind();
-		if (type_ == BufferType::Vertex)
+		assert(lastAttributeLocations_.size() == 0); // make sure this buffer is not binding to other programs
+		lastAttributeLocations_.resize(layout_.GetChannelLayoutCount());
+		for (uint32 i = 0; i < layout_.GetChannelLayoutCount(); ++i)
 		{
-			assert(lastAttributeLocations_.size() == 0); // make sure this buffer is not binding to other programs
-			lastAttributeLocations_.resize(layout_.GetChannelLayoutCount());
-			for (uint32 i = 0; i < layout_.GetChannelLayoutCount(); ++i)
+			DataLayout::ElementLayout const& channelLayout = layout_.GetChannelLayoutAtIndex(i);
+			lastAttributeLocations_[i] = program->GetAttributeLocation(channelLayout.channel);
+			if (lastAttributeLocations_[i] != -1)
 			{
-				DataLayout::ElementLayout const& channelLayout = layout_.GetChannelLayoutAtIndex(i);
-				lastAttributeLocations_[i] = program->GetAttributeLocation(channelLayout.channel);
-				if (lastAttributeLocations_[i] != -1)
-				{
-					gl::EnableVertexAttribArray(lastAttributeLocations_[i]);
-					gl::VertexAttribPointer(lastAttributeLocations_[i], GetElementPrimitiveCount(channelLayout.elementType), GLTypeFromElementType(GetElementPrimitiveType(channelLayout.elementType)),
-						channelLayout.needNormalize, channelLayout.strip, reinterpret_cast<void const*>(channelLayout.start));
-				}
+				gl::EnableVertexAttribArray(lastAttributeLocations_[i]);
+				gl::VertexAttribPointer(lastAttributeLocations_[i], GetElementPrimitiveCount(channelLayout.elementType), GLTypeFromElementType(GetElementPrimitiveType(channelLayout.elementType)),
+					channelLayout.needNormalize, channelLayout.strip, reinterpret_cast<void const*>(channelLayout.start));
 			}
 		}
 	}
 
-	void GraphicsBuffer::Unbind()
+	void VertexBuffer::Unbind()
 	{
-		if (type_ == BufferType::Vertex)
+		GraphicsBuffer::Unbind();
+		for (uint32 i = 0; i < layout_.GetChannelLayoutCount(); ++i)
 		{
-			for (uint32 i = 0; i < layout_.GetChannelLayoutCount(); ++i)
+			if (lastAttributeLocations_[i] != -1)
 			{
-				if (lastAttributeLocations_[i] != -1)
-				{
-					gl::DisableVertexAttribArray(lastAttributeLocations_[i]);
-				}
+				gl::DisableVertexAttribArray(lastAttributeLocations_[i]);
 			}
-			lastAttributeLocations_.clear();
 		}
-
-		gl::BindBuffer(glBindingTarget_, 0);
-
+		lastAttributeLocations_.swap(decltype(lastAttributeLocations_)());
 	}
 
 }

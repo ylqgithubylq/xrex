@@ -7,6 +7,9 @@
 #include "Texture.hpp"
 #include "Mesh.hpp"
 
+#include "TextureLoader.hpp"
+
+
 #include <filesystem>
 
 namespace XREX
@@ -46,9 +49,19 @@ namespace XREX
 			}
 			return false;
 		}
+
+		bool LocatePathString(std::vector<std::tr2::sys::path> const& locations, bool containsDirectory, std::string const& relativePath, std::string* resultPath)
+		{
+			std::tr2::sys::path resourceLocation;
+			if (!Locate(locations, containsDirectory, std::tr2::sys::path(relativePath), &resourceLocation))
+			{
+				return false;
+			}
+			*resultPath = resourceLocation.string();
+			return true;
+		}
 	}
 
-	// std::string const ResourceManager::RootPath = "../../";
 
 	struct ResourceManager::HideFileSystemHeader
 	{
@@ -92,96 +105,139 @@ namespace XREX
 
 	bool ResourceManager::LocatePath(std::string const& relativePath, std::string* resultPath)
 	{
-		std::tr2::sys::path resourceLocation;
-		if (!Locate(hideFileSystemHeader_->paths, true, std::tr2::sys::path(relativePath), &resourceLocation))
-		{
-			return false;
-		}
-		*resultPath = resourceLocation.string();
-		return true;
+		return LocatePathString(hideFileSystemHeader_->paths, true, relativePath, resultPath);
 	}
+
 
 	namespace
 	{
-		template <typename LoadingFunction>
-		TextureSP DoGetTexture(std::vector<std::tr2::sys::path> const& paths, std::unordered_map<std::string, TextureSP>& textures, std::string const& fileName,
-			LoadingFunction const& loadingFunction)
-			//TextureSP (LocalResourceLoader::* loadFunction)(std::string const& fileName, bool generateMipmap)) // pointer to member function, a little brain fucking...
+		template <typename Type>
+		struct LoadingResultProxy
+			: LoadingResult<Type>
 		{
-			std::tr2::sys::path resourceLocation;
-			if (!Locate(paths, false, std::tr2::sys::path(fileName), &resourceLocation))
-			{
-				return nullptr;
-			}
-			std::string fullPath = resourceLocation.string();
-			auto found = textures.find(fullPath);
-			if (found == textures.end())
-			{
-				TextureSP texture = loadingFunction(fullPath, true);
+			std::shared_ptr<LoadingResult<Type>> actualResult;
+			std::shared_ptr<Type> object;
+			std::function<void(std::shared_ptr<Type> const& loadedObject)> onLoad;
 
-				if (texture != nullptr)
+			LoadingResultProxy()
+			{
+			}
+
+			LoadingResultProxy(std::shared_ptr<LoadingResult<Type>> const& result)
+				: actualResult(result)
+			{
+			}
+			LoadingResultProxy(std::shared_ptr<Type> const& theObject)
+				: object(theObject)
+			{
+			}
+
+			void SetOnLoad(std::function<void(std::shared_ptr<Type> const& loadedObject)>&& callback)
+			{
+				onLoad = std::move(callback);
+			}
+
+			virtual bool Succeeded() const override
+			{
+				return object || (actualResult && actualResult->Succeeded());
+			}
+			virtual std::shared_ptr<Type> Create() override
+			{
+				if (object)
 				{
-					textures[fullPath] = texture;
+					return object; // already loaded
 				}
-				return texture;
+				if (actualResult && actualResult->Succeeded())
+				{
+					object = actualResult->Create();
+					onLoad(object); // the lambda in DoLoadTexture
+					return object;
+				}
+				else
+				{
+					return nullptr; // file not found
+				}
 			}
-			else
+		};
+
+		template <typename Type>
+		std::shared_ptr<LoadingResult<Type>> DoLoad(std::vector<std::tr2::sys::path> const& paths,
+			std::unordered_map<std::string, std::shared_ptr<Type>>& objects, std::unordered_map<std::string, std::shared_ptr<LoadingResult<Type>>>& objectLoadingCache,
+			std::string const& fileName, std::function<std::shared_ptr<LoadingResult<Type>>(std::string const& fileName)> const& loadingFunction)
+		{
+			std::string fullPath;
+			if (!LocatePathString(paths, false, fileName, &fullPath))
 			{
-				return found->second;
+				return MakeSP<LoadingResultProxy<Type>>(); // not found
 			}
-		}
-	}
+			auto found = objects.find(fullPath);
+			if (found == objects.end())
+			{ // not in object cache
+				auto foundInToLoad = objectLoadingCache.find(fullPath);
+				if (foundInToLoad == objectLoadingCache.end())
+				{ // and not in object loading cache
+					std::shared_ptr<LoadingResult<Type>> result = loadingFunction(fullPath);
+					std::shared_ptr<LoadingResultProxy<Type>> proxy = MakeSP<LoadingResultProxy<Type>>(result);
+					objectLoadingCache.insert(std::make_pair(fullPath, proxy));
 
-	TextureSP ResourceManager::GetTexture1D(std::string const& fileName)
-	{
-		auto loadFunction = &LocalResourceLoader::LoadTexture1D;
-		return DoGetTexture(hideFileSystemHeader_->paths, texture1Ds_, fileName, [] (std::string const& fileName, bool generateMipmap)
-		{
-			return XREXContext::GetInstance().GetResourceLoader().LoadTexture1D(fileName, generateMipmap);
-		});
-	}
+					// callback to do caching
+					auto onLoadHandler = [&objects, &objectLoadingCache, fullPath] (std::shared_ptr<Type> const& object)
+					{
+						auto found = objectLoadingCache.find(fullPath);
+						if (found == objectLoadingCache.end())
+						{
+							assert(false);
+						}
+						objectLoadingCache.erase(found);
+						objects.insert(std::make_pair(fullPath, object));
+					};
+					proxy->SetOnLoad(std::move(onLoadHandler));
 
-	TextureSP ResourceManager::GetTexture2D(std::string const& fileName)
-	{
-		auto loadFunction = &LocalResourceLoader::LoadTexture2D;
-		return DoGetTexture(hideFileSystemHeader_->paths, texture2Ds_, fileName, [] (std::string const& fileName, bool generateMipmap)
-		{
-			return XREXContext::GetInstance().GetResourceLoader().LoadTexture2D(fileName, generateMipmap);
-		});
-	}
-
-	TextureSP ResourceManager::GetTexture3D(std::string const& fileName)
-	{
-		auto loadFunction = &LocalResourceLoader::LoadTexture3D;
-		return DoGetTexture(hideFileSystemHeader_->paths, texture3Ds_, fileName, [] (std::string const& fileName, bool generateMipmap)
-		{
-			return XREXContext::GetInstance().GetResourceLoader().LoadTexture3D(fileName, generateMipmap);
-		});
-	}
-
-	MeshSP ResourceManager::GetModel(std::string const& fileName)
-	{
-		std::tr2::sys::path resourceLocation;
-		if (!Locate(hideFileSystemHeader_->paths, false, std::tr2::sys::path(fileName), &resourceLocation))
-		{
-			return nullptr;
-		}
-		std::string fullPath = resourceLocation.string();
-
-		auto found = meshes_.find(fullPath);
-		if (found == meshes_.end())
-		{
-			MeshSP mesh = XREXContext::GetInstance().GetResourceLoader().LoadMesh(fullPath);
-			if (mesh != nullptr)
+					return proxy;
+				}
+				else // loaded but not created
+				{
+					return foundInToLoad->second;
+				}
+			}
+			else // already created object
 			{
-				meshes_[fullPath] = mesh;
+				std::shared_ptr<LoadingResultProxy<Type>> proxy = MakeSP<LoadingResultProxy<Type>>(found->second);
+				return proxy;
 			}
-			return mesh;
-		}
-		else
-		{
-			return found->second; // TODO need clone?
 		}
 	}
 
+	TextureLoadingResultSP ResourceManager::LoadTexture1D(std::string const& fileName)
+	{
+		return DoLoad<Texture>(hideFileSystemHeader_->paths, texture1Ds_, texture1DsToLoad_, fileName, [] (std::string const& fullPath)
+		{
+			return XREXContext::GetInstance().GetResourceLoader().LoadTexture1D(fullPath, true);
+		});
+	}
+
+	TextureLoadingResultSP ResourceManager::LoadTexture2D(std::string const& fileName)
+	{
+		return DoLoad<Texture>(hideFileSystemHeader_->paths, texture2Ds_, texture2DsToLoad_, fileName, [] (std::string const& fullPath)
+		{
+			return XREXContext::GetInstance().GetResourceLoader().LoadTexture2D(fullPath, true);
+		});
+	}
+
+	TextureLoadingResultSP ResourceManager::LoadTexture3D(std::string const& fileName)
+	{
+		return DoLoad<Texture>(hideFileSystemHeader_->paths, texture3Ds_, texture3DsToLoad_, fileName, [] (std::string const& fullPath)
+		{
+			return XREXContext::GetInstance().GetResourceLoader().LoadTexture3D(fullPath, true);
+		});
+	}
+
+	MeshLoadingResultSP ResourceManager::LoadModel(std::string const& fileName)
+	{
+		return DoLoad<Mesh>(hideFileSystemHeader_->paths, meshes_, meshesToLoad_, fileName, [] (std::string const& fullPath)
+		{
+			return XREXContext::GetInstance().GetResourceLoader().LoadMesh(fullPath);
+		});
+	}
+	
 }

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Declare.hpp"
-#include "Texture.hpp"
+#include "LoadingResult.hpp"
 
 #include <functional>
 
@@ -16,24 +16,22 @@ namespace XREX
 		~TextureLoader();
 
 		/*
-		 *	@return: nullptr if failed.
+		 *	@return: texture data ready to create texture.
 		 */
-		TextureSP LoadTexture1D(std::string const& fileName, bool generateMipmap = true);
+		TextureLoadingResultSP LoadTexture1D(std::string const& fileName, bool generateMipmap = true);
 		/*
-		 *	@return: nullptr if failed.
+		 *	@return: texture data ready to create texture.
 		 */
-		TextureSP LoadTexture2D(std::string const& fileName, bool generateMipmap = true);
+		TextureLoadingResultSP LoadTexture2D(std::string const& fileName, bool generateMipmap = true);
 		/*
-		 *	@return: nullptr if failed.
+		 *	@return: texture data ready to create texture.
 		 */
-		TextureSP LoadTexture3D(std::string const& fileName, bool generateMipmap = true);
+		TextureLoadingResultSP LoadTexture3D(std::string const& fileName, bool generateMipmap = true);
 		/*
-		 *	@return: nullptr if failed.
+		 *	@return: texture data ready to create texture.
 		 */
-		TextureSP LoadTextureCube(std::string const& fileName, bool generateMipmap = true);
+		TextureLoadingResultSP LoadTextureCube(std::string const& fileName, bool generateMipmap = true);
 
-	private:
-		bool LoadBits(std::string const &fileName, std::function<void(uint32 width, uint32 height, uint32 size, Texture::TexelFormat format, uint8 const* data)> const& handler);
 	};
 
 }

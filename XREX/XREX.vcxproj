@@ -247,6 +247,7 @@
     <ClInclude Include="GraphicsBuffer.hpp" />
     <ClInclude Include="InputCenter.hpp" />
     <ClInclude Include="InputHandler.hpp" />
+    <ClInclude Include="LoadingResult.hpp" />
     <ClInclude Include="LocalResourceLoader.hpp" />
     <ClInclude Include="Logger.hpp" />
     <ClInclude Include="Material.hpp" />

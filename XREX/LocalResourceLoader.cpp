@@ -109,24 +109,24 @@ namespace XREX
 		return program;
 	}
 
-	MeshSP LocalResourceLoader::LoadMesh(std::string const& fileName)
+	MeshLoadingResultSP LocalResourceLoader::LoadMesh(std::string const& fileName)
 	{
 		return meshLoader_->LoadMesh(fileName);
 	}
 
-	TextureSP LocalResourceLoader::LoadTexture1D(std::string const& fileName, bool generateMipmap)
+	TextureLoadingResultSP LocalResourceLoader::LoadTexture1D(std::string const& fileName, bool generateMipmap)
 	{
 		return textureLoader_->LoadTexture1D(fileName, generateMipmap);
 	}
-	TextureSP LocalResourceLoader::LoadTexture2D(std::string const& fileName, bool generateMipmap)
+	TextureLoadingResultSP LocalResourceLoader::LoadTexture2D(std::string const& fileName, bool generateMipmap)
 	{
 		return textureLoader_->LoadTexture2D(fileName, generateMipmap);
 	}
-	TextureSP LocalResourceLoader::LoadTexture3D(std::string const& fileName, bool generateMipmap)
+	TextureLoadingResultSP LocalResourceLoader::LoadTexture3D(std::string const& fileName, bool generateMipmap)
 	{
 		return textureLoader_->LoadTexture3D(fileName, generateMipmap);
 	}
-	TextureSP LocalResourceLoader::LoadTextureCube(std::string const& fileName, bool generateMipmap)
+	TextureLoadingResultSP LocalResourceLoader::LoadTextureCube(std::string const& fileName, bool generateMipmap)
 	{
 		return textureLoader_->LoadTextureCube(fileName, generateMipmap);
 	}

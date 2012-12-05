@@ -2,12 +2,12 @@
 
 #include "Declare.hpp"
 #include "Shader.hpp"
+#include "LoadingResult.hpp"
 
 #include <string>
 
 namespace XREX
 {
-
 	class XREX_API LocalResourceLoader
 		: Noncopyable
 	{
@@ -24,11 +24,11 @@ namespace XREX
 		// temp
 		ProgramObjectSP LoadProgram(std::string const& fileName, std::vector<std::string> const& macros);
 
-		MeshSP LoadMesh(std::string const& fileName);
-		TextureSP LoadTexture1D(std::string const& fileName, bool generateMipmap);
-		TextureSP LoadTexture2D(std::string const& fileName, bool generateMipmap);
-		TextureSP LoadTexture3D(std::string const& fileName, bool generateMipmap);
-		TextureSP LoadTextureCube(std::string const& fileName, bool generateMipmap);
+		MeshLoadingResultSP LoadMesh(std::string const& fileName);
+		TextureLoadingResultSP LoadTexture1D(std::string const& fileName, bool generateMipmap);
+		TextureLoadingResultSP LoadTexture2D(std::string const& fileName, bool generateMipmap);
+		TextureLoadingResultSP LoadTexture3D(std::string const& fileName, bool generateMipmap);
+		TextureLoadingResultSP LoadTextureCube(std::string const& fileName, bool generateMipmap);
 
 	private:
 		std::unique_ptr<MeshLoader> meshLoader_;

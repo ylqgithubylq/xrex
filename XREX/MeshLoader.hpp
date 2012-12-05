@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Declare.hpp"
+#include "LoadingResult.hpp"
 
 namespace XREX
 {
@@ -13,9 +14,9 @@ namespace XREX
 		~MeshLoader();
 
 		/*
-		 *	@return nullptr if failed.
+		 *	@return: mesh and texture data ready to create mesh.
 		 */
-		MeshSP LoadMesh(std::string const& fileName);
+		MeshLoadingResultSP LoadMesh(std::string const& fileName);
 	};
 
 }

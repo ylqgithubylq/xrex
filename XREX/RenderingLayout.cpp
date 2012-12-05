@@ -15,30 +15,41 @@ namespace XREX
 {
 	namespace
 	{
-		uint32 GLDrawModeFromDrawMode(RenderingLayout::DrawingMode mode)
+		uint32 GLDrawModeFromDrawMode(IndexBuffer::PrimitiveType primitiveType)
 		{
-			static std::array<uint32, static_cast<uint32>(RenderingLayout::DrawingMode::DrawingModeCount)> const mapping = [] ()
+			switch (primitiveType)
 			{
-				std::array<uint32, static_cast<uint32>(RenderingLayout::DrawingMode::DrawingModeCount)> mapping;
-				mapping[static_cast<uint32>(RenderingLayout::DrawingMode::Points)] = gl::GL_POINTS;
-				mapping[static_cast<uint32>(RenderingLayout::DrawingMode::LineStrip)] = gl::GL_LINE_STRIP;
-				mapping[static_cast<uint32>(RenderingLayout::DrawingMode::LineLoop)] = gl::GL_LINE_LOOP;
-				mapping[static_cast<uint32>(RenderingLayout::DrawingMode::Lines)] = gl::GL_LINES;
-				mapping[static_cast<uint32>(RenderingLayout::DrawingMode::TriangleStrip)] = gl::GL_TRIANGLE_STRIP;
-				mapping[static_cast<uint32>(RenderingLayout::DrawingMode::TriangleFan)] = gl::GL_TRIANGLE_FAN;
-				mapping[static_cast<uint32>(RenderingLayout::DrawingMode::Triangles)] = gl::GL_TRIANGLES;
-				return mapping;
-			} ();
-			return mapping[static_cast<uint32>(mode)];
+			case IndexBuffer::PrimitiveType::Points:
+				return gl::GL_POINTS;
+			case IndexBuffer::PrimitiveType::LineStrip:
+				return gl::GL_LINE_STRIP;
+			case IndexBuffer::PrimitiveType::LineLoop:
+				return gl::GL_LINE_LOOP;
+			case IndexBuffer::PrimitiveType::Lines:
+				return gl::GL_LINES;
+			case IndexBuffer::PrimitiveType::TriangleStrip:
+				return gl::GL_TRIANGLE_STRIP;
+			case IndexBuffer::PrimitiveType::TriangleFan:
+				return gl::GL_TRIANGLE_FAN;
+			case IndexBuffer::PrimitiveType::Triangles:
+				return gl::GL_TRIANGLES;
+			case IndexBuffer::PrimitiveType::DrawingModeCount:
+				assert(false);
+				return gl::GL_TRIANGLES;
+			default:
+				assert(false);
+				return gl::GL_TRIANGLES;
+			}
 		};
 	}
 
 
-	RenderingLayout::RenderingLayout(vector<GraphicsBufferSP> const& buffers, GraphicsBufferSP const& indexBuffer, DrawingMode mode)
-		: buffers_(buffers), indexBuffer_(indexBuffer), mode_(mode),
-		glDrawingMode_(GLDrawModeFromDrawMode(mode))
+
+	RenderingLayout::RenderingLayout(vector<VertexBufferSP> const& buffers, IndexBufferSP const& indexBuffer)
+		: buffers_(buffers), indexBuffer_(indexBuffer)
 	{
-		 glIndexBufferElementType_ = GLTypeFromElementType(GetIndexElementType());
+		glDrawingMode_ = GLDrawModeFromDrawMode(indexBuffer_->GetPrimitiveType());
+		glIndexBufferElementType_ = GLTypeFromElementType(GetIndexElementType());
 
 	#ifdef XREX_DEBUG
 		int32 elementCount = -1;
@@ -106,7 +117,7 @@ namespace XREX
 
 	ElementType RenderingLayout::GetIndexElementType() const
 	{
-		return indexBuffer_->GetDataLayout().GetChannelLayout("").elementType;
+		return indexBuffer_->GetElementType();
 	}
 
 
