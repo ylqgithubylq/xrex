@@ -73,7 +73,27 @@ namespace XREX
 	{
 		assert(false);
 	}
+	void EffectParameter::SetValue(double const& value)
+	{
+		assert(false);
+	}
+	void EffectParameter::SetValue(doubleV2 const& value)
+	{
+		assert(false);
+	}
+	void EffectParameter::SetValue(doubleV3 const& value)
+	{
+		assert(false);
+	}
+	void EffectParameter::SetValue(doubleV4 const& value)
+	{
+		assert(false);
+	}
 	void EffectParameter::SetValue(floatM44 const& value)
+	{
+		assert(false);
+	}
+	void EffectParameter::SetValue(doubleM44 const& value)
 	{
 		assert(false);
 	}
@@ -140,7 +160,7 @@ namespace XREX
 	EffectParameter::ParameterValueAutoConverter::operator float const&() const
 	{
 		assert(false);
-		return 0.f;
+		return 0;
 	}
 	EffectParameter::ParameterValueAutoConverter::operator floatV2 const&() const
 	{
@@ -157,10 +177,35 @@ namespace XREX
 		assert(false);
 		return floatV4();
 	}
+	EffectParameter::ParameterValueAutoConverter::operator double const&() const
+	{
+		assert(false);
+		return 0;
+	}
+	EffectParameter::ParameterValueAutoConverter::operator doubleV2 const&() const
+	{
+		assert(false);
+		return doubleV2();
+	}
+	EffectParameter::ParameterValueAutoConverter::operator doubleV3 const&() const
+	{
+		assert(false);
+		return doubleV3();
+	}
+	EffectParameter::ParameterValueAutoConverter::operator doubleV4 const&() const
+	{
+		assert(false);
+		return doubleV4();
+	}
 	EffectParameter::ParameterValueAutoConverter::operator floatM44 const&() const
 	{
 		assert(false);
 		return floatM44();
+	}
+	EffectParameter::ParameterValueAutoConverter::operator doubleM44 const&() const
+	{
+		assert(false);
+		return doubleM44();
 	}
 	EffectParameter::ParameterValueAutoConverter::operator std::pair<TextureSP, SamplerSP> const&() const
 	{

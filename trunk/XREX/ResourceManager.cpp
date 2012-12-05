@@ -7,8 +7,6 @@
 #include "Texture.hpp"
 #include "Mesh.hpp"
 
-#include "TextureLoader.hpp"
-
 
 #include <filesystem>
 

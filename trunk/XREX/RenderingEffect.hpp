@@ -46,7 +46,12 @@ namespace XREX
 		virtual void SetValue(floatV2 const& value);
 		virtual void SetValue(floatV3 const& value);
 		virtual void SetValue(floatV4 const& value);
+		virtual void SetValue(double const& value);
+		virtual void SetValue(doubleV2 const& value);
+		virtual void SetValue(doubleV3 const& value);
+		virtual void SetValue(doubleV4 const& value);
 		virtual void SetValue(floatM44 const& value);
+		virtual void SetValue(doubleM44 const& value);
 		virtual void SetValue(std::pair<TextureSP, SamplerSP> const& value);
 	// 	
 	// 	virtual void SetValue(std::vector<bool> const& value);
@@ -77,7 +82,12 @@ namespace XREX
 			virtual operator floatV2 const&() const;
 			virtual operator floatV3 const&() const;
 			virtual operator floatV4 const&() const;
+			virtual operator double const&() const;
+			virtual operator doubleV2 const&() const;
+			virtual operator doubleV3 const&() const;
+			virtual operator doubleV4 const&() const;
 			virtual operator floatM44 const&() const;
+			virtual operator doubleM44 const&() const;
 			virtual operator std::pair<TextureSP, SamplerSP> const&() const;
 	// 		virtual operator std::vector<bool> const&() const;
 	// 		virtual operator std::vector<int32> const&() const;
