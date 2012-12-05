@@ -66,7 +66,7 @@ namespace XREX
 
 		// a little brain fucking...
 		// a helper struct to help return value automatically convert to sorts of types.
-		struct ParameterValueAutoConverter
+		struct XREX_API ParameterValueAutoConverter
 			: Noncopyable
 		{
 			virtual operator bool const&() const;
