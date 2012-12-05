@@ -11,9 +11,10 @@
 #include "ResourceManager.hpp"
 #include "Material.hpp"
 #include "Sampler.hpp"
+#include "TextureLoader.hpp"
 
 #include <assimp/Importer.hpp>      // C++ importer interface
-#include <assimp/scene.h>           // Output data structure
+#include <assimp/scene.h>           // Output vertex structure
 #include <assimp/postprocess.h>     // Post processing flags
 
 #include <vector>
@@ -29,20 +30,216 @@ namespace XREX
 {
 	namespace
 	{
+		struct NullModelLoadingResult
+			: LoadingResult<Mesh>
+		{
+			virtual bool Succeeded() const override
+			{
+				return false;
+			}
+			virtual MeshSP Create() override
+			{
+				return nullptr;
+			}
+		};
+
+		struct ModelLoadingResultDetail
+			: LoadingResult<Mesh>
+		{
+
+			struct DataDetail
+				: private XREX::Noncopyable
+			{
+				struct LayoutData
+					: private XREX::Noncopyable
+				{
+					VertexBuffer::DataLayout description;
+					std::vector<uint8> vertex;
+					IndexBuffer::PrimitiveType primitiveType;
+					ElementType indexType;
+					std::vector<uint16> index16;
+					std::vector<uint32> index32;
+
+					LayoutData(VertexBuffer::DataLayout&& theDescription, std::vector<uint8>&& theVertex, IndexBuffer::PrimitiveType thePrimitiveType, std::vector<uint16>&& theIndex)
+						: description(std::move(theDescription)), vertex(std::move(theVertex)), primitiveType(thePrimitiveType), index16(std::move(theIndex)), indexType(ElementType::Uint16)
+					{
+					}
+					LayoutData(VertexBuffer::DataLayout&& theDescription, std::vector<uint8>&& theVertex, IndexBuffer::PrimitiveType thePrimitiveType, std::vector<uint32>&& theIndex)
+						: description(std::move(theDescription)), vertex(std::move(theVertex)), primitiveType(thePrimitiveType), index32(std::move(theIndex)), indexType(ElementType::Uint32)
+					{
+					}
+					LayoutData(LayoutData&& rhs)
+						: description(std::move(rhs.description)), vertex(std::move(rhs.vertex)), index16(std::move(rhs.index16)), index32(std::move(rhs.index32)),
+						primitiveType(rhs.primitiveType), indexType(rhs.indexType)
+					{
+					}
+				};
+
+				struct MaterialData
+					: private XREX::Noncopyable
+				{
+					struct TextureData
+					{
+						std::string name;
+						SamplerState samplerState;
+						TextureLoadingResultSP loadingResult;
+
+						TextureData(std::string const& theName, SamplerState const& theSamplerState, TextureLoadingResultSP&& theLoadingResult)
+							: name(theName), samplerState(theSamplerState), loadingResult(std::move(theLoadingResult))
+						{
+						}
+						TextureData(TextureData&& rhs)
+							: name(std::move(rhs.name)), loadingResult(std::move(rhs.loadingResult)), samplerState(rhs.samplerState)
+						{
+						}
+					};
+
+					MaterialSP material;
+					std::vector<TextureData> textures;
+
+					MaterialData(MaterialSP&& theMaterial, std::vector<TextureData>&& theTextures)
+						: material(std::move(theMaterial)), textures(std::move(theTextures))
+					{
+					}
+					MaterialData(MaterialData&& rhs)
+						: material(std::move(rhs.material)), textures(std::move(rhs.textures))
+					{
+					}
+				};
+
+				std::string name;
+
+				std::vector<LayoutData> layouts;
+				std::vector<MaterialData> materials;
+				std::vector<std::tuple<std::string, uint32, uint32>> subMeshes; // tuple<(name), (material index), (mesh index)>
+
+				std::vector<RenderingLayoutSP> createdLayouts;
+				std::vector<MaterialSP> createdMaterials;
+				MeshSP loadedMesh;
+
+				DataDetail(std::string const& theName)
+					: name(theName)
+				{
+				}
+				~DataDetail()
+				{
+				}
+
+				void AddSubMeshData(LayoutData&& subMeshData)
+				{
+					layouts.push_back(std::move(subMeshData));
+				}
+				void AddMaterialData(MaterialData&& materialData)
+				{
+					materials.push_back(std::move(materialData));
+				}
+				// tuple<(name), (material index), (mesh index)>
+				void AddSubMesh(std::tuple<std::string, uint32, uint32> meshIndex)
+				{
+					subMeshes.push_back(meshIndex);
+				}
+
+				MeshSP DoCreateMesh()
+				{
+					if (loadedMesh == nullptr)
+					{
+						loadedMesh = DoLoad();
+					}
+					return loadedMesh;
+				}
+
+				MeshSP DoLoad()
+				{
+					createdLayouts.reserve(layouts.size());
+					for (auto& layoutToCreate : layouts)
+					{
+						VertexBufferSP vertices = XREXContext::GetInstance().GetRenderingFactory().CreateVertexBuffer(GraphicsBuffer::Usage::Static, layoutToCreate.vertex, std::move(layoutToCreate.description));
+						IndexBufferSP indices = (layoutToCreate.indexType == ElementType::Uint16)
+							? XREXContext::GetInstance().GetRenderingFactory().CreateIndexBuffer(GraphicsBuffer::Usage::Static, layoutToCreate.index16, layoutToCreate.primitiveType)
+							: XREXContext::GetInstance().GetRenderingFactory().CreateIndexBuffer(GraphicsBuffer::Usage::Static, layoutToCreate.index32, layoutToCreate.primitiveType);
+
+						vector<VertexBufferSP> vertexBuffers(1);
+						vertexBuffers[0] = vertices;
+						RenderingLayoutSP layout = XREXContext::GetInstance().GetRenderingFactory().CreateRenderingLayout(vertexBuffers, indices);
+						createdLayouts.push_back(layout);
+					}
+
+					createdMaterials.reserve(materials.size());
+					for (auto& materialToFinish : materials)
+					{
+						materialToFinish.material;
+						for (auto& textureToCreate : materialToFinish.textures)
+						{
+							SamplerSP sampler = XREXContext::GetInstance().GetRenderingFactory().CreateSampler(textureToCreate.samplerState);
+							TextureSP texture = textureToCreate.loadingResult->Create();
+							materialToFinish.material->SetParameter(textureToCreate.name, std::make_pair(texture, sampler));
+						}
+						createdMaterials.push_back(std::move(materialToFinish.material));
+					}
+
+					MeshSP createdMesh = MakeSP<Mesh>(name);
+
+					for (auto& meshIndex : subMeshes)
+					{
+						createdMesh->CreateSubMesh(std::get<0>(meshIndex), createdMaterials[std::get<1>(meshIndex)], createdLayouts[std::get<2>(meshIndex)], nullptr);
+					}
+
+					createdMesh;
+					return createdMesh;
+				}
+
+			};
+
+			ModelLoadingResultDetail(std::string const& name)
+				: data_(MakeUP<DataDetail>(name))
+			{
+			}
+			void AddSubMeshData(DataDetail::LayoutData&& subMeshData)
+			{
+				data_->AddSubMeshData(std::move(subMeshData));
+			}
+			void AddMaterialData(DataDetail::MaterialData&& materialData)
+			{
+				data_->AddMaterialData(std::move(materialData));
+			}
+			// tuple<(name), (material index), (mesh index)>
+			void AddSubMesh(std::tuple<std::string, uint32, uint32> meshIndex)
+			{
+				data_->AddSubMesh(meshIndex);
+			}
+
+			virtual bool Succeeded() const override
+			{
+				return data_ != nullptr;
+			}
+
+			virtual MeshSP Create() override
+			{
+				if (Succeeded())
+				{
+					return data_->DoCreateMesh();
+				}
+				return nullptr;
+			}
+
+			std::unique_ptr<DataDetail> data_;
+		};
+
+
+
 		struct SceneProcessor
 		{
-			MeshSP* outMesh_;
 			aiScene const& scene_;
-			vector<RenderingLayoutSP> layouts_;
-			vector<MaterialSP> materials_;
-			vector<TextureSP> textures_;
 			std::string directoryPath_;
 
-			SceneProcessor(aiScene const& theScene, std::string const& filePath, MeshSP* theOutMesh)
-				: scene_(theScene), outMesh_(theOutMesh)
+			std::shared_ptr<ModelLoadingResultDetail> result_;
+
+			SceneProcessor(aiScene const& theScene, std::string const& filePath)
+				: scene_(theScene)
 			{
 				std::tr2::sys::path scenePath(filePath);
 				directoryPath_ = scenePath.parent_path().string() + "/";
+				result_ = MakeSP<ModelLoadingResultDetail>(scenePath.string());
 				ProcessScene();
 			}
 
@@ -85,7 +282,6 @@ namespace XREX
 
 			void ProcessMaterial()
 			{
-				materials_.resize(scene_.mNumMaterials);
 				aiMaterial** materials = scene_.mMaterials;
 				for (uint32 i = 0; i < scene_.mNumMaterials; ++i)
 				{
@@ -97,7 +293,6 @@ namespace XREX
 						assert(false);
 					}
 					MaterialSP material = MakeSP<Material>(name.C_Str());
-					materials_[i] = material;
 					static_assert(sizeof(aiColor3D) == sizeof(floatV3), "size not match.");
 					aiColor3D aiColor;
 					if (AI_SUCCESS == loaderMaterial->Get(AI_MATKEY_COLOR_DIFFUSE, aiColor))
@@ -143,7 +338,7 @@ namespace XREX
 					{
 						std::make_pair(aiTextureType::aiTextureType_DIFFUSE, GetUniformString(DefinedUniform::DiffuseMap)),
 						std::make_pair(aiTextureType::aiTextureType_SPECULAR, GetUniformString(DefinedUniform::SpecularMap)),
-						//std::make_pair(aiTextureType::aiTextureType_AMBIENT, GetUniformString(DefinedUniform::DiffuseMap)),
+						//std::make_pair(aiTextureType::aiTextureType_AMBIENT, GetUniformString(DefinedUniform::DiffuseMap)), // same as diffuse
 						std::make_pair(aiTextureType::aiTextureType_EMISSIVE, GetUniformString(DefinedUniform::EmissiveMap)),
 						std::make_pair(aiTextureType::aiTextureType_HEIGHT, GetUniformString(DefinedUniform::HeightMap)),
 						std::make_pair(aiTextureType::aiTextureType_NORMALS, GetUniformString(DefinedUniform::NormalMap)),
@@ -163,20 +358,24 @@ namespace XREX
 					aiTextureOp textureOp = _aiTextureOp_Force32Bit;
 					std::array<aiTextureMapMode, 3> textureMapModes;
 					textureMapModes.fill(_aiTextureMapMode_Force32Bit);
+
+					std::vector<ModelLoadingResultDetail::DataDetail::MaterialData::TextureData> texturesToLoad;
+
 					for (auto& textureType : TextureTypes)
 					{
 						textureCount = loaderMaterial->GetTextureCount(textureType.first);
 						assert(textureCount <= 1); // larger are not support
+
 						for (uint32 j = 0; j < textureCount; ++j)
 						{
 							if (AI_SUCCESS == loaderMaterial->GetTexture(textureType.first, j, &path, &textureMapping, &uvIndex, &blend, &textureOp, textureMapModes.data()))
 							{
-								TextureSP texture = XREXContext::GetInstance().GetResourceManager().GetTexture2D(path.C_Str());
-								if (!texture)
+								TextureLoadingResultSP texureLoadingResult = XREXContext::GetInstance().GetResourceManager().LoadTexture2D(directoryPath_ + path.C_Str());
+								if (!texureLoadingResult->Succeeded())
 								{
-									texture = XREXContext::GetInstance().GetResourceManager().GetTexture2D(directoryPath_ + path.C_Str());
+									texureLoadingResult = XREXContext::GetInstance().GetResourceManager().LoadTexture2D(path.C_Str());
 								}
-							
+
 								assert(textureType.second != ""); // TODO log failure rather than assert
 
 								SamplerState samplerState;
@@ -197,8 +396,8 @@ namespace XREX
 									case aiTextureMapMode_Mirror:
 										addressingModes[i] = SamplerState::TextureAddressingMode::MirroredRepeat;
 										break;
-									case _aiTextureMapMode_Force32Bit:
-										addressingModes[i] = SamplerState::TextureAddressingMode::Repeat; // the default one
+									case _aiTextureMapMode_Force32Bit: // default value
+										addressingModes[i] = SamplerState::TextureAddressingMode::Repeat;
 										break;
 									default:
 										assert(false);
@@ -211,17 +410,16 @@ namespace XREX
 								samplerState.magFilterOperation = SamplerState::TextureFilterOperation::Anisotropic;
 								samplerState.minFilterOperation = SamplerState::TextureFilterOperation::Anisotropic;
 
-								SamplerSP sampler = XREXContext::GetInstance().GetRenderingFactory().CreateSampler(samplerState);
-								material->SetParameter(textureType.second, std::make_pair(texture, sampler));
+								texturesToLoad.push_back(ModelLoadingResultDetail::DataDetail::MaterialData::TextureData(textureType.second, samplerState, std::move(texureLoadingResult)));
 							}
 						}
 					}
+					result_->AddMaterialData(ModelLoadingResultDetail::DataDetail::MaterialData(std::move(material), std::move(texturesToLoad)));
 				}
 			}
 
 			void ProcessMesh()
 			{
-				layouts_.resize(scene_.mNumMeshes);
 				aiMesh** meshes = scene_.mMeshes;
 				for (uint32 i = 0; i < scene_.mNumMeshes; ++i)
 				{
@@ -238,7 +436,6 @@ namespace XREX
 					uint32 totalLengthPerElement = 0;
 					uint32 textureCoordinateCount = 0;
 					uint32 vertexColorCount = 0;
-					bool makeSureNoGap = true;
 					if (mesh->HasPositions())
 					{
 						totalLengthPerElement += sizeof(*mesh->mVertices);
@@ -253,14 +450,8 @@ namespace XREX
 						{
 							totalLengthPerElement += sizeof(*mesh->mTextureCoords[0]);
 							++textureCoordinateCount;
-							assert(makeSureNoGap);
-						}
-						else
-						{
-							makeSureNoGap = false;
 						}
 					}
-					makeSureNoGap = true;
 					for (uint32 j = 0; j < AI_MAX_NUMBER_OF_COLOR_SETS; ++j)
 					{
 						if (mesh->HasVertexColors(j))
@@ -268,33 +459,29 @@ namespace XREX
 							totalLengthPerElement += sizeof(*mesh->mColors[0]);
 							++vertexColorCount;
 						}
-						else
-						{
-							makeSureNoGap = false;
-						}
 					}
 
 					int startLocation = 0;
-					GraphicsBuffer::DataLayout dataDescription = GraphicsBuffer::DataLayout(mesh->mNumVertices);
+					VertexBuffer::DataLayout dataDescription = VertexBuffer::DataLayout(mesh->mNumVertices);
 					if (mesh->HasPositions())
 					{
-						dataDescription.AddChannelLayout(GraphicsBuffer::DataLayout::ElementLayout(startLocation, totalLengthPerElement, ElementType::FloatV3, GetAttributeString(DefinedAttribute::Position)));
+						dataDescription.AddChannelLayout(VertexBuffer::DataLayout::ElementLayout(startLocation, totalLengthPerElement, ElementType::FloatV3, GetAttributeString(DefinedAttribute::Position)));
 						startLocation += sizeof(*mesh->mVertices);
 					}
 					if (mesh->HasNormals())
 					{
-						dataDescription.AddChannelLayout(GraphicsBuffer::DataLayout::ElementLayout(startLocation, totalLengthPerElement, ElementType::FloatV3, GetAttributeString(DefinedAttribute::Normal)));
+						dataDescription.AddChannelLayout(VertexBuffer::DataLayout::ElementLayout(startLocation, totalLengthPerElement, ElementType::FloatV3, GetAttributeString(DefinedAttribute::Normal)));
 						startLocation += sizeof(*mesh->mNormals);
 					}
 					for (uint32 j = 0; j < textureCoordinateCount; ++j)
 					{
-						dataDescription.AddChannelLayout(GraphicsBuffer::DataLayout::ElementLayout(startLocation, totalLengthPerElement, ElementType::FloatV3,
+						dataDescription.AddChannelLayout(VertexBuffer::DataLayout::ElementLayout(startLocation, totalLengthPerElement, ElementType::FloatV3,
 							GetAttributeString(static_cast<DefinedAttribute>(static_cast<uint32>(DefinedAttribute::TextureCoordinate0) + j))));
 						startLocation += sizeof(*mesh->mTextureCoords[0]);
 					}
 					for (uint32 j = 0; j < vertexColorCount; ++j)
 					{
-						dataDescription.AddChannelLayout(GraphicsBuffer::DataLayout::ElementLayout(startLocation, totalLengthPerElement, ElementType::FloatV4,
+						dataDescription.AddChannelLayout(VertexBuffer::DataLayout::ElementLayout(startLocation, totalLengthPerElement, ElementType::FloatV4,
 							GetAttributeString(static_cast<DefinedAttribute>(static_cast<uint32>(DefinedAttribute::Color0) + j))));
 						startLocation += sizeof(*mesh->mColors[0]);
 					}
@@ -364,31 +551,32 @@ namespace XREX
 						}
 					}
 
-
-					GraphicsBufferSP vertices = XREXContext::GetInstance().GetRenderingFactory().CreateGraphicsVertexBuffer(GraphicsBuffer::Usage::Static, data, std::move(dataDescription));
-					GraphicsBufferSP indices = !useLargeIndexBuffer
-						? XREXContext::GetInstance().GetRenderingFactory().CreateGraphicsIndexBuffer(GraphicsBuffer::Usage::Static, indexData16)
-						: XREXContext::GetInstance().GetRenderingFactory().CreateGraphicsIndexBuffer(GraphicsBuffer::Usage::Static, indexData32);
-					RenderingLayout::DrawingMode mode;
+					IndexBuffer::PrimitiveType primitiveType;
 					switch (mesh->mPrimitiveTypes)
 					{
 					case aiPrimitiveType::aiPrimitiveType_TRIANGLE:
-						mode = RenderingLayout::DrawingMode::Triangles;
+						primitiveType = IndexBuffer::PrimitiveType::Triangles;
 						break;
 					case aiPrimitiveType::aiPrimitiveType_LINE:
-						mode = RenderingLayout::DrawingMode::Lines;
+						primitiveType = IndexBuffer::PrimitiveType::Lines;
 						break;
 					case aiPrimitiveType::aiPrimitiveType_POINT:
-						mode = RenderingLayout::DrawingMode::Points;
+						primitiveType = IndexBuffer::PrimitiveType::Points;
 						break;
 					default:
 						assert(false);
 						break;
 					}
-					vector<GraphicsBufferSP> vertexBuffers(1);
-					vertexBuffers[0] = vertices;
-					RenderingLayoutSP layout = XREXContext::GetInstance().GetRenderingFactory().CreateRenderingLayout(vertexBuffers, indices, mode);
-					layouts_[i] = layout;
+
+					if (!useLargeIndexBuffer)
+					{
+						result_->AddSubMeshData(ModelLoadingResultDetail::DataDetail::LayoutData(std::move(dataDescription), std::move(data), primitiveType, std::move(indexData16)));
+					}
+					else
+					{
+						result_->AddSubMeshData(ModelLoadingResultDetail::DataDetail::LayoutData(std::move(dataDescription), std::move(data), primitiveType, std::move(indexData32)));
+					}
+
 				}
 			}
 
@@ -399,7 +587,7 @@ namespace XREX
 				for (uint32 i = 0; i < node.mNumMeshes; ++i)
 				{
 					aiMesh* mesh = scene_.mMeshes[meshIndices[i]];
-					(*outMesh_)->CreateSubMesh(mesh->mName.C_Str(), materials_[mesh->mMaterialIndex], layouts_[meshIndices[i]], nullptr);
+					result_->AddSubMesh(std::make_tuple(std::string(mesh->mName.C_Str()), mesh->mMaterialIndex, meshIndices[i]));
 				}
 
 				aiNode** children = node.mChildren;
@@ -422,7 +610,7 @@ namespace XREX
 	{
 	}
 
-	MeshSP MeshLoader::LoadMesh(std::string const& fileName)
+	MeshLoadingResultSP MeshLoader::LoadMesh(std::string const& fileName)
 	{
 		Assimp::Importer importer;
 
@@ -437,13 +625,10 @@ namespace XREX
 		{
 			// TODO log the error?
 			std::cout << importer.GetErrorString() << std::endl;
-			return nullptr;
+			return MakeSP<NullModelLoadingResult>();
 		}
-		MeshSP mesh = MakeSP<Mesh>(fileName);
-		SceneProcessor(*scene, fileName, &mesh);
-
 		// Everything will be cleaned up by the importer destructor
-		return mesh;
+		return SceneProcessor(*scene, fileName).result_;
 	}
 
 }

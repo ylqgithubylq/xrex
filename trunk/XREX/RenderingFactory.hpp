@@ -77,33 +77,28 @@ namespace XREX
 			return MakeSP<ProgramObject>();
 		}
 		template <typename T>
-		GraphicsBufferSP CreateGraphicsVertexBuffer(GraphicsBuffer::Usage usage, std::vector<T> const& data)
+		VertexBufferSP CreateVertexBuffer(GraphicsBuffer::Usage usage, std::vector<T> const& data, std::string const& channel)
 		{
-			return MakeSP<GraphicsBuffer>(GraphicsBuffer::BufferType::Vertex, usage, data);
+			return MakeSP<VertexBuffer>(usage, data, channel);
 		}
 		template <typename T>
-		GraphicsBufferSP CreateGraphicsVertexBuffer(GraphicsBuffer::Usage usage, std::vector<T> const& data, std::string const& channel)
+		VertexBufferSP CreateVertexBuffer(GraphicsBuffer::Usage usage, std::vector<T> const& data, std::string const& channel, bool normalized)
 		{
-			return MakeSP<GraphicsBuffer>(GraphicsBuffer::BufferType::Vertex, usage, data, channel);
+			return MakeSP<VertexBuffer>(usage, data, channel, normalized);
 		}
 		template <typename T>
-		GraphicsBufferSP CreateGraphicsVertexBuffer(GraphicsBuffer::Usage usage, std::vector<T> const& data, std::string const& channel, bool normalized)
+		VertexBufferSP CreateVertexBuffer(GraphicsBuffer::Usage usage, std::vector<T> const& data, VertexBuffer::DataLayout&& description)
 		{
-			return MakeSP<GraphicsBuffer>(GraphicsBuffer::BufferType::Vertex, usage, data, channel, normalized);
+			return MakeSP<VertexBuffer>(usage, data, std::move(description));
 		}
 		template <typename T>
-		GraphicsBufferSP CreateGraphicsVertexBuffer(GraphicsBuffer::Usage usage, std::vector<T> const& data, GraphicsBuffer::DataLayout&& description)
+		IndexBufferSP CreateIndexBuffer(GraphicsBuffer::Usage usage, std::vector<T> const& data, IndexBuffer::PrimitiveType primitiveType)
 		{
-			return MakeSP<GraphicsBuffer>(GraphicsBuffer::BufferType::Vertex, usage, data, std::move(description));
+			return MakeSP<IndexBuffer>(usage, data, primitiveType);
 		}
-		template <typename T>
-		GraphicsBufferSP CreateGraphicsIndexBuffer(GraphicsBuffer::Usage usage, std::vector<T> const& data)
+		RenderingLayoutSP CreateRenderingLayout(std::vector<VertexBufferSP> const& buffers, IndexBufferSP const& indexBuffer)
 		{
-			return MakeSP<GraphicsBuffer>(GraphicsBuffer::BufferType::Index, usage, data);
-		}
-		RenderingLayoutSP CreateRenderingLayout(std::vector<GraphicsBufferSP> const& buffers, GraphicsBufferSP const& indexBuffer, RenderingLayout::DrawingMode mode)
-		{
-			return MakeSP<RenderingLayout>(buffers, indexBuffer, mode);
+			return MakeSP<RenderingLayout>(buffers, indexBuffer);
 		}
 
 		SamplerSP CreateSampler(SamplerState const& samplerState)

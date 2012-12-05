@@ -178,9 +178,9 @@ struct TempScene
 		BlendStateObjectSP bso = XREXContext::GetInstance().GetRenderingFactory().CreateBlendStateObject(blendState);
 		
 
-		GraphicsBufferSP vertices = XREXContext::GetInstance().GetRenderingFactory().CreateGraphicsVertexBuffer(GraphicsBuffer::Usage::Static, vertexData, "position");
-		GraphicsBufferSP indices = XREXContext::GetInstance().GetRenderingFactory().CreateGraphicsIndexBuffer(GraphicsBuffer::Usage::Static, indexData);
-		RenderingLayoutSP layout = MakeSP<RenderingLayout>(vector<GraphicsBufferSP>(1, vertices), indices, RenderingLayout::DrawingMode::Triangles);
+		VertexBufferSP vertices = XREXContext::GetInstance().GetRenderingFactory().CreateVertexBuffer(GraphicsBuffer::Usage::Static, vertexData, "position");
+		IndexBufferSP indices = XREXContext::GetInstance().GetRenderingFactory().CreateIndexBuffer(GraphicsBuffer::Usage::Static, indexData, IndexBuffer::PrimitiveType::Triangles);
+		RenderingLayoutSP layout = MakeSP<RenderingLayout>(vector<VertexBufferSP>(1, vertices), indices);
 
 		MeshSP cubeMesh = MakeSP<Mesh>("cube mesh");
 
@@ -300,7 +300,7 @@ struct TempScene
 		// 		wMatrix->SetValue(translate * rotation);
 		XREXContext::GetInstance().GetResourceManager().AddResourceLocation("Data/");
 		MeshSP model;
-		model = XREXContext::GetInstance().GetResourceManager().GetModel("crytek-sponza/sponza.obj");
+		model = XREXContext::GetInstance().GetResourceManager().LoadModel("crytek-sponza/sponza.obj")->Create();
 		//model = XREXContext::GetInstance().GetResourceManager().GetModel("sibenik/sibenik.obj");
 		//model = XREXContext::GetInstance().GetResourceManager().GetModel("rungholt/rungholt.obj");
 		if (model)

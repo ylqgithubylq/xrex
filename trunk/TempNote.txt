@@ -2,8 +2,6 @@ using regular expressions(Ctrl+Shift+F):
 ^:b*[^:b*#/{}]+.*$
 
 TODO:
-sampler: mesh loader, factory, shader, sampler itself
-state objects: operator <()
 
 create new texture constructor without 2 dimension data parameter, remove constructor parameter generateMipmap of the one with 2 dimension data parameter
 effect loading with macro
@@ -15,5 +13,5 @@ change EffectParameter to use something like boost::any, change to use type Effe
 how to make a dll that can work correctly?
 (now have a lot of warning about stl class and may have some other warning, and exe using this dll cannot work)
 thread for logic/rendering call generation/rendering api calls
-using input device caputre to do input event generation, refactor Window to subclass device interface.
+using input device capture to do input event generation, refactor Window to subclass device interface.
 separate indexBuffer and vertexBuffer
