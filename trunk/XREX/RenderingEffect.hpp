@@ -148,7 +148,6 @@ namespace XREX
 		}
 
 	private:
-//		friend class ConcreteParameterValueAutoConverter;
 		struct ConcreteParameterValueAutoConverter
 			: public ParameterValueAutoConverter
 		{
@@ -161,10 +160,7 @@ namespace XREX
 			{
 				return parameter_->value_;
 			}
-// 			ConcreteParameterValueAutoConverter(EffectParameter* parameter)
-// 				: parameter_(parameter)
-// 			{
-// 			}
+
 		private:
 			ConcreteEffectParameter* parameter_;
 		};
@@ -181,49 +177,6 @@ namespace XREX
 		ConcreteParameterValueAutoConverter converter_;
 	};
 
-
-// 	template <>
-// 	class ConcreteEffectParameter<std::pair<TextureSP, SamplerSP>>
-// 		: public EffectParameter
-// 	{
-// 	public:
-// 		ConcreteEffectParameter(std::string const& name)
-// 			: EffectParameter(name)
-// 		{
-// 
-// 		}
-// 
-// 		virtual void GetValueFrom(EffectParameter const& rhs) override
-// 		{
-// 			value_ = CheckedCast<ConcreteEffectParameter const*>(&rhs)->value_;
-// 		}
-// 
-// 		virtual ParameterValueAutoConverter const& DoGetValue() const override
-// 		{
-// 			throw std::exception("The method or operation is not implemented.");
-// 		}
-// 
-// 	private:	
-// 		struct ConcreteParameterValueAutoConverter
-// 			: public ParameterValueAutoConverter
-// 		{
-// 		public:
-// 			explicit ConcreteParameterValueAutoConverter(ConcreteEffectParameter* parameter)
-// 				: parameter_(parameter)
-// 			{
-// 			}
-// 			virtual operator std::pair<TextureSP, SamplerSP> const&() const override
-// 			{
-// 				return parameter_->value_;
-// 			}
-// 
-// 		private:
-// 			ConcreteEffectParameter* parameter_;
-// 		};
-// 
-// 	private:
-// 		std::pair<TextureSP, SamplerSP> value_;
-// 	};
 
 	struct XREX_API EffectPipelineParameters
 		: Noncopyable

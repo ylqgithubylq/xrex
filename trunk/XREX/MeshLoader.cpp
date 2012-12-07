@@ -79,6 +79,7 @@ namespace XREX
 					: private XREX::Noncopyable
 				{
 					struct TextureData
+						: private XREX::Noncopyable
 					{
 						std::string name;
 						SamplerState samplerState;
@@ -167,7 +168,6 @@ namespace XREX
 					createdMaterials.reserve(materials.size());
 					for (auto& materialToFinish : materials)
 					{
-						materialToFinish.material;
 						for (auto& textureToCreate : materialToFinish.textures)
 						{
 							SamplerSP sampler = XREXContext::GetInstance().GetRenderingFactory().CreateSampler(textureToCreate.samplerState);
@@ -184,7 +184,6 @@ namespace XREX
 						createdMesh->CreateSubMesh(std::get<0>(meshIndex), createdMaterials[std::get<1>(meshIndex)], createdLayouts[std::get<2>(meshIndex)], nullptr);
 					}
 
-					createdMesh;
 					return createdMesh;
 				}
 
@@ -407,8 +406,8 @@ namespace XREX
 								samplerState.addressingModeS = addressingModes[0];
 								samplerState.addressingModeT = addressingModes[1];
 								samplerState.addressingModeR = addressingModes[2];
-								samplerState.magFilterOperation = SamplerState::TextureFilterOperation::Anisotropic;
-								samplerState.minFilterOperation = SamplerState::TextureFilterOperation::Anisotropic;
+								samplerState.magFilterOperation = SamplerState::TextureFilterOperation::Linear;
+								samplerState.minFilterOperation = SamplerState::TextureFilterOperation::NearestMipmapLinear;
 
 								texturesToLoad.push_back(ModelLoadingResultDetail::DataDetail::MaterialData::TextureData(textureType.second, samplerState, std::move(texureLoadingResult)));
 							}
