@@ -47,6 +47,9 @@ namespace XREX
 		// move gl context creation here?
 		//gl::Enable(gl::GL_DEBUG_OUTPUT); // ogl 4.3
 
+		gl::PixelStorei(gl::GL_UNPACK_ALIGNMENT, 1);
+
+
 		gl::Enable(gl::GL_SCISSOR_TEST);
 
 		gl::Enable(gl::GL_POLYGON_OFFSET_FILL);
