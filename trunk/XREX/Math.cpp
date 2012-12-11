@@ -381,7 +381,7 @@ namespace XREX
 		// 	cos(A/2)=+-((1+cosA)/2)^(1/2), here only positive
 		T sha = std::sqrt(T((1 - cos) * 0.5));
 		T cha = std::sqrt(T((1 + cos) * 0.5));
-		return QuaternionT<T>(sha * axis, cha);
+		return QuaternionT<T>(sha * axis, cha).Normalize();
 	}
 	template XREX_API floatQ RotationQuaternionFromTo(floatV3 const& from, floatV3 const& to);
 
