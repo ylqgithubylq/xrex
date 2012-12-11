@@ -301,7 +301,7 @@ struct TempScene
 		XREXContext::GetInstance().GetResourceManager().AddResourceLocation("Data/");
 		MeshSP model;
 		model = XREXContext::GetInstance().GetResourceManager().LoadModel("crytek-sponza/sponza.obj")->Create();
-		//model = XREXContext::GetInstance().GetResourceManager().LoadModel("dd.obj")->Create();
+		//model = XREXContext::GetInstance().GetResourceManager().LoadModel("vcc/vcc.dae")->Create();
 		//model = XREXContext::GetInstance().GetResourceManager().GetModel("sibenik/sibenik.obj");
 		//model = XREXContext::GetInstance().GetResourceManager().GetModel("rungholt/rungholt.obj");
 		if (model)

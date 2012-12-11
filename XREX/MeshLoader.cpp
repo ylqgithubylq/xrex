@@ -529,7 +529,7 @@ namespace XREX
 						for (uint32 j = 0; j < mesh->mNumFaces; ++j)
 						{
 							aiFace& face = mesh->mFaces[j];
-							assert(face.mNumIndices == 3);
+							//assert(face.mNumIndices == 3);
 							for (int k = 0; k < indicesPerFace; ++k)
 							{
 								indexData16[j * indicesPerFace + k] = static_cast<uint16>(face.mIndices[k]);
@@ -542,7 +542,7 @@ namespace XREX
 						for (uint32 j = 0; j < mesh->mNumFaces; ++j)
 						{
 							aiFace& face = mesh->mFaces[j];
-							assert(face.mNumIndices == 3);
+							//assert(face.mNumIndices == 3);
 							for (int k = 0; k < indicesPerFace; ++k)
 							{
 								indexData32[j * indicesPerFace + k] = face.mIndices[k];

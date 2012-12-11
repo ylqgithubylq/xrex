@@ -14,7 +14,9 @@ namespace XREX
 	public:
 		static SceneObjectSP const NullSceneObject;
 	public:
-		SceneObject();
+		/*
+		 *	@name: Scene using this name to identify different SceneObject, so this should be unique.
+		 */
 		explicit SceneObject(std::string const& name);
 		~SceneObject();
 
