@@ -18,6 +18,8 @@
 
 #include <CoreGL.hpp>
 
+#include <map>
+
 using std::vector;
 
 namespace XREX
@@ -163,51 +165,62 @@ namespace XREX
 			}
 		}
 		// TODO do some sorting works
-
+		std::map<int32, std::vector<Renderable::RenderablePack*>> renderingGroups;
 		for (auto& renderablePack : allRenderableNeedToRender)
 		{
-			Renderable& ownerRenderable = renderablePack.renderable;
-			RenderingTechniqueSP const& technique = renderablePack.technique;
-			RenderingLayoutSP const& layout = renderablePack.layout;
+			renderingGroups[renderablePack.renderingGroup].push_back(&renderablePack);
+		}
 
-			floatM44 const& modelMatrix = ownerRenderable.GetOwnerSceneObject()->GetComponent<Transformation>()->GetWorldMatrix();
-
-			RenderingEffect const& effect = technique->GetEffect();
-
-			// are these too hard coded?
-			EffectParameterSP const& model = effect.GetParameterByName(GetUniformString(DefinedUniform::ModelMatrix));
-			if (model)
+		for (auto& group : renderingGroups)
+		{
+			for (auto& renderablePack : group.second)
 			{
-				model->SetValue(modelMatrix);
-			}
-			EffectParameterSP const& view = effect.GetParameterByName(GetUniformString(DefinedUniform::ViewMatrix));
-			if (view)
-			{
-				view->SetValue(viewMatrix);
-			}
-			EffectParameterSP const& projection = effect.GetParameterByName(GetUniformString(DefinedUniform::ProjectionMatrix));
-			if (projection)
-			{
-				projection->SetValue(projectionMatrix);
-			}
+				Renderable& ownerRenderable = *renderablePack->renderable;
+				RenderingTechniqueSP const& technique = renderablePack->technique;
+				RenderingLayoutSP const& layout = renderablePack->layout;
+				MaterialSP const& material = renderablePack->material;
 
-			if (renderablePack.material)
-			{
-				renderablePack.material->BindToEffect(renderablePack.technique->GetEffect().shared_from_this());
-				renderablePack.material->SetAllEffectParameterValues();
-			}
+				floatM44 const& modelMatrix = ownerRenderable.GetOwnerSceneObject()->GetComponent<Transformation>()->GetWorldMatrix();
 
-			uint32 passCount = technique->GetPassCount();
+				RenderingEffect const& effect = technique->GetEffect();
 
-			for (uint32 passIndex = 0; passIndex < passCount; ++passIndex)
-			{
-				RenderingPassSP pass = technique->GetPass(passIndex);
-				pass->Use();
-				layout->BindToProgram(pass->GetProgram());
-				layout->Draw();
-				layout->Unbind();
+				// are these too hard coded?
+				EffectParameterSP const& model = effect.GetParameterByName(GetUniformString(DefinedUniform::ModelMatrix));
+				if (model)
+				{
+					model->SetValue(modelMatrix);
+				}
+				EffectParameterSP const& view = effect.GetParameterByName(GetUniformString(DefinedUniform::ViewMatrix));
+				if (view)
+				{
+					view->SetValue(viewMatrix);
+				}
+				EffectParameterSP const& projection = effect.GetParameterByName(GetUniformString(DefinedUniform::ProjectionMatrix));
+				if (projection)
+				{
+					projection->SetValue(projectionMatrix);
+				}
+
+				if (material)
+				{
+					material->BindToEffect(renderablePack->technique->GetEffect().shared_from_this());
+					material->SetAllEffectParameterValues();
+				}
+
+				uint32 passCount = technique->GetPassCount();
+
+				for (uint32 passIndex = 0; passIndex < passCount; ++passIndex)
+				{
+					RenderingPassSP pass = technique->GetPass(passIndex);
+					pass->Use();
+					layout->BindToProgram(pass->GetProgram());
+					layout->Draw();
+					layout->Unbind();
+				}
 			}
 		}
+
+
 	}
 
 }

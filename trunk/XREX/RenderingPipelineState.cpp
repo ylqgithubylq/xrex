@@ -7,11 +7,6 @@
 
 namespace XREX
 {
-	namespace
-	{
-
-	}
-
 	RasterizerState::RasterizerState()
 		: polygonMode(PolygonMode::Fill), cullMode(CullMode::Back), frontFaceCCW(true), multisampleEnable(false)
 	{
