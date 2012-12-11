@@ -34,9 +34,9 @@ namespace XREX
 		return *found;
 	}
 
-	SubMeshSP const& Mesh::CreateSubMesh(string const& name, MaterialSP const& material, RenderingLayoutSP const& layout, RenderingEffectSP const& effect)
+	SubMeshSP const& Mesh::CreateSubMesh(string const& name, MaterialSP const& material, RenderingLayoutSP const& layout, RenderingEffectSP const& effect, int32 renderingGroup)
 	{
-		subMeshes_.emplace_back(new SubMesh(*this, name, material, layout, effect));
+		subMeshes_.emplace_back(new SubMesh(*this, name, material, layout, effect, renderingGroup));
 		return subMeshes_.back();
 	}
 
@@ -66,8 +66,8 @@ namespace XREX
 
 
 
-	SubMesh::SubMesh(Mesh& mesh, string const& name, MaterialSP const& material, RenderingLayoutSP const& layout, RenderingEffectSP const& effect)
-		: mesh_(mesh), name_(name), material_(material), layout_(layout)
+	SubMesh::SubMesh(Mesh& mesh, string const& name, MaterialSP const& material, RenderingLayoutSP const& layout, RenderingEffectSP const& effect, int32 renderingGroup)
+		: mesh_(mesh), name_(name), material_(material), layout_(layout), renderingGroup_(renderingGroup)
 	{
 		assert(layout_ != nullptr);
 		SetEffect(effect);
@@ -82,7 +82,7 @@ namespace XREX
 	{
 		// TODO camera dependence technique
 		assert(effect_ != nullptr);
-		return Renderable::RenderablePack(this->mesh_, material_, layout_, effect_->GetAvailableTechnique(0));
+		return Renderable::RenderablePack(this->mesh_, material_, layout_, effect_->GetAvailableTechnique(0), renderingGroup_);
 	}
 
 	void SubMesh::SetEffect(RenderingEffectSP const& effect)
