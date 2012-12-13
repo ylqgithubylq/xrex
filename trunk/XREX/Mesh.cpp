@@ -94,4 +94,13 @@ namespace XREX
 		}
 	}
 
+	void SubMesh::SetMaterial(MaterialSP const& material)
+	{
+		material_ = material;
+		if (effect_)
+		{
+			material_->BindToEffect(effect_);
+		}
+	}
+
 }

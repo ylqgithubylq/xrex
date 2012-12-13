@@ -19,6 +19,9 @@ namespace XREX
 		Material(std::string const& name);
 		~Material();
 
+		/*
+		 *	Will updated until next call to UpdateBindingValues or bind to other RenderingEffect.
+		 */
 		template <typename T>
 		void SetParameter(std::string const& parameterName, T const& value)
 		{
@@ -70,6 +73,8 @@ namespace XREX
 
 
 		void BindToEffect(RenderingEffectSP const& effect);
+
+		void UpdateBindingValues();
 
 		void SetAllEffectParameterValues();
 

@@ -65,10 +65,11 @@ namespace XREX
 
 		void SetEffect(RenderingEffectSP const& effect);
 
-		MaterialSP& GetMaterial()
+		MaterialSP const& GetMaterial() const
 		{
 			return material_;
 		}
+		void SetMaterial(MaterialSP const& material);
 
 		Renderable::RenderablePack GetRenderablePack(SceneObjectSP const& camera) const;
 

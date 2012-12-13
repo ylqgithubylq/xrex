@@ -43,7 +43,7 @@ namespace XREX
 		 *	Can only be called in relative mode.
 		 *	@return: tuple<(left), (bottom), (width), (height)>
 		 */
-		std::tuple<float, float, float, float> GetRalative() const
+		std::tuple<float, float, float, float> GetRelative() const
 		{
 			assert(!absolute_);
 			return std::make_tuple(data_.relative.left, data_.relative.bottom, data_.relative.width, data_.relative.height);
