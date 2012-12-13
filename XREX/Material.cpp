@@ -154,6 +154,12 @@ namespace XREX
 			return;
 		}
 		boundEffect_ = effect;
+		UpdateBindingValues();
+	}
+
+
+	void Material::UpdateBindingValues()
+	{
 		RenderingEffectSP boundEffect = boundEffect_.lock();
 		parameterMappingCache_.clear();
 		if (boundEffect != nullptr)
@@ -169,6 +175,7 @@ namespace XREX
 		}
 	}
 
+
 	void Material::SetAllEffectParameterValues()
 	{
 		for (auto& parameterPair : parameterMappingCache_)
@@ -178,6 +185,7 @@ namespace XREX
 		}
 
 		RenderingEffectSP boundEffect = boundEffect_.lock();
+		assert(boundEffect);
 		for (uint32 i = 0; i < boundEffect->GetTechniqueCount() && i < pipelineParameters_.size(); ++i)
 		{
 			std::vector<std::unique_ptr<EffectPipelineParameterSettings>>& techniqueParameters = pipelineParameters_[i];
