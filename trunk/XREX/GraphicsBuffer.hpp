@@ -27,8 +27,56 @@ namespace XREX
 			UsageCount
 		};
 
+		enum class AccessType
+		{
+			ReadOnly,
+			WriteOnly,
+			ReadWrite,
+		};
+
 	public:
-		GraphicsBuffer(BufferType type, Usage usage, void const* data, uint32 bytes);
+		/*
+		 *	Wrapper object to Unmap the buffer when destructed.
+		 */
+		class XREX_API BufferMapper
+			: Noncopyable
+		{
+			friend class GraphicsBuffer;
+		private:
+			BufferMapper(GraphicsBuffer& buffer, AccessType type)
+				: buffer_(buffer)
+			{
+				data_ = buffer_.Map(type);
+			}
+		public:
+			BufferMapper(BufferMapper&& rhs)
+				: buffer_(rhs.buffer_), data_(rhs.data_)
+			{
+				rhs.data_ = nullptr; // prevent Unmap of rhs in destructor
+			}
+
+			~BufferMapper()
+			{
+				if (data_)
+				{
+					data_ = nullptr;
+					buffer_.Unmap();
+				}
+			}
+
+			template <typename T>
+			T* Pointer()
+			{
+				return static_cast<T*>(data_);
+			}
+
+		private:
+			GraphicsBuffer& buffer_;
+			void* data_;
+		};
+
+	public:
+		GraphicsBuffer(BufferType type, Usage usage, void const* data, uint32 sizeInByte);
 
 		virtual ~GraphicsBuffer();
 
@@ -41,17 +89,33 @@ namespace XREX
 			return usage_;
 		}
 
+		uint32 GetSize() const
+		{
+			return sizeInByte_;
+		}
+		void Resize(uint32 sizeInByte);
+
 		void Bind();
 		virtual void Unbind();
 
+		BufferMapper CreateMap(AccessType accessType)
+		{
+			return BufferMapper(*this, accessType);
+		}
+
 	private:
-		void DoConsctruct(void const* data, uint32 dataSize);
+		void DoConsctruct(void const* data, uint32 sizeInByte);
+
+		void* Map(AccessType accessType);
+		void Unmap();
 
 	private:
 		BufferType type_;
 		Usage usage_;
 		uint32 glBindingTarget_;
 		uint32 glBufferID_;
+
+		uint32 sizeInByte_;
 	};
 
 

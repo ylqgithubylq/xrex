@@ -140,7 +140,6 @@ namespace XREX
 		camera->GetViewport()->Bind(settings.width, settings.height);
 
 		Color const& backgroundColor = camera->GetBackgroundColor();
-		// TODO viewport and scissor rectangle
 		gl::ClearColor(backgroundColor.R(), backgroundColor.G(), backgroundColor.B(), backgroundColor.A());
 		gl::Clear(gl::GL_COLOR_BUFFER_BIT | gl::GL_DEPTH_BUFFER_BIT | gl::GL_STENCIL_BUFFER_BIT);
 

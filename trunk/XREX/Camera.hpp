@@ -21,6 +21,15 @@ namespace XREX
 		Camera(float fieldOfView, float aspectRatio, float near, float far);
 		virtual ~Camera() override;
 
+		float GetFieldOfView() const
+		{
+			return fieldOfView_;
+		}
+		float GetAspectRatio() const
+		{
+			return aspectRatio_;
+		}
+
 		bool IsActive() const
 		{
 			return active_;
