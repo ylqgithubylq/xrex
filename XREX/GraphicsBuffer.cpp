@@ -39,22 +39,38 @@ namespace XREX
 				break;
 			}
 		}
+
+		uint32 GlAccessTypeFromAccessType(GraphicsBuffer::AccessType type)
+		{
+			switch (type)
+			{
+			case GraphicsBuffer::AccessType::ReadOnly:
+				return gl::GL_READ_ONLY;
+			case GraphicsBuffer::AccessType::WriteOnly:
+				return gl::GL_WRITE_ONLY;
+			case GraphicsBuffer::AccessType::ReadWrite:
+				return gl::GL_READ_WRITE;
+			default:
+				assert(false);
+				return 0;
+			}
+		}
 	}
 
 
-	GraphicsBuffer::GraphicsBuffer(BufferType type, Usage usage, void const* data, uint32 bytes )
-		: type_(type), usage_(usage)
+	GraphicsBuffer::GraphicsBuffer(BufferType type, Usage usage, void const* data, uint32 sizeInByte)
+		: type_(type), usage_(usage), sizeInByte_(sizeInByte)
 	{
-		DoConsctruct(data, bytes);
+		DoConsctruct(data, sizeInByte);
 	}
 
-	void GraphicsBuffer::DoConsctruct(void const* data, uint32 dataSize)
+	void GraphicsBuffer::DoConsctruct(void const* data, uint32 sizeInByte)
 	{
 		gl::GenBuffers(1, &glBufferID_);
 		assert(glBufferID_ != 0); // 0 is reserved by GL
 		glBindingTarget_ = type_ == BufferType::Vertex ? gl::GL_ARRAY_BUFFER : gl::GL_ELEMENT_ARRAY_BUFFER;
 		gl::BindBuffer(glBindingTarget_, glBufferID_);
-		gl::BufferData(glBindingTarget_, dataSize, data, GLUsageFromUsage(usage_));
+		gl::BufferData(glBindingTarget_, sizeInByte, data, GLUsageFromUsage(usage_));
 	}
 
 	GraphicsBuffer::~GraphicsBuffer()
@@ -66,6 +82,16 @@ namespace XREX
 		}
 	}
 
+
+	void GraphicsBuffer::Resize(uint32 sizeInByte)
+	{
+		assert(sizeInByte != 0);
+		sizeInByte_ = sizeInByte;
+		gl::BindBuffer(glBindingTarget_, glBufferID_);
+		gl::BufferData(glBindingTarget_, sizeInByte_, nullptr, GLUsageFromUsage(usage_));
+	}
+
+
 	void GraphicsBuffer::Bind()
 	{
 		gl::BindBuffer(glBindingTarget_, glBufferID_);
@@ -74,6 +100,22 @@ namespace XREX
 	void GraphicsBuffer::Unbind()
 	{
 		gl::BindBuffer(glBindingTarget_, 0);
+	}
+
+	void* GraphicsBuffer::Map(AccessType accessType)
+	{
+		uint32 glAccessType = GlAccessTypeFromAccessType(accessType);
+		gl::BindBuffer(glBindingTarget_, glBufferID_);
+		void* p = gl::MapBuffer(glBindingTarget_, glAccessType);
+		assert(p != nullptr);
+		return p;
+	}
+
+	void GraphicsBuffer::Unmap()
+	{
+		gl::BindBuffer(glBindingTarget_, glBufferID_);
+		bool result = gl::UnmapBuffer(glBindingTarget_) == gl::GL_TRUE;
+		assert(result);
 	}
 
 
