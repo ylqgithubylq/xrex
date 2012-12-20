@@ -19,9 +19,6 @@ namespace XREX
 		Material(std::string const& name);
 		~Material();
 
-		/*
-		 *	Will updated until next call to UpdateBindingValues or bind to other RenderingEffect.
-		 */
 		template <typename T>
 		void SetParameter(std::string const& parameterName, T const& value)
 		{
@@ -31,6 +28,7 @@ namespace XREX
 				EffectParameterSP parameter = MakeSP<ConcreteEffectParameter<T>>(parameterName);
 				parameter->SetValue(value);
 				parameters_[parameterName] = std::move(parameter);
+				cacheDirty_ = true;
 			}
 			else
 			{
@@ -74,11 +72,11 @@ namespace XREX
 
 		void BindToEffect(RenderingEffectSP const& effect);
 
-		void UpdateBindingValues();
-
 		void SetAllEffectParameterValues();
 
 	private:
+		void UpdateBindingMapping();
+
 		bool HavePipelineParameter(uint32 techniqueIndex, uint32 passIndex) const;
 		void ShrinkPipelineParameter(uint32 techniqueIndex, uint32 passIndex);
 		void ResizePipelineParameterOnRequest(uint32 techniqueIndex, uint32 passIndex);
@@ -101,7 +99,8 @@ namespace XREX
 
 		std::weak_ptr<RenderingEffect> boundEffect_;
 		std::vector<std::pair<EffectParameterSP, std::weak_ptr<EffectParameter>>> parameterMappingCache_;
-
+		
+		bool cacheDirty_;
 	};
 
 }

@@ -12,7 +12,7 @@ namespace XREX
 
 
 	Material::Material(std::string const& name)
-		: name_(name)
+		: name_(name), cacheDirty_(false)
 	{
 	}
 
@@ -154,30 +154,16 @@ namespace XREX
 			return;
 		}
 		boundEffect_ = effect;
-		UpdateBindingValues();
-	}
-
-
-	void Material::UpdateBindingValues()
-	{
-		RenderingEffectSP boundEffect = boundEffect_.lock();
-		parameterMappingCache_.clear();
-		if (boundEffect != nullptr)
-		{
-			for (auto& effectParameter : boundEffect->GetAllParameters())
-			{
-				EffectParameterSP materialParameter = GetParameter(effectParameter->GetName());
-				if (materialParameter)
-				{
-					parameterMappingCache_.push_back(std::make_pair(materialParameter, std::weak_ptr<EffectParameter>(effectParameter)));
-				}
-			}
-		}
 	}
 
 
 	void Material::SetAllEffectParameterValues()
 	{
+		if (cacheDirty_)
+		{
+			UpdateBindingMapping();
+		}
+
 		for (auto& parameterPair : parameterMappingCache_)
 		{
 			assert(!parameterPair.second.expired());
@@ -215,6 +201,26 @@ namespace XREX
 					}
 				}
 
+			}
+		}
+	}
+
+
+	void Material::UpdateBindingMapping()
+	{
+		cacheDirty_ = false;
+
+		RenderingEffectSP boundEffect = boundEffect_.lock();
+		parameterMappingCache_.clear();
+		if (boundEffect != nullptr)
+		{
+			for (auto& effectParameter : boundEffect->GetAllParameters())
+			{
+				EffectParameterSP materialParameter = GetParameter(effectParameter->GetName());
+				if (materialParameter)
+				{
+					parameterMappingCache_.push_back(std::make_pair(materialParameter, std::weak_ptr<EffectParameter>(effectParameter)));
+				}
 			}
 		}
 	}
