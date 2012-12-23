@@ -28,6 +28,14 @@ namespace XREX
 			return indexBuffer_->GetElementCount();
 		}
 
+		std::vector<VertexBufferSP> const& GetVertexBuffers() const
+		{
+			return buffers_;
+		}
+		IndexBufferSP const& GetIndexBuffer() const
+		{
+			return indexBuffer_;
+		}
 
 		void Draw();
 
