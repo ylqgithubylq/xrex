@@ -58,19 +58,19 @@ namespace XREX
 	}
 
 
-	GraphicsBuffer::GraphicsBuffer(BufferType type, Usage usage, void const* data, uint32 sizeInByte)
-		: type_(type), usage_(usage), sizeInByte_(sizeInByte)
+	GraphicsBuffer::GraphicsBuffer(BufferType type, Usage usage, void const* data, uint32 sizeInBytes)
+		: type_(type), usage_(usage), sizeInBytes_(sizeInBytes)
 	{
-		DoConsctruct(data, sizeInByte);
+		DoConsctruct(data, sizeInBytes);
 	}
 
-	void GraphicsBuffer::DoConsctruct(void const* data, uint32 sizeInByte)
+	void GraphicsBuffer::DoConsctruct(void const* data, uint32 sizeInBytes)
 	{
 		gl::GenBuffers(1, &glBufferID_);
 		assert(glBufferID_ != 0); // 0 is reserved by GL
 		glBindingTarget_ = type_ == BufferType::Vertex ? gl::GL_ARRAY_BUFFER : gl::GL_ELEMENT_ARRAY_BUFFER;
 		gl::BindBuffer(glBindingTarget_, glBufferID_);
-		gl::BufferData(glBindingTarget_, sizeInByte, data, GLUsageFromUsage(usage_));
+		gl::BufferData(glBindingTarget_, sizeInBytes, data, GLUsageFromUsage(usage_));
 	}
 
 	GraphicsBuffer::~GraphicsBuffer()
@@ -83,12 +83,12 @@ namespace XREX
 	}
 
 
-	void GraphicsBuffer::Resize(uint32 sizeInByte)
+	void GraphicsBuffer::Resize(uint32 sizeInBytes)
 	{
-		assert(sizeInByte != 0);
-		sizeInByte_ = sizeInByte;
+		assert(sizeInBytes != 0);
+		sizeInBytes_ = sizeInBytes;
 		gl::BindBuffer(glBindingTarget_, glBufferID_);
-		gl::BufferData(glBindingTarget_, sizeInByte_, nullptr, GLUsageFromUsage(usage_));
+		gl::BufferData(glBindingTarget_, sizeInBytes_, nullptr, GLUsageFromUsage(usage_));
 	}
 
 

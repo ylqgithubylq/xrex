@@ -76,7 +76,7 @@ namespace XREX
 		};
 
 	public:
-		GraphicsBuffer(BufferType type, Usage usage, void const* data, uint32 sizeInByte);
+		GraphicsBuffer(BufferType type, Usage usage, void const* data, uint32 sizeInBytes);
 
 		virtual ~GraphicsBuffer();
 
@@ -89,22 +89,25 @@ namespace XREX
 			return usage_;
 		}
 
+		/*
+		 *	@return: size in bytes.
+		 */
 		uint32 GetSize() const
 		{
-			return sizeInByte_;
+			return sizeInBytes_;
 		}
-		void Resize(uint32 sizeInByte);
+		void Resize(uint32 sizeInBytes);
 
 		void Bind();
 		virtual void Unbind();
 
-		BufferMapper CreateMap(AccessType accessType)
+		BufferMapper GetMapper(AccessType accessType)
 		{
 			return BufferMapper(*this, accessType);
 		}
 
 	private:
-		void DoConsctruct(void const* data, uint32 sizeInByte);
+		void DoConsctruct(void const* data, uint32 sizeInBytes);
 
 		void* Map(AccessType accessType);
 		void Unmap();
@@ -115,7 +118,7 @@ namespace XREX
 		uint32 glBindingTarget_;
 		uint32 glBufferID_;
 
-		uint32 sizeInByte_;
+		uint32 sizeInBytes_;
 	};
 
 
