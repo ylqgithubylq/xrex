@@ -65,7 +65,7 @@ namespace XREX
 			}
 
 			template <typename T>
-			T* Pointer()
+			T* GetPointer()
 			{
 				return static_cast<T*>(data_);
 			}
