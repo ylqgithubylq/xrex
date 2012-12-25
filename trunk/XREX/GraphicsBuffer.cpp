@@ -167,7 +167,7 @@ namespace XREX
 				gl::DisableVertexAttribArray(lastAttributeLocations_[i]);
 			}
 		}
-		lastAttributeLocations_.swap(decltype(lastAttributeLocations_)());
+		lastAttributeLocations_.shrink_to_fit();
 	}
 
 }
