@@ -57,8 +57,7 @@ typedef double GLclampd;
 		#ifndef NOMINMAX
 			#define NOMINMAX
 		#endif
-		//#include <windows.h>
-		#define APIENTRY __stdcall // NOTICE: I modified this to remove windows.h dependency
+		#include <windows.h>
 	#else
 		#define APIENTRY
 	#endif
@@ -160,6 +159,9 @@ typedef void (APIENTRY *GLDEBUGPROCARB)(GLenum source,GLenum type,GLuint id,GLen
 #endif
 #ifndef GL_AMD_debug_output
 typedef void (APIENTRY *GLDEBUGPROCAMD)(GLuint id,GLenum category,GLenum severity,GLsizei length,const GLchar *message,GLvoid *userParam);
+#endif
+#ifndef GL_KHR_debug
+typedef void (APIENTRY *GLDEBUGPROC)(GLenum source,GLenum type,GLuint id,GLenum severity,GLsizei length,const GLchar *message,GLvoid *userParam);
 #endif
 #ifndef GL_NV_vdpau_interop
 typedef GLintptr GLvdpauSurfaceNV;

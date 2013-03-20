@@ -38,7 +38,7 @@ namespace XREX
 		scene_.reset(); // release scene
 	}
 
-	XREX::uint32 RenderingEngine::GetGLError()
+	uint32 RenderingEngine::GetGLError()
 	{
 		return gl::GetError();
 	}
@@ -145,6 +145,7 @@ namespace XREX
 
 		floatM44 const& viewMatrix = camera->GetViewMatrix();
 		floatM44 const& projectionMatrix = camera->GetProjectionMatrix();
+		floatV3 const& cameraPosition = cameraObject->GetComponent<Transformation>()->GetWorldPosition();
 
 		vector<SceneObjectSP> sceneObjects = scene_->GetRenderableQueue(cameraObject);
 
@@ -180,24 +181,37 @@ namespace XREX
 				MaterialSP const& material = renderablePack->material;
 
 				floatM44 const& modelMatrix = ownerRenderable.GetOwnerSceneObject()->GetComponent<Transformation>()->GetWorldMatrix();
+				floatM44 normalMatrix = modelMatrix; // TODO do inverse transpose to the upper floatV3 of modelMatrix
 
 				RenderingEffect const& effect = technique->GetEffect();
 
 				// are these too hard coded?
-				EffectParameterSP const& model = effect.GetParameterByName(GetUniformString(DefinedUniform::ModelMatrix));
-				if (model)
 				{
-					model->SetValue(modelMatrix);
-				}
-				EffectParameterSP const& view = effect.GetParameterByName(GetUniformString(DefinedUniform::ViewMatrix));
-				if (view)
-				{
-					view->SetValue(viewMatrix);
-				}
-				EffectParameterSP const& projection = effect.GetParameterByName(GetUniformString(DefinedUniform::ProjectionMatrix));
-				if (projection)
-				{
-					projection->SetValue(projectionMatrix);
+					EffectParameterSP const& model = effect.GetParameterByName(GetUniformString(DefinedUniform::ModelMatrix));
+					if (model)
+					{
+						model->SetValue(modelMatrix);
+					}
+					EffectParameterSP const& normal = effect.GetParameterByName(GetUniformString(DefinedUniform::NormalMatrix));
+					if (normal)
+					{
+						normal->SetValue(normalMatrix);
+					}
+					EffectParameterSP const& view = effect.GetParameterByName(GetUniformString(DefinedUniform::ViewMatrix));
+					if (view)
+					{
+						view->SetValue(viewMatrix);
+					}
+					EffectParameterSP const& projection = effect.GetParameterByName(GetUniformString(DefinedUniform::ProjectionMatrix));
+					if (projection)
+					{
+						projection->SetValue(projectionMatrix);
+					}
+					EffectParameterSP const& position = effect.GetParameterByName(GetUniformString(DefinedUniform::CameraPosition));
+					if (position)
+					{
+						position->SetValue(cameraPosition);
+					}
 				}
 
 				if (material)

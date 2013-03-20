@@ -37,7 +37,7 @@ namespace XREX
 		return counts[static_cast<uint32>(type)];
 	}
 
-	XREX_API uint32 GetElementSizeInByte(ElementType type)
+	XREX_API uint32 GetElementSizeInBytes(ElementType type)
 	{
 		static array<uint32, static_cast<uint32>(ElementType::ParameterTypeCount)> const sizes = [] ()
 		{

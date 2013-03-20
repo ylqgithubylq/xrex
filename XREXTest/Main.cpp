@@ -194,8 +194,14 @@ struct TempScene
 		RenderingTechniqueSP technique = effect->CreateTechnique();
 		RenderingPassSP pass = technique->CreatePass(program, rso, dsso, bso);
 
-		SubMeshSP const& subMesh = cubeMesh->CreateSubMesh("cube sub mesh", nullptr, layout, cubeEffect);
+		SubMeshSP const& subMesh = cubeMesh->CreateSubMesh("cube sub mesh", layout, nullptr, cubeEffect);
 
+
+		EffectParameterSP const& lightColor = effect->GetParameterByName("lightColor");
+		if (lightColor)
+		{
+			lightColor->SetValue(floatV3(50000, 50000, 60000));
+		}
 		EffectParameterSP const& centerPosition = effect->GetParameterByName("centerPosition");
 		if (centerPosition)
 		{
@@ -301,6 +307,8 @@ struct TempScene
 		XREXContext::GetInstance().GetResourceManager().AddResourceLocation("Data/");
 		MeshSP model;
 		model = XREXContext::GetInstance().GetResourceManager().LoadModel("crytek-sponza/sponza.obj")->Create();
+		//model = XREXContext::GetInstance().GetResourceManager().LoadModel("yfl/yfl.obj")->Create();
+		
 		//model = XREXContext::GetInstance().GetResourceManager().LoadModel("vcc/vcc.dae")->Create();
 		//model = XREXContext::GetInstance().GetResourceManager().GetModel("sibenik/sibenik.obj");
 		//model = XREXContext::GetInstance().GetResourceManager().GetModel("rungholt/rungholt.obj");
@@ -412,10 +420,12 @@ void Main()
 
 
 #include "TestFile.hpp"
-
+#include "TextureTest.h"
 
 int main()
 {
+	TextureTest textest;
+	return 0;
 	//TestMath();
 	//SQRTSpeedTest();
 	//return 0;

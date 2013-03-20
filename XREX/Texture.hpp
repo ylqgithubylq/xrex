@@ -35,12 +35,26 @@ namespace XREX
 
 		enum class TexelFormat
 		{
+			R8,
+
 			RGB8,
 			BGR8,
 			RGBA8,
 			BGRA8,
 
-			R8,
+			R16F,
+
+			RGB16F,
+			BGR16F,
+			RGBA16F,
+			BGRA16F,
+
+			R32F,
+
+			RGB32F,
+			BGR32F,
+			RGBA32F,
+			BGRA32F,
 
 			// TODO
 			NotUsed,

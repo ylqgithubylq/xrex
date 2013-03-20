@@ -133,7 +133,7 @@ namespace XREX
 				} ();
 				uint32 blueMask = FreeImage_GetBlueMask(bitmap);
 				uint32 redMask = FreeImage_GetRedMask(bitmap);
-				texelFormat = colorTypeMapping.at(std::make_pair(colorType, blueMask > redMask));
+				texelFormat = colorTypeMapping.at(std::make_pair(colorType, blueMask < redMask));
 			}
 			else
 			{

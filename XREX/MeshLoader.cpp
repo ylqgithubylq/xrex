@@ -181,7 +181,7 @@ namespace XREX
 
 					for (auto& meshIndex : subMeshes)
 					{
-						createdMesh->CreateSubMesh(std::get<0>(meshIndex), createdMaterials[std::get<1>(meshIndex)], createdLayouts[std::get<2>(meshIndex)], nullptr);
+						createdMesh->CreateSubMesh(std::get<0>(meshIndex), createdLayouts[std::get<2>(meshIndex)], createdMaterials[std::get<1>(meshIndex)], nullptr);
 					}
 
 					return createdMesh;
@@ -542,7 +542,7 @@ namespace XREX
 						for (uint32 j = 0; j < mesh->mNumFaces; ++j)
 						{
 							aiFace& face = mesh->mFaces[j];
-							//assert(face.mNumIndices == 3);
+							assert(face.mNumIndices <= 3);
 							for (int k = 0; k < indicesPerFace; ++k)
 							{
 								indexData32[j * indicesPerFace + k] = face.mIndices[k];
@@ -613,8 +613,8 @@ namespace XREX
 	{
 		Assimp::Importer importer;
 
-		aiScene const* scene = importer.ReadFile(fileName, 
-			// aiProcess_CalcTangentSpace |
+		aiScene const* scene = importer.ReadFile(fileName,
+			aiProcess_CalcTangentSpace |
 			aiProcess_Triangulate |
 			aiProcess_JoinIdenticalVertices |
 			aiProcess_SortByPType

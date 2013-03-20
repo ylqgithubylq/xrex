@@ -34,9 +34,14 @@ namespace XREX
 		return *found;
 	}
 
-	SubMeshSP const& Mesh::CreateSubMesh(string const& name, MaterialSP const& material, RenderingLayoutSP const& layout, RenderingEffectSP const& effect, int32 renderingGroup)
+	SubMeshSP const& Mesh::CreateSubMesh(std::string const& name, RenderingLayoutSP const& layout)
 	{
-		subMeshes_.emplace_back(new SubMesh(*this, name, material, layout, effect, renderingGroup));
+		subMeshes_.emplace_back(new SubMesh(*this, name, layout, nullptr, nullptr, RenderablePack::DefaultRenderingGroup));
+		return subMeshes_.back();
+	}
+	SubMeshSP const& Mesh::CreateSubMesh(std::string const& name, RenderingLayoutSP const& layout, MaterialSP const& material, RenderingEffectSP const& effect, int32 renderingGroup /*= RenderablePack::DefaultRenderingGroup*/)
+	{
+		subMeshes_.emplace_back(new SubMesh(*this, name, layout, material, effect, renderingGroup));
 		return subMeshes_.back();
 	}
 
@@ -59,14 +64,14 @@ namespace XREX
 		clone.SetVisible(IsVisible());
 		for (auto& subMesh : subMeshes_)
 		{
-			clone.CreateSubMesh(subMesh->GetName(), subMesh->GetMaterial(), subMesh->layout_, subMesh->effect_);
+			clone.CreateSubMesh(subMesh->GetName(), subMesh->GetLayout(), subMesh->GetMaterial(), subMesh->GetEffect());
 		}
 		return cloneSP;
 	}
 
 
 
-	SubMesh::SubMesh(Mesh& mesh, string const& name, MaterialSP const& material, RenderingLayoutSP const& layout, RenderingEffectSP const& effect, int32 renderingGroup)
+	SubMesh::SubMesh(Mesh& mesh, std::string const& name, RenderingLayoutSP const& layout, MaterialSP const& material, RenderingEffectSP const& effect, int32 renderingGroup)
 		: mesh_(mesh), name_(name), material_(material), layout_(layout), renderingGroup_(renderingGroup)
 	{
 		assert(layout_ != nullptr);
@@ -82,7 +87,7 @@ namespace XREX
 	{
 		// TODO camera dependence technique
 		assert(effect_ != nullptr);
-		return Renderable::RenderablePack(this->mesh_, material_, layout_, effect_->GetAvailableTechnique(0), renderingGroup_);
+		return Renderable::RenderablePack(this->mesh_, layout_, material_, effect_->GetAvailableTechnique(0), renderingGroup_);
 	}
 
 	void SubMesh::SetEffect(RenderingEffectSP const& effect)

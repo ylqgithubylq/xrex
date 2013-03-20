@@ -26,7 +26,8 @@ namespace XREX
 			return subMeshes_;
 		}
 
-		SubMeshSP const& CreateSubMesh(std::string const& name, MaterialSP const& material, RenderingLayoutSP const& layout, RenderingEffectSP const& effect, int32 renderingGroup = 0);
+		SubMeshSP const& CreateSubMesh(std::string const& name, RenderingLayoutSP const& layout);
+		SubMeshSP const& CreateSubMesh(std::string const& name, RenderingLayoutSP const& layout, MaterialSP const& material, RenderingEffectSP const& effect, int32 renderingGroup = RenderablePack::DefaultRenderingGroup);
 
 		virtual std::vector<RenderablePack> GetRenderablePack(SceneObjectSP const& camera) override;
 
@@ -63,6 +64,15 @@ namespace XREX
 			return name_;
 		}
 
+		RenderingLayoutSP const& GetLayout() const
+		{
+			return layout_;
+		}
+
+		RenderingEffectSP const& GetEffect() const
+		{
+			return effect_;
+		}
 		void SetEffect(RenderingEffectSP const& effect);
 
 		MaterialSP const& GetMaterial() const
@@ -71,10 +81,19 @@ namespace XREX
 		}
 		void SetMaterial(MaterialSP const& material);
 
+		int32 GetRenderingGroup() const
+		{
+			return renderingGroup_;
+		}
+		void SetRenderingGroup(int32 renderingGroup)
+		{
+			renderingGroup_ = renderingGroup;
+		}
+
 		Renderable::RenderablePack GetRenderablePack(SceneObjectSP const& camera) const;
 
 	private:
-		SubMesh(Mesh& mesh, std::string const& name, MaterialSP const& material, RenderingLayoutSP const& layout, RenderingEffectSP const& effect, int32 renderingGroup);
+		SubMesh(Mesh& mesh, std::string const& name, RenderingLayoutSP const& layout, MaterialSP const& material, RenderingEffectSP const& effect, int32 renderingGroup);
 
 	private:
 		Mesh& mesh_;
