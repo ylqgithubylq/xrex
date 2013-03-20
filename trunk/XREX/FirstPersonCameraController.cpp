@@ -66,7 +66,6 @@ namespace XREX
 		// the angle from directionInFrontRightPlane to front referenced by axis up, so negate it.
 		azimuthAngle_ = -(Angle(directionInFrontRightPlane, front) * (positive ? 1 : -1));
 
-		// TODO check if same
 		floatQ elevation = RotationQuaternion(elevationAngle_, right);
 		floatQ azimuth = RotationQuaternion(azimuthAngle_, up);
 		floatQ totalRotation = azimuth * elevation;

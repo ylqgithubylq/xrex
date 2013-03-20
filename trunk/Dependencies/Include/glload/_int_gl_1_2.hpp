@@ -8,7 +8,7 @@ extern "C" {
 #endif //__cplusplus
 
 
-extern void (GLE_FUNCPTR *__gleBlendColor)(GLclampf , GLclampf , GLclampf , GLclampf );
+extern void (GLE_FUNCPTR *__gleBlendColor)(GLfloat , GLfloat , GLfloat , GLfloat );
 extern void (GLE_FUNCPTR *__gleBlendEquation)(GLenum );
 extern void (GLE_FUNCPTR *__gleDrawRangeElements)(GLenum , GLuint , GLuint , GLsizei , GLenum , const GLvoid *);
 extern void (GLE_FUNCPTR *__gleTexImage3D)(GLenum , GLint , GLint , GLsizei , GLsizei , GLsizei , GLint , GLenum , GLenum , const GLvoid *);
@@ -34,7 +34,6 @@ namespace gl
 		GL_PACK_IMAGE_HEIGHT             = 0x806C,
 		GL_UNPACK_SKIP_IMAGES            = 0x806D,
 		GL_UNPACK_IMAGE_HEIGHT           = 0x806E,
-		GL_TEXTURE_3D                    = 0x806F,
 		GL_PROXY_TEXTURE_3D              = 0x8070,
 		GL_TEXTURE_DEPTH                 = 0x8071,
 		GL_TEXTURE_WRAP_R                = 0x8072,
@@ -60,7 +59,7 @@ namespace gl
 		GL_ALIASED_LINE_WIDTH_RANGE      = 0x846E,
 	};
 
-	inline void BlendColor(GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha) { ::__gleBlendColor(red, green, blue, alpha); }
+	inline void BlendColor(GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha) { ::__gleBlendColor(red, green, blue, alpha); }
 	inline void BlendEquation(GLenum mode) { ::__gleBlendEquation(mode); }
 	inline void DrawRangeElements(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, const GLvoid *indices) { ::__gleDrawRangeElements(mode, start, end, count, type, indices); }
 	inline void TexImage3D(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum type, const GLvoid *pixels) { ::__gleTexImage3D(target, level, internalformat, width, height, depth, border, format, type, pixels); }

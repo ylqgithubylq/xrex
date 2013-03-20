@@ -168,8 +168,9 @@ namespace XREX
 		flags |= WGL_CONTEXT_DEBUG_BIT_ARB;
 #endif
 
-		int32 versions[3][2] =
+		int32 versions[][2] =
 		{
+			{ 4, 3 },
 			{ 4, 2 },
 			{ 4, 1 },
 			{ 4, 0 },

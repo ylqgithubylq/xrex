@@ -10,8 +10,11 @@ namespace XREX
 	enum class DefinedUniform
 	{
 		ModelMatrix,
+		NormalMatrix,
 		ViewMatrix,
 		ProjectionMatrix,
+
+		CameraPosition,
 
 		DiffuseColor,
 		SpecularColor,
@@ -41,8 +44,11 @@ namespace XREX
 		{
 			std::array<std::string, static_cast<uint32>(DefinedUniform::DefinedUniformCount)> temp;
 			temp[static_cast<uint32>(DefinedUniform::ModelMatrix)] = "modelMatrix";
+			temp[static_cast<uint32>(DefinedUniform::NormalMatrix)] = "normalMatrix";
 			temp[static_cast<uint32>(DefinedUniform::ViewMatrix)] = "viewMatrix";
 			temp[static_cast<uint32>(DefinedUniform::ProjectionMatrix)] = "projectionMatrix";
+
+			temp[static_cast<uint32>(DefinedUniform::CameraPosition)] = "cameraPosition";
 
 			temp[static_cast<uint32>(DefinedUniform::DiffuseColor)] = "diffuseColor";
 			temp[static_cast<uint32>(DefinedUniform::SpecularColor)] = "specularColor";

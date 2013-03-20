@@ -51,11 +51,14 @@ namespace XREX
 	{
 		switch (format)
 		{
+		case TexelFormat::R8:
+			{
+				static GLTextureFormat const Format(gl::GL_R8, gl::GL_RED, gl::GL_UNSIGNED_BYTE);
+				return Format;
+			}
 		case TexelFormat::RGB8:
 			{
-				// TODO why BGR?
-				//static GLTextureFormat const Format(gl::GL_RGBA8, gl::GL_RGB, gl::GL_UNSIGNED_BYTE);
-				static GLTextureFormat const Format(gl::GL_RGBA8, gl::GL_BGR, gl::GL_UNSIGNED_BYTE);
+				static GLTextureFormat const Format(gl::GL_RGBA8, gl::GL_RGB, gl::GL_UNSIGNED_BYTE);
 				return Format;
 			}
 		case TexelFormat::BGR8:
@@ -65,9 +68,7 @@ namespace XREX
 			}
 		case TexelFormat::RGBA8:
 			{
-				// TODO why BGRA?
-				//static GLTextureFormat const Format(gl::GL_RGBA8, gl::GL_RGBA, gl::GL_UNSIGNED_BYTE);
-				static GLTextureFormat const Format(gl::GL_RGBA8, gl::GL_BGRA, gl::GL_UNSIGNED_BYTE);
+				static GLTextureFormat const Format(gl::GL_RGBA8, gl::GL_RGBA, gl::GL_UNSIGNED_BYTE);
 				return Format;
 			}
 		case TexelFormat::BGRA8:
@@ -75,9 +76,54 @@ namespace XREX
 				static GLTextureFormat const Format(gl::GL_RGBA8, gl::GL_BGRA, gl::GL_UNSIGNED_BYTE);
 				return Format;
 			}
-		case TexelFormat::R8:
+		case TexelFormat::R16F:
 			{
-				static GLTextureFormat const Format(gl::GL_R8, gl::GL_RED, gl::GL_UNSIGNED_BYTE);
+				static GLTextureFormat const Format(gl::GL_R16F, gl::GL_RED, gl::GL_FLOAT);
+				return Format;
+			}
+		case TexelFormat::RGB16F:
+			{
+				static GLTextureFormat const Format(gl::GL_RGB16F, gl::GL_RGB, gl::GL_FLOAT);
+				return Format;
+			}
+		case TexelFormat::BGR16F:
+			{
+				static GLTextureFormat const Format(gl::GL_RGB16F, gl::GL_BGR, gl::GL_FLOAT);
+				return Format;
+			}
+		case TexelFormat::RGBA16F:
+			{
+				static GLTextureFormat const Format(gl::GL_RGBA16F, gl::GL_RGBA, gl::GL_FLOAT);
+				return Format;
+			}
+		case TexelFormat::BGRA16F:
+			{
+				static GLTextureFormat const Format(gl::GL_RGBA16F, gl::GL_BGRA, gl::GL_FLOAT);
+				return Format;
+			}
+		case TexelFormat::R32F:
+			{
+				static GLTextureFormat const Format(gl::GL_R32F, gl::GL_RED, gl::GL_FLOAT);
+				return Format;
+			}
+		case TexelFormat::RGB32F:
+			{
+				static GLTextureFormat const Format(gl::GL_RGB32F, gl::GL_RGB, gl::GL_FLOAT);
+				return Format;
+			}
+		case TexelFormat::BGR32F:
+			{
+				static GLTextureFormat const Format(gl::GL_RGB32F, gl::GL_BGR, gl::GL_FLOAT);
+				return Format;
+			}
+		case TexelFormat::RGBA32F:
+			{
+				static GLTextureFormat const Format(gl::GL_RGBA32F, gl::GL_RGBA, gl::GL_FLOAT);
+				return Format;
+			}
+		case TexelFormat::BGRA32F:
+			{
+				static GLTextureFormat const Format(gl::GL_RGBA32F, gl::GL_BGRA, gl::GL_FLOAT);
 				return Format;
 			}
 		default:

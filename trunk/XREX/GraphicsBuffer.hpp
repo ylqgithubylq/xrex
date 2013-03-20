@@ -141,19 +141,19 @@ namespace XREX
 				/*
 				 *	@elementStrip: 0 indicates no strip between elements.
 				 */
-				ElementLayout(uint32 startLocation, uint32 elementStrip, ElementType type, std::string const& attributeChannel, bool normalize = false)
-					: start(startLocation), strip(elementStrip), elementType(type), channel(attributeChannel), needNormalize(normalize)
+				ElementLayout(uint32 startLocationInBytes, uint32 elementStripInBytes, ElementType type, std::string const& attributeChannel, bool normalize = false)
+					: start(startLocationInBytes), strip(elementStripInBytes), elementType(type), channel(attributeChannel), needNormalize(normalize)
 				{
 				}
 			};
 
 		public:
-			explicit DataLayout(uint32 elementCount)
-				: elementCount_(elementCount)
+			explicit DataLayout(uint32 vertexCount)
+				: vertexCount_(vertexCount)
 			{
 			}
 			DataLayout(DataLayout&& rhs)
-				: elementCount_(rhs.elementCount_), channelLayouts_(std::move(rhs.channelLayouts_))
+				: vertexCount_(rhs.vertexCount_), channelLayouts_(std::move(rhs.channelLayouts_))
 			{
 			}
 
@@ -167,13 +167,13 @@ namespace XREX
 			{
 				return channelLayouts_[index];
 			}
-			uint32 GetElementCount() const
+			uint32 GetVertexCount() const
 			{
-				return elementCount_;
+				return vertexCount_;
 			}
 
 		private:
-			uint32 elementCount_;
+			uint32 vertexCount_;
 			std::vector<ElementLayout> channelLayouts_;
 		};
 
@@ -188,7 +188,7 @@ namespace XREX
 		{
 			assert(channel != "");
 			layout_.AddChannelLayout(DataLayout::ElementLayout(0, 0, TypeToElementType<T>::Type, channel));
-			assert(sizeof(T) == GetElementSizeInByte(TypeToElementType<T>::Type));
+			assert(sizeof(T) == GetElementSizeInBytes(TypeToElementType<T>::Type));
 		}
 
 		/*
@@ -207,7 +207,7 @@ namespace XREX
 
 		uint32 GetElementCount() const
 		{
-			return layout_.GetElementCount();
+			return layout_.GetVertexCount();
 		}
 
 		void BindToProgram(ProgramObjectSP const& program);

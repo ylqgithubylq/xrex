@@ -62,8 +62,8 @@ namespace XREX
 		template <typename T>
 		std::shared_ptr<T> GetComponent() const
 		{
-			ComponentSP const& comonent = components_[static_cast<uint32>(Component::TypeToComponentType<T>::Type)];
-			return CheckedSPCast<T>(comonent); // shared_ptr_cast create a new shared_ptr object.
+			ComponentSP const& component = components_[static_cast<uint32>(Component::TypeToComponentType<T>::Type)];
+			return CheckedSPCast<T>(component); // shared_ptr_cast create a new shared_ptr object.
 		}
 
 	private:

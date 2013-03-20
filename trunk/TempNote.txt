@@ -6,7 +6,9 @@ TODO:
 create new texture constructor without 2 dimension data parameter, remove constructor parameter generateMipmap of the one with 2 dimension data parameter
 effect file / format
 effect loading with macro
-light
+effect interal intermediate texture variable
+light base class, light shader and it's interface, material shader and it's interface
+the shading process that use light shader and material shader
 
 optional:
 change all enum cast to use: ValueFromEnum, EnumFromValue

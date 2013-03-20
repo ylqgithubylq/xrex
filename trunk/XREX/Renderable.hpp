@@ -15,14 +15,16 @@ namespace XREX
 		struct RenderablePack
 			: XREX::Noncopyable
 		{
+			static int32 const DefaultRenderingGroup = 0;
+
 			Renderable* renderable;
-			MaterialSP material;
 			RenderingLayoutSP layout;
+			MaterialSP material;
 			RenderingTechniqueSP technique;
 			int32 renderingGroup;
 
 			RenderablePack(RenderablePack&& rhs)
-				: renderable(rhs.renderable), material(std::move(rhs.material)), layout(std::move(rhs.layout)), technique(std::move(rhs.technique)), renderingGroup(rhs.renderingGroup)
+				: renderable(rhs.renderable), layout(std::move(rhs.layout)), material(std::move(rhs.material)), technique(std::move(rhs.technique)), renderingGroup(rhs.renderingGroup)
 			{
 			}
 			explicit RenderablePack(Renderable& ownerRenderable)
@@ -32,8 +34,8 @@ namespace XREX
 			/*
 			 *	@renderingGroup: smaller value will be rendered before any RenderablePack with larger value.
 			 */
-			RenderablePack(Renderable& ownerRenderable, MaterialSP const& theMaterial, RenderingLayoutSP const& renderingLayout, RenderingTechniqueSP const& renderingTechnique, int32 theRenderingGroup = 0)
-				: renderable(&ownerRenderable), material(theMaterial), layout(renderingLayout), technique(renderingTechnique), renderingGroup(theRenderingGroup)
+			RenderablePack(Renderable& ownerRenderable, RenderingLayoutSP const& renderingLayout, MaterialSP const& theMaterial, RenderingTechniqueSP const& renderingTechnique, int32 theRenderingGroup = DefaultRenderingGroup)
+				: renderable(&ownerRenderable), layout(renderingLayout), material(theMaterial), technique(renderingTechnique), renderingGroup(theRenderingGroup)
 			{
 			}
 			RenderablePack& operator =(RenderablePack&& rhs)
@@ -41,8 +43,8 @@ namespace XREX
 				if (this != &rhs)
 				{
 					renderable = rhs.renderable;
-					material = rhs.material;
 					layout = rhs.layout;
+					material = rhs.material;
 					technique = rhs.technique;
 				}
 				return *this;

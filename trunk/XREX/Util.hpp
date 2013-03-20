@@ -167,7 +167,7 @@ namespace XREX
 
 	XREX_API ElementType GetElementPrimitiveType(ElementType type);
 
-	XREX_API uint32 GetElementSizeInByte(ElementType type);
+	XREX_API uint32 GetElementSizeInBytes(ElementType type);
 
 	template <typename T>
 	struct TypeToElementType
