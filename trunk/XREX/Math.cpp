@@ -27,6 +27,12 @@ namespace XREX
 		return fni.f;
 	}
 
+	template <>
+	XREX_API double ReciprocalSqrt<double>(double number)
+	{
+		return 1 / std::sqrt(number);
+	}
+
 	template <typename T, uint32 N>
 	T Angle(VectorT<T, N> const& from, VectorT<T, N> const& to)
 	{
