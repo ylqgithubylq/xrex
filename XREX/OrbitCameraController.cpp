@@ -98,7 +98,7 @@ namespace XREX
 			break;
 		case OrbitSemantic::ScaleDistance:
 			{
-				float delta = inputEvent.data * distanceScalingScaler_ * 0.01f;
+				float delta = -inputEvent.data * distanceScalingScaler_ * 0.01f;
 				XREXContext::GetInstance().GetInputCenter().EnqueueAction(GenerateDistanceScalingAction(delta));
 			}
 			break;

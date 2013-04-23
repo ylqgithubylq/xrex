@@ -226,14 +226,15 @@ namespace XREX
 			return lhs.values_ != rhs.values_;
 		}
 
-		VectorT Normalize() const // float only
+		VectorT Normalize() const // float & double only
 		{
 			return *this * ReciprocalSqrt(LengthSquared());
 		}
 
-		T Length() const // float only
+		T Length() const // float & double only
 		{
-			return T(1) / ReciprocalSqrt(LengthSquared());
+			// return T(1) / ReciprocalSqrt(LengthSquared());
+			return std::sqrt(LengthSquared());
 		}
 
 		T LengthSquared() const
