@@ -274,13 +274,13 @@ namespace XREX
 				: inputCommand(std::move(command))
 			{
 			}
-			Action(Action&& rhs)
-				: inputCommand(std::move(rhs.inputCommand))
+			Action(Action&& right)
+				: inputCommand(std::move(right.inputCommand))
 			{
 			}
-			Action& operator =(Action&& rhs)
+			Action& operator =(Action&& right)
 			{
-				inputCommand = std::move(rhs.inputCommand);
+				inputCommand = std::move(right.inputCommand);
 			}
 
 			std::function<void()> inputCommand;

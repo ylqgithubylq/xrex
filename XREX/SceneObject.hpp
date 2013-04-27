@@ -52,6 +52,7 @@ namespace XREX
 
 		/*
 		 *	Set an instance of a subclass of Component into this object, one instance per a subclass can be set in.
+		 *	@component: component cannot be shared by multiple SceneObjects.
 		 */
 		void SetComponent(ComponentSP const& component);
 

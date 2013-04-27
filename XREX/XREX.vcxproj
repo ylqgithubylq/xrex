@@ -122,8 +122,7 @@
       <AdditionalLibraryDirectories>$(SolutionDir)\Lib\$(Platform)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>
-      </Command>
+      <Command>copy "$(TargetPath)" "$(SolutionDir)Bin\$(Platform)\"</Command>
     </PostBuildEvent>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)\Dependencies\Lib\$(Platform)</AdditionalLibraryDirectories>
@@ -175,8 +174,7 @@
       <AdditionalLibraryDirectories>$(SolutionDir)\Lib\$(Platform)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>
-      </Command>
+      <Command>copy "$(TargetPath)" "$(SolutionDir)Bin\$(Platform)\"</Command>
     </PostBuildEvent>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)\Dependencies\Lib\$(Platform)</AdditionalLibraryDirectories>

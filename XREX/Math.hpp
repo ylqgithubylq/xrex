@@ -43,19 +43,19 @@ namespace XREX
 	}
 
 	template <typename T>
-	inline bool Equal(T const& lhs, T const& rhs)
+	inline bool Equal(T const& left, T const& right)
 	{
-		return lhs == rhs;
+		return left == right;
 	}
 	template <>
-	inline bool Equal<float>(float const& lhs, float const& rhs)
+	inline bool Equal<float>(float const& left, float const& right)
 	{
-		return std::abs(lhs - rhs) <= std::numeric_limits<float>::epsilon();
+		return std::abs(left - right) <= std::numeric_limits<float>::epsilon();
 	}
 	template <>
-	inline bool Equal<double>(double const& lhs, double const& rhs)
+	inline bool Equal<double>(double const& left, double const& right)
 	{
-		return std::abs(lhs - rhs) <= std::numeric_limits<double>::epsilon();
+		return std::abs(left - right) <= std::numeric_limits<double>::epsilon();
 	}
 
 	template <typename T>

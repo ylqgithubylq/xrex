@@ -104,7 +104,7 @@ namespace XREX
 			return DoGetValue();
 		}
 
-		virtual void GetValueFrom(EffectParameter const& rhs) = 0;
+		virtual void GetValueFrom(EffectParameter const& right) = 0;
 
 	private:
 		/*
@@ -142,9 +142,9 @@ namespace XREX
 			value_ = value;
 		}
 	
-		virtual void GetValueFrom(EffectParameter const& rhs) override
+		virtual void GetValueFrom(EffectParameter const& right) override
 		{
-			value_ = CheckedCast<ConcreteEffectParameter const*>(&rhs)->value_;
+			value_ = CheckedCast<ConcreteEffectParameter const*>(&right)->value_;
 		}
 
 	private:

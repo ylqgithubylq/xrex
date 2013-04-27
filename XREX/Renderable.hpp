@@ -23,8 +23,8 @@ namespace XREX
 			RenderingTechniqueSP technique;
 			int32 renderingGroup;
 
-			RenderablePack(RenderablePack&& rhs)
-				: renderable(rhs.renderable), layout(std::move(rhs.layout)), material(std::move(rhs.material)), technique(std::move(rhs.technique)), renderingGroup(rhs.renderingGroup)
+			RenderablePack(RenderablePack&& right)
+				: renderable(right.renderable), layout(std::move(right.layout)), material(std::move(right.material)), technique(std::move(right.technique)), renderingGroup(right.renderingGroup)
 			{
 			}
 			explicit RenderablePack(Renderable& ownerRenderable)
@@ -38,14 +38,14 @@ namespace XREX
 				: renderable(&ownerRenderable), layout(renderingLayout), material(theMaterial), technique(renderingTechnique), renderingGroup(theRenderingGroup)
 			{
 			}
-			RenderablePack& operator =(RenderablePack&& rhs)
+			RenderablePack& operator =(RenderablePack&& right)
 			{
-				if (this != &rhs)
+				if (this != &right)
 				{
-					renderable = rhs.renderable;
-					layout = rhs.layout;
-					material = rhs.material;
-					technique = rhs.technique;
+					renderable = right.renderable;
+					layout = right.layout;
+					material = right.material;
+					technique = right.technique;
 				}
 				return *this;
 			}
@@ -78,10 +78,10 @@ namespace XREX
 namespace std
 {
 	template<>
-	inline void swap<XREX::Renderable::RenderablePack>(XREX::Renderable::RenderablePack& lhs, XREX::Renderable::RenderablePack& rhs)
+	inline void swap<XREX::Renderable::RenderablePack>(XREX::Renderable::RenderablePack& left, XREX::Renderable::RenderablePack& right)
 	{
-		XREX::Renderable::RenderablePack temp = std::move(lhs);
-		lhs = std::move(rhs);
-		rhs = std::move(temp);
+		XREX::Renderable::RenderablePack temp = std::move(left);
+		left = std::move(right);
+		right = std::move(temp);
 	}
 }

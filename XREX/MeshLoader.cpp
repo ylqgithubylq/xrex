@@ -68,9 +68,9 @@ namespace XREX
 						: description(std::move(theDescription)), vertex(std::move(theVertex)), primitiveType(thePrimitiveType), index32(std::move(theIndex)), indexType(ElementType::Uint32)
 					{
 					}
-					LayoutData(LayoutData&& rhs)
-						: description(std::move(rhs.description)), vertex(std::move(rhs.vertex)), index16(std::move(rhs.index16)), index32(std::move(rhs.index32)),
-						primitiveType(rhs.primitiveType), indexType(rhs.indexType)
+					LayoutData(LayoutData&& right)
+						: description(std::move(right.description)), vertex(std::move(right.vertex)), index16(std::move(right.index16)), index32(std::move(right.index32)),
+						primitiveType(right.primitiveType), indexType(right.indexType)
 					{
 					}
 				};
@@ -89,8 +89,8 @@ namespace XREX
 							: name(theName), samplerState(theSamplerState), loadingResult(std::move(theLoadingResult))
 						{
 						}
-						TextureData(TextureData&& rhs)
-							: name(std::move(rhs.name)), loadingResult(std::move(rhs.loadingResult)), samplerState(rhs.samplerState)
+						TextureData(TextureData&& right)
+							: name(std::move(right.name)), loadingResult(std::move(right.loadingResult)), samplerState(right.samplerState)
 						{
 						}
 					};
@@ -102,8 +102,8 @@ namespace XREX
 						: material(std::move(theMaterial)), textures(std::move(theTextures))
 					{
 					}
-					MaterialData(MaterialData&& rhs)
-						: material(std::move(rhs.material)), textures(std::move(rhs.textures))
+					MaterialData(MaterialData&& right)
+						: material(std::move(right.material)), textures(std::move(right.textures))
 					{
 					}
 				};

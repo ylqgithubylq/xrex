@@ -424,13 +424,13 @@ void Main()
 
 int main()
 {
-	TextureTest textest;
-	return 0;
+	//TextureTest textest;
+	//return 0;
 	//TestMath();
 	//SQRTSpeedTest();
 	//return 0;
-	TestFile t;
-	t.TestTransformation();
+	//TestFile t;
+	//t.TestTransformation();
 	Main();
 
 	shared_ptr<int> isp = MakeSP<int>(1);

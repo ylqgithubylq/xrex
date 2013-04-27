@@ -15,8 +15,8 @@ namespace XREX
 			: value_(r, g, b, a)
 		{
 		}
-		Color(Color const& rhs)
-			: value_(rhs.value_)
+		Color(Color const& right)
+			: value_(right.value_)
 		{
 		}
 		~Color()
@@ -40,44 +40,44 @@ namespace XREX
 			return value_.W();
 		}
 
-		friend Color operator +(Color const& lhs, Color const& rhs)
+		friend Color operator +(Color const& left, Color const& right)
 		{
 			Color temp;
-			temp.value_ = lhs.value_ + rhs.value_;
+			temp.value_ = left.value_ + right.value_;
 			return temp;
 		}
 
-		friend Color operator -(Color const& lhs, Color const& rhs)
+		friend Color operator -(Color const& left, Color const& right)
 		{
 			Color temp;
-			temp.value_ = lhs.value_ - rhs.value_;
+			temp.value_ = left.value_ - right.value_;
 			return temp;
 		}
 
-		friend Color operator *(Color const& lhs, Color const& rhs)
+		friend Color operator *(Color const& left, Color const& right)
 		{
 			Color temp;
-			temp.value_ = lhs.value_ * rhs.value_;
+			temp.value_ = left.value_ * right.value_;
 			return temp;
 		}
 
-		friend Color operator *(Color const& lhs, float rhs)
+		friend Color operator *(Color const& left, float right)
 		{
 			Color temp;
-			temp.value_ = lhs.value_ * rhs;
+			temp.value_ = left.value_ * right;
 			return temp;
 		}
-		friend Color operator *(float const& lhs, Color const& rhs)
+		friend Color operator *(float const& left, Color const& right)
 		{
 			Color temp;
-			temp.value_ = lhs * rhs.value_;
+			temp.value_ = left * right.value_;
 			return temp;
 		}
 
-		friend Color operator /(Color const& lhs, float const& rhs)
+		friend Color operator /(Color const& left, float const& right)
 		{
 			Color temp;
-			temp.value_ = lhs.value_ / rhs;
+			temp.value_ = left.value_ / right;
 			return temp;
 		}
 
@@ -92,14 +92,14 @@ namespace XREX
 			return temp;
 		}
 
-		friend bool operator ==(Color const& lhs, Color const& rhs)
+		friend bool operator ==(Color const& left, Color const& right)
 		{
-			return lhs.value_ == rhs.value_;
+			return left.value_ == right.value_;
 		}
 
-		friend bool operator !=(Color const& lhs, Color const& rhs)
+		friend bool operator !=(Color const& left, Color const& right)
 		{
-			return lhs.value_ != rhs.value_;
+			return left.value_ != right.value_;
 		}
 
 		float const* GetArray() const

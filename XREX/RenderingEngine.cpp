@@ -119,10 +119,10 @@ namespace XREX
 				assert(camera->GetComponent<Camera>()->IsActive());
 			}
 			// sort by depth order of viewport, larger first.
-			std::sort(cameras_.begin(), cameras_.end(), [] (SceneObjectSP const& lhs, SceneObjectSP const& rhs)
+			std::sort(cameras_.begin(), cameras_.end(), [] (SceneObjectSP const& left, SceneObjectSP const& right)
 			{
-				auto depthL = lhs->GetComponent<Camera>()->GetViewport()->GetDepthOrder();
-				auto depthR = rhs->GetComponent<Camera>()->GetViewport()->GetDepthOrder();
+				auto depthL = left->GetComponent<Camera>()->GetViewport()->GetDepthOrder();
+				auto depthR = right->GetComponent<Camera>()->GetViewport()->GetDepthOrder();
 				return depthL > depthR;
 			});
 

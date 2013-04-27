@@ -56,81 +56,81 @@ namespace XREX
 		{
 			static_assert(N <= 4, "Vector larger than 4 are not support.");
 			template <typename U>
-			static void DoCopy(T out[N], U const rhs[N])
+			static void DoCopy(T out[N], U const right[N])
 			{
-				out[0] = static_cast<T>(rhs[0]);
-				VectorHelper<T, N - 1>::DoCopy(out + 1, rhs + 1);
+				out[0] = static_cast<T>(right[0]);
+				VectorHelper<T, N - 1>::DoCopy(out + 1, right + 1);
 			}
 
-			static void DoAssign(T out[N], T const& rhs)
+			static void DoAssign(T out[N], T const& right)
 			{
-				out[0] = rhs;
-				VectorHelper<T, N - 1>::DoAssign(out + 1, rhs);
+				out[0] = right;
+				VectorHelper<T, N - 1>::DoAssign(out + 1, right);
 			}
 
-			static void DoAdd(T out[N], T const lhs[N], T const rhs[N])
+			static void DoAdd(T out[N], T const left[N], T const right[N])
 			{
-				out[0] = lhs[0] + rhs[0];
-				VectorHelper<T, N - 1>::DoAdd(out + 1, lhs + 1, rhs + 1);
+				out[0] = left[0] + right[0];
+				VectorHelper<T, N - 1>::DoAdd(out + 1, left + 1, right + 1);
 			}
 
-			static void DoAdd(T out[N], T const lhs[N], T const& rhs)
+			static void DoAdd(T out[N], T const left[N], T const& right)
 			{
-				out[0] = lhs[0] + rhs;
-				VectorHelper<T, N - 1>::DoAdd(out + 1, lhs + 1, rhs);
+				out[0] = left[0] + right;
+				VectorHelper<T, N - 1>::DoAdd(out + 1, left + 1, right);
 			}
 
-			static void DoSubtract(T out[N], T const lhs[N], T const rhs[N])
+			static void DoSubtract(T out[N], T const left[N], T const right[N])
 			{
-				out[0] = lhs[0] - rhs[0];
-				VectorHelper<T, N - 1>::DoSubtract(out + 1, lhs + 1, rhs + 1);
+				out[0] = left[0] - right[0];
+				VectorHelper<T, N - 1>::DoSubtract(out + 1, left + 1, right + 1);
 			}
 
-			static void DoSubtract(T out[N], T const lhs[N], T const& rhs)
+			static void DoSubtract(T out[N], T const left[N], T const& right)
 			{
-				out[0] = lhs[0] - rhs;
-				VectorHelper<T, N - 1>::DoSubtract(out + 1, lhs + 1, rhs);
+				out[0] = left[0] - right;
+				VectorHelper<T, N - 1>::DoSubtract(out + 1, left + 1, right);
 			}
 
-			static void DoMultiply(T out[N], T const lhs[N], T const rhs[N])
+			static void DoMultiply(T out[N], T const left[N], T const right[N])
 			{
-				out[0] = lhs[0] * rhs[0];
-				VectorHelper<T, N - 1>::DoMultiply(out + 1, lhs + 1, rhs + 1);
+				out[0] = left[0] * right[0];
+				VectorHelper<T, N - 1>::DoMultiply(out + 1, left + 1, right + 1);
 			}
 
-			static void DoScale(T out[N], T const lhs[N], T const& rhs)
+			static void DoScale(T out[N], T const left[N], T const& right)
 			{
-				out[0] = lhs[0] * rhs;
-				VectorHelper<T, N - 1>::DoScale(out + 1, lhs + 1, rhs);
+				out[0] = left[0] * right;
+				VectorHelper<T, N - 1>::DoScale(out + 1, left + 1, right);
 			}
 
-			static void DoDivide(T out[N], T const lhs[N], T const rhs[N])
+			static void DoDivide(T out[N], T const left[N], T const right[N])
 			{
-				out[0] = lhs[0] / rhs[0];
-				VectorHelper<T, N - 1>::DoDivide(out + 1, lhs + 1, rhs + 1);
+				out[0] = left[0] / right[0];
+				VectorHelper<T, N - 1>::DoDivide(out + 1, left + 1, right + 1);
 			}
 
-			static void DoNegate(T out[N], T const rhs[N])
+			static void DoNegate(T out[N], T const right[N])
 			{
-				out[0] = -rhs[0];
-				VectorHelper<T, N - 1>::DoNegate(out + 1, rhs + 1);
+				out[0] = -right[0];
+				VectorHelper<T, N - 1>::DoNegate(out + 1, right + 1);
 			}
 
-			static bool DoEqual(T const lhs[N], T const rhs[N])
+			static bool DoEqual(T const left[N], T const right[N])
 			{
-				return VectorHelper<T, 1>::DoEqual(lhs, rhs) && VectorHelper<T, N - 1>::DoEqual(lhs + 1, rhs + 1);
+				return VectorHelper<T, 1>::DoEqual(left, right) && VectorHelper<T, N - 1>::DoEqual(left + 1, right + 1);
 			}
 
-			static void DoSwap(T lhs[N], T rhs[N])
+			static void DoSwap(T left[N], T right[N])
 			{
-				std::swap(lhs[0], rhs[0]);
-				VectorHelper<T, N - 1>::DoSwap(lhs + 1, rhs + 1);
+				std::swap(left[0], right[0]);
+				VectorHelper<T, N - 1>::DoSwap(left + 1, right + 1);
 			}
 
 
-			static T DoDot(T const lhs[1], T const rhs[1])
+			static T DoDot(T const left[1], T const right[1])
 			{
-				return lhs[0] * rhs[0] + VectorHelper<T, N - 1>::DoDot(lhs + 1, rhs + 1);
+				return left[0] * right[0] + VectorHelper<T, N - 1>::DoDot(left + 1, right + 1);
 			}
 		};
 
@@ -138,88 +138,88 @@ namespace XREX
 		struct VectorHelper<T, 1>
 		{
 			template <typename U>
-			static void DoCopy(T out[1], U const rhs[1])
+			static void DoCopy(T out[1], U const right[1])
 			{
-				out[0] = static_cast<T>(rhs[0]);
+				out[0] = static_cast<T>(right[0]);
 			}
 
-			static void DoAssign(T out[1], T const& rhs)
+			static void DoAssign(T out[1], T const& right)
 			{
-				out[0] = rhs;
+				out[0] = right;
 			}
 
-			static void DoAdd(T out[1], T const lhs[1], T const rhs[1])
+			static void DoAdd(T out[1], T const left[1], T const right[1])
 			{
-				out[0] = lhs[0] + rhs[0];
+				out[0] = left[0] + right[0];
 			}
 
-			static void DoAdd(T out[1], T const lhs[1], T const rhs)
+			static void DoAdd(T out[1], T const left[1], T const right)
 			{
-				out[0] = lhs[0] + rhs;
+				out[0] = left[0] + right;
 			}
 
-			static void DoSubtract(T out[1], T const lhs[1], T const rhs[1])
+			static void DoSubtract(T out[1], T const left[1], T const right[1])
 			{
-				out[0] = lhs[0] - rhs[0];
+				out[0] = left[0] - right[0];
 			}
 
-			static void DoSubtract(T out[1], T const lhs[1], T const& rhs)
+			static void DoSubtract(T out[1], T const left[1], T const& right)
 			{
-				out[0] = lhs[0] - rhs;
+				out[0] = left[0] - right;
 			}
 
-			static void DoMultiply(T out[1], T const lhs[1], T const rhs[1])
+			static void DoMultiply(T out[1], T const left[1], T const right[1])
 			{
-				out[0] = lhs[0] * rhs[0];
+				out[0] = left[0] * right[0];
 			}
 
-			static void DoScale(T out[1], T const lhs[1], T const& rhs)
+			static void DoScale(T out[1], T const left[1], T const& right)
 			{
-				out[0] = lhs[0] * rhs;
+				out[0] = left[0] * right;
 			}
 
-			static void DoDivide(T out[1], T const lhs[1], T const rhs[1])
+			static void DoDivide(T out[1], T const left[1], T const right[1])
 			{
-				out[0] = lhs[0] / rhs[0];
+				out[0] = left[0] / right[0];
 			}
 
-			static void DoNegate(T out[1], T const rhs[1])
+			static void DoNegate(T out[1], T const right[1])
 			{
-				out[0] = -rhs[0];
+				out[0] = -right[0];
 			}
 
-			static bool DoEqual(T const lhs[1], T const rhs[1])
+			static bool DoEqual(T const left[1], T const right[1])
 			{
-				return lhs[0] == rhs[0];
+				return left[0] == right[0];
 			}
 
-			static T DoDot(T const lhs[1], T const rhs[1])
+			static T DoDot(T const left[1], T const right[1])
 			{
-				return lhs[0] * rhs[0];
+				return left[0] * right[0];
 			}
 		};
 
 		template <typename T>
 		struct MatrixHepler
 		{
-			static void DoMultiply(T out[16], T const lhs[16], T const rhs[16])
+			static void DoMultiply(T out[16], T const left[16], T const right[16])
 			{
-				out[0] = rhs[0] * lhs[0] + rhs[1] * lhs[4] + rhs[2] * lhs[8] + rhs[3] * lhs[12];
-				out[1] = rhs[0] * lhs[1] + rhs[1] * lhs[5] + rhs[2] * lhs[9] + rhs[3] * lhs[13];
-				out[2] = rhs[0] * lhs[2] + rhs[1] * lhs[6] + rhs[2] * lhs[10] + rhs[3] * lhs[14];
-				out[3] = rhs[0] * lhs[3] + rhs[1] * lhs[7] + rhs[2] * lhs[11] + rhs[3] * lhs[15];
-				out[4] = rhs[4] * lhs[0] + rhs[5] * lhs[4] + rhs[6] * lhs[8] + rhs[7] * lhs[12];
-				out[5] = rhs[4] * lhs[1] + rhs[5] * lhs[5] + rhs[6] * lhs[9] + rhs[7] * lhs[13];
-				out[6] = rhs[4] * lhs[2] + rhs[5] * lhs[6] + rhs[6] * lhs[10] + rhs[7] * lhs[14];
-				out[7] = rhs[4] * lhs[3] + rhs[5] * lhs[7] + rhs[6] * lhs[11] + rhs[7] * lhs[15];
-				out[8] = rhs[8] * lhs[0] + rhs[9] * lhs[4] + rhs[10] * lhs[8] + rhs[11] * lhs[12];
-				out[9] = rhs[8] * lhs[1] + rhs[9] * lhs[5] + rhs[10] * lhs[9] + rhs[11] * lhs[13];
-				out[10] = rhs[8] * lhs[2] + rhs[9] * lhs[6] + rhs[10] * lhs[10] + rhs[11] * lhs[14];
-				out[11] = rhs[8] * lhs[3] + rhs[9] * lhs[7] + rhs[10] * lhs[11] + rhs[11] * lhs[15];
-				out[12] = rhs[12] * lhs[0] + rhs[13] * lhs[4] + rhs[14] * lhs[8] + rhs[15] * lhs[12];
-				out[13] = rhs[12] * lhs[1] + rhs[13] * lhs[5] + rhs[14] * lhs[9] + rhs[15] * lhs[13];
-				out[14] = rhs[12] * lhs[2] + rhs[13] * lhs[6] + rhs[14] * lhs[10] + rhs[15] * lhs[14];
-				out[15] = rhs[12] * lhs[3] + rhs[13] * lhs[7] + rhs[14] * lhs[11] + rhs[15] * lhs[15];
+				out[0] = right[0] * left[0] + right[1] * left[4] + right[2] * left[8] + right[3] * left[12];
+				out[1] = right[0] * left[1] + right[1] * left[5] + right[2] * left[9] + right[3] * left[13];
+				out[2] = right[0] * left[2] + right[1] * left[6] + right[2] * left[10] + right[3] * left[14];
+				out[3] = right[0] * left[3] + right[1] * left[7] + right[2] * left[11] + right[3] * left[15];
+				out[4] = right[4] * left[0] + right[5] * left[4] + right[6] * left[8] + right[7] * left[12];
+				out[5] = right[4] * left[1] + right[5] * left[5] + right[6] * left[9] + right[7] * left[13];
+				out[6] = right[4] * left[2] + right[5] * left[6] + right[6] * left[10] + right[7] * left[14];
+				out[7] = right[4] * left[3] + right[5] * left[7] + right[6] * left[11] + right[7] * left[15];
+				out[8] = right[8] * left[0] + right[9] * left[4] + right[10] * left[8] + right[11] * left[12];
+				out[9] = right[8] * left[1] + right[9] * left[5] + right[10] * left[9] + right[11] * left[13];
+				out[10] = right[8] * left[2] + right[9] * left[6] + right[10] * left[10] + right[11] * left[14];
+				out[11] = right[8] * left[3] + right[9] * left[7] + right[10] * left[11] + right[11] * left[15];
+				out[12] = right[12] * left[0] + right[13] * left[4] + right[14] * left[8] + right[15] * left[12];
+				out[13] = right[12] * left[1] + right[13] * left[5] + right[14] * left[9] + right[15] * left[13];
+				out[14] = right[12] * left[2] + right[13] * left[6] + right[14] * left[10] + right[15] * left[14];
+				out[15] = right[12] * left[3] + right[13] * left[7] + right[14] * left[11] + right[15] * left[15];
 			}
 
 			static void CalculateDeterminant(T vectors_[16]) 

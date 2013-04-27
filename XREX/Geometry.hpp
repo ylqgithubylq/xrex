@@ -29,31 +29,31 @@ namespace XREX
 			auto& zero = VectorT<T, 3>::Zero;
 			assert(direction != zero);
 		}
-		RayT(RayT const& rhs)
-			: origin_(rhs.origin_), direction_(rhs.direction_)
+		RayT(RayT const& right)
+			: origin_(right.origin_), direction_(right.direction_)
 		{
 		}
 		template <typename U>
-		RayT(RayT<U> const& rhs)
-			: origin_(rhs.origin_), direction_(rhs.direction_)
+		RayT(RayT<U> const& right)
+			: origin_(right.origin_), direction_(right.direction_)
 		{
 		}
 
-		RayT& operator =(RayT const& rhs)
+		RayT& operator =(RayT const& right)
 		{
-			if (this != &rhs)
+			if (this != &right)
 			{
-				origin_ = rhs.origin_;
-				direction_ = rhs.direction_;
+				origin_ = right.origin_;
+				direction_ = right.direction_;
 			}
 		}
 		template <typename U>
-		RayT& operator =(RayT<U> const& rhs)
+		RayT& operator =(RayT<U> const& right)
 		{
-			if (this != &rhs)
+			if (this != &right)
 			{
-				origin_ = rhs.origin_;
-				direction_ = rhs.direction_;
+				origin_ = right.origin_;
+				direction_ = right.direction_;
 			}
 		}
 
@@ -110,31 +110,31 @@ namespace XREX
 		{
 		}
 
-		PlaneT(PlaneT const& rhs)
-			: normal_(rhs.normal_), distance_(rhs.distance_)
+		PlaneT(PlaneT const& right)
+			: normal_(right.normal_), distance_(right.distance_)
 		{
 		}
 		template <typename U>
-		PlaneT(PlaneT<U> const& rhs)
-			: normal_(rhs.normal_), distance_(rhs.distance_)
+		PlaneT(PlaneT<U> const& right)
+			: normal_(right.normal_), distance_(right.distance_)
 		{
 		}
 
-		PlaneT& operator =(PlaneT const& rhs)
+		PlaneT& operator =(PlaneT const& right)
 		{
-			if (this != &rhs)
+			if (this != &right)
 			{
-				normal_ = rhs.normal_;
-				distance_ = rhs.distance_;
+				normal_ = right.normal_;
+				distance_ = right.distance_;
 			}
 		}
 		template <typename U>
-		PlaneT& operator =(PlaneT<U> const& rhs)
+		PlaneT& operator =(PlaneT<U> const& right)
 		{
-			if (this != &rhs)
+			if (this != &right)
 			{
-				normal_ = rhs.normal_;
-				distance_ = rhs.distance_;
+				normal_ = right.normal_;
+				distance_ = right.distance_;
 			}
 		}
 
