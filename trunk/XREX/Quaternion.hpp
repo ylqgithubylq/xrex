@@ -41,17 +41,17 @@ namespace XREX
 		QuaternionT()
 		{
 		}
-		QuaternionT(QuaternionT const& rhs)
-			: values_(rhs.values_)
+		QuaternionT(QuaternionT const& right)
+			: values_(right.values_)
 		{
 		}
 		template <typename U>
-		explicit QuaternionT(QuaternionT<U> const& rhs)
-			: values_(rhs.values_)
+		explicit QuaternionT(QuaternionT<U> const& right)
+			: values_(right.values_)
 		{
 		}
-		explicit QuaternionT(VectorT<T, 4> const& rhs)
-			: values_(rhs)
+		explicit QuaternionT(VectorT<T, 4> const& right)
+			: values_(right)
 		{
 		}
 		QuaternionT(VectorT<T, 3> const& axis, T const& w)
@@ -63,18 +63,18 @@ namespace XREX
 		{
 		}
 
-		QuaternionT& operator =(QuaternionT const& rhs)
+		QuaternionT& operator =(QuaternionT const& right)
 		{
-			if (this != &rhs)
+			if (this != &right)
 			{
-				values_ = rhs.values_;
+				values_ = right.values_;
 			}
 			return *this;
 		}
 		template <typename U>
-		QuaternionT& operator =(QuaternionT<U> const& rhs)
+		QuaternionT& operator =(QuaternionT<U> const& right)
 		{
-			values_ = rhs.values_;
+			values_ = right.values_;
 			return *this;
 		}
 
@@ -115,39 +115,39 @@ namespace XREX
 			return *reinterpret_cast<VectorT<T, 3> const*>(&values_);
 		}
 
-		friend QuaternionT operator +(QuaternionT const& lhs, QuaternionT const& rhs)
+		friend QuaternionT operator +(QuaternionT const& left, QuaternionT const& right)
 		{
-			return QuaternionT(lhs.values_ + rhs.values_);
+			return QuaternionT(left.values_ + right.values_);
 		}
 
-		friend QuaternionT operator -(QuaternionT const& lhs, QuaternionT const& rhs)
+		friend QuaternionT operator -(QuaternionT const& left, QuaternionT const& right)
 		{
-			return QuaternionT(lhs.values_ - rhs.values_);
+			return QuaternionT(left.values_ - right.values_);
 
 		}
 
-		friend QuaternionT operator *(QuaternionT const& lhs, QuaternionT const& rhs)
+		friend QuaternionT operator *(QuaternionT const& left, QuaternionT const& right)
 		{
 			// see Mathematics for 3D Game Programming and Computer Graphics, 3rd. 4.6.1 Quaternions Mathematics
 			return QuaternionT(
-				lhs.W() * rhs.X() + lhs.X() * rhs.W() + lhs.Y() * rhs.Z() - lhs.Z() * rhs.Y(),
-				lhs.W() * rhs.Y() + lhs.Y() * rhs.W() + lhs.Z() * rhs.X() - lhs.X() * rhs.Z(),
-				lhs.W() * rhs.Z() + lhs.Z() * rhs.W() + lhs.X() * rhs.Y() - lhs.Y() * rhs.X(),
-				lhs.W() * rhs.W() - lhs.X() * rhs.X() - lhs.Y() * rhs.Y() - lhs.Z() * rhs.Z());
+				left.W() * right.X() + left.X() * right.W() + left.Y() * right.Z() - left.Z() * right.Y(),
+				left.W() * right.Y() + left.Y() * right.W() + left.Z() * right.X() - left.X() * right.Z(),
+				left.W() * right.Z() + left.Z() * right.W() + left.X() * right.Y() - left.Y() * right.X(),
+				left.W() * right.W() - left.X() * right.X() - left.Y() * right.Y() - left.Z() * right.Z());
 		}
 
-		friend QuaternionT operator *(QuaternionT const& lhs, T const& rhs)
+		friend QuaternionT operator *(QuaternionT const& left, T const& right)
 		{
-			return QuaternionT(lhs.values_ * rhs);
+			return QuaternionT(left.values_ * right);
 		}
-		friend QuaternionT operator *(T const& lhs, QuaternionT const& rhs)
+		friend QuaternionT operator *(T const& left, QuaternionT const& right)
 		{
-			return QuaternionT(lhs * rhs.values_);
+			return QuaternionT(left * right.values_);
 		}
 
-		friend QuaternionT operator /(QuaternionT const& lhs, T const& rhs)
+		friend QuaternionT operator /(QuaternionT const& left, T const& right)
 		{
-			return QuaternionT(lhs.values_ / rhs);
+			return QuaternionT(left.values_ / right);
 		}
 
 		QuaternionT const& operator +() const
@@ -159,14 +159,14 @@ namespace XREX
 			return QuaternionT(-values_);
 		}
 
-		friend bool operator ==(QuaternionT const& lhs, QuaternionT const& rhs)
+		friend bool operator ==(QuaternionT const& left, QuaternionT const& right)
 		{
-			return lhs.values_ == rhs.values_;
+			return left.values_ == right.values_;
 		}
 
-		friend bool	operator !=(QuaternionT const& lhs, QuaternionT const& rhs)
+		friend bool	operator !=(QuaternionT const& left, QuaternionT const& right)
 		{
-			return lhs.values_ != rhs.values_;
+			return left.values_ != right.values_;
 		}
 
 		QuaternionT Normalize() const

@@ -23,13 +23,13 @@ namespace XREX
 			ActionMap()
 			{
 			}
-			ActionMap(ActionMap&& rhs)
-				: actionMap_(std::move(rhs.actionMap_))
+			ActionMap(ActionMap&& right)
+				: actionMap_(std::move(right.actionMap_))
 			{
 			}
-			ActionMap& operator =(ActionMap&& rhs)
+			ActionMap& operator =(ActionMap&& right)
 			{
-				actionMap_ = std::move(rhs.actionMap_);
+				actionMap_ = std::move(right.actionMap_);
 				return *this;
 			}
 			void Set(InputCenter::InputSemantic inputSemantic, int32 mappedSemantic)

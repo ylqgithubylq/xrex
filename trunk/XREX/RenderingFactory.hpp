@@ -91,6 +91,10 @@ namespace XREX
 		{
 			return MakeSP<VertexBuffer>(usage, data, std::move(description));
 		}
+		VertexBufferSP CreateVertexBuffer(GraphicsBuffer::Usage usage, uint32 elementSizeInBytes, VertexBuffer::DataLayout&& description)
+		{
+			return MakeSP<VertexBuffer>(usage, elementSizeInBytes, std::move(description));
+		}
 		template <typename T>
 		IndexBufferSP CreateIndexBuffer(GraphicsBuffer::Usage usage, std::vector<T> const& data, IndexBuffer::PrimitiveType primitiveType)
 		{

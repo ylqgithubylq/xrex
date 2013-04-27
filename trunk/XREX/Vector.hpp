@@ -49,12 +49,12 @@ namespace XREX
 		VectorT()
 		{
 		}
-		explicit VectorT(T const* rhs)
+		explicit VectorT(T const* right)
 		{
-			MathHelper::VectorHelper<T, N>::DoCopy(&values_[0], rhs);
+			MathHelper::VectorHelper<T, N>::DoCopy(&values_[0], right);
 		}
-		VectorT(VectorT const& rhs)
-			: values_(rhs.values_)
+		VectorT(VectorT const& right)
+			: values_(right.values_)
 		{
 		}
 	private:
@@ -65,25 +65,25 @@ namespace XREX
 		{
 		};
 		template <typename U, uint32 M>
-		void DoConstructFromOtherSizedVector(VectorT<U, M> const& rhs, SmallerSizeTag)
+		void DoConstructFromOtherSizedVector(VectorT<U, M> const& right, SmallerSizeTag)
 		{
-			MathHelper::VectorHelper<T, M>::DoCopy(&values_[0], &rhs[0]);
+			MathHelper::VectorHelper<T, M>::DoCopy(&values_[0], &right[0]);
 			MathHelper::VectorHelper<T, N - M>::DoAssign(&values_[M], 0); // fill rest with 0
 		}
 		template <typename U, uint32 M>
-		void DoConstructFromOtherSizedVector(VectorT<U, M> const& rhs, LargerSizeTag)
+		void DoConstructFromOtherSizedVector(VectorT<U, M> const& right, LargerSizeTag)
 		{
-			MathHelper::VectorHelper<T, N>::DoCopy(&values_[0], &rhs[0]);
+			MathHelper::VectorHelper<T, N>::DoCopy(&values_[0], &right[0]);
 		}
 	public:
 		template <typename U, uint32 M>
-		explicit VectorT(VectorT<U, M> const& rhs)
+		explicit VectorT(VectorT<U, M> const& right)
 		{
-			DoConstructFromOtherSizedVector(rhs, std::conditional<M >= N, LargerSizeTag, SmallerSizeTag>::type());
+			DoConstructFromOtherSizedVector(right, std::conditional<M >= N, LargerSizeTag, SmallerSizeTag>::type());
 		}
-		explicit VectorT(T const& rhs)
+		explicit VectorT(T const& right)
 		{
-			MathHelper::VectorHelper<T, N>::DoAssign(&values_[0], rhs);
+			MathHelper::VectorHelper<T, N>::DoAssign(&values_[0], right);
 		}
 		VectorT(T const& x, T const& y)
 		{
@@ -109,18 +109,18 @@ namespace XREX
 			values_[2] = z;
 			values_[3] = w;
 		}
-		VectorT& operator =(VectorT const& rhs)
+		VectorT& operator =(VectorT const& right)
 		{
-			if (this != &rhs)
+			if (this != &right)
 			{
-				values_ = rhs.values_;
+				values_ = right.values_;
 			}
 			return *this;
 		}
 		template <typename U, uint32 M>
-		VectorT& operator =(VectorT<U, M> const& rhs)
+		VectorT& operator =(VectorT<U, M> const& right)
 		{
-			DoConstructFromOtherSizedVector(rhs, std::conditional<M >= N, LargerSizeTag, SmallerSizeTag>::type());
+			DoConstructFromOtherSizedVector(right, std::conditional<M >= N, LargerSizeTag, SmallerSizeTag>::type());
 			return *this;
 		}
 
@@ -156,51 +156,51 @@ namespace XREX
 		}
 
 
-		friend VectorT operator +(VectorT const& lhs, VectorT const& rhs)
+		friend VectorT operator +(VectorT const& left, VectorT const& right)
 		{
 			VectorT temp;
-			MathHelper::VectorHelper<T, N>::DoAdd(&temp.values_[0], &lhs.values_[0], &rhs.values_[0]);
+			MathHelper::VectorHelper<T, N>::DoAdd(&temp.values_[0], &left.values_[0], &right.values_[0]);
 			return temp;
 		}
 
-		friend VectorT operator -(VectorT const& lhs, VectorT const& rhs)
+		friend VectorT operator -(VectorT const& left, VectorT const& right)
 		{
 			VectorT temp;
-			MathHelper::VectorHelper<T, N>::DoSubtract(&temp.values_[0], &lhs.values_[0], &rhs.values_[0]);
+			MathHelper::VectorHelper<T, N>::DoSubtract(&temp.values_[0], &left.values_[0], &right.values_[0]);
 			return temp;
 		}
 
-		friend VectorT operator *(VectorT const& lhs, VectorT const& rhs)
+		friend VectorT operator *(VectorT const& left, VectorT const& right)
 		{
 			VectorT temp;
-			MathHelper::VectorHelper<T, N>::DoMultiply(&temp.values_[0], &lhs.values_[0], &rhs.values_[0]);
+			MathHelper::VectorHelper<T, N>::DoMultiply(&temp.values_[0], &left.values_[0], &right.values_[0]);
 			return temp;
 		}
 
-		friend VectorT operator *(VectorT const& lhs, T const& rhs)
+		friend VectorT operator *(VectorT const& left, T const& right)
 		{
 			VectorT temp;
-			MathHelper::VectorHelper<T, N>::DoScale(&temp.values_[0], &lhs.values_[0], rhs);
+			MathHelper::VectorHelper<T, N>::DoScale(&temp.values_[0], &left.values_[0], right);
 			return temp;
 		}
-		friend VectorT operator *(T const& lhs, VectorT const& rhs)
+		friend VectorT operator *(T const& left, VectorT const& right)
 		{
 			VectorT temp;
-			MathHelper::VectorHelper<T, N>::DoScale(&temp.values_[0], &rhs.values_[0], lhs);
-			return temp;
-		}
-
-		friend VectorT operator /(VectorT const& lhs, VectorT const& rhs)
-		{
-			VectorT temp;
-			MathHelper::VectorHelper<T, N>::DoDivide(&temp.values_[0], &lhs.values_[0], &rhs.values_[0]);
+			MathHelper::VectorHelper<T, N>::DoScale(&temp.values_[0], &right.values_[0], left);
 			return temp;
 		}
 
-		friend VectorT operator /(VectorT const& lhs, T const& rhs)
+		friend VectorT operator /(VectorT const& left, VectorT const& right)
 		{
 			VectorT temp;
-			MathHelper::VectorHelper<T, N>::DoScale(&temp.values_[0], &lhs.values_[0], T(1) / rhs);
+			MathHelper::VectorHelper<T, N>::DoDivide(&temp.values_[0], &left.values_[0], &right.values_[0]);
+			return temp;
+		}
+
+		friend VectorT operator /(VectorT const& left, T const& right)
+		{
+			VectorT temp;
+			MathHelper::VectorHelper<T, N>::DoScale(&temp.values_[0], &left.values_[0], T(1) / right);
 			return temp;
 		}
 
@@ -215,15 +215,15 @@ namespace XREX
 			return temp;
 		}
 
-		friend bool operator ==(VectorT const& lhs, VectorT const& rhs)
+		friend bool operator ==(VectorT const& left, VectorT const& right)
 		{
-			return lhs.values_ == rhs.values_;
-			//return MathHelper::VectorHelper<T, N>::DoEqual(&lhs[0], &rhs[0]);
+			return left.values_ == right.values_;
+			//return MathHelper::VectorHelper<T, N>::DoEqual(&left[0], &right[0]);
 		}
 
-		friend bool	operator !=(VectorT const& lhs, VectorT const& rhs)
+		friend bool	operator !=(VectorT const& left, VectorT const& right)
 		{
-			return lhs.values_ != rhs.values_;
+			return left.values_ != right.values_;
 		}
 
 		VectorT Normalize() const // float & double only
@@ -242,9 +242,9 @@ namespace XREX
 			return Dot(*this, *this);
 		}
 
-		friend T Dot(VectorT const& lhs, VectorT const& rhs)
+		friend T Dot(VectorT const& left, VectorT const& right)
 		{
-			return MathHelper::VectorHelper<T, N>::DoDot(&lhs.values_[0], &rhs.values_[0]);
+			return MathHelper::VectorHelper<T, N>::DoDot(&left.values_[0], &right.values_[0]);
 		}
 
 		T const* GetArray() const
@@ -262,12 +262,12 @@ namespace XREX
 
 
 	template <typename T>
-	VectorT<T, 3> Cross(VectorT<T, 3> const& lhs, VectorT<T, 3> const& rhs)
+	VectorT<T, 3> Cross(VectorT<T, 3> const& left, VectorT<T, 3> const& right)
 	{
 		return VectorT<T, 3>(
-			lhs.Y() * rhs.Z() - lhs.Z() * rhs.Y(),
-			lhs.Z() * rhs.X() - lhs.X() * rhs.Z(),
-			lhs.X() * rhs.Y() - lhs.Y() * rhs.X());
+			left.Y() * right.Z() - left.Z() * right.Y(),
+			left.Z() * right.X() - left.X() * right.Z(),
+			left.X() * right.Y() - left.Y() * right.X());
 	}
 
 

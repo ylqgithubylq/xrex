@@ -46,66 +46,66 @@ namespace XREX
 		{
 		}
 		/*
-		 *	Create a scalar equivalent matrix, fill principal diagonal with rhs.
+		 *	Create a scalar equivalent matrix, fill principal diagonal with right.
 		 */
-		explicit Matrix4T(T const& rhs)
+		explicit Matrix4T(T const& right)
 		{
 			T* temp = GetFirstElementNonConstPointer(*this);
-			temp[0] = rhs;
+			temp[0] = right;
 			temp[1] = 0;
 			temp[2] = 0;
 			temp[3] = 0;
 
 			temp[4] = 0;
-			temp[5] = rhs;
+			temp[5] = right;
 			temp[6] = 0;
 			temp[7] = 0;
 
 			temp[8] = 0;
 			temp[9] = 0;
-			temp[10] = rhs;
+			temp[10] = right;
 			temp[11] = 0;
 
 			temp[12] = 0;
 			temp[13] = 0;
 			temp[14] = 0;
-			temp[15] = rhs;
+			temp[15] = right;
 		}
 		/*
-		 *	@rhs: column major array.
+		 *	@right: column major array.
 		 */
-		explicit Matrix4T(T const* rhs)
+		explicit Matrix4T(T const* right)
 		{
 			for (uint32 i = 0; i < Dimension; ++i)
 			{
-				vectors_[i] = VectorT<T, Dimension>(rhs);
-				rhs += Dimension;
+				vectors_[i] = VectorT<T, Dimension>(right);
+				right += Dimension;
 			}
 		}
 		/*
-		 *	@rhs: column major array.
+		 *	@right: column major array.
 		 */
-		explicit Matrix4T(std::array<T, ElementCount> const& rhs) // TODO need test
+		explicit Matrix4T(std::array<T, ElementCount> const& right) // TODO need test
 		{
 			for (uint32 i = 0; i < Dimension; ++i)
 			{
-				vectors_[i] = VectorT<T, Dimension>(&rhs[i * 4]);
+				vectors_[i] = VectorT<T, Dimension>(&right[i * 4]);
 			}
 		}
 		/*
-		 *	@rhs: column major vectors.
+		 *	@right: column major vectors.
 		 */
-		explicit Matrix4T(VectorT<VectorT<T, Dimension>, Dimension> const& rhs)
-			: vectors_(rhs)
+		explicit Matrix4T(VectorT<VectorT<T, Dimension>, Dimension> const& right)
+			: vectors_(right)
 		{
 		}
-		Matrix4T(Matrix4T const& rhs)
-			: vectors_(rhs.vectors_)
+		Matrix4T(Matrix4T const& right)
+			: vectors_(right.vectors_)
 		{
 		}
 		template <typename U>
-		Matrix4T(Matrix4T<U> const& rhs)
-			: vectors_(rhs.vectors_)
+		Matrix4T(Matrix4T<U> const& right)
+			: vectors_(right.vectors_)
 		{
 		}
 		/*
@@ -168,49 +168,49 @@ namespace XREX
 			return vectors_[index];
 		}
 
-		friend Matrix4T operator +(Matrix4T const& lhs, Matrix4T const& rhs)
+		friend Matrix4T operator +(Matrix4T const& left, Matrix4T const& right)
 		{
-			return Matrix4T(lhs.vectors_ + rhs.vectors_);
+			return Matrix4T(left.vectors_ + right.vectors_);
 		}
-		friend Matrix4T operator -(Matrix4T const& lhs, Matrix4T const& rhs)
+		friend Matrix4T operator -(Matrix4T const& left, Matrix4T const& right)
 		{
-			return Matrix4T(lhs.vectors_ - rhs.vectors_);
+			return Matrix4T(left.vectors_ - right.vectors_);
 		}
 
-		friend Matrix4T operator *(Matrix4T const& lhs, Matrix4T const& rhs)
+		friend Matrix4T operator *(Matrix4T const& left, Matrix4T const& right)
 		{
 			Matrix4T temp;
-			MathHelper::MatrixHepler<T>::DoMultiply(Matrix4T::GetFirstElementNonConstPointer(temp), Matrix4T::GetFirstElementNonConstPointer(lhs), Matrix4T::GetFirstElementNonConstPointer(rhs));
+			MathHelper::MatrixHepler<T>::DoMultiply(Matrix4T::GetFirstElementNonConstPointer(temp), Matrix4T::GetFirstElementNonConstPointer(left), Matrix4T::GetFirstElementNonConstPointer(right));
 			return temp;
 		}
-		friend Matrix4T operator *(Matrix4T const& lhs, T const& rhs)
+		friend Matrix4T operator *(Matrix4T const& left, T const& right)
 		{
-			return Matrix4T(lhs.vectors_ * VectorT<T, Dimension>(rhs));
+			return Matrix4T(left.vectors_ * VectorT<T, Dimension>(right));
 		}
-		friend Matrix4T operator *(T const& lhs, Matrix4T const& rhs)
+		friend Matrix4T operator *(T const& left, Matrix4T const& right)
 		{
-			return Matrix4T(VectorT<T, Dimension>(lhs) * rhs.vectors_);
-		}
-
-		friend Matrix4T operator /(Matrix4T const& lhs, T const& rhs)
-		{
-			return Matrix4T(lhs.vectors_ / VectorT<T, Dimension>(rhs));
+			return Matrix4T(VectorT<T, Dimension>(left) * right.vectors_);
 		}
 
-		Matrix4T& operator =(Matrix4T const& rhs)
+		friend Matrix4T operator /(Matrix4T const& left, T const& right)
 		{
-			if (this != &rhs)
+			return Matrix4T(left.vectors_ / VectorT<T, Dimension>(right));
+		}
+
+		Matrix4T& operator =(Matrix4T const& right)
+		{
+			if (this != &right)
 			{
-				vectors_ = rhs.vectors_;
+				vectors_ = right.vectors_;
 			}
 			return *this;
 		}
 		template <typename U>
-		Matrix4T const& operator =(Matrix4T<U> const& rhs)
+		Matrix4T const& operator =(Matrix4T<U> const& right)
 		{
-			if (this != &rhs)
+			if (this != &right)
 			{
-				vectors_ = rhs.vectors_;
+				vectors_ = right.vectors_;
 			}
 			return *this;
 		}
@@ -226,13 +226,13 @@ namespace XREX
 			return temp;
 		}
 
-		friend bool operator ==(Matrix4T const& lhs, Matrix4T const& rhs)
+		friend bool operator ==(Matrix4T const& left, Matrix4T const& right)
 		{
-			return lhs.vectors_ == rhs.vectors_;
+			return left.vectors_ == right.vectors_;
 		}
-		friend bool operator !=(Matrix4T const& lhs, Matrix4T const& rhs)
+		friend bool operator !=(Matrix4T const& left, Matrix4T const& right)
 		{
-			return lhs.vectors_ != rhs.vectors_;
+			return left.vectors_ != right.vectors_;
 		}
 
 		Matrix4T Transpose() const

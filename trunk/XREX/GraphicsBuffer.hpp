@@ -49,10 +49,10 @@ namespace XREX
 				data_ = buffer_.Map(type);
 			}
 		public:
-			BufferMapper(BufferMapper&& rhs)
-				: buffer_(rhs.buffer_), data_(rhs.data_)
+			BufferMapper(BufferMapper&& right)
+				: buffer_(right.buffer_), data_(right.data_)
 			{
-				rhs.data_ = nullptr; // prevent Unmap of rhs in destructor
+				right.data_ = nullptr; // prevent Unmap of right in destructor
 			}
 
 			~BufferMapper()
@@ -76,6 +76,8 @@ namespace XREX
 		};
 
 	public:
+		GraphicsBuffer(BufferType type, Usage usage, uint32 sizeInBytes);
+
 		GraphicsBuffer(BufferType type, Usage usage, void const* data, uint32 sizeInBytes);
 
 		virtual ~GraphicsBuffer();
@@ -97,6 +99,8 @@ namespace XREX
 			return sizeInBytes_;
 		}
 		void Resize(uint32 sizeInBytes);
+
+		void UpdateData(void const* data, uint32 offset = 0);
 
 		void Bind();
 		virtual void Unbind();
@@ -152,8 +156,8 @@ namespace XREX
 				: vertexCount_(vertexCount)
 			{
 			}
-			DataLayout(DataLayout&& rhs)
-				: vertexCount_(rhs.vertexCount_), channelLayouts_(std::move(rhs.channelLayouts_))
+			DataLayout(DataLayout&& right)
+				: vertexCount_(right.vertexCount_), channelLayouts_(std::move(right.channelLayouts_))
 			{
 			}
 
@@ -179,7 +183,7 @@ namespace XREX
 
 	public:
 		/*
-		 *	For single-channel buffer.
+		 *	Short cut for single-channel buffer.
 		 *	@data: vector of type T, T must be the actual type of element in data.
 		 */
 		template <typename T>
@@ -197,6 +201,15 @@ namespace XREX
 		template <typename T>
 		VertexBuffer(Usage usage, std::vector<T> const& data, DataLayout&& layout)
 			: GraphicsBuffer(BufferType::Vertex, usage, data.data(), data.size() * sizeof(T)), layout_(std::move(layout))
+		{
+		}
+
+		/*
+		 *	Create a buffer without initial data.
+		 *	@elementSizeInBytes: element size in bytes of one vertex.
+		 */
+		VertexBuffer(Usage usage, uint32 elementSizeInBytes, DataLayout&& layout)
+			: GraphicsBuffer(BufferType::Vertex, usage, elementSizeInBytes * layout.GetVertexCount()), layout_(std::move(layout))
 		{
 		}
 
