@@ -2,7 +2,8 @@
 
 #include "XREXContext.hpp"
 
-#include "GLWindow.hpp"
+#include "Window.hpp"
+#include "GraphicsContext.hpp"
 
 #include "RenderingFactory.hpp"
 #include "RenderingEngine.hpp"
@@ -37,27 +38,45 @@ namespace XREX
 	void XREXContext::Initialize(Settings const& settings)
 	{
 		settings_ = settings;
-		resourceManager_ = MakeUP<ResourceManager>(settings.rootPath);
-		renderingFactory_ = MakeUP<RenderingFactory>();
+		resourceManager_ = MakeUP<ResourceManager>(settings_.rootPath);
 		inputCenter_ = MakeUP<InputCenter>();
 		resourceLoader_ = MakeUP<LocalResourceLoader>();
 
-		InitializeMainWindow(settings.windowTitle, settings.renderingSettings);
-		renderingFactory_->Initialize();
-		renderingEngine_ = &renderingFactory_->GetRenderingEngine();
-		renderingEngine_->Initialize();
+		InitializeMainWindow();
+		InitializeGraphicsContext();
+
+		mainWindow_->SetMessageIdle([this] () // using GUI thread do the rendering
+		{
+			RenderAFrame();
+		});
 	}
 
 
-	void XREXContext::InitializeMainWindow(std::wstring const& name, RenderingSettings const& settings)
+	void XREXContext::InitializeMainWindow()
 	{
-		mainWindow_ = std::move(MakeUP<GLWindow>(name, settings));
+		mainWindow_ = MakeUP<Window>(settings_);
+		// window size and position will change while creating window, set those values after creating window.
+		Size<uint32> clientRegionSize = mainWindow_->GetClientRegionSize();
+		settings_.renderingSettings.width = clientRegionSize.x;
+		settings_.renderingSettings.height = clientRegionSize.y;
+		Size<int32> windowPosition = mainWindow_->GetWindowPosition();
+		settings_.renderingSettings.left = windowPosition.x;
+		settings_.renderingSettings.top = windowPosition.y;
 	}
+
+
+	void XREXContext::InitializeGraphicsContext()
+	{
+		renderingFactory_ = MakeUP<RenderingFactory>(*mainWindow_, settings_);
+		renderingEngine_ = &renderingFactory_->GetRenderingEngine();
+	}
+
 
 
 	void XREXContext::Start()
 	{
 		timer_.Restart();
+		mainWindow_->SetActive(true);
 		renderingEngine_->Start();
 		mainWindow_->StartHandlingMessages();
 		// when runs to here, the whole program will stop running.
@@ -82,6 +101,8 @@ namespace XREX
 	{
 		ExecuteALogicFrame(); // temp, move to somewhere else when using separate thread to do logic.
 		renderingEngine_->RenderAFrame();
+		renderingEngine_->SwapBuffers();
+		
 	}
 
 

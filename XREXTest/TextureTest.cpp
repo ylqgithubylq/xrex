@@ -71,9 +71,9 @@ MeshSP MakeCube()
 
 	assert(indexData.size() == 36);
 
-	VertexBuffer::DataLayout layoutDesc(8);
-	layoutDesc.AddChannelLayout(VertexBuffer::DataLayout::ElementLayout(0, 2 * sizeof(floatV3), ElementType::FloatV3, "position"));
-	layoutDesc.AddChannelLayout(VertexBuffer::DataLayout::ElementLayout(sizeof(floatV3), 2 * sizeof(floatV3), ElementType::FloatV3, "textureCoordinate0"));
+	VertexBuffer::DataLayoutDescription layoutDesc(8);
+	layoutDesc.AddChannelLayout(VertexBuffer::DataLayoutDescription::ElementLayoutDescription(0, 2 * sizeof(floatV3), ElementType::FloatV3, "position"));
+	layoutDesc.AddChannelLayout(VertexBuffer::DataLayoutDescription::ElementLayoutDescription(sizeof(floatV3), 2 * sizeof(floatV3), ElementType::FloatV3, "textureCoordinate0"));
 	VertexBufferSP vertices = XREXContext::GetInstance().GetRenderingFactory().CreateVertexBuffer(GraphicsBuffer::Usage::Static, vertexData, move(layoutDesc));
 	IndexBufferSP indices = XREXContext::GetInstance().GetRenderingFactory().CreateIndexBuffer(GraphicsBuffer::Usage::Static, indexData, IndexBuffer::PrimitiveType::Triangles);
 	RenderingLayoutSP layout = MakeSP<RenderingLayout>(vector<VertexBufferSP>(1, vertices), indices);
@@ -87,7 +87,13 @@ MeshSP MakeCube()
 
 RenderingEffectSP MakeEffect()
 {
-
+	string testCommonFunctionString =
+	"\n\
+	vec3 ReturnSelf(vec3 v)\n\
+	{\n\
+		return v;\n\
+	}\n\
+	";
 	string shaderString =
 	"\n\
 	uniform mat4 modelMatrix;\n\
@@ -106,6 +112,7 @@ RenderingEffectSP MakeEffect()
 	\n\
 	void main()\n\
 	{\n\
+		position = ReturnSelf(position);\n\
 		gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(position, 1.0);\n\
 		pixelTextureCoordinate = textureCoordinate0.st;\n\
 	}\n\
@@ -120,7 +127,7 @@ RenderingEffectSP MakeEffect()
 	\n\
 	void main()\n\
 	{\n\
-		finalColor = vec4(textureLod(bumpTexture, pixelTextureCoordinate, 0).rgb, 1);\n\
+		finalColor = vec4(ReturnSelf(textureLod(bumpTexture, pixelTextureCoordinate, 0).rgb), 1);\n\
 		//finalColor = vec4(textureLod(bumpTexture, vec2(1, 1), 0).rgb, 1);\n\
 	}\n\
 	\n\
@@ -128,10 +135,15 @@ RenderingEffectSP MakeEffect()
 	\n\
 	";
 
-
 	ProgramObjectSP cubeProgram = XREXContext::GetInstance().GetRenderingFactory().CreateProgramObject();
-	ShaderObjectSP vs = XREXContext::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::VertexShader, shaderString);
-	ShaderObjectSP fs = XREXContext::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::FragmentShader, shaderString);
+
+	std::vector<std::string> shaderStrings;
+	shaderStrings.emplace_back(std::move(testCommonFunctionString));
+	shaderStrings.emplace_back(std::move(shaderString));
+	ShaderObjectSP vs = XREXContext::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::VertexShader);
+	ShaderObjectSP fs = XREXContext::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::FragmentShader);
+	vs->Compile(shaderStrings);
+	fs->Compile(shaderStrings);
 
 	if (!vs->IsValidate())
 	{

@@ -15,6 +15,7 @@
 
 #include "DefinedShaderName.hpp"
 #include "GLUtil.hpp"
+#include "GraphicsContext.hpp"
 
 #include <CoreGL.hpp>
 
@@ -25,9 +26,27 @@ using std::vector;
 namespace XREX
 {
 
-	RenderingEngine::RenderingEngine()
+	RenderingEngine::RenderingEngine(Window& window, Settings const& settings)
 		: scene_(MakeSP<NaiveManagedScene>()), defaultBlendColor_(0, 0, 0, 1)
 	{
+		// initialize the graphics context first
+		graphicsContext_ = MakeUP<GraphicsContext>(window, settings);
+
+		// move gl context creation here?
+		//gl::Enable(gl::GL_DEBUG_OUTPUT); // ogl 4.3
+
+		gl::PixelStorei(gl::GL_UNPACK_ALIGNMENT, 1); // default 4
+		gl::PixelStorei(gl::GL_PACK_ALIGNMENT, 1); // default 4
+
+
+		gl::Enable(gl::GL_SCISSOR_TEST);
+
+		gl::Enable(gl::GL_POLYGON_OFFSET_FILL);
+		gl::Enable(gl::GL_POLYGON_OFFSET_POINT);
+		gl::Enable(gl::GL_POLYGON_OFFSET_LINE);
+		defaultRasterizerState_ = XREXContext::GetInstance().GetRenderingFactory().CreateRasterizerStateObject(RasterizerState());
+		defaultDepthStencilState_ = XREXContext::GetInstance().GetRenderingFactory().CreateDepthStencilStateObject(DepthStencilState());
+		defaultBlendState_ = XREXContext::GetInstance().GetRenderingFactory().CreateBlendStateObject(BlendState());
 	}
 
 
@@ -43,23 +62,9 @@ namespace XREX
 		return gl::GetError();
 	}
 
-
-	void RenderingEngine::Initialize()
+	void RenderingEngine::SwapBuffers()
 	{
-		// move gl context creation here?
-		//gl::Enable(gl::GL_DEBUG_OUTPUT); // ogl 4.3
-
-		gl::PixelStorei(gl::GL_UNPACK_ALIGNMENT, 1);
-
-
-		gl::Enable(gl::GL_SCISSOR_TEST);
-
-		gl::Enable(gl::GL_POLYGON_OFFSET_FILL);
-		gl::Enable(gl::GL_POLYGON_OFFSET_POINT);
-		gl::Enable(gl::GL_POLYGON_OFFSET_LINE);
-		defaultRasterizerState_ = XREXContext::GetInstance().GetRenderingFactory().CreateRasterizerStateObject(RasterizerState());
-		defaultDepthStencilState_ = XREXContext::GetInstance().GetRenderingFactory().CreateDepthStencilStateObject(DepthStencilState());
-		defaultBlendState_ = XREXContext::GetInstance().GetRenderingFactory().CreateBlendStateObject(BlendState());
+		graphicsContext_->SwapBuffers();
 	}
 
 	void RenderingEngine::RenderAFrame()

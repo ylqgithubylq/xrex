@@ -1,8 +1,9 @@
 #include "XREX.hpp"
 
-#include "GLWindow.hpp"
+#include "GraphicsContext.hpp"
 
 #include "Settings.hpp"
+#include "Window.hpp"
 
 #include <sstream>
 #include <iostream>
@@ -26,9 +27,9 @@ using std::wstring;
 namespace XREX
 {
 
-	struct GLWindow::GLHideWindows_
+	struct GraphicsContext::GLHideWindows_
 	{
-		GLHideWindows_(GLWindow& window)
+		GLHideWindows_(Window& window)
 			: window_(window)
 		{
 		}
@@ -38,42 +39,25 @@ namespace XREX
 			return static_cast<HWND>(window_.GetHWND());
 		}
 
-		GLWindow& window_;
+		Window& window_;
 		HDC hDC_;
 		HGLRC hRC_;
 	};
 
 
-	GLWindow::GLWindow(wstring const& name, RenderingSettings const& settings)
-		: Window(name, settings.left, settings.top, settings.width, settings.height), majorVersion_(0), minorVersion_(0)
+	GraphicsContext::GraphicsContext(Window& window, Settings const& settings)
 	{
-		glHideWindows_ = MakeUP<GLHideWindows_>(*this);
 
-		colorBits_ = settings.colorBits;
-		depthBits_ = settings.depthBits;
-		stencilBits_ = settings.stencilBits;
-		sampleCount_ = settings.sampleCount;
+		glHideWindows_ = MakeUP<GLHideWindows_>(window);
+
+		RenderingSettings const& renderingSettings = settings.renderingSettings;
+
+		colorBits_ = renderingSettings.colorBits;
+		depthBits_ = renderingSettings.depthBits;
+		stencilBits_ = renderingSettings.stencilBits;
+		sampleCount_ = renderingSettings.sampleCount;
 
 		glHideWindows_->hDC_ = ::GetDC(glHideWindows_->GetHWND());
-
-		uint32 style;
-		style = WS_OVERLAPPEDWINDOW;
-
-
-		RECT windowRect = { settings.left, settings.top, settings.left + settings.width, settings.top + settings.height };
-		::AdjustWindowRect(&windowRect, style, false);
-
-		::SetWindowLongPtr(glHideWindows_->GetHWND(), GWL_STYLE, style);
-
-		::SetWindowPos(glHideWindows_->GetHWND(), NULL, windowRect.left, windowRect.top, windowRect.right - windowRect.left, windowRect.bottom - windowRect.top,
-			SWP_SHOWWINDOW | SWP_NOZORDER);
-
-		RECT clientRect;
-		::GetClientRect(glHideWindows_->GetHWND(), &clientRect);
-
-		width_ = clientRect.right - clientRect.left;
-		height_ = clientRect.bottom - clientRect.top;
-
 
 		PIXELFORMATDESCRIPTOR pixelFormatDescriptor;
 		memset(&pixelFormatDescriptor, 0, sizeof(pixelFormatDescriptor));
@@ -136,23 +120,17 @@ namespace XREX
 
 			if (valid && (sampleCount_ > 1))
 			{
-				::wglMakeCurrent(glHideWindows_->hDC_, NULL);
+				::wglMakeCurrent(glHideWindows_->hDC_, nullptr);
 				::wglDeleteContext(glHideWindows_->hRC_);
 				::ReleaseDC(glHideWindows_->GetHWND(), glHideWindows_->hDC_);
 
-				Recreate();
+				glHideWindows_->window_.Recreate();
 
 				glHideWindows_->hDC_ = ::GetDC(glHideWindows_->GetHWND());
-
-				::SetWindowPos(glHideWindows_->GetHWND(), NULL, windowRect.left, windowRect.top, windowRect.right - windowRect.left, windowRect.bottom - windowRect.top,
-					SWP_SHOWWINDOW | SWP_NOZORDER);
-
 				::SetPixelFormat(glHideWindows_->hDC_, pixelFormat, &pixelFormatDescriptor);
 
 				glHideWindows_->hRC_ = ::wglCreateContext(glHideWindows_->hDC_);
 				::wglMakeCurrent(glHideWindows_->hDC_, glHideWindows_->hRC_);
-
-
 			}
 		}
 
@@ -184,14 +162,14 @@ namespace XREX
 			WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
 #endif
 			0 };
-		for (int32 i = 0; i < 3; ++ i)
+		for (int32 i = 0; i < 3; ++i)
 		{
 			attribs[1] = versions[i][0];
 			attribs[3] = versions[i][1];
-			HGLRC newRC = wglCreateContextAttribsARB(glHideWindows_->hDC_, NULL, attribs);
-			if (newRC != NULL)
+			HGLRC newRC = wglCreateContextAttribsARB(glHideWindows_->hDC_, nullptr, attribs);
+			if (newRC != nullptr)
 			{
-				::wglMakeCurrent(glHideWindows_->hDC_, NULL);
+				::wglMakeCurrent(glHideWindows_->hDC_, nullptr);
 				::wglDeleteContext(glHideWindows_->hRC_);
 				glHideWindows_->hRC_ = newRC;
 
@@ -210,9 +188,6 @@ namespace XREX
 		gl::GetIntegerv(gl::GL_MINOR_VERSION,&minorVersion_);
 		cout << "OpenGL version: " << majorVersion_ << "." << minorVersion_ << endl;
 
-		//gl::PixelStorei(gl::GL_PACK_ALIGNMENT, 1); // default: 4
-		//gl::PixelStorei(gl::GL_UNPACK_ALIGNMENT, 1); // default: 4
-
 
 		string vendor, renderer, glVersion, glslVersion;
 		vendor = reinterpret_cast<char const*>(gl::GetString(gl::GL_VENDOR));
@@ -228,8 +203,6 @@ namespace XREX
 		}
 		description_ = oss.str();
 
-		active_ = true;
-
 		cout << description_ << endl;
 
 		uint32 glError = gl::GetError();
@@ -240,33 +213,31 @@ namespace XREX
 	}
 
 
-	GLWindow::~GLWindow()
+	GraphicsContext::~GraphicsContext()
 	{
-		Destory();
-	}
-
-	void GLWindow::Destory()
-	{
-		if (glHideWindows_->GetHWND() != NULL)
+		if (glHideWindows_->GetHWND() != nullptr)
 		{
-			if (glHideWindows_->hDC_ != NULL)
+			if (glHideWindows_->hDC_ != nullptr)
 			{
-				::wglMakeCurrent(glHideWindows_->hDC_, NULL);
-				if (glHideWindows_->hRC_ != NULL)
+				::wglMakeCurrent(glHideWindows_->hDC_, nullptr);
+				if (glHideWindows_->hRC_ != nullptr)
 				{
 					::wglDeleteContext(glHideWindows_->hRC_);
-					glHideWindows_->hRC_ = NULL;
+					glHideWindows_->hRC_ = nullptr;
 				}
 				::ReleaseDC(glHideWindows_->GetHWND(), glHideWindows_->hDC_);
-				glHideWindows_->hDC_ = NULL;
+				glHideWindows_->hDC_ = nullptr;
 			}
-
-			::ChangeDisplaySettings(NULL, 0);
-			ShowCursor(TRUE);
 		}
 	}
 
-	void GLWindow::SwapBuffers()
+	void GraphicsContext::OnMessageIdle()
+	{
+		XREXContext::GetInstance().RenderAFrame();
+		SwapBuffers();
+	}
+
+	void GraphicsContext::SwapBuffers()
 	{
 		::SwapBuffers(glHideWindows_->hDC_);
 	}

@@ -40,7 +40,7 @@ namespace XREX
 		TransformationSP const& cameraTransformation = cameraObject_->GetComponent<Transformation>();
 		TransformationSP const& targetTransformation = target_->GetComponent<Transformation>();
 
-		// make camera position in world space the same.
+		// make camera position in world space the same after set parent.
 		floatV3 displacement = cameraTransformation->GetWorldPosition() - targetTransformation->GetWorldPosition();
 		cameraTransformation->SetParent(targetTransformation);
 		cameraTransformation->SetPosition(displacement);

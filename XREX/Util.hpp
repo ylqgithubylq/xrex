@@ -10,6 +10,29 @@
 
 namespace XREX
 {
+	template <typename T>
+	struct Size
+	{
+		T x;
+		T y;
+		Size(T const& x, T const& y)
+			: x(x), y(y)
+		{
+		}
+	};
+
+	template <typename T>
+	struct Rectangle
+	{
+		T x;
+		T y;
+		T width;
+		T height;
+		Rectangle(T const& x, T const& y, T const& width, T const& height)
+			: x(x), y(y), width(width), height(height)
+		{
+		}
+	};
 
 	template <typename T>
 	void SwapBackRemove(std::vector<T>& vector, typename std::vector<T>::iterator toBeRemove)
@@ -146,11 +169,25 @@ namespace XREX
 		Int16,
 		Int32,
 
+		IntV2,
+		IntV3,
+		IntV4,
+
+		UintV2,
+		UintV3,
+		UintV4,
+
 		Float,
 		FloatV2,
 		FloatV3,
 		FloatV4,
 		FloatM44,
+
+		Double,
+		DoubleV2,
+		DoubleV3,
+		DoubleV4,
+		DoubleM44,
 
 		Sampler1D,
 		Sampler2D,

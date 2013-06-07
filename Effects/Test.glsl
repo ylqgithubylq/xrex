@@ -1,6 +1,6 @@
 
 
-const vec3 lightColor = vec3(50, 50, 60);
+const vec3 lightColor = vec3(150, 150, 160);
 uniform vec3 centerPosition;
 
 uniform mat4 modelMatrix;

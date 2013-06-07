@@ -1,8 +1,6 @@
 #pragma once
 #include "Declare.hpp"
 
-#include "Window.hpp"
-
 #include "XREXContext.hpp"
 #include "RenderingEngine.hpp"
 
@@ -13,14 +11,11 @@ namespace XREX
 {
 
 
-	class XREX_API GLWindow
-		: public Window
+	class XREX_API GraphicsContext
 	{
 	public:
-		GLWindow(std::wstring const& name, RenderingSettings const& settings);
-		virtual ~GLWindow() override;
-
-		void Destory();
+		GraphicsContext(Window& window, Settings const& settings);
+		~GraphicsContext();
 
 		void SwapBuffers();
 
@@ -33,11 +28,7 @@ namespace XREX
 			return minorVersion_;
 		}
 	protected:
-		virtual void OnMessageIdle() override
-		{
-			XREXContext::GetInstance().RenderAFrame();
-			SwapBuffers();
-		}
+		void OnMessageIdle();
 
 	private:
 		// used to hide windows.h to the cpp file

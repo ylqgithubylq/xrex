@@ -131,11 +131,11 @@ namespace XREX
 		: public GraphicsBuffer
 	{
 	public:
-		class XREX_API DataLayout
+		class XREX_API DataLayoutDescription
 			: XREX::Noncopyable
 		{
 		public:
-			struct XREX_API ElementLayout
+			struct XREX_API ElementLayoutDescription
 			{
 				uint32 start;
 				uint32 strip;
@@ -145,29 +145,29 @@ namespace XREX
 				/*
 				 *	@elementStrip: 0 indicates no strip between elements.
 				 */
-				ElementLayout(uint32 startLocationInBytes, uint32 elementStripInBytes, ElementType type, std::string const& attributeChannel, bool normalize = false)
+				ElementLayoutDescription(uint32 startLocationInBytes, uint32 elementStripInBytes, ElementType type, std::string const& attributeChannel, bool normalize = false)
 					: start(startLocationInBytes), strip(elementStripInBytes), elementType(type), channel(attributeChannel), needNormalize(normalize)
 				{
 				}
 			};
 
 		public:
-			explicit DataLayout(uint32 vertexCount)
+			explicit DataLayoutDescription(uint32 vertexCount)
 				: vertexCount_(vertexCount)
 			{
 			}
-			DataLayout(DataLayout&& right)
+			DataLayoutDescription(DataLayoutDescription&& right)
 				: vertexCount_(right.vertexCount_), channelLayouts_(std::move(right.channelLayouts_))
 			{
 			}
 
-			bool AddChannelLayout(ElementLayout&& elementLayout);
-			ElementLayout const& GetChannelLayout(std::string const& channel) const;
+			bool AddChannelLayout(ElementLayoutDescription&& elementLayout);
+			ElementLayoutDescription const& GetChannelLayout(std::string const& channel) const;
 			uint32 GetChannelLayoutCount() const
 			{
 				return channelLayouts_.size();
 			}
-			ElementLayout const& GetChannelLayoutAtIndex(uint32 index) const
+			ElementLayoutDescription const& GetChannelLayoutAtIndex(uint32 index) const
 			{
 				return channelLayouts_[index];
 			}
@@ -178,7 +178,7 @@ namespace XREX
 
 		private:
 			uint32 vertexCount_;
-			std::vector<ElementLayout> channelLayouts_;
+			std::vector<ElementLayoutDescription> channelLayouts_;
 		};
 
 	public:
@@ -191,7 +191,7 @@ namespace XREX
 			: GraphicsBuffer(BufferType::Vertex, usage, data.data(), data.size() * sizeof(T)), layout_(data.size())
 		{
 			assert(channel != "");
-			layout_.AddChannelLayout(DataLayout::ElementLayout(0, 0, TypeToElementType<T>::Type, channel));
+			layout_.AddChannelLayout(DataLayoutDescription::ElementLayoutDescription(0, 0, TypeToElementType<T>::Type, channel));
 			assert(sizeof(T) == GetElementSizeInBytes(TypeToElementType<T>::Type));
 		}
 
@@ -199,7 +199,7 @@ namespace XREX
 		 *	For multi-channel buffer. a.k.a.: array of structures.
 		 */
 		template <typename T>
-		VertexBuffer(Usage usage, std::vector<T> const& data, DataLayout&& layout)
+		VertexBuffer(Usage usage, std::vector<T> const& data, DataLayoutDescription&& layout)
 			: GraphicsBuffer(BufferType::Vertex, usage, data.data(), data.size() * sizeof(T)), layout_(std::move(layout))
 		{
 		}
@@ -208,12 +208,12 @@ namespace XREX
 		 *	Create a buffer without initial data.
 		 *	@elementSizeInBytes: element size in bytes of one vertex.
 		 */
-		VertexBuffer(Usage usage, uint32 elementSizeInBytes, DataLayout&& layout)
+		VertexBuffer(Usage usage, uint32 elementSizeInBytes, DataLayoutDescription&& layout)
 			: GraphicsBuffer(BufferType::Vertex, usage, elementSizeInBytes * layout.GetVertexCount()), layout_(std::move(layout))
 		{
 		}
 
-		DataLayout const& GetDataLayout() const
+		DataLayoutDescription const& GetDataLayoutDescription() const
 		{
 			return layout_;
 		}
@@ -223,13 +223,10 @@ namespace XREX
 			return layout_.GetVertexCount();
 		}
 
-		void BindToProgram(ProgramObjectSP const& program);
 
-		virtual void Unbind() override;
 
 	private:
-		DataLayout layout_;
-		std::vector<int32> lastAttributeLocations_; // used to store attribute binding location temporarily
+		DataLayoutDescription layout_;
 	};
 
 

@@ -73,7 +73,8 @@ namespace XREX
 		void RenderAFrame();
 
 	private:
-		void InitializeMainWindow(std::wstring const& name, RenderingSettings const& settings);
+		void InitializeMainWindow();
+		void InitializeGraphicsContext();
 
 	private:
 		XREXContext();

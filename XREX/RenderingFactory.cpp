@@ -4,29 +4,27 @@
 
 #include "XREXContext.hpp"
 #include "RenderingEngine.hpp"
+#include "GraphicsContext.hpp"
+#include "Window.hpp"
 
 #include "Viewport.hpp"
 
 namespace XREX
 {
 
-	RenderingFactory::RenderingFactory()
+	RenderingFactory::RenderingFactory(Window& window, Settings const& settings)
 	{
-	}
+		renderingEngine_ = MakeUP<RenderingEngine>(window, settings);
+		GraphicsContext& graphicsContext = renderingEngine_->GetGraphicsContext();
+		
+		glslVersionString_ = "#version ";
+		std::string version = "000";
+		version[0] = '0' + graphicsContext.GetMajorVersion(); // int to one byte char
+		version[1] = '0' + graphicsContext.GetMinorVersion(); // int to one byte char
+		glslVersionString_ += version + "\n\n";
 
-
-	RenderingFactory::~RenderingFactory()
-	{
-	}
-
-
-	void RenderingFactory::Initialize()
-	{
-		renderingEngine_ = MakeUP<RenderingEngine>();
-
-		RenderingSettings const& settings = XREXContext::GetInstance().GetSettings().renderingSettings;
 		auto depthOrder = std::numeric_limits<decltype(std::declval<Viewport>().GetDepthOrder())>::max();
-		defaultViewport_ = XREXContext::GetInstance().GetRenderingFactory().CreateViewport(depthOrder, 0, 0, settings.width, settings.height);
+		defaultViewport_ = XREXContext::GetInstance().GetRenderingFactory().CreateViewport(depthOrder, 0, 0, window.GetClientRegionSize().x, window.GetClientRegionSize().y);
 
 		std::array<uint32, 1> size1;
 		size1[0] = 1;
@@ -53,7 +51,14 @@ namespace XREX
 
 		SamplerState samplerState;
 		defaultSampler_ = MakeSP<Sampler>(samplerState);
+
 	}
+
+
+	RenderingFactory::~RenderingFactory()
+	{
+	}
+
 
 	RenderingEngine& RenderingFactory::GetRenderingEngine()
 	{

@@ -145,7 +145,7 @@ namespace XREX
 
 		case WM_SIZE:
 			{
-				window_.OnResize(LOWORD(lParam), HIWORD(lParam)); // LoWord = width, HiWord = height
+				//window_.OnResize(LOWORD(lParam), HIWORD(lParam)); // LoWord = width, HiWord = height
 			}
 			break;
 
@@ -183,12 +183,13 @@ namespace XREX
 
 
 
-	Window::Window(std::wstring const& name, int32 left, int32 top, int32 width, int32 height)
-		: name_(name), left_(left), top_(top), active_(false), running_(false), rendering_(false)
+	Window::Window(Settings const& settings)
+		: name_(settings.windowTitle), fullScreen_(settings.renderingSettings.fullScreen),
+		active_(false), running_(false), rendering_(false)
 	{
 		hideWindows_ = MakeUP<HideWindows_>(*this);
 
-		HINSTANCE hInstance = ::GetModuleHandle(NULL);
+		HINSTANCE hInstance = ::GetModuleHandle(nullptr);
 
 		WNDCLASSEX wcex;
 		wcex.cbSize = sizeof(WNDCLASSEX);
@@ -198,76 +199,137 @@ namespace XREX
 		wcex.cbClsExtra		= 0;
 		wcex.cbWndExtra		= 0;
 		wcex.hInstance		= hInstance;
-		wcex.hIcon			= NULL;
-		wcex.hCursor		= LoadCursor(NULL, IDC_ARROW);
+		wcex.hIcon			= nullptr;
+		wcex.hCursor		= LoadCursor(nullptr, IDC_ARROW);
 		wcex.hbrBackground	= static_cast<HBRUSH>(::GetStockObject(BLACK_BRUSH));
-		wcex.lpszMenuName	= NULL;
+		wcex.lpszMenuName	= nullptr;
 		wcex.lpszClassName	= name_.c_str();
-		wcex.hIconSm		= NULL;
+		wcex.hIconSm		= nullptr;
 
 		::RegisterClassEx(&wcex);
 
+		left_ = settings.renderingSettings.left;
+		top_ = settings.renderingSettings.top;
 
-
-		RECT windowRect = {left, top, left + width, top + height};
+		RECT windowRect;
+		windowRect.left = left_;
+		windowRect.top = top_;
+		windowRect.right = left_ + settings.renderingSettings.width;
+		windowRect.bottom = top_ + settings.renderingSettings.height;
 
 		DWORD style;
-		style = WS_OVERLAPPEDWINDOW;
-
-		::AdjustWindowRect(&windowRect, style, false);
-
-		hideWindows_->hWnd_ = ::CreateWindow(name_.c_str(), name_.c_str(), style,
-			windowRect.left, windowRect.top, windowRect.right - windowRect.left, windowRect.bottom - windowRect.top, NULL, NULL, hInstance, NULL);
-
-	
-		::GetClientRect(hideWindows_->hWnd_, &windowRect);
-
-		left_ = windowRect.left;
-		top_ = windowRect.top;
-		width_ = windowRect.right - windowRect.left;
-		height_ = windowRect.bottom - windowRect.top;
-
-		::SetWindowLongPtr(hideWindows_->hWnd_, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
-
-		::ShowWindow(hideWindows_->hWnd_, SW_SHOWNORMAL);
-		::UpdateWindow(hideWindows_->hWnd_);
-
-	}
-
-
-	Window::~Window()
-	{
-		if (hideWindows_->hWnd_ != NULL)
+		if (fullScreen_)
 		{
-			::DestroyWindow(hideWindows_->hWnd_);
-			hideWindows_->hWnd_ = NULL;
+			style = WS_POPUPWINDOW | WS_OVERLAPPED;
 		}
-	}
-
-	void Window::Recreate()
-	{
-		HINSTANCE hInstance = ::GetModuleHandle(NULL);
-
-		DWORD style = static_cast<DWORD>(::GetWindowLongPtr(hideWindows_->hWnd_, GWL_STYLE));
-		RECT windowRect = { left_, top_, width_, height_ };
-
+		else
+		{
+			style = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
+		}
 		::AdjustWindowRect(&windowRect, style, false);
-		::DestroyWindow(hideWindows_->hWnd_);
+		windowLeft_ = windowRect.left;
+		windowTop_ = windowRect.top;
 
 		hideWindows_->hWnd_ = ::CreateWindow(name_.c_str(), name_.c_str(), style,
-			windowRect.left, windowRect.top, windowRect.right - windowRect.left, windowRect.bottom - windowRect.top, 0, 0, hInstance, NULL);
+			windowRect.left, windowRect.top, windowRect.right - windowRect.left, windowRect.bottom - windowRect.top, nullptr, nullptr, hInstance, nullptr);
 
-		::GetClientRect(hideWindows_->hWnd_, &windowRect);
-		left_ = windowRect.left;
-		top_ = windowRect.top;
-		width_ = windowRect.right - windowRect.left;
-		height_ = windowRect.bottom - windowRect.top;
+		RECT clientRect;
+		::GetClientRect(hideWindows_->hWnd_, &clientRect);
+		width_ = clientRect.right - clientRect.left;
+		height_ = clientRect.bottom - clientRect.top;
 
 		::SetWindowLongPtr(hideWindows_->hWnd_, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 		::SetWindowLongPtr(hideWindows_->hWnd_, GWL_STYLE, style);
 
 		::ShowWindow(hideWindows_->hWnd_, SW_SHOWNORMAL);
 		::UpdateWindow(hideWindows_->hWnd_);
+
+		if (fullScreen_)
+		{
+			left_ = 0;
+			top_ = 0;
+			windowLeft_ = 0;
+			windowTop_ = 0;
+
+			width_ = ::GetSystemMetrics(SM_CXSCREEN);
+			height_ = ::GetSystemMetrics(SM_CYSCREEN);
+
+			DEVMODE devMode;
+			devMode.dmSize = sizeof(devMode);
+			devMode.dmBitsPerPel = settings.renderingSettings.colorBits;
+			devMode.dmPelsWidth = width_;
+			devMode.dmPelsHeight = height_;
+			devMode.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
+			// LONG result = ::ChangeDisplaySettings(&devMode, CDS_FULLSCREEN); // real full screen
+		}
+
+		windowRect.left = left_;
+		windowRect.top = top_;
+		windowRect.right = left_ + width_;
+		windowRect.bottom = top_ + height_;
+		::AdjustWindowRect(&windowRect, style, false);
+
+		::SetWindowPos(hideWindows_->hWnd_, nullptr, windowRect.left, windowRect.top, windowRect.right - windowRect.left, windowRect.bottom - windowRect.top,
+			SWP_SHOWWINDOW | SWP_NOZORDER);
+
+		::GetClientRect(hideWindows_->hWnd_, &clientRect);
+		width_ = clientRect.right - clientRect.left;
+		height_ = clientRect.bottom - clientRect.top;
+
+	}
+
+
+	Window::~Window()
+	{
+		if (hideWindows_->hWnd_ != nullptr)
+		{
+			if (fullScreen_)
+			{
+				::ChangeDisplaySettings(nullptr, 0);
+				ShowCursor(TRUE);
+			}
+
+			::DestroyWindow(hideWindows_->hWnd_);
+			hideWindows_->hWnd_ = nullptr;
+		}
+	}
+
+
+	void Window::OnMessageIdle()
+	{
+		if (messageIdle_ != nullptr)
+		{
+			messageIdle_();
+		}
+	}
+
+	void Window::Recreate()
+	{
+		HINSTANCE hInstance = ::GetModuleHandle(nullptr);
+
+		DWORD style = static_cast<DWORD>(::GetWindowLongPtr(hideWindows_->hWnd_, GWL_STYLE));
+		RECT windowRect = { left_, top_, left_ + width_, top_ + height_ };
+		::AdjustWindowRect(&windowRect, style, false);
+
+		::DestroyWindow(hideWindows_->hWnd_);
+
+		hideWindows_->hWnd_ = ::CreateWindow(name_.c_str(), name_.c_str(), style,
+			windowRect.left, windowRect.top, windowRect.right - windowRect.left, windowRect.bottom - windowRect.top, 0, 0, hInstance, nullptr);
+
+		RECT clientRect;
+		::GetClientRect(hideWindows_->hWnd_, &clientRect);
+		width_ = clientRect.right - clientRect.left;
+		height_ = clientRect.bottom - clientRect.top;
+
+		::SetWindowLongPtr(hideWindows_->hWnd_, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
+		::SetWindowLongPtr(hideWindows_->hWnd_, GWL_STYLE, style);
+
+		::ShowWindow(hideWindows_->hWnd_, SW_SHOWNORMAL);
+		::UpdateWindow(hideWindows_->hWnd_);
+
+		::SetWindowPos(hideWindows_->hWnd_, nullptr, windowRect.left, windowRect.top, windowRect.right - windowRect.left, windowRect.bottom - windowRect.top,
+			SWP_SHOWWINDOW | SWP_NOZORDER);
+
 	}
 
 
@@ -282,11 +344,11 @@ namespace XREX
 		{
 			if (active_ && rendering_)
 			{
-				hasMessage = ::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE);
+				hasMessage = ::PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE);
 			}
 			else
 			{
-				hasMessage = ::GetMessage(&msg, NULL, 0, 0);
+				hasMessage = ::GetMessage(&msg, nullptr, 0, 0);
 			}
 
 			if (hasMessage)
@@ -513,10 +575,10 @@ namespace XREX
 
 
 
-	void Window::OnResize(uint32 width, uint32 height)
-	{
-		// TODO
-	}
+// 	void Window::OnResize(uint32 width, uint32 height)
+// 	{
+// 		// TODO
+// 	}
 
 	void Window::OnKeyDown(uint32 winKey)
 	{

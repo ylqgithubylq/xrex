@@ -84,7 +84,7 @@ namespace XREX
 			return gl::GL_FILL;
 		default:
 			assert(false);
-			return gl::GL_FILL;
+			return 0;
 		}
 	}
 
@@ -110,7 +110,7 @@ namespace XREX
 			return gl::GL_GEQUAL;
 		default:
 			assert(false);
-			return gl::GL_EQUAL;
+			return 0;
 		}
 	}
 
@@ -136,7 +136,7 @@ namespace XREX
 			return gl::GL_DECR_WRAP;
 		default:
 			assert(false);
-			return gl::GL_KEEP;
+			return 0;
 		}
 	}
 
@@ -156,7 +156,7 @@ namespace XREX
 			return gl::GL_MAX;
 		default:
 			assert(false);
-			return gl::GL_FUNC_ADD;
+			return 0;
 		}
 	}
 
@@ -188,7 +188,7 @@ namespace XREX
 			return gl::GL_SRC_ALPHA_SATURATE;
 		default:
 			assert(false);
-			return gl::GL_ZERO;
+			return 0;
 		}
 	}
 
@@ -206,7 +206,7 @@ namespace XREX
 			return gl::GL_CLAMP_TO_BORDER;
 		default:
 			assert(false);
-			return gl::GL_REPEAT;
+			return 0;
 		}
 	}
 
@@ -228,10 +228,90 @@ namespace XREX
 			return gl::GL_LINEAR_MIPMAP_LINEAR;
 		case SamplerState::TextureFilterOperation::Anisotropic:
 			assert(false);
-			return gl::GL_NEAREST;
+			return 0;
 		default:
 			assert(false);
-			return gl::GL_NEAREST;
+			return 0;
+		}
+	}
+
+	XREX_API uint32 GLShaderTypeFromShaderType(ShaderObject::ShaderType type)
+	{
+		switch (type)
+		{
+		case ShaderObject::ShaderType::VertexShader:
+			return gl::GL_VERTEX_SHADER;
+		case ShaderObject::ShaderType::FragmentShader:
+			return gl::GL_FRAGMENT_SHADER;
+		case ShaderObject::ShaderType::GeometryShader:
+			return gl::GL_GEOMETRY_SHADER;
+		case ShaderObject::ShaderType::TessellationControlShader:
+			gl::GL_TESS_CONTROL_SHADER;
+		case ShaderObject::ShaderType::TessellationEvaluationShader:
+			gl::GL_TESS_EVALUATION_SHADER;
+		case ShaderObject::ShaderType::CountOfShaderTypes:
+			assert(false);
+			return 0;
+		default:
+			assert(false);
+			return 0;
+		}
+	}
+
+	XREX_API ElementType ElementTypeFromeGLType(uint32 glType)
+	{
+		switch (glType)
+		{
+		case gl::GL_BOOL:
+			return ElementType::Bool;
+		case gl::GL_INT:
+			return ElementType::Int32;
+		case gl::GL_INT_VEC2:
+			return ElementType::IntV2;
+		case gl::GL_INT_VEC3:
+			return ElementType::IntV3;
+		case gl::GL_INT_VEC4:
+			return ElementType::IntV4;
+		case gl::GL_UNSIGNED_INT:
+			return ElementType::Uint32;
+		case gl::GL_UNSIGNED_INT_VEC2:
+			return ElementType::UintV2;
+		case gl::GL_UNSIGNED_INT_VEC3:
+			return ElementType::UintV3;
+		case gl::GL_UNSIGNED_INT_VEC4:
+			return ElementType::UintV4;
+		case gl::GL_FLOAT:
+			return ElementType::Float;
+		case gl::GL_FLOAT_VEC2:
+			return ElementType::FloatV2;
+		case gl::GL_FLOAT_VEC3:
+			return ElementType::FloatV3;
+		case gl::GL_FLOAT_VEC4:
+			return ElementType::FloatV4;
+		case gl::GL_DOUBLE:
+			return ElementType::Double;
+		case gl::GL_DOUBLE_VEC2:
+			return ElementType::DoubleV2;
+		case gl::GL_DOUBLE_VEC3:
+			return ElementType::DoubleV3;
+		case gl::GL_DOUBLE_VEC4:
+			return ElementType::DoubleV4;
+		case gl::GL_FLOAT_MAT4:
+			return ElementType::FloatM44;
+		case gl::GL_DOUBLE_MAT4:
+			return ElementType::DoubleM44;
+		case gl::GL_SAMPLER_1D:
+			return ElementType::Sampler1D;
+		case gl::GL_SAMPLER_2D:
+			return ElementType::Sampler2D;
+		case gl::GL_SAMPLER_3D:
+			return ElementType::Sampler3D;
+		case gl::GL_SAMPLER_CUBE:
+			return ElementType::SamplerCube;
+		default:
+			// not support.
+			assert(false);
+			return ElementType::Void;
 		}
 	}
 
