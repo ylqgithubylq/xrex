@@ -8,6 +8,7 @@
 #include "GraphicsBuffer.hpp"
 #include "Texture.hpp"
 #include "Sampler.hpp"
+#include "GLUtil.hpp"
 
 #include <CoreGL.hpp>
 
@@ -42,42 +43,18 @@ namespace XREX
 
 		string const& VersionMacro()
 		{
-			static string const macro = "#version 420\n\n";
-			return macro;
+			return XREXContext::GetInstance().GetRenderingFactory().GetGLSLVersionString();
 		}
 
-		uint32 GLShaderTypeFromShaderType(ShaderObject::ShaderType type)
-		{
-			static std::array<uint32, static_cast<uint32>(ShaderObject::ShaderType::CountOfShaderTypes)> const mapping = [] ()
-			{
-				std::remove_const<decltype(mapping)>::type mapping;
-				mapping[static_cast<uint32>(ShaderObject::ShaderType::VertexShader)] = gl::GL_VERTEX_SHADER;
-				mapping[static_cast<uint32>(ShaderObject::ShaderType::FragmentShader)] = gl::GL_FRAGMENT_SHADER;
-				mapping[static_cast<uint32>(ShaderObject::ShaderType::GeometryShader)] = gl::GL_GEOMETRY_SHADER;
-				mapping[static_cast<uint32>(ShaderObject::ShaderType::TessellationControlShader)] = gl::GL_TESS_CONTROL_SHADER;
-				mapping[static_cast<uint32>(ShaderObject::ShaderType::TessellationEvaluationShader)] = gl::GL_TESS_EVALUATION_SHADER;
-				return mapping;
-			} ();
-			return mapping[static_cast<uint32>(type)];
-		};
 	}
 
 
 
-
-
-	ShaderObject::ShaderObject(ShaderType type, string const& source) : type_(type), source_(source)
+	ShaderObject::ShaderObject(ShaderType type)
+		: type_(type), validate_(false)
 	{
 		glShaderID_ = gl::CreateShader(GLShaderTypeFromShaderType(type_));
 		assert(glShaderID_ != 0);
-		Compile();
-	}
-
-	ShaderObject::ShaderObject(ShaderType type, string&& source) : type_(type), source_(move(source))
-	{
-		glShaderID_ = gl::CreateShader(GLShaderTypeFromShaderType(type_));
-		assert(glShaderID_ != 0);
-		Compile();
 	}
 
 
@@ -97,14 +74,20 @@ namespace XREX
 	}
 
 
-	bool ShaderObject::Compile()
+	bool ShaderObject::Compile(std::vector<std::string> const& sources)
 	{
 		string const& macroToDefine = ShaderDefineMacroFromShaderType(type_);
 
-		char const* cstring[] = { VersionMacro().c_str(), macroToDefine.c_str(), source_.c_str() };
-		gl::ShaderSource(glShaderID_, sizeof(cstring) / sizeof(cstring[0]), cstring, nullptr);
+		std::vector<char const*> cstrings;
+		cstrings.push_back(VersionMacro().c_str());
+		cstrings.push_back(macroToDefine.c_str());
+		for (auto& source : sources)
+		{
+			cstrings.push_back(source.c_str());
+		}
+		gl::ShaderSource(glShaderID_, cstrings.size(), cstrings.data(), nullptr);
 		gl::CompileShader(glShaderID_);
-	
+
 		int32 sourceLength;
 		gl::GetShaderiv(glShaderID_, gl::GL_SHADER_SOURCE_LENGTH, &sourceLength); // '\0' included
 		source_.resize(sourceLength);
@@ -172,6 +155,7 @@ namespace XREX
 
 	void ProgramObject::AttachShader(ShaderObjectSP& shader)
 	{
+		assert(shader->IsValidate());
 		gl::AttachShader(glProgramID_, shader->GetGLID());
 		shaders_[static_cast<uint32>(shader->GetType())] = shader;
 	}
@@ -241,7 +225,7 @@ namespace XREX
 	#endif
 	}
 
-	int32 ProgramObject::GetAttributeLocation(string const& channel) const
+	std::pair<bool, ProgramObject::AttributeInformation> ProgramObject::GetAttributeInformation(std::string const& channel) const
 	{
 		auto found = std::find_if(attributeBindingInformation_.begin(), attributeBindingInformation_.end(), [&channel] (AttributeBindingInformation const& bindingInformation)
 		{
@@ -249,9 +233,9 @@ namespace XREX
 		});
 		if (found == attributeBindingInformation_.end())
 		{
-			return -1;
+			return std::make_pair(false, AttributeInformation());
 		}
-		return found->glLocation;
+		return std::make_pair(true, AttributeInformation(ElementTypeFromeGLType(found->glType), found->elementCount, found->glLocation));
 	}
 
 
@@ -532,7 +516,6 @@ namespace XREX
 						{
 							XREXContext::GetInstance().GetRenderingFactory().GetDefaultSampler()->Bind(samplerLocation);
 						}
-
 					};
 				}
 				break;

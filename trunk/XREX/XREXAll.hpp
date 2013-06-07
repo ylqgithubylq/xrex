@@ -23,7 +23,7 @@
 #include "FirstPersonCameraController.hpp"
 
 #include "Window.hpp"
-#include "GLWindow.hpp"
+#include "GraphicsContext.hpp"
 
 #include "Scene.hpp"
 #include "NaiveManagedScene.hpp"

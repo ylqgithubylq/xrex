@@ -15,7 +15,10 @@ namespace XREX
 		: Noncopyable
 	{
 	public:
-		Window(std::wstring const& name, int32 left, int32 top, int32 width, int32 height);
+		/*
+		 *	Size and position of created window may not equal to the values in settings.
+		 */
+		Window(Settings const& settings);
 		virtual ~Window();
 
 		void StartHandlingMessages();
@@ -37,6 +40,31 @@ namespace XREX
 			running_ = running;
 		}
 
+		bool IsActive() const
+		{
+			return active_;
+		}
+		void SetActive(bool active)
+		{
+			active_ = active;
+		}
+
+		/*
+		 *	Client region size, not the window size.
+		 */
+		Size<uint32> GetClientRegionSize() const
+		{
+			return Size<uint32>(width_, height_);
+		}
+
+		/*
+		 *	Upper left corner of the window.
+		 */
+		Size<int32> GetWindowPosition() const
+		{
+			return Size<int32>(windowLeft_, windowTop_);
+		}
+
 		std::wstring GetTitleText() const;
 		void SetTitleText(std::wstring const& text);
 
@@ -46,25 +74,28 @@ namespace XREX
 		 */
 		void SetRawWindowsMessageHook(void const* hook);
 
-	protected:
-		void Recreate();
-
-		virtual void OnMessageIdle()
-		{
-		}
-
 		/*
 		 *	@return: actual type is HWND, return void* to remove windows.h dependency from hpp.
 		 */
 		void* GetHWND() const;
 
+		void Recreate();
+
+		void SetMessageIdle(std::function<void()> const& messageIdle)
+		{
+			messageIdle_ = messageIdle;
+		}
+
+	protected:
+
+		void OnMessageIdle();
 
 	private:
 		static InputCenter::InputSemantic InputSemanticFromWindowsVK(uint32 winKey);
 
 	private:
 
-		void OnResize(uint32 width, uint32 height);
+		// void OnResize(uint32 width, uint32 height);
 
 		void OnKeyDown(uint32 winKey);
 		void OnKeyUp(uint32 winKey);
@@ -91,14 +122,20 @@ namespace XREX
 		bool running_;
 		bool rendering_;
 
+		bool fullScreen_;
+
 		uint32 height_;
 		uint32 width_;
 
-		uint32 left_;
-		uint32 top_;
+		int32 left_;
+		int32 top_;
+
+		int32 windowLeft_;
+		int32 windowTop_;
 
 		std::wstring name_;
 
+		std::function<void()> messageIdle_;
 	};
 
 }

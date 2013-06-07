@@ -17,10 +17,13 @@ namespace XREX
 		: Noncopyable
 	{
 	public:
-		RenderingFactory();
+		RenderingFactory(Window& window, Settings const& settings);
 		virtual ~RenderingFactory();
 
-		void Initialize();
+		std::string const& GetGLSLVersionString() const
+		{
+			return glslVersionString_;
+		}
 
 		ViewportSP const& GetDefaultViewport() const
 		{
@@ -64,13 +67,9 @@ namespace XREX
 		{
 			return MakeSP<BlendStateObject>(blendState);
 		}
-		ShaderObjectSP CreateShaderObject(ShaderObject::ShaderType type, std::string const& source)
+		ShaderObjectSP CreateShaderObject(ShaderObject::ShaderType type)
 		{
-			return MakeSP<ShaderObject>(type, source);
-		}
-		ShaderObjectSP CreateShaderObject(ShaderObject::ShaderType type, std::string&& source)
-		{
-			return MakeSP<ShaderObject>(type, std::move(source));
+			return MakeSP<ShaderObject>(type);
 		}
 		ProgramObjectSP CreateProgramObject()
 		{
@@ -87,11 +86,11 @@ namespace XREX
 			return MakeSP<VertexBuffer>(usage, data, channel, normalized);
 		}
 		template <typename T>
-		VertexBufferSP CreateVertexBuffer(GraphicsBuffer::Usage usage, std::vector<T> const& data, VertexBuffer::DataLayout&& description)
+		VertexBufferSP CreateVertexBuffer(GraphicsBuffer::Usage usage, std::vector<T> const& data, VertexBuffer::DataLayoutDescription&& description)
 		{
 			return MakeSP<VertexBuffer>(usage, data, std::move(description));
 		}
-		VertexBufferSP CreateVertexBuffer(GraphicsBuffer::Usage usage, uint32 elementSizeInBytes, VertexBuffer::DataLayout&& description)
+		VertexBufferSP CreateVertexBuffer(GraphicsBuffer::Usage usage, uint32 elementSizeInBytes, VertexBuffer::DataLayoutDescription&& description)
 		{
 			return MakeSP<VertexBuffer>(usage, elementSizeInBytes, std::move(description));
 		}
@@ -160,6 +159,7 @@ namespace XREX
 		}
 
 	private:
+		std::string glslVersionString_;
 		ViewportSP defaultViewport_;
 		TextureSP blackTexture1D_;
 		TextureSP blackTexture2D_;

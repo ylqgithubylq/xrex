@@ -32,21 +32,19 @@ namespace XREX
 		}
 		/*
 		 *	Can only be called in absolute mode.
-		 *	@return: tuple<(left), (bottom), (width), (height)>
 		 */
-		std::tuple<int32, int32, uint32, uint32> GetAbsolute() const
+		Rectangle<int32> GetAbsolute() const
 		{
 			assert(absolute_);
-			return std::make_tuple(data_.absolute.left, data_.absolute.bottom, data_.absolute.width, data_.absolute.height);
+			return Rectangle<int32>(data_.absolute.left, data_.absolute.bottom, data_.absolute.width, data_.absolute.height);
 		}
 		/*
 		 *	Can only be called in relative mode.
-		 *	@return: tuple<(left), (bottom), (width), (height)>
 		 */
-		std::tuple<float, float, float, float> GetRelative() const
+		Rectangle<float> GetRelative() const
 		{
 			assert(!absolute_);
-			return std::make_tuple(data_.relative.left, data_.relative.bottom, data_.relative.width, data_.relative.height);
+			return Rectangle<float>(data_.relative.left, data_.relative.bottom, data_.relative.width, data_.relative.height);
 		}
 		/*
 		 *	If viewport is absolute mode, all parameters are ignored.

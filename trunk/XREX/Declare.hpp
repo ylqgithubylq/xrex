@@ -29,7 +29,7 @@ namespace XREX
 	class RenderingEngine;
 	class InputCenter;
 	class Window;
-	class GLWindow;
+	class GraphicsContext;
 
 	class InputHandler;
 	typedef std::shared_ptr<InputHandler> InputHandlerSP;

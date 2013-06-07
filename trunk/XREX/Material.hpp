@@ -19,6 +19,11 @@ namespace XREX
 		Material(std::string const& name);
 		~Material();
 
+		std::string const& GetName() const
+		{
+			return name_;
+		}
+
 		template <typename T>
 		void SetParameter(std::string const& parameterName, T const& value)
 		{

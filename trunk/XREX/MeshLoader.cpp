@@ -53,18 +53,18 @@ namespace XREX
 				struct LayoutData
 					: private XREX::Noncopyable
 				{
-					VertexBuffer::DataLayout description;
+					VertexBuffer::DataLayoutDescription description;
 					std::vector<uint8> vertex;
 					IndexBuffer::PrimitiveType primitiveType;
 					ElementType indexType;
 					std::vector<uint16> index16;
 					std::vector<uint32> index32;
 
-					LayoutData(VertexBuffer::DataLayout&& theDescription, std::vector<uint8>&& theVertex, IndexBuffer::PrimitiveType thePrimitiveType, std::vector<uint16>&& theIndex)
+					LayoutData(VertexBuffer::DataLayoutDescription&& theDescription, std::vector<uint8>&& theVertex, IndexBuffer::PrimitiveType thePrimitiveType, std::vector<uint16>&& theIndex)
 						: description(std::move(theDescription)), vertex(std::move(theVertex)), primitiveType(thePrimitiveType), index16(std::move(theIndex)), indexType(ElementType::Uint16)
 					{
 					}
-					LayoutData(VertexBuffer::DataLayout&& theDescription, std::vector<uint8>&& theVertex, IndexBuffer::PrimitiveType thePrimitiveType, std::vector<uint32>&& theIndex)
+					LayoutData(VertexBuffer::DataLayoutDescription&& theDescription, std::vector<uint8>&& theVertex, IndexBuffer::PrimitiveType thePrimitiveType, std::vector<uint32>&& theIndex)
 						: description(std::move(theDescription)), vertex(std::move(theVertex)), primitiveType(thePrimitiveType), index32(std::move(theIndex)), indexType(ElementType::Uint32)
 					{
 					}
@@ -461,26 +461,26 @@ namespace XREX
 					}
 
 					int startLocation = 0;
-					VertexBuffer::DataLayout dataDescription = VertexBuffer::DataLayout(mesh->mNumVertices);
+					VertexBuffer::DataLayoutDescription dataDescription = VertexBuffer::DataLayoutDescription(mesh->mNumVertices);
 					if (mesh->HasPositions())
 					{
-						dataDescription.AddChannelLayout(VertexBuffer::DataLayout::ElementLayout(startLocation, totalLengthPerElement, ElementType::FloatV3, GetAttributeString(DefinedAttribute::Position)));
+						dataDescription.AddChannelLayout(VertexBuffer::DataLayoutDescription::ElementLayoutDescription(startLocation, totalLengthPerElement, ElementType::FloatV3, GetAttributeString(DefinedAttribute::Position)));
 						startLocation += sizeof(*mesh->mVertices);
 					}
 					if (mesh->HasNormals())
 					{
-						dataDescription.AddChannelLayout(VertexBuffer::DataLayout::ElementLayout(startLocation, totalLengthPerElement, ElementType::FloatV3, GetAttributeString(DefinedAttribute::Normal)));
+						dataDescription.AddChannelLayout(VertexBuffer::DataLayoutDescription::ElementLayoutDescription(startLocation, totalLengthPerElement, ElementType::FloatV3, GetAttributeString(DefinedAttribute::Normal)));
 						startLocation += sizeof(*mesh->mNormals);
 					}
 					for (uint32 j = 0; j < textureCoordinateCount; ++j)
 					{
-						dataDescription.AddChannelLayout(VertexBuffer::DataLayout::ElementLayout(startLocation, totalLengthPerElement, ElementType::FloatV3,
+						dataDescription.AddChannelLayout(VertexBuffer::DataLayoutDescription::ElementLayoutDescription(startLocation, totalLengthPerElement, ElementType::FloatV3,
 							GetAttributeString(static_cast<DefinedAttribute>(static_cast<uint32>(DefinedAttribute::TextureCoordinate0) + j))));
 						startLocation += sizeof(*mesh->mTextureCoords[0]);
 					}
 					for (uint32 j = 0; j < vertexColorCount; ++j)
 					{
-						dataDescription.AddChannelLayout(VertexBuffer::DataLayout::ElementLayout(startLocation, totalLengthPerElement, ElementType::FloatV4,
+						dataDescription.AddChannelLayout(VertexBuffer::DataLayoutDescription::ElementLayoutDescription(startLocation, totalLengthPerElement, ElementType::FloatV4,
 							GetAttributeString(static_cast<DefinedAttribute>(static_cast<uint32>(DefinedAttribute::Color0) + j))));
 						startLocation += sizeof(*mesh->mColors[0]);
 					}

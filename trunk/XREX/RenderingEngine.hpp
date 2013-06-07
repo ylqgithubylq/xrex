@@ -14,12 +14,16 @@ namespace XREX
 	{
 
 	public:
-		RenderingEngine();
+		RenderingEngine(Window& window, Settings const& settings);
 		~RenderingEngine();
 
-		void Initialize();
-
 		uint32 GetGLError();
+
+		GraphicsContext& GetGraphicsContext() const
+		{
+			return *graphicsContext_;
+		}
+
 		/*
 		 *	@scene: set to nullptr to make no scene to render.
 		 */
@@ -37,6 +41,8 @@ namespace XREX
 			timer_.Restart();
 			lastTime_ = timer_.Elapsed();
 		}
+		
+		void SwapBuffers();
 
 		void RenderAFrame();
 
@@ -52,11 +58,12 @@ namespace XREX
 			afterRenderingFunction_ = afterRenderingFunction;
 		}
 
-
 	private:
 		void RenderACamera(SceneObjectSP const& cameraObject);
 
 	private:
+		std::unique_ptr<GraphicsContext> graphicsContext_;
+
 		std::function<void(double current, double delta)> beforeRenderingFunction_;
 		std::function<void(double current, double delta)> afterRenderingFunction_;
 		SceneSP scene_;

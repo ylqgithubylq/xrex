@@ -116,8 +116,12 @@ struct TempScene
 			cerr << "file not found. file: " << shaderFile << endl;
 		}
 
-		ShaderObjectSP vs = XREXContext::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::VertexShader, shaderString);
-		ShaderObjectSP fs = XREXContext::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::FragmentShader, shaderString);
+		vector<string> shaderStrings(1);
+		shaderStrings[0] = shaderString;
+		ShaderObjectSP vs = XREXContext::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::VertexShader);
+		ShaderObjectSP fs = XREXContext::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::FragmentShader);
+		vs->Compile(shaderStrings);
+		fs->Compile(shaderStrings);
 
 		if (!vs->IsValidate())
 		{
@@ -142,8 +146,11 @@ struct TempScene
 			cerr << "file not found. file: " << shaderFile << endl;
 		}
 
-		vs = XREXContext::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::VertexShader, shaderString);
-		fs = XREXContext::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::FragmentShader, shaderString);
+		shaderStrings[0] = shaderString;
+		vs = XREXContext::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::VertexShader);
+		fs = XREXContext::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::FragmentShader);
+		vs->Compile(shaderStrings);
+		fs->Compile(shaderStrings);
 
 
 		if (!vs->IsValidate())

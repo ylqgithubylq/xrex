@@ -3,6 +3,7 @@
 #include "BasicType.hpp"
 #include "RenderingPipelineState.hpp"
 #include "Sampler.hpp"
+#include "Shader.hpp"
 
 namespace XREX
 {
@@ -24,4 +25,9 @@ namespace XREX
 	XREX_API uint32 GLTextureAddressingModeFromAddressingMode(SamplerState::TextureAddressingMode addressingMode);
 
 	XREX_API uint32 GLFilterOperationFromTextureFilterOperation(SamplerState::TextureFilterOperation filterOperation);
+
+	XREX_API uint32 GLShaderTypeFromShaderType(ShaderObject::ShaderType type);
+
+	XREX_API ElementType ElementTypeFromeGLType(uint32 glType);
+
 }

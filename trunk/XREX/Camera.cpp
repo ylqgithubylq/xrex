@@ -35,7 +35,7 @@ namespace XREX
 		dirty_ = false;
 	}
 
-	XREX::Ray Camera::GetViewRay(floatV2 const& position, ViewportOrigin origin)
+	Ray Camera::GetViewRay(floatV2 const& position, ViewportOrigin origin)
 	{
 		TransformationSP transformation = GetOwnerSceneObject()->GetComponent<Transformation>();
 		float xFromViewportCenter;

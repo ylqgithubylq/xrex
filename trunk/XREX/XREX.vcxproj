@@ -190,8 +190,8 @@
     <ClCompile Include="FreeRoamCameraController.cpp" />
     <ClCompile Include="GeometricalMath.cpp" />
     <ClCompile Include="GLUtil.cpp" />
-    <ClCompile Include="GLWindow.cpp" />
     <ClCompile Include="GraphicsBuffer.cpp" />
+    <ClCompile Include="GraphicsContext.cpp" />
     <ClCompile Include="InputCenter.cpp" />
     <ClCompile Include="InputHandler.cpp" />
     <ClCompile Include="LocalResourceLoader.cpp" />
@@ -241,8 +241,8 @@
     <ClInclude Include="GeometricalMath.hpp" />
     <ClInclude Include="Geometry.hpp" />
     <ClInclude Include="GLUtil.hpp" />
-    <ClInclude Include="GLWindow.hpp" />
     <ClInclude Include="GraphicsBuffer.hpp" />
+    <ClInclude Include="GraphicsContext.hpp" />
     <ClInclude Include="InputCenter.hpp" />
     <ClInclude Include="InputHandler.hpp" />
     <ClInclude Include="LoadingResult.hpp" />

@@ -73,7 +73,7 @@ namespace XREX
 		return false;
 	}
 
-	XREX::ProgramObjectSP LocalResourceLoader::LoadProgram(std::string const& fileName, std::vector<std::string> const& macros)
+	ProgramObjectSP LocalResourceLoader::LoadProgram(std::string const& fileName, std::vector<std::string> const& macros)
 	{
 		ProgramObjectSP program = XREXContext::GetInstance().GetRenderingFactory().CreateProgramObject();
 		string shaderString;
@@ -88,8 +88,11 @@ namespace XREX
 			return nullptr;
 		}
 
-		ShaderObjectSP vs =XREXContext::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::VertexShader, shaderString);
-		ShaderObjectSP fs = XREXContext::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::FragmentShader, shaderString);
+		ShaderObjectSP vs =XREXContext::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::VertexShader);
+		ShaderObjectSP fs = XREXContext::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::FragmentShader);
+
+		vs->Compile(std::vector<string>(1, shaderString));
+		fs->Compile(std::vector<string>(1, shaderString));
 
 		if (!vs->IsValidate())
 		{

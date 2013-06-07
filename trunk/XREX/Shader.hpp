@@ -28,8 +28,7 @@ namespace XREX
 		};
 
 	public:
-		ShaderObject(ShaderType type, std::string const& source);
-		ShaderObject(ShaderType type, std::string&& source);
+		ShaderObject(ShaderType type);
 		~ShaderObject();
 
 		void Destory();
@@ -38,6 +37,8 @@ namespace XREX
 		{
 			return type_;
 		}
+
+		bool Compile(std::vector<std::string> const& sources);
 
 		bool IsValidate() const
 		{
@@ -51,8 +52,6 @@ namespace XREX
 
 
 	private:
-		bool Compile();
-
 		uint32 GetGLID() const
 		{
 			return glShaderID_;
@@ -70,6 +69,21 @@ namespace XREX
 	class XREX_API ProgramObject
 		: Noncopyable
 	{
+	public:
+		struct AttributeInformation
+		{
+			ElementType elementType;
+			int32 elementCount;
+			int32 location;
+			AttributeInformation()
+				: elementType(ElementType::Void), elementCount(0), location(-1)
+			{
+			}
+			AttributeInformation(ElementType type, int32 elementCount, int32 location)
+				: elementType(type), elementCount(elementCount), location(location)
+			{
+			}
+		};
 
 	public:
 		ProgramObject();
@@ -90,10 +104,11 @@ namespace XREX
 		}
 
 		void Bind();
+
 		/*
-		 *	@return: -1 indicates not found.
+		 *	@return: return.first indicates whether the channel is found.
 		 */
-		int32 GetAttributeLocation(std::string const& channel) const;
+		std::pair<bool, AttributeInformation> GetAttributeInformation(std::string const& channel) const;
 
 		/*
 		 *	Do not call this. Used by RenderingPass.
@@ -102,6 +117,7 @@ namespace XREX
 		void InitializeParameterSetters(RenderingEffect& effect);
 
 	private:
+
 		struct UniformBinder
 		{
 			uint32 glType;
@@ -109,6 +125,7 @@ namespace XREX
 			int32 glLocation;
 			std::function<void()> setter;
 		};
+
 		struct AttributeBindingInformation
 		{
 			std::string channel;
@@ -116,6 +133,7 @@ namespace XREX
 			int32 elementCount; // always 1?
 			int32 glLocation;
 		};
+
 	private:
 		void InitializeUniformBinder(UniformBinder& binder, EffectParameterSP& parameter, uint32& availableSamplerLocation);
 

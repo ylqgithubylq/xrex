@@ -132,16 +132,16 @@ namespace XREX
 
 
 
-	bool VertexBuffer::DataLayout::AddChannelLayout(ElementLayout&& elementLayout)
+	bool VertexBuffer::DataLayoutDescription::AddChannelLayout(ElementLayoutDescription&& elementLayout)
 	{
 		channelLayouts_.push_back(std::move(elementLayout));
 		// TODO check if they overlaid each other
 		return true;
 	}
 
-	auto VertexBuffer::DataLayout::GetChannelLayout(string const& channel) const -> ElementLayout const&
+	auto VertexBuffer::DataLayoutDescription::GetChannelLayout(string const& channel) const -> ElementLayoutDescription const&
 	{
-		auto found = std::find_if(channelLayouts_.begin(), channelLayouts_.end(), [&channel] (ElementLayout const& elementLayout) 
+		auto found = std::find_if(channelLayouts_.begin(), channelLayouts_.end(), [&channel] (ElementLayoutDescription const& elementLayout) 
 		{
 			return elementLayout.channel == channel;
 		});
@@ -149,37 +149,5 @@ namespace XREX
 		return *found;
 	}
 
-
-	void VertexBuffer::BindToProgram(ProgramObjectSP const& program)
-	{
-		// binding relations are saved in VAO in RenderingLayout.
-		Bind();
-		assert(lastAttributeLocations_.size() == 0); // make sure this buffer is not binding to other programs
-		lastAttributeLocations_.resize(layout_.GetChannelLayoutCount());
-		for (uint32 i = 0; i < layout_.GetChannelLayoutCount(); ++i)
-		{
-			DataLayout::ElementLayout const& channelLayout = layout_.GetChannelLayoutAtIndex(i);
-			lastAttributeLocations_[i] = program->GetAttributeLocation(channelLayout.channel);
-			if (lastAttributeLocations_[i] != -1)
-			{
-				gl::EnableVertexAttribArray(lastAttributeLocations_[i]);
-				gl::VertexAttribPointer(lastAttributeLocations_[i], GetElementPrimitiveCount(channelLayout.elementType), GLTypeFromElementType(GetElementPrimitiveType(channelLayout.elementType)),
-					channelLayout.needNormalize, channelLayout.strip, reinterpret_cast<void const*>(channelLayout.start));
-			}
-		}
-	}
-
-	void VertexBuffer::Unbind()
-	{
-		GraphicsBuffer::Unbind();
-		for (uint32 i = 0; i < layout_.GetChannelLayoutCount(); ++i)
-		{
-			if (lastAttributeLocations_[i] != -1)
-			{
-				gl::DisableVertexAttribArray(lastAttributeLocations_[i]);
-			}
-		}
-		lastAttributeLocations_.shrink_to_fit();
-	}
 
 }
