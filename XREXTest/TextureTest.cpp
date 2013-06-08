@@ -134,12 +134,15 @@ RenderingEffectSP MakeEffect()
 	#endif\n\
 	\n\
 	";
+	RenderingEffectSP commonEffect = MakeSP<RenderingEffect>("common effect");
+	commonEffect->AddShaderCode(std::move(testCommonFunctionString));
+	RenderingEffectSP cubeEffect = MakeSP<RenderingEffect>("test cube effect");
+	cubeEffect->AddShaderCode(std::move(shaderString));
+	cubeEffect->AddInclude(commonEffect);
 
 	ProgramObjectSP cubeProgram = XREXContext::GetInstance().GetRenderingFactory().CreateProgramObject();
 
-	std::vector<std::string> shaderStrings;
-	shaderStrings.emplace_back(std::move(testCommonFunctionString));
-	shaderStrings.emplace_back(std::move(shaderString));
+	std::vector<std::string const*> const& shaderStrings = cubeEffect->GetFullShaderCode();
 	ShaderObjectSP vs = XREXContext::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::VertexShader);
 	ShaderObjectSP fs = XREXContext::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::FragmentShader);
 	vs->Compile(shaderStrings);
@@ -176,7 +179,6 @@ RenderingEffectSP MakeEffect()
 	DepthStencilStateObjectSP dsso = XREXContext::GetInstance().GetRenderingFactory().CreateDepthStencilStateObject(depthStencilState);
 	BlendStateObjectSP bso = XREXContext::GetInstance().GetRenderingFactory().CreateBlendStateObject(blendState);
 
-	RenderingEffectSP cubeEffect = MakeSP<RenderingEffect>("test cube effect");
 	RenderingTechniqueSP cubeTechnique = cubeEffect->CreateTechnique();
 	RenderingPassSP cubePass = cubeTechnique->CreatePass(cubeProgram, rso, dsso, bso);
 

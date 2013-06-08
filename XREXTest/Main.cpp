@@ -116,8 +116,8 @@ struct TempScene
 			cerr << "file not found. file: " << shaderFile << endl;
 		}
 
-		vector<string> shaderStrings(1);
-		shaderStrings[0] = shaderString;
+		vector<string const*> shaderStrings(1);
+		shaderStrings[0] = &shaderString;
 		ShaderObjectSP vs = XREXContext::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::VertexShader);
 		ShaderObjectSP fs = XREXContext::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::FragmentShader);
 		vs->Compile(shaderStrings);
@@ -146,7 +146,7 @@ struct TempScene
 			cerr << "file not found. file: " << shaderFile << endl;
 		}
 
-		shaderStrings[0] = shaderString;
+		shaderStrings[0] = &shaderString;
 		vs = XREXContext::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::VertexShader);
 		fs = XREXContext::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::FragmentShader);
 		vs->Compile(shaderStrings);
@@ -207,13 +207,13 @@ struct TempScene
 		EffectParameterSP const& lightColor = effect->GetParameterByName("lightColor");
 		if (lightColor)
 		{
-			lightColor->SetValue(floatV3(50000, 50000, 60000));
+			lightColor->As<floatV3>().SetValue(floatV3(50000, 50000, 60000));
 		}
 		EffectParameterSP const& centerPosition = effect->GetParameterByName("centerPosition");
 		if (centerPosition)
 		{
-			centerPosition->SetValue(centerPosition_);
-			centerPosition_ = centerPosition->GetValue<floatV3>();
+			centerPosition->As<floatV3>().SetValue(centerPosition_);
+			centerPosition_ = centerPosition->As<floatV3>().GetValue();
 		}
 		camera_ = MakeSP<SceneObject>("camera");
 		Settings const& settings = XREXContext::GetInstance().GetSettings();
@@ -302,7 +302,7 @@ struct TempScene
 		EffectParameterSP const& cubeCenterPosition = cubeEffect->GetParameterByName("centerPosition");
 		if (cubeCenterPosition)
 		{
-			cubeCenterPosition->SetValue(floatV3(0, 50, 0));
+			cubeCenterPosition->As<floatV3>().SetValue(floatV3(0, 50, 0));
 		}
 
 //		FreeRoamCameraControllerSP cameraController = MakeSP<FreeRoamCameraController>();
@@ -431,8 +431,8 @@ void Main()
 
 int main()
 {
-	//TextureTest textest;
-	//return 0;
+	TextureTest textest;
+	return 0;
 	//TestMath();
 	//SQRTSpeedTest();
 	//return 0;

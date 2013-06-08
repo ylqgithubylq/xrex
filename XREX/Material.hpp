@@ -31,13 +31,13 @@ namespace XREX
 			if (found == parameters_.end())
 			{
 				EffectParameterSP parameter = MakeSP<ConcreteEffectParameter<T>>(parameterName);
-				parameter->SetValue(value);
+				parameter->As<T>().SetValue(value);
 				parameters_[parameterName] = std::move(parameter);
 				cacheDirty_ = true;
 			}
 			else
 			{
-				found->second->SetValue(value);
+				found->second->As<T>().SetValue(value);
 			}
 		}
 

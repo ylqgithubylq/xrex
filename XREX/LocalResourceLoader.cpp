@@ -91,8 +91,8 @@ namespace XREX
 		ShaderObjectSP vs =XREXContext::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::VertexShader);
 		ShaderObjectSP fs = XREXContext::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::FragmentShader);
 
-		vs->Compile(std::vector<string>(1, shaderString));
-		fs->Compile(std::vector<string>(1, shaderString));
+		vs->Compile(std::vector<string const*>(1, &shaderString));
+		fs->Compile(std::vector<string const*>(1, &shaderString));
 
 		if (!vs->IsValidate())
 		{

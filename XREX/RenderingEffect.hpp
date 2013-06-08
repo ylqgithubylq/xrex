@@ -9,6 +9,9 @@
 namespace XREX
 {
 
+	template <typename T>
+	class ConcreteEffectParameter;
+
 	class XREX_API EffectParameter
 		: Noncopyable
 	{
@@ -25,158 +28,60 @@ namespace XREX
 		{
 		}
 
-		virtual std::string const& GetName() const
+		std::string const& GetName() const
 		{
 			return name_;
 		}
 
-		virtual ElementType GetType() const;
-
-
-		virtual void SetValue(bool const& value);
-		virtual void SetValue(int32 const& value);
-		virtual void SetValue(intV2 const& value);
-		virtual void SetValue(intV3 const& value);
-		virtual void SetValue(intV4 const& value);
-		virtual void SetValue(uint32 const& value);
-		virtual void SetValue(uintV2 const& value);
-		virtual void SetValue(uintV3 const& value);
-		virtual void SetValue(uintV4 const& value);
-		virtual void SetValue(float const& value);
-		virtual void SetValue(floatV2 const& value);
-		virtual void SetValue(floatV3 const& value);
-		virtual void SetValue(floatV4 const& value);
-		virtual void SetValue(double const& value);
-		virtual void SetValue(doubleV2 const& value);
-		virtual void SetValue(doubleV3 const& value);
-		virtual void SetValue(doubleV4 const& value);
-		virtual void SetValue(floatM44 const& value);
-		virtual void SetValue(doubleM44 const& value);
-		virtual void SetValue(std::pair<TextureSP, SamplerSP> const& value);
-	// 	
-	// 	virtual void SetValue(std::vector<bool> const& value);
-	// 	virtual void SetValue(std::vector<int32> const& value);
-	// 	virtual void SetValue(std::vector<float> const& value);
-	// 	virtual void SetValue(std::vector<floatV2> const& value);
-	// 	virtual void SetValue(std::vector<floatV3> const& value);
-	// 	virtual void SetValue(std::vector<floatV4> const& value);
-	// 	virtual void SetValue(std::vector<floatM44> const& value);
-
-		// the mass above is due to no template virtual member functions
-
-		// a little brain fucking...
-		// a helper struct to help return value automatically convert to sorts of types.
-		struct XREX_API ParameterValueAutoConverter
-			: Noncopyable
-		{
-			virtual operator bool const&() const;
-			virtual operator int32 const&() const;
-			virtual operator intV2 const&() const;
-			virtual operator intV3 const&() const;
-			virtual operator intV4 const&() const;
-			virtual operator uint32 const&() const;
-			virtual operator uintV2 const&() const;
-			virtual operator uintV3 const&() const;
-			virtual operator uintV4 const&() const;
-			virtual operator float const&() const;
-			virtual operator floatV2 const&() const;
-			virtual operator floatV3 const&() const;
-			virtual operator floatV4 const&() const;
-			virtual operator double const&() const;
-			virtual operator doubleV2 const&() const;
-			virtual operator doubleV3 const&() const;
-			virtual operator doubleV4 const&() const;
-			virtual operator floatM44 const&() const;
-			virtual operator doubleM44 const&() const;
-			virtual operator std::pair<TextureSP, SamplerSP> const&() const;
-	// 		virtual operator std::vector<bool> const&() const;
-	// 		virtual operator std::vector<int32> const&() const;
-	// 		virtual operator std::vector<float> const&() const;
-	// 		virtual operator std::vector<floatV2> const&() const;
-	// 		virtual operator std::vector<floatV3> const&() const;
-	// 		virtual operator std::vector<floatV4> const&() const;
-		};
-
-		// a bit magic, do it this way can overload functions by return value.
-		template <typename T>
-		T const& GetValue() const
-		{
-			return DoGetValue();
-		}
+		virtual ElementType GetType() const = 0;
 
 		virtual void GetValueFrom(EffectParameter const& right) = 0;
 
-	private:
-		/*
-		 *	@return ParameterValueAutoConverter: a helper struct that can convert to other type automatically.
-		 */
-		virtual ParameterValueAutoConverter const& DoGetValue() const = 0;
+		template <typename T>
+		ConcreteEffectParameter<T>& As()
+		{
+			return *CheckedCast<ConcreteEffectParameter<T>*>(this);
+		}
 
 	protected:
 			std::string name_;
 	};
 
-
 	template <typename T>
 	class ConcreteEffectParameter
 		: public EffectParameter
 	{
-	public:
-		typedef T ValueType;
 
-#pragma warning(push)
-#pragma warning(disable: 4355) // 'this' used in base member initializer list
+	public:
 		explicit ConcreteEffectParameter(std::string const& name)
-			: EffectParameter(name), converter_(this)
+			: EffectParameter(name)
 		{
 		}
-#pragma warning(pop)
 
+		T const& GetValue() const
+		{
+			return value_;
+		}
+
+		void SetValue(T const& value)
+		{
+			value_ = value;
+		}
+
+	private:
 		virtual ElementType GetType() const override
 		{
 			return TypeToElementType<T>::Type;
 		}
 
-		virtual void SetValue(T const& value) override
-		{
-			value_ = value;
-		}
-	
 		virtual void GetValueFrom(EffectParameter const& right) override
 		{
 			value_ = CheckedCast<ConcreteEffectParameter const*>(&right)->value_;
 		}
 
 	private:
-		struct ConcreteParameterValueAutoConverter
-			: public ParameterValueAutoConverter
-		{
-		public:
-			explicit ConcreteParameterValueAutoConverter(ConcreteEffectParameter* parameter)
-				: parameter_(parameter)
-			{
-			}
-			virtual operator T const&() const override
-			{
-				return parameter_->value_;
-			}
-
-		private:
-			ConcreteEffectParameter* parameter_;
-		};
-
-	private:
-		virtual ParameterValueAutoConverter const& DoGetValue() const override
-		{
-			return converter_;
-		}
-
-
-	protected:
 		T value_;
-		ConcreteParameterValueAutoConverter converter_;
 	};
-
 
 	struct XREX_API EffectPipelineParameters
 		: Noncopyable
@@ -200,7 +105,34 @@ namespace XREX
 		explicit RenderingEffect(std::string const& name);
 		~RenderingEffect();
 
-		std::vector<EffectParameterSP> const& GetAllParameters()
+		void AddInclude(RenderingEffectSP const& effect)
+		{
+			includes_.push_back(effect);
+		}
+		std::vector<RenderingEffectSP> const& GetAllIncludes() const
+		{
+			return includes_;
+		}
+
+		void AddShaderCode(std::string const& code)
+		{
+			shaderCodes_.emplace_back(code);
+		}
+		void AddShaderCode(std::string&& code)
+		{
+			shaderCodes_.emplace_back(std::move(code));
+		}
+		std::vector<std::string> const& GetAllShaderCodes() const
+		{
+			return shaderCodes_;
+		}
+
+		/*
+		 *	Get shader codes for compile, include all included effect codes.
+		 */
+		std::vector<std::string const*> GetFullShaderCode() const;
+
+		std::vector<EffectParameterSP> const& GetAllParameters() const
 		{
 			return parameters_;
 		}
@@ -231,6 +163,9 @@ namespace XREX
 
 	private:
 		std::string name_;
+
+		std::vector<RenderingEffectSP> includes_;
+		std::vector<std::string> shaderCodes_;
 
 		std::vector<EffectParameterSP> parameters_;
 		std::vector<RenderingTechniqueSP> techniques_;
