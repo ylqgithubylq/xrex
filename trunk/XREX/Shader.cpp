@@ -74,16 +74,16 @@ namespace XREX
 	}
 
 
-	bool ShaderObject::Compile(std::vector<std::string> const& sources)
+	bool ShaderObject::Compile(std::vector<std::string const*> const& sources)
 	{
 		string const& macroToDefine = ShaderDefineMacroFromShaderType(type_);
 
 		std::vector<char const*> cstrings;
 		cstrings.push_back(VersionMacro().c_str());
 		cstrings.push_back(macroToDefine.c_str());
-		for (auto& source : sources)
+		for (auto source : sources)
 		{
-			cstrings.push_back(source.c_str());
+			cstrings.push_back(source->c_str());
 		}
 		gl::ShaderSource(glShaderID_, cstrings.size(), cstrings.data(), nullptr);
 		gl::CompileShader(glShaderID_);
@@ -448,7 +448,7 @@ namespace XREX
 				{
 					binder.setter = [&binder, parameter, samplerLocation] ()
 					{
-						std::pair<TextureSP, SamplerSP> const& texture = parameter->GetValue<std::pair<TextureSP, SamplerSP>>();
+						std::pair<TextureSP, SamplerSP> const& texture = parameter->As<std::pair<TextureSP, SamplerSP>>().GetValue();
 						if (texture.first)
 						{
 							texture.first->Bind(samplerLocation);
@@ -473,7 +473,7 @@ namespace XREX
 				{
 					binder.setter = [&binder, parameter, samplerLocation] ()
 					{
-						std::pair<TextureSP, SamplerSP> const& texture = parameter->GetValue<std::pair<TextureSP, SamplerSP>>();
+						std::pair<TextureSP, SamplerSP> const& texture = parameter->As<std::pair<TextureSP, SamplerSP>>().GetValue();
 						if (texture.first)
 						{
 							texture.first->Bind(samplerLocation);
@@ -498,7 +498,7 @@ namespace XREX
 				{
 					binder.setter = [&binder, parameter, samplerLocation] ()
 					{
-						std::pair<TextureSP, SamplerSP> const& texture = parameter->GetValue<std::pair<TextureSP, SamplerSP>>();
+						std::pair<TextureSP, SamplerSP> const& texture = parameter->As<std::pair<TextureSP, SamplerSP>>().GetValue();
 						if (texture.first)
 						{
 							texture.first->Bind(samplerLocation);
@@ -523,7 +523,7 @@ namespace XREX
 				{
 					binder.setter = [&binder, parameter, samplerLocation] ()
 					{
-						std::pair<TextureSP, SamplerSP> const& texture = parameter->GetValue<std::pair<TextureSP, SamplerSP>>();
+						std::pair<TextureSP, SamplerSP> const& texture = parameter->As<std::pair<TextureSP, SamplerSP>>().GetValue();
 						if (texture.first)
 						{
 							texture.first->Bind(samplerLocation);
@@ -558,7 +558,7 @@ namespace XREX
 				{
 					binder.setter = [&binder, parameter] ()
 					{
-						gl::Uniform1i(binder.glLocation, parameter->GetValue<bool>());
+						gl::Uniform1i(binder.glLocation, parameter->As<bool>().GetValue());
 					};
 				}
 				break;
@@ -566,7 +566,7 @@ namespace XREX
 				{
 					binder.setter = [&binder, parameter] ()
 					{
-						gl::Uniform1i(binder.glLocation, parameter->GetValue<int32>());
+						gl::Uniform1i(binder.glLocation, parameter->As<int32>().GetValue());
 					};
 				}
 				break;
@@ -574,7 +574,7 @@ namespace XREX
 				{
 					binder.setter = [&binder, parameter] ()
 					{
-						gl::Uniform2iv(binder.glLocation, 1, parameter->GetValue<intV2>().GetArray());
+						gl::Uniform2iv(binder.glLocation, 1, parameter->As<intV2>().GetValue().GetArray());
 					};
 				}
 				break;
@@ -582,7 +582,7 @@ namespace XREX
 				{
 					binder.setter = [&binder, parameter] ()
 					{
-						gl::Uniform3iv(binder.glLocation, 1, parameter->GetValue<intV3>().GetArray());
+						gl::Uniform3iv(binder.glLocation, 1, parameter->As<intV3>().GetValue().GetArray());
 					};
 				}
 				break;
@@ -590,7 +590,7 @@ namespace XREX
 				{
 					binder.setter = [&binder, parameter] ()
 					{
-						gl::Uniform4iv(binder.glLocation, 1, parameter->GetValue<intV4>().GetArray());
+						gl::Uniform4iv(binder.glLocation, 1, parameter->As<intV4>().GetValue().GetArray());
 					};
 				}
 				break;
@@ -598,7 +598,7 @@ namespace XREX
 				{
 					binder.setter = [&binder, parameter] ()
 					{
-						gl::Uniform1ui(binder.glLocation, parameter->GetValue<uint32>());
+						gl::Uniform1ui(binder.glLocation, parameter->As<uint32>().GetValue());
 					};
 				}
 				break;
@@ -606,7 +606,7 @@ namespace XREX
 				{
 					binder.setter = [&binder, parameter] ()
 					{
-						gl::Uniform2uiv(binder.glLocation, 1, parameter->GetValue<uintV2>().GetArray());
+						gl::Uniform2uiv(binder.glLocation, 1, parameter->As<uintV2>().GetValue().GetArray());
 					};
 				}
 				break;
@@ -614,7 +614,7 @@ namespace XREX
 				{
 					binder.setter = [&binder, parameter] ()
 					{
-						gl::Uniform3uiv(binder.glLocation, 1, parameter->GetValue<uintV3>().GetArray());
+						gl::Uniform3uiv(binder.glLocation, 1, parameter->As<uintV3>().GetValue().GetArray());
 					};
 				}
 				break;
@@ -622,7 +622,7 @@ namespace XREX
 				{
 					binder.setter = [&binder, parameter] ()
 					{
-						gl::Uniform4uiv(binder.glLocation, 1, parameter->GetValue<uintV4>().GetArray());
+						gl::Uniform4uiv(binder.glLocation, 1, parameter->As<uintV4>().GetValue().GetArray());
 					};
 				}
 				break;
@@ -630,7 +630,7 @@ namespace XREX
 				{
 					binder.setter = [&binder, parameter] ()
 					{
-						gl::Uniform1f(binder.glLocation, parameter->GetValue<float>());
+						gl::Uniform1f(binder.glLocation, parameter->As<float>().GetValue());
 					};
 				}
 				break;
@@ -638,7 +638,7 @@ namespace XREX
 				{
 					binder.setter = [&binder, parameter] ()
 					{
-						gl::Uniform2fv(binder.glLocation, 1, parameter->GetValue<floatV2>().GetArray());
+						gl::Uniform2fv(binder.glLocation, 1, parameter->As<floatV2>().GetValue().GetArray());
 					};
 				}
 				break;
@@ -646,7 +646,7 @@ namespace XREX
 				{
 					binder.setter = [&binder, parameter] ()
 					{
-						gl::Uniform3fv(binder.glLocation, 1, parameter->GetValue<floatV3>().GetArray());
+						gl::Uniform3fv(binder.glLocation, 1, parameter->As<floatV3>().GetValue().GetArray());
 					};
 				}
 				break;
@@ -654,7 +654,7 @@ namespace XREX
 				{
 					binder.setter = [&binder, parameter] ()
 					{
-						gl::Uniform4fv(binder.glLocation, 1, parameter->GetValue<floatV4>().GetArray());
+						gl::Uniform4fv(binder.glLocation, 1, parameter->As<floatV4>().GetValue().GetArray());
 					};
 				}
 				break;
@@ -662,7 +662,7 @@ namespace XREX
 				{
 					binder.setter = [&binder, parameter] ()
 					{
-						gl::Uniform1d(binder.glLocation, parameter->GetValue<double>());
+						gl::Uniform1d(binder.glLocation, parameter->As<double>().GetValue());
 					};
 				}
 				break;
@@ -670,7 +670,7 @@ namespace XREX
 				{
 					binder.setter = [&binder, parameter] ()
 					{
-						gl::Uniform2dv(binder.glLocation, 1, parameter->GetValue<doubleV2>().GetArray());
+						gl::Uniform2dv(binder.glLocation, 1, parameter->As<doubleV2>().GetValue().GetArray());
 					};
 				}
 				break;
@@ -678,7 +678,7 @@ namespace XREX
 				{
 					binder.setter = [&binder, parameter] ()
 					{
-						gl::Uniform3dv(binder.glLocation, 1, parameter->GetValue<doubleV3>().GetArray());
+						gl::Uniform3dv(binder.glLocation, 1, parameter->As<doubleV3>().GetValue().GetArray());
 					};
 				}
 				break;
@@ -686,7 +686,7 @@ namespace XREX
 				{
 					binder.setter = [&binder, parameter] ()
 					{
-						gl::Uniform4dv(binder.glLocation, 1, parameter->GetValue<doubleV4>().GetArray());
+						gl::Uniform4dv(binder.glLocation, 1, parameter->As<doubleV4>().GetValue().GetArray());
 					};
 				}
 				break;
@@ -694,7 +694,7 @@ namespace XREX
 				{
 					binder.setter = [&binder, parameter] ()
 					{
-						gl::UniformMatrix4fv(binder.glLocation, 1, false, parameter->GetValue<floatM44>().GetArray());
+						gl::UniformMatrix4fv(binder.glLocation, 1, false, parameter->As<floatM44>().GetValue().GetArray());
 					};
 				}
 				break;
@@ -702,7 +702,7 @@ namespace XREX
 				{
 					binder.setter = [&binder, parameter] ()
 					{
-						gl::UniformMatrix4dv(binder.glLocation, 1, false, parameter->GetValue<doubleM44>().GetArray());
+						gl::UniformMatrix4dv(binder.glLocation, 1, false, parameter->As<doubleM44>().GetValue().GetArray());
 					};
 				}
 				break;

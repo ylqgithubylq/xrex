@@ -4,6 +4,8 @@
 #include "RenderingPipelineState.hpp"
 #include "Sampler.hpp"
 #include "Shader.hpp"
+#include "GraphicsBuffer.hpp"
+
 
 namespace XREX
 {
@@ -27,6 +29,12 @@ namespace XREX
 	XREX_API uint32 GLFilterOperationFromTextureFilterOperation(SamplerState::TextureFilterOperation filterOperation);
 
 	XREX_API uint32 GLShaderTypeFromShaderType(ShaderObject::ShaderType type);
+
+	XREX_API uint32 GLBufferTypeFromBufferType(GraphicsBuffer::BufferType type);
+
+	XREX_API uint32 GLUsageFromUsage(GraphicsBuffer::Usage usage);
+
+	XREX_API uint32 GlAccessTypeFromAccessType(GraphicsBuffer::AccessType type);
 
 	XREX_API ElementType ElementTypeFromeGLType(uint32 glType);
 

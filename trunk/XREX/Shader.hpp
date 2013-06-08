@@ -38,7 +38,7 @@ namespace XREX
 			return type_;
 		}
 
-		bool Compile(std::vector<std::string> const& sources);
+		bool Compile(std::vector<std::string const*> const& sources);
 
 		bool IsValidate() const
 		{

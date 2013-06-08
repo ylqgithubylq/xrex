@@ -195,27 +195,27 @@ namespace XREX
 					EffectParameterSP const& model = effect.GetParameterByName(GetUniformString(DefinedUniform::ModelMatrix));
 					if (model)
 					{
-						model->SetValue(modelMatrix);
+						model->As<floatM44>().SetValue(modelMatrix);
 					}
 					EffectParameterSP const& normal = effect.GetParameterByName(GetUniformString(DefinedUniform::NormalMatrix));
 					if (normal)
 					{
-						normal->SetValue(normalMatrix);
+						normal->As<floatM44>().SetValue(normalMatrix);
 					}
 					EffectParameterSP const& view = effect.GetParameterByName(GetUniformString(DefinedUniform::ViewMatrix));
 					if (view)
 					{
-						view->SetValue(viewMatrix);
+						view->As<floatM44>().SetValue(viewMatrix);
 					}
 					EffectParameterSP const& projection = effect.GetParameterByName(GetUniformString(DefinedUniform::ProjectionMatrix));
 					if (projection)
 					{
-						projection->SetValue(projectionMatrix);
+						projection->As<floatM44>().SetValue(projectionMatrix);
 					}
 					EffectParameterSP const& position = effect.GetParameterByName(GetUniformString(DefinedUniform::CameraPosition));
 					if (position)
 					{
-						position->SetValue(cameraPosition);
+						position->As<floatV3>().SetValue(cameraPosition);
 					}
 				}
 

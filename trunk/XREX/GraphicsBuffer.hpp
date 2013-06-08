@@ -16,6 +16,11 @@ namespace XREX
 		{
 			Vertex,
 			Index,
+			Uniform,
+			TransformFeedback,
+			Texture,
+
+			TypeCount,
 		};
 
 		enum class Usage
@@ -98,12 +103,20 @@ namespace XREX
 		{
 			return sizeInBytes_;
 		}
+		/*
+		 *	This will invalidate the content of the buffer.
+		 */
 		void Resize(uint32 sizeInBytes);
 
-		void UpdateData(void const* data, uint32 offset = 0);
+		void UpdateData(void const* data);
+
+		void BindWrite();
+		void BindRead();
 
 		void Bind();
-		virtual void Unbind();
+		void BindIndex(uint32 index);
+		void Unbind();
+		void UnbindIndex();
 
 		BufferMapper GetMapper(AccessType accessType)
 		{
@@ -119,10 +132,11 @@ namespace XREX
 	private:
 		BufferType type_;
 		Usage usage_;
+		uint32 sizeInBytes_;
 		uint32 glBindingTarget_;
 		uint32 glBufferID_;
-
-		uint32 sizeInBytes_;
+		uint32 glCurrentBindingTarget_;
+		uint32 glCurrentBindingIndex_;
 	};
 
 

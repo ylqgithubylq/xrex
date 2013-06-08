@@ -235,7 +235,7 @@ namespace XREX
 		}
 	}
 
-	XREX_API uint32 GLShaderTypeFromShaderType(ShaderObject::ShaderType type)
+	uint32 GLShaderTypeFromShaderType(ShaderObject::ShaderType type)
 	{
 		switch (type)
 		{
@@ -258,7 +258,32 @@ namespace XREX
 		}
 	}
 
-	XREX_API ElementType ElementTypeFromeGLType(uint32 glType)
+
+	uint32 GLBufferTypeFromBufferType(GraphicsBuffer::BufferType type)
+	{
+		switch (type)
+		{
+		case GraphicsBuffer::BufferType::Vertex:
+			return gl::GL_ARRAY_BUFFER;
+		case GraphicsBuffer::BufferType::Index:
+			return gl::GL_ELEMENT_ARRAY_BUFFER;
+		case GraphicsBuffer::BufferType::Uniform:
+			return gl::GL_UNIFORM_BUFFER;
+		case GraphicsBuffer::BufferType::TransformFeedback:
+			return gl::GL_TRANSFORM_FEEDBACK_BUFFER;
+		case GraphicsBuffer::BufferType::Texture:
+			return gl::GL_TEXTURE_BUFFER;
+		case GraphicsBuffer::BufferType::TypeCount:
+			assert(false);
+			return 0;
+		default:
+			assert(false);
+			return 0;
+		}
+	}
+
+
+	ElementType ElementTypeFromeGLType(uint32 glType)
 	{
 		switch (glType)
 		{
@@ -312,6 +337,41 @@ namespace XREX
 			// not support.
 			assert(false);
 			return ElementType::Void;
+		}
+	}
+
+	uint32 GLUsageFromUsage(GraphicsBuffer::Usage usage)
+	{
+		switch (usage)
+		{
+		case GraphicsBuffer::Usage::Static:
+			return gl::GL_STATIC_DRAW;
+		case GraphicsBuffer::Usage::Dynamic:
+			return gl::GL_DYNAMIC_DRAW;
+		case GraphicsBuffer::Usage::Stream:
+			return gl::GL_STREAM_DRAW;
+		case GraphicsBuffer::Usage::UsageCount:
+			assert(false);
+			return 0;
+		default:
+			assert(false);
+			return 0;
+		}
+	}
+
+	uint32 GlAccessTypeFromAccessType(GraphicsBuffer::AccessType type)
+	{
+		switch (type)
+		{
+		case GraphicsBuffer::AccessType::ReadOnly:
+			return gl::GL_READ_ONLY;
+		case GraphicsBuffer::AccessType::WriteOnly:
+			return gl::GL_WRITE_ONLY;
+		case GraphicsBuffer::AccessType::ReadWrite:
+			return gl::GL_READ_WRITE;
+		default:
+			assert(false);
+			return 0;
 		}
 	}
 

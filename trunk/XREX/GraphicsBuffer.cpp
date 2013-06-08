@@ -17,46 +17,6 @@ using std::vector;
 namespace XREX
 {
 
-	namespace
-	{
-		uint32 GLUsageFromUsage(GraphicsBuffer::Usage usage)
-		{
-			switch (usage)
-			{
-			case GraphicsBuffer::Usage::Static:
-				return gl::GL_STATIC_DRAW;
-			case GraphicsBuffer::Usage::Dynamic:
-				return gl::GL_DYNAMIC_DRAW;
-			case GraphicsBuffer::Usage::Stream:
-				return gl::GL_STREAM_DRAW;
-			case GraphicsBuffer::Usage::UsageCount:
-				assert(false);
-				return gl::GL_STATIC_DRAW;
-				break;
-			default:
-				assert(false);
-				return gl::GL_STATIC_DRAW;
-				break;
-			}
-		}
-
-		uint32 GlAccessTypeFromAccessType(GraphicsBuffer::AccessType type)
-		{
-			switch (type)
-			{
-			case GraphicsBuffer::AccessType::ReadOnly:
-				return gl::GL_READ_ONLY;
-			case GraphicsBuffer::AccessType::WriteOnly:
-				return gl::GL_WRITE_ONLY;
-			case GraphicsBuffer::AccessType::ReadWrite:
-				return gl::GL_READ_WRITE;
-			default:
-				assert(false);
-				return 0;
-			}
-		}
-	}
-
 	GraphicsBuffer::GraphicsBuffer(BufferType type, Usage usage, uint32 sizeInBytes)
 		: type_(type), usage_(usage), sizeInBytes_(sizeInBytes)
 	{
@@ -74,9 +34,11 @@ namespace XREX
 		assert(sizeInBytes != 0);
 		gl::GenBuffers(1, &glBufferID_);
 		assert(glBufferID_ != 0); // 0 is reserved by GL
-		glBindingTarget_ = type_ == BufferType::Vertex ? gl::GL_ARRAY_BUFFER : gl::GL_ELEMENT_ARRAY_BUFFER;
-		Bind();
-		gl::BufferData(glBindingTarget_, sizeInBytes, data, GLUsageFromUsage(usage_));
+		glBindingTarget_ = GLBufferTypeFromBufferType(type_);
+		glCurrentBindingTarget_ = gl::GL_COPY_WRITE_BUFFER;
+		glCurrentBindingIndex_ = 0;
+		BindWrite();
+		gl::BufferData(gl::GL_COPY_WRITE_BUFFER, sizeInBytes, data, GLUsageFromUsage(usage_));
 	}
 
 	GraphicsBuffer::~GraphicsBuffer()
@@ -93,42 +55,69 @@ namespace XREX
 	{
 		assert(sizeInBytes != 0);
 		sizeInBytes_ = sizeInBytes;
-		Bind();
-		gl::BufferData(glBindingTarget_, sizeInBytes_, nullptr, GLUsageFromUsage(usage_));
+		BindWrite();
+		gl::BufferData(gl::GL_COPY_WRITE_BUFFER, sizeInBytes_, nullptr, GLUsageFromUsage(usage_));
 	}
 
-	void GraphicsBuffer::UpdateData(void const* data, uint32 offset)
+	void GraphicsBuffer::UpdateData(void const* data)
 	{
-		Bind();
-		gl::BufferSubData(glBindingTarget_, offset, sizeInBytes_, data);
+		BindWrite();
+		gl::BufferSubData(gl::GL_COPY_WRITE_BUFFER, 0, sizeInBytes_, data);
 	}
 
+
+	void GraphicsBuffer::BindWrite()
+	{
+		gl::BindBuffer(gl::GL_COPY_WRITE_BUFFER, glBufferID_);
+		glCurrentBindingTarget_ = gl::GL_COPY_WRITE_BUFFER;
+	}
+
+	void GraphicsBuffer::BindRead()
+	{
+		gl::BindBuffer(gl::GL_COPY_READ_BUFFER, glBufferID_);
+		glCurrentBindingTarget_ = gl::GL_COPY_READ_BUFFER;
+	}
+
+	void GraphicsBuffer::BindIndex(uint32 index)
+	{
+		gl::BindBufferBase(glBindingTarget_, index, glBufferID_);
+		glCurrentBindingTarget_ = glBindingTarget_;
+		glCurrentBindingIndex_ = index;
+	}
 
 	void GraphicsBuffer::Bind()
 	{
 		gl::BindBuffer(glBindingTarget_, glBufferID_);
+		glCurrentBindingTarget_ = glBindingTarget_;
 	}
 
 	void GraphicsBuffer::Unbind()
 	{
-		gl::BindBuffer(glBindingTarget_, 0);
+		gl::BindBuffer(glCurrentBindingTarget_, 0);
+	}
+
+	void GraphicsBuffer::UnbindIndex()
+	{
+		gl::BindBufferBase(glCurrentBindingTarget_, glCurrentBindingIndex_, 0);
 	}
 
 	void* GraphicsBuffer::Map(AccessType accessType)
 	{
 		uint32 glAccessType = GlAccessTypeFromAccessType(accessType);
-		Bind();
-		void* p = gl::MapBuffer(glBindingTarget_, glAccessType);
+		BindWrite();
+		void* p = gl::MapBuffer(gl::GL_COPY_WRITE_BUFFER, glAccessType);
 		assert(p != nullptr);
 		return p;
 	}
 
 	void GraphicsBuffer::Unmap()
 	{
-		Bind();
-		bool result = gl::UnmapBuffer(glBindingTarget_) == gl::GL_TRUE;
+		BindWrite();
+		bool result = gl::UnmapBuffer(gl::GL_COPY_WRITE_BUFFER) == gl::GL_TRUE;
 		assert(result);
 	}
+
+
 
 
 
