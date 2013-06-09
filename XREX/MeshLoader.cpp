@@ -55,16 +55,16 @@ namespace XREX
 				{
 					VertexBuffer::DataLayoutDescription description;
 					std::vector<uint8> vertex;
-					IndexBuffer::PrimitiveType primitiveType;
+					IndexBuffer::TopologicalType primitiveType;
 					ElementType indexType;
 					std::vector<uint16> index16;
 					std::vector<uint32> index32;
 
-					LayoutData(VertexBuffer::DataLayoutDescription&& theDescription, std::vector<uint8>&& theVertex, IndexBuffer::PrimitiveType thePrimitiveType, std::vector<uint16>&& theIndex)
+					LayoutData(VertexBuffer::DataLayoutDescription&& theDescription, std::vector<uint8>&& theVertex, IndexBuffer::TopologicalType thePrimitiveType, std::vector<uint16>&& theIndex)
 						: description(std::move(theDescription)), vertex(std::move(theVertex)), primitiveType(thePrimitiveType), index16(std::move(theIndex)), indexType(ElementType::Uint16)
 					{
 					}
-					LayoutData(VertexBuffer::DataLayoutDescription&& theDescription, std::vector<uint8>&& theVertex, IndexBuffer::PrimitiveType thePrimitiveType, std::vector<uint32>&& theIndex)
+					LayoutData(VertexBuffer::DataLayoutDescription&& theDescription, std::vector<uint8>&& theVertex, IndexBuffer::TopologicalType thePrimitiveType, std::vector<uint32>&& theIndex)
 						: description(std::move(theDescription)), vertex(std::move(theVertex)), primitiveType(thePrimitiveType), index32(std::move(theIndex)), indexType(ElementType::Uint32)
 					{
 					}
@@ -550,17 +550,17 @@ namespace XREX
 						}
 					}
 
-					IndexBuffer::PrimitiveType primitiveType;
+					IndexBuffer::TopologicalType primitiveType;
 					switch (mesh->mPrimitiveTypes)
 					{
 					case aiPrimitiveType::aiPrimitiveType_TRIANGLE:
-						primitiveType = IndexBuffer::PrimitiveType::Triangles;
+						primitiveType = IndexBuffer::TopologicalType::Triangles;
 						break;
 					case aiPrimitiveType::aiPrimitiveType_LINE:
-						primitiveType = IndexBuffer::PrimitiveType::Lines;
+						primitiveType = IndexBuffer::TopologicalType::Lines;
 						break;
 					case aiPrimitiveType::aiPrimitiveType_POINT:
-						primitiveType = IndexBuffer::PrimitiveType::Points;
+						primitiveType = IndexBuffer::TopologicalType::Points;
 						break;
 					default:
 						assert(false);

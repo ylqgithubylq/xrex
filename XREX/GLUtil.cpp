@@ -259,21 +259,21 @@ namespace XREX
 	}
 
 
-	uint32 GLBufferTypeFromBufferType(GraphicsBuffer::BufferType type)
+	uint32 GLBufferTypeFromBufferType(BufferView::BufferType type)
 	{
 		switch (type)
 		{
-		case GraphicsBuffer::BufferType::Vertex:
+		case BufferView::BufferType::Vertex:
 			return gl::GL_ARRAY_BUFFER;
-		case GraphicsBuffer::BufferType::Index:
+		case BufferView::BufferType::Index:
 			return gl::GL_ELEMENT_ARRAY_BUFFER;
-		case GraphicsBuffer::BufferType::Uniform:
+		case BufferView::BufferType::Uniform:
 			return gl::GL_UNIFORM_BUFFER;
-		case GraphicsBuffer::BufferType::TransformFeedback:
+		case BufferView::BufferType::TransformFeedback:
 			return gl::GL_TRANSFORM_FEEDBACK_BUFFER;
-		case GraphicsBuffer::BufferType::Texture:
+		case BufferView::BufferType::Texture:
 			return gl::GL_TEXTURE_BUFFER;
-		case GraphicsBuffer::BufferType::TypeCount:
+		case BufferView::BufferType::TypeCount:
 			assert(false);
 			return 0;
 		default:

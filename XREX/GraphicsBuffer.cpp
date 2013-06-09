@@ -17,14 +17,14 @@ using std::vector;
 namespace XREX
 {
 
-	GraphicsBuffer::GraphicsBuffer(BufferType type, Usage usage, uint32 sizeInBytes)
-		: type_(type), usage_(usage), sizeInBytes_(sizeInBytes)
+	GraphicsBuffer::GraphicsBuffer( Usage usage, uint32 sizeInBytes)
+		: usage_(usage), sizeInBytes_(sizeInBytes)
 	{
 		DoConsctruct(nullptr, sizeInBytes);
 	}
 
-	GraphicsBuffer::GraphicsBuffer(BufferType type, Usage usage, void const* data, uint32 sizeInBytes)
-		: type_(type), usage_(usage), sizeInBytes_(sizeInBytes)
+	GraphicsBuffer::GraphicsBuffer(Usage usage, void const* data, uint32 sizeInBytes)
+		: usage_(usage), sizeInBytes_(sizeInBytes)
 	{
 		DoConsctruct(data, sizeInBytes);
 	}
@@ -34,7 +34,6 @@ namespace XREX
 		assert(sizeInBytes != 0);
 		gl::GenBuffers(1, &glBufferID_);
 		assert(glBufferID_ != 0); // 0 is reserved by GL
-		glBindingTarget_ = GLBufferTypeFromBufferType(type_);
 		glCurrentBindingTarget_ = gl::GL_COPY_WRITE_BUFFER;
 		glCurrentBindingIndex_ = 0;
 		BindWrite();
@@ -78,17 +77,17 @@ namespace XREX
 		glCurrentBindingTarget_ = gl::GL_COPY_READ_BUFFER;
 	}
 
-	void GraphicsBuffer::BindIndex(uint32 index)
+	void GraphicsBuffer::Bind(BufferView::BufferType type)
 	{
-		gl::BindBufferBase(glBindingTarget_, index, glBufferID_);
-		glCurrentBindingTarget_ = glBindingTarget_;
-		glCurrentBindingIndex_ = index;
+		glCurrentBindingTarget_ = GLBufferTypeFromBufferType(type);
+		gl::BindBuffer(glCurrentBindingTarget_, glBufferID_);
 	}
 
-	void GraphicsBuffer::Bind()
+	void GraphicsBuffer::BindIndex(BufferView::BufferType type, uint32 index)
 	{
-		gl::BindBuffer(glBindingTarget_, glBufferID_);
-		glCurrentBindingTarget_ = glBindingTarget_;
+		glCurrentBindingTarget_ = GLBufferTypeFromBufferType(type);
+		glCurrentBindingIndex_ = index;
+		gl::BindBufferBase(glCurrentBindingTarget_, index, glBufferID_);
 	}
 
 	void GraphicsBuffer::Unbind()
