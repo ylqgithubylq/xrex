@@ -4,6 +4,7 @@
 #include "RenderingPipelineState.hpp"
 #include "Sampler.hpp"
 #include "Shader.hpp"
+#include "BufferView.hpp"
 #include "GraphicsBuffer.hpp"
 
 
@@ -30,7 +31,7 @@ namespace XREX
 
 	XREX_API uint32 GLShaderTypeFromShaderType(ShaderObject::ShaderType type);
 
-	XREX_API uint32 GLBufferTypeFromBufferType(GraphicsBuffer::BufferType type);
+	XREX_API uint32 GLBufferTypeFromBufferType(BufferView::BufferType type);
 
 	XREX_API uint32 GLUsageFromUsage(GraphicsBuffer::Usage usage);
 

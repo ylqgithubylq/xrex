@@ -4,6 +4,7 @@
 
 #include "Shader.hpp"
 #include "GraphicsBuffer.hpp"
+#include "BufferView.hpp"
 #include "RenderingLayout.hpp"
 #include "Texture.hpp"
 #include "RenderingPipelineState.hpp"
@@ -75,29 +76,54 @@ namespace XREX
 		{
 			return MakeSP<ProgramObject>();
 		}
+		GraphicsBufferSP CreateGraphicsBuffer(GraphicsBuffer::Usage usage, uint32 sizeInBytes)
+		{
+			return MakeSP<GraphicsBuffer>(usage, sizeInBytes);
+		}
+		GraphicsBufferSP CreateGraphicsBuffer(GraphicsBuffer::Usage usage, void const* data, uint32 sizeInBytes)
+		{
+			return MakeSP<GraphicsBuffer>(usage, data, sizeInBytes);
+		}
+		VertexBufferSP CreateVertexBuffer(VertexBuffer::DataLayoutDescription&& description)
+		{
+			return MakeSP<VertexBuffer>(std::move(description));
+		}
 		template <typename T>
 		VertexBufferSP CreateVertexBuffer(GraphicsBuffer::Usage usage, std::vector<T> const& data, std::string const& channel)
 		{
-			return MakeSP<VertexBuffer>(usage, data, channel);
+			GraphicsBufferSP buffer = MakeSP<GraphicsBuffer>(usage, data.data(), data.size() * sizeof(T));
+			VertexBuffer::DataLayoutDescription description(data.size());
+			description.AddChannelLayout(VertexBuffer::DataLayoutDescription::ElementLayoutDescription(0, 0, TypeToElementType<T>::Type, channel));
+			return MakeSP<VertexBuffer>(std::move(buffer), std::move(description));
 		}
 		template <typename T>
 		VertexBufferSP CreateVertexBuffer(GraphicsBuffer::Usage usage, std::vector<T> const& data, std::string const& channel, bool normalized)
 		{
-			return MakeSP<VertexBuffer>(usage, data, channel, normalized);
+			GraphicsBufferSP buffer = MakeSP<GraphicsBuffer>(usage, data.data(), data.size() * sizeof(T));
+			VertexBuffer::DataLayoutDescription description(data.size());
+			description.AddChannelLayout(VertexBuffer::DataLayoutDescription::ElementLayoutDescription(0, 0, TypeToElementType<T>::Type, channel, normalized));
+			return MakeSP<VertexBuffer>(std::move(buffer), std::move(description));
 		}
 		template <typename T>
 		VertexBufferSP CreateVertexBuffer(GraphicsBuffer::Usage usage, std::vector<T> const& data, VertexBuffer::DataLayoutDescription&& description)
 		{
-			return MakeSP<VertexBuffer>(usage, data, std::move(description));
+			GraphicsBufferSP buffer = MakeSP<GraphicsBuffer>(usage, data.data(), data.size() * sizeof(T));
+			return MakeSP<VertexBuffer>(std::move(buffer), std::move(description));
 		}
 		VertexBufferSP CreateVertexBuffer(GraphicsBuffer::Usage usage, uint32 elementSizeInBytes, VertexBuffer::DataLayoutDescription&& description)
 		{
-			return MakeSP<VertexBuffer>(usage, elementSizeInBytes, std::move(description));
+			GraphicsBufferSP buffer = MakeSP<GraphicsBuffer>(usage, elementSizeInBytes);
+			return MakeSP<VertexBuffer>(std::move(buffer), std::move(description));
+		}
+		IndexBufferSP CreateIndexBuffer(IndexBuffer::TopologicalType topologicalType, ElementType elementType, uint32 elementCount)
+		{
+			return MakeSP<IndexBuffer>(topologicalType, elementType, elementCount);
 		}
 		template <typename T>
-		IndexBufferSP CreateIndexBuffer(GraphicsBuffer::Usage usage, std::vector<T> const& data, IndexBuffer::PrimitiveType primitiveType)
+		IndexBufferSP CreateIndexBuffer(GraphicsBuffer::Usage usage, std::vector<T> const& data, IndexBuffer::TopologicalType topologicalType)
 		{
-			return MakeSP<IndexBuffer>(usage, data, primitiveType);
+			GraphicsBufferSP buffer = MakeSP<GraphicsBuffer>(usage, data.data(), data.size() * sizeof(T));
+			return MakeSP<IndexBuffer>(std::move(buffer), topologicalType, TypeToElementType<T>::Type, data.size());
 		}
 		RenderingLayoutSP CreateRenderingLayout(std::vector<VertexBufferSP> const& buffers, IndexBufferSP const& indexBuffer)
 		{

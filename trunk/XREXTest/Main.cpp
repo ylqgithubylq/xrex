@@ -186,7 +186,7 @@ struct TempScene
 		
 
 		VertexBufferSP vertices = XREXContext::GetInstance().GetRenderingFactory().CreateVertexBuffer(GraphicsBuffer::Usage::Static, vertexData, "position");
-		IndexBufferSP indices = XREXContext::GetInstance().GetRenderingFactory().CreateIndexBuffer(GraphicsBuffer::Usage::Static, indexData, IndexBuffer::PrimitiveType::Triangles);
+		IndexBufferSP indices = XREXContext::GetInstance().GetRenderingFactory().CreateIndexBuffer(GraphicsBuffer::Usage::Static, indexData, IndexBuffer::TopologicalType::Triangles);
 		RenderingLayoutSP layout = MakeSP<RenderingLayout>(vector<VertexBufferSP>(1, vertices), indices);
 
 		MeshSP cubeMesh = MakeSP<Mesh>("cube mesh");
@@ -431,8 +431,8 @@ void Main()
 
 int main()
 {
-	TextureTest textest;
-	return 0;
+	//TextureTest textest;
+	//return 0;
 	//TestMath();
 	//SQRTSpeedTest();
 	//return 0;

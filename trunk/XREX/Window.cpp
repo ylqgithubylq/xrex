@@ -16,9 +16,146 @@ namespace XREX
 
 	struct Window::HideWindows_
 	{
-		static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+		//  FUNCTION: WndProc(HWND, UINT, WPARAM, LPARAM)
+		//
+		//  PURPOSE:  Processes messages for the main window.
+		//
+		//  WM_COMMAND	- process the application menu
+		//  WM_PAINT	- Paint the main window
+		//  WM_DESTROY	- post a quit message and return
+		//
+		static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+		{
+			Window* thiz = reinterpret_cast<Window*>(::GetWindowLongPtr(hWnd, GWLP_USERDATA));
 
-		LRESULT InstanceWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+			if (thiz)
+			{
+				if (thiz->hideWindows_->hWnd_)
+				{
+					return thiz->hideWindows_->InstanceWndProc(thiz->hideWindows_->hWnd_, message, wParam, lParam);
+				}
+			}
+			else
+			{
+				return DefWindowProc(hWnd, message, wParam, lParam);
+			}
+		}
+
+		LRESULT InstanceWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+		{
+			if (messageHook_ != nullptr)
+			{
+				messageHook_(hWnd, message, wParam, lParam);
+			}
+
+			switch (message)
+			{
+				// Add all windows message handling here
+			case WM_KEYDOWN:
+				{
+					window_.OnKeyDown(wParam);
+					break;
+				}
+
+			case WM_KEYUP:
+				{
+					window_.OnKeyUp(wParam);
+					break;
+				}
+			case WM_LBUTTONDOWN:
+				{
+					wParam = VK_LBUTTON;
+					window_.OnMouseDown(wParam, LOWORD(lParam), HIWORD(lParam));
+				}
+				break;
+			case WM_RBUTTONDOWN:
+				{
+					wParam = VK_RBUTTON;
+					window_.OnMouseDown(wParam, LOWORD(lParam), HIWORD(lParam));
+				}
+				break;
+			case WM_MBUTTONDOWN:
+				{
+					wParam = VK_MBUTTON;
+					window_.OnMouseDown(wParam, LOWORD(lParam), HIWORD(lParam));
+				}
+				break;
+			case WM_LBUTTONUP:
+				{
+					wParam = VK_LBUTTON;
+					window_.OnMouseUp(wParam, LOWORD(lParam), HIWORD(lParam));
+				}
+				break;
+			case WM_RBUTTONUP:
+				{
+					wParam = VK_RBUTTON;
+					window_.OnMouseUp(wParam, LOWORD(lParam), HIWORD(lParam));
+				}
+				break;
+			case WM_MBUTTONUP:
+				{
+					wParam = VK_MBUTTON;
+					window_.OnMouseUp(wParam, LOWORD(lParam), HIWORD(lParam));
+				}
+				break;
+
+			case WM_MOUSEWHEEL:
+				{
+					// wParam buttons should not be relied on
+					window_.OnMouseWheel(GET_KEYSTATE_WPARAM(wParam), LOWORD(lParam), HIWORD(lParam), GET_WHEEL_DELTA_WPARAM(wParam));
+				}
+				break;
+
+			case WM_MOUSEMOVE:
+				{
+					// wParam buttons should not be relied on
+					window_.OnMouseMove(GET_KEYSTATE_WPARAM(wParam), LOWORD(lParam), HIWORD(lParam));
+				}
+				break;
+
+			case WM_MOUSELEAVE:
+				{
+
+				}
+				break;
+
+			case WM_ACTIVATE:
+				{
+					if (!HIWORD(wParam))
+					{
+						window_.active_ = true;
+					}
+					else
+					{
+						window_.active_ = false;
+					}
+					break;
+				}
+
+			case WM_SIZE:
+				{
+					//window_.OnResize(LOWORD(lParam), HIWORD(lParam)); // LoWord = width, HiWord = height
+				}
+				break;
+
+
+			case WM_ERASEBKGND:
+				{
+					return 1;
+				}
+				break;
+			case WM_CLOSE:
+				{
+					PostQuitMessage(0);
+				}
+				break;
+
+			default:
+				{
+				}
+			}
+			return DefWindowProc(hWnd, message, wParam, lParam);
+		}
 
 		HideWindows_(Window& window)
 			: window_(window)
@@ -30,143 +167,9 @@ namespace XREX
 		std::function<void(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)> messageHook_;
 	};
 
-	//  FUNCTION: WndProc(HWND, UINT, WPARAM, LPARAM)
-	//
-	//  PURPOSE:  Processes messages for the main window.
-	//
-	//  WM_COMMAND	- process the application menu
-	//  WM_PAINT	- Paint the main window
-	//  WM_DESTROY	- post a quit message and return
-	//
-	LRESULT CALLBACK Window::HideWindows_::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
-	{
-		Window* thiz = reinterpret_cast<Window*>(::GetWindowLongPtr(hWnd, GWLP_USERDATA));
-
-		if (thiz)
-		{
-			return thiz->hideWindows_->InstanceWndProc(hWnd, message, wParam, lParam);
-		}
-		else
-		{
-			return DefWindowProc(hWnd, message, wParam, lParam);
-		}
-	}
-
-	LRESULT Window::HideWindows_::InstanceWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
-	{
-		if (messageHook_ != nullptr)
-		{
-			messageHook_(hWnd, message, wParam, lParam);
-		}
-
-		switch (message)
-		{
-			// Add all windows message handling here
-		case WM_KEYDOWN:
-			{
-				window_.OnKeyDown(wParam);
-				break;
-			}
-
-		case WM_KEYUP:
-			{
-				window_.OnKeyUp(wParam);
-				break;
-			}
-		case WM_LBUTTONDOWN:
-			{
-				wParam = VK_LBUTTON;
-				window_.OnMouseDown(wParam, LOWORD(lParam), HIWORD(lParam));
-			}
-			break;
-		case WM_RBUTTONDOWN:
-			{
-				wParam = VK_RBUTTON;
-				window_.OnMouseDown(wParam, LOWORD(lParam), HIWORD(lParam));
-			}
-			break;
-		case WM_MBUTTONDOWN:
-			{
-				wParam = VK_MBUTTON;
-				window_.OnMouseDown(wParam, LOWORD(lParam), HIWORD(lParam));
-			}
-			break;
-		case WM_LBUTTONUP:
-			{
-				wParam = VK_LBUTTON;
-				window_.OnMouseUp(wParam, LOWORD(lParam), HIWORD(lParam));
-			}
-			break;
-		case WM_RBUTTONUP:
-			{
-				wParam = VK_RBUTTON;
-				window_.OnMouseUp(wParam, LOWORD(lParam), HIWORD(lParam));
-			}
-			break;
-		case WM_MBUTTONUP:
-			{
-				wParam = VK_MBUTTON;
-				window_.OnMouseUp(wParam, LOWORD(lParam), HIWORD(lParam));
-			}
-			break;
-
-		case WM_MOUSEWHEEL:
-			{
-				// wParam buttons should not be relied on
-				window_.OnMouseWheel(GET_KEYSTATE_WPARAM(wParam), LOWORD(lParam), HIWORD(lParam), GET_WHEEL_DELTA_WPARAM(wParam));
-			}
-			break;
-
-		case WM_MOUSEMOVE:
-			{
-				// wParam buttons should not be relied on
-				window_.OnMouseMove(GET_KEYSTATE_WPARAM(wParam), LOWORD(lParam), HIWORD(lParam));
-			}
-			break;
-
-		case WM_MOUSELEAVE:
-			{
-
-			}
-			break;
-
-		case WM_ACTIVATE:
-			{
-				if (!HIWORD(wParam))
-				{
-					window_.active_ = true;
-				}
-				else
-				{
-					window_.active_ = false;
-				}
-				break;
-			}
-
-		case WM_SIZE:
-			{
-				//window_.OnResize(LOWORD(lParam), HIWORD(lParam)); // LoWord = width, HiWord = height
-			}
-			break;
 
 
-		case WM_ERASEBKGND:
-			{
-				return 1;
-			}
-			break;
-		case WM_CLOSE:
-			{
-				PostQuitMessage(0);
-			}
-			break;
 
-		default:
-			{
-			}
-		}
-		return DefWindowProc(hWnd, message, wParam, lParam);
-	}
 
 
 
@@ -283,6 +286,7 @@ namespace XREX
 	{
 		if (hideWindows_->hWnd_ != nullptr)
 		{
+			::SetWindowLongPtr(hideWindows_->hWnd_, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(nullptr));
 			if (fullScreen_)
 			{
 				::ChangeDisplaySettings(nullptr, 0);

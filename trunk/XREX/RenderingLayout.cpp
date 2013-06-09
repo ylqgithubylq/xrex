@@ -16,25 +16,25 @@ namespace XREX
 {
 	namespace
 	{
-		uint32 GLDrawModeFromDrawMode(IndexBuffer::PrimitiveType primitiveType)
+		uint32 GLDrawModeFromTopologicalType(IndexBuffer::TopologicalType primitiveType)
 		{
 			switch (primitiveType)
 			{
-			case IndexBuffer::PrimitiveType::Points:
+			case IndexBuffer::TopologicalType::Points:
 				return gl::GL_POINTS;
-			case IndexBuffer::PrimitiveType::LineStrip:
+			case IndexBuffer::TopologicalType::LineStrip:
 				return gl::GL_LINE_STRIP;
-			case IndexBuffer::PrimitiveType::LineLoop:
+			case IndexBuffer::TopologicalType::LineLoop:
 				return gl::GL_LINE_LOOP;
-			case IndexBuffer::PrimitiveType::Lines:
+			case IndexBuffer::TopologicalType::Lines:
 				return gl::GL_LINES;
-			case IndexBuffer::PrimitiveType::TriangleStrip:
+			case IndexBuffer::TopologicalType::TriangleStrip:
 				return gl::GL_TRIANGLE_STRIP;
-			case IndexBuffer::PrimitiveType::TriangleFan:
+			case IndexBuffer::TopologicalType::TriangleFan:
 				return gl::GL_TRIANGLE_FAN;
-			case IndexBuffer::PrimitiveType::Triangles:
+			case IndexBuffer::TopologicalType::Triangles:
 				return gl::GL_TRIANGLES;
-			case IndexBuffer::PrimitiveType::DrawingModeCount:
+			case IndexBuffer::TopologicalType::DrawingModeCount:
 				assert(false);
 				return gl::GL_TRIANGLES;
 			default:
@@ -49,7 +49,7 @@ namespace XREX
 	RenderingLayout::RenderingLayout(vector<VertexBufferSP> const& buffers, IndexBufferSP const& indexBuffer)
 		: buffers_(buffers), indexBuffer_(indexBuffer)
 	{
-		glDrawingMode_ = GLDrawModeFromDrawMode(indexBuffer_->GetPrimitiveType());
+		glDrawingMode_ = GLDrawModeFromTopologicalType(indexBuffer_->GetTopologicalType());
 		glIndexBufferElementType_ = GLTypeFromElementType(GetIndexElementType());
 
 	#ifdef XREX_DEBUG
