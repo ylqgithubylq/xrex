@@ -28,12 +28,9 @@ namespace XREX
 		{
 			Window* thiz = reinterpret_cast<Window*>(::GetWindowLongPtr(hWnd, GWLP_USERDATA));
 
-			if (thiz)
+			if (thiz && thiz->hideWindows_->hWnd_)
 			{
-				if (thiz->hideWindows_->hWnd_)
-				{
-					return thiz->hideWindows_->InstanceWndProc(thiz->hideWindows_->hWnd_, message, wParam, lParam);
-				}
+				return thiz->hideWindows_->InstanceWndProc(thiz->hideWindows_->hWnd_, message, wParam, lParam);
 			}
 			else
 			{

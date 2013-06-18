@@ -144,6 +144,15 @@
     <ClCompile Include="BufferView.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TextureImage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderingProcess.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DefaultRenderingProcess.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BasicType.hpp">
@@ -297,6 +306,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="BufferView.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureImage.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderingProcess.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DefaultRenderingProcess.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

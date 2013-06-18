@@ -55,6 +55,18 @@ namespace XREX
 		}
 
 		/*
+		 *	@scene: set to nullptr to make no scene to render.
+		 */
+		void SetScene(SceneSP const& scene)
+		{
+			scene_ = scene;
+		}
+		SceneSP const& GetScene() const
+		{
+			return scene_;
+		}
+
+		/*
 		 *	@ loginFunction: return value is false will stop running and Start function will exit.
 		 */
 		void SetLogicFunction(std::function<bool(double currentTime, double deltaTime)> const& logicFunction)
@@ -89,6 +101,8 @@ namespace XREX
 		std::unique_ptr<LocalResourceLoader> resourceLoader_;
 
 		RenderingEngine* renderingEngine_;
+
+		SceneSP scene_;
 
 		Settings settings_;
 		Timer timer_;

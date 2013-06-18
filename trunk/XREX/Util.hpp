@@ -194,8 +194,16 @@ namespace XREX
 		Sampler3D,
 		SamplerCube,
 
-		ParameterTypeCount
+		Image1D,
+		Image2D,
+		Image3D,
+		ImageCube,
+
+		ParameterTypeCount,
 	};
+
+	XREX_API bool IsSamplerType(ElementType type);
+	XREX_API bool IsImageType(ElementType type);
 
 	/*
 	 *	@return: how many primitive element in a type.
@@ -272,5 +280,57 @@ namespace XREX
 		static ElementType const Type = ElementType::FloatM44;
 	};
 	// TODO samplers
+
+
+	enum class TexelFormat
+	{
+		R8,
+		RG8,
+		RGB8,
+		RGBA8,
+
+		R16I,
+		RG16I,
+		RGB16I,
+		RGBA16I,
+
+		R16UI,
+		RG16UI,
+		RGB16UI,
+		RGBA16UI,
+
+		R16F,
+		RG16F,
+		RGB16F,
+		RGBA16F,
+
+		R32I,
+		RG32I,
+		RGB32I,
+		RGBA32I,
+
+		R32UI,
+		RG32UI,
+		RGB32UI,
+		RGBA32UI,
+
+		R32F,
+		RG32F,
+		RGB32F,
+		RGBA32F,
+
+		BGR8,
+		BGRA8,
+		BGR16F,
+		BGRA16F,
+		BGR32F,
+		BGRA32F,
+
+		// TODO
+		NotUsed,
+		TexelFormatCount
+	};
+
+	XREX_API uint32 GetTexelSizeInBytes(TexelFormat format);
 
 }

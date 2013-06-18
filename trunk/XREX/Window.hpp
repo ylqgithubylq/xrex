@@ -4,7 +4,6 @@
 #include "InputCenter.hpp"
 
 #include <string>
-#include <memory>
 #include <vector>
 
 

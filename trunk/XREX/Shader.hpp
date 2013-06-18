@@ -28,10 +28,8 @@ namespace XREX
 		};
 
 	public:
-		ShaderObject(ShaderType type);
+		explicit ShaderObject(ShaderType type);
 		~ShaderObject();
-
-		void Destory();
 
 		ShaderType GetType() const
 		{
@@ -49,10 +47,7 @@ namespace XREX
 			return errorString_;
 		}
 
-
-
-	private:
-		uint32 GetGLID() const
+		uint32 GetID() const
 		{
 			return glShaderID_;
 		}
@@ -70,26 +65,87 @@ namespace XREX
 		: Noncopyable
 	{
 	public:
-		struct AttributeInformation
+		class AttributeInformation
 		{
-			ElementType elementType;
-			int32 elementCount;
-			int32 location;
+		public:
 			AttributeInformation()
 				: elementType(ElementType::Void), elementCount(0), location(-1)
 			{
 			}
-			AttributeInformation(ElementType type, int32 elementCount, int32 location)
-				: elementType(type), elementCount(elementCount), location(location)
+			AttributeInformation(std::string const& channel, ElementType type, int32 elementCount, int32 location)
+				: channel(channel), elementType(type), elementCount(elementCount), location(location)
 			{
 			}
+			AttributeInformation(std::string&& channel, ElementType type, int32 elementCount, int32 location)
+				: channel(std::move(channel)), elementType(type), elementCount(elementCount), location(location)
+			{
+			}
+			std::string const& GetChannel() const
+			{
+				return channel;
+			}
+			ElementType GetElementType() const
+			{
+				return elementType;
+			}
+			int32 GetElementCount() const
+			{
+				return elementCount;
+			}
+			int32 GetLocation() const
+			{
+				return location;
+			}
+		private:
+			std::string channel;
+			ElementType elementType;
+			int32 elementCount;
+			int32 location;
+		};
+
+		class UniformInformation
+		{
+		public:
+			UniformInformation()
+				: elementType(ElementType::Void), elementCount(0), location(-1)
+			{
+			}
+			UniformInformation(std::string const& channel, ElementType type, int32 elementCount, int32 location)
+				: channel(channel), elementType(type), elementCount(elementCount), location(location)
+			{
+			}
+			UniformInformation(std::string&& channel, ElementType type, int32 elementCount, int32 location)
+				: channel(std::move(channel)), elementType(type), elementCount(elementCount), location(location)
+			{
+			}
+
+			std::string const& GetChannel() const
+			{
+				return channel;
+			}
+			ElementType GetElementType() const
+			{
+				return elementType;
+			}
+			int32 GetElementCount() const
+			{
+				return elementCount;
+			}
+			int32 GetLocation() const
+			{
+				return location;
+			}
+
+		private:
+			std::string channel;
+			ElementType elementType;
+			int32 elementCount;
+			int32 location;
 		};
 
 	public:
 		ProgramObject();
 		~ProgramObject();
-
-		void Destory();
 
 		void AttachShader(ShaderObjectSP& shader);
 		bool Link();
@@ -110,33 +166,40 @@ namespace XREX
 		 */
 		std::pair<bool, AttributeInformation> GetAttributeInformation(std::string const& channel) const;
 
+		std::vector<AttributeInformation> const& GetAllAttributeInformations() const
+		{
+			return attributeInformations_;
+		}
+
 		/*
-		 *	Do not call this. Used by RenderingPass.
-		 *	@effect: new parameters will be added to it if this shader have uniform names that not in parameters of effect.
+		 *	@return: return.first indicates whether the channel is found.
 		 */
-		void InitializeParameterSetters(RenderingEffect& effect);
+		std::pair<bool, UniformInformation> GetUniformInformation(std::string const& channel) const;
+
+		std::vector<UniformInformation> const& GetAllUniformInformations() const
+		{
+			return uniformInformations_;
+		}
+
+		void CreateUniformBinder(std::string const& channel, EffectParameterSP const& parameter);
+		void CreateSamplerUniformBinder(std::string const& channel, EffectParameterSP const& parameter, uint32 samplerLocation);
+		void CreateImageUniformBinder(std::string const& channel, EffectParameterSP const& parameter, uint32 imageLocation);
 
 	private:
+
+		static AttributeInformation const NullAttributeInformation;
+		static UniformInformation const NullUniformInformation;
 
 		struct UniformBinder
 		{
-			uint32 glType;
-			int32 elementCount;
-			int32 glLocation;
-			std::function<void()> setter;
+			UniformInformation const& uniformInformation;
+			std::function<void(UniformInformation const& uniformInformation)> setter;
+			explicit UniformBinder(UniformInformation const& uniformInformation)
+				: uniformInformation(uniformInformation)
+			{
+			}
 		};
-
-		struct AttributeBindingInformation
-		{
-			std::string channel;
-			uint32 glType;
-			int32 elementCount; // always 1?
-			int32 glLocation;
-		};
-
-	private:
-		void InitializeUniformBinder(UniformBinder& binder, EffectParameterSP& parameter, uint32& availableSamplerLocation);
-
+		UniformBinder& CreateBinder(std::string const& channel);
 
 	private:
 		std::vector<ShaderObjectSP> shaders_;
@@ -144,8 +207,10 @@ namespace XREX
 		std::string errorString_;
 		uint32 glProgramID_;
 	
+		std::vector<UniformInformation> uniformInformations_;
+		std::vector<AttributeInformation> attributeInformations_;
+
 		std::vector<UniformBinder> uniformBinders_;
-		std::vector<AttributeBindingInformation> attributeBindingInformation_;
 	};
 
 }

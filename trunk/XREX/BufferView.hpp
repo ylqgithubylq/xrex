@@ -1,6 +1,8 @@
 #pragma once
 #include "Declare.hpp"
 
+#include <vector>
+
 namespace XREX
 {
 
@@ -95,6 +97,10 @@ namespace XREX
 
 			bool AddChannelLayout(ElementLayoutDescription&& elementLayout);
 			ElementLayoutDescription const& GetChannelLayout(std::string const& channel) const;
+			std::vector<ElementLayoutDescription> const& GetAllLayouts() const
+			{
+				return channelLayouts_;
+			}
 			uint32 GetChannelLayoutCount() const
 			{
 				return channelLayouts_.size();

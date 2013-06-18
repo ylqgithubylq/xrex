@@ -106,8 +106,8 @@ namespace XREX
 					std::pair<bool, ProgramObject::AttributeInformation> attributeInformation = program->GetAttributeInformation(channelLayout.channel);
 					if (attributeInformation.first)
 					{
-						lastAttributeLocations[bufferIndex][i] = attributeInformation.second.location;
-						ElementType channelElementType = attributeInformation.second.elementType;
+						lastAttributeLocations[bufferIndex][i] = attributeInformation.second.GetLocation();
+						ElementType channelElementType = attributeInformation.second.GetElementType();
 
 						gl::EnableVertexAttribArray(lastAttributeLocations[bufferIndex][i]);
 						switch (channelElementType)
@@ -145,12 +145,6 @@ namespace XREX
 						case ElementType::Uint16:
 						case ElementType::Int8:
 						case ElementType::Int16:
-							assert(false); // impossible
-							break;
-						case ElementType::Sampler1D:
-						case ElementType::Sampler2D:
-						case ElementType::Sampler3D:
-						case ElementType::SamplerCube:
 							assert(false); // impossible
 							break;
 						case ElementType::ParameterTypeCount:

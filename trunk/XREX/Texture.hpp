@@ -9,7 +9,7 @@ namespace XREX
 {
 
 	class XREX_API Texture
-		: Noncopyable
+		: public std::enable_shared_from_this<Texture>, Noncopyable
 	{
 	public:
 		enum class TextureType
@@ -33,33 +33,6 @@ namespace XREX
 			CubeFaceElementCount,
 		};
 
-		enum class TexelFormat
-		{
-			R8,
-
-			RGB8,
-			BGR8,
-			RGBA8,
-			BGRA8,
-
-			R16F,
-
-			RGB16F,
-			BGR16F,
-			RGBA16F,
-			BGRA16F,
-
-			R32F,
-
-			RGB32F,
-			BGR32F,
-			RGBA32F,
-			BGRA32F,
-
-			// TODO
-			NotUsed,
-			TexelFormatCount
-		};
 
 
 		template <uint32 Dimension>
@@ -91,11 +64,8 @@ namespace XREX
 		};
 
 	protected:
-		struct GLTextureFormat;
-		static GLTextureFormat const& GLTextureFormatFromTexelFormat(TexelFormat format);
-
-	public:
 		explicit Texture(TextureType type);
+	public:
 		virtual ~Texture();
 
 		TextureType GetType() const
@@ -103,14 +73,26 @@ namespace XREX
 			return type_;
 		}
 
-		void Bind(uint32 textureChannel);
-		void UnbindTexture();
+		uint32 GetID() const
+		{
+			return glTextureID_;
+		}
+
+		virtual TexelFormat GetFormat() const = 0;
+
+		void Bind(uint32 index);
+		void Unbind();
+
+		TextureImageSP GetImage_TEMP(uint32 level, TexelFormat format);
+		TextureImageSP GetImage(uint32 level);
 
 	protected:
 		TextureType type_;
 		uint32 mipmapCount_;
 		uint32 glBindingTarget_;
 		uint32 glTextureID_;
+
+		uint32 lastBindingIndex_;
 	};
 
 
@@ -146,26 +128,20 @@ namespace XREX
 
 	public:
 
+		explicit ConcreteTexture(DataDescription<Dimension> const& description);
 		/*
 		 *	@generateMipmap: true will generate mipmap, ignore data vector except data at index 0.
 		 */
-		template <typename T>
-		ConcreteTexture(DataDescription<Dimension> const& description, std::vector<std::vector<T>> const& data, bool generateMipmap = true)
-			: Texture(TextureDimensionToTextureType<Dimension>::TextureType), description_(description)
-		{
-			std::vector<void const*> rawData(data.size());
-			for (uint32 i = 0; i < data.size(); ++i)
-			{
-				rawData[i] = data[i].data();
-			}
-			DoConstructTexture(rawData, description, generateMipmap);
-		}
-
+		ConcreteTexture(DataDescription<Dimension> const& description, std::vector<void const*> const& data, bool generateMipmap = true);
 		virtual ~ConcreteTexture() override;
 
+		virtual TexelFormat GetFormat() const override
+		{
+			return description_.GetFormat();
+		}
+
 	private:
-		void DoConstructTexture(std::vector<void const*>& rawData, DataDescription<Dimension> const& description, bool generateMipmap);
-		void DoFillTexture(uint32 mipmapLevel, GLTextureFormat const& glFormat, DataDescription<Dimension> const& description, void const* data);
+		void DoFillTexture(DataDescription<Dimension> const& description, uint32 mipmapLevel, void const* data);
 
 	private:
 		DataDescription<Dimension> description_;
@@ -189,3 +165,4 @@ namespace XREX
 	};
 
 }
+

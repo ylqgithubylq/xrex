@@ -6,6 +6,7 @@
 #include "Shader.hpp"
 #include "BufferView.hpp"
 #include "GraphicsBuffer.hpp"
+#include "Texture.hpp"
 
 
 namespace XREX
@@ -36,6 +37,29 @@ namespace XREX
 	XREX_API uint32 GLUsageFromUsage(GraphicsBuffer::Usage usage);
 
 	XREX_API uint32 GlAccessTypeFromAccessType(GraphicsBuffer::AccessType type);
+
+	XREX_API uint32 GLTextureTypeFromTextureType(Texture::TextureType type);
+
+	struct XREX_API GLTextureFormat
+	{
+		uint32 glInternalFormat;
+		uint32 glSourceFormat;
+		uint32 glTextureElementType;
+		/*
+		 *	For std::array initialization, do not use this constructor.
+		 */
+		GLTextureFormat()
+			: glInternalFormat(0), glSourceFormat(0), glTextureElementType(0)
+		{
+		}
+		GLTextureFormat(uint32 internalFormat, uint32 sourceFormat, uint32 textureElementType)
+			: glInternalFormat(internalFormat), glSourceFormat(sourceFormat), glTextureElementType(textureElementType)
+		{
+		}
+	};
+
+	XREX_API GLTextureFormat const& GLTextureFormatFromTexelFormat(TexelFormat format);
+
 
 	XREX_API ElementType ElementTypeFromeGLType(uint32 glType);
 

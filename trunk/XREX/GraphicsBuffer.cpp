@@ -29,6 +29,19 @@ namespace XREX
 		DoConsctruct(data, sizeInBytes);
 	}
 
+	GraphicsBuffer::GraphicsBuffer(Usage usage, uint32 sizeInBytes, BufferView::BufferType typeHint)
+		: usage_(usage), sizeInBytes_(sizeInBytes)
+	{
+		DoConsctruct(nullptr, sizeInBytes, typeHint);
+
+	}
+
+	GraphicsBuffer::GraphicsBuffer(Usage usage, void const* data, uint32 sizeInBytes, BufferView::BufferType typeHint)
+		: usage_(usage), sizeInBytes_(sizeInBytes)
+	{
+		DoConsctruct(data, sizeInBytes, typeHint);
+	}
+
 	void GraphicsBuffer::DoConsctruct(void const* data, uint32 sizeInBytes)
 	{
 		assert(sizeInBytes != 0);
@@ -38,6 +51,17 @@ namespace XREX
 		glCurrentBindingIndex_ = 0;
 		BindWrite();
 		gl::BufferData(gl::GL_COPY_WRITE_BUFFER, sizeInBytes, data, GLUsageFromUsage(usage_));
+	}
+
+	void GraphicsBuffer::DoConsctruct(void const* data, uint32 sizeInBytes, BufferView::BufferType typeHint)
+	{
+		assert(sizeInBytes != 0);
+		gl::GenBuffers(1, &glBufferID_);
+		assert(glBufferID_ != 0); // 0 is reserved by GL
+		glCurrentBindingTarget_ = GLBufferTypeFromBufferType(typeHint);
+		glCurrentBindingIndex_ = 0;
+		Bind(typeHint);
+		gl::BufferData(glCurrentBindingTarget_, sizeInBytes, data, GLUsageFromUsage(usage_));
 	}
 
 	GraphicsBuffer::~GraphicsBuffer()

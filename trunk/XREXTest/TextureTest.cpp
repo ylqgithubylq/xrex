@@ -1,9 +1,17 @@
 #include "XREXAll.hpp"
 #include "TextureTest.h"
+#include "ShaderCodes.h"
+#include "TextureImage.hpp"
 #include <CoreGL.hpp>
 #include <assert.h>
 #include <iostream>
 
+MeshSP LoadTeapot()
+{
+	MeshSP model;
+	model = XREXContext::GetInstance().GetResourceManager().LoadModel("Data/teapot/teapot.obj")->Create();
+	return model;
+}
 
 MeshSP MakeCube()
 {
@@ -87,57 +95,12 @@ MeshSP MakeCube()
 
 RenderingEffectSP MakeEffect()
 {
-	string testCommonFunctionString =
-	"\n\
-	vec3 ReturnSelf(vec3 v)\n\
-	{\n\
-		return v;\n\
-	}\n\
-	";
-	string shaderString =
-	"\n\
-	uniform mat4 modelMatrix;\n\
-	uniform mat4 normalMatrix;\n\
-	uniform mat4 viewMatrix;\n\
-	uniform mat4 projectionMatrix;\n\
-	uniform vec3 cameraPosition;\n\
-	\n\
-	uniform sampler2D bumpTexture;\n\
-	\n\
-	#ifdef VS\n\
-	\n\
-	in vec3 position;\n\
-	in vec3 textureCoordinate0;\n\
-	out vec2 pixelTextureCoordinate;\n\
-	\n\
-	void main()\n\
-	{\n\
-		position = ReturnSelf(position);\n\
-		gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(position, 1.0);\n\
-		pixelTextureCoordinate = textureCoordinate0.st;\n\
-	}\n\
-	\n\
-	#endif\n\
-	\n\
-	#ifdef FS\n\
-	\n\
-	in vec2 pixelTextureCoordinate;\n\
-	\n\
-	layout(location = 0) out vec4 finalColor;\n\
-	\n\
-	void main()\n\
-	{\n\
-		finalColor = vec4(ReturnSelf(textureLod(bumpTexture, pixelTextureCoordinate, 0).rgb), 1);\n\
-		//finalColor = vec4(textureLod(bumpTexture, vec2(1, 1), 0).rgb, 1);\n\
-	}\n\
-	\n\
-	#endif\n\
-	\n\
-	";
+	ShaderCodes codes;
+
 	RenderingEffectSP commonEffect = MakeSP<RenderingEffect>("common effect");
-	commonEffect->AddShaderCode(std::move(testCommonFunctionString));
+	commonEffect->AddShaderCode(std::move(codes.GetShaderCodes()[0]));
 	RenderingEffectSP cubeEffect = MakeSP<RenderingEffect>("test cube effect");
-	cubeEffect->AddShaderCode(std::move(shaderString));
+	cubeEffect->AddShaderCode(std::move(codes.GetShaderCodes()[1]));
 	cubeEffect->AddInclude(commonEffect);
 
 	ProgramObjectSP cubeProgram = XREXContext::GetInstance().GetRenderingFactory().CreateProgramObject();
@@ -189,7 +152,7 @@ RenderingEffectSP MakeEffect()
 pair<TextureSP, SamplerSP> MakeBumpTexture()
 {
 	array<uint32, 2> dim = {2, 2};
-	Texture2D::DataDescription<2> desc(Texture::TexelFormat::R32F, dim);
+	Texture2D::DataDescription<2> desc(TexelFormat::R32F, dim);
 	vector<float> dataLevel0(4);
 	dataLevel0[0] = floatV4(1.0f, 0, 0, 1).X();
 	dataLevel0[1] = floatV4(0.7f, 0, 0, 1).X();
@@ -202,6 +165,75 @@ pair<TextureSP, SamplerSP> MakeBumpTexture()
 	ss.addressingModeR = SamplerState::TextureAddressingMode::MirroredRepeat;
 	ss.addressingModeS = SamplerState::TextureAddressingMode::MirroredRepeat;
 	ss.addressingModeT = SamplerState::TextureAddressingMode::MirroredRepeat;
+	SamplerSP sampler = XREXContext::GetInstance().GetRenderingFactory().CreateSampler(ss);
+	return pair<TextureSP, SamplerSP>(texture, sampler);
+}
+
+TextureSP MakeTestImageTexture0()
+{
+	array<uint32, 2> dim = {2, 2};
+	Texture2D::DataDescription<2> desc(TexelFormat::RGBA32F, dim);
+	vector<floatV4> dataLevel0(4);
+	dataLevel0[0] = floatV4(0, 1.0f, 0, 1);
+	dataLevel0[1] = floatV4(0, 0.7f, 0, 1);
+	dataLevel0[2] = floatV4(0, 0.4f, 0, 1);
+	dataLevel0[3] = floatV4(0, 0.1f, 0, 1);
+	vector<vector<floatV4>> data(1);
+// 	vector<int> dataLevel0(4);
+// 	dataLevel0[0] = int(255);
+// 	dataLevel0[1] = int(63);
+// 	dataLevel0[2] = int(127);
+// 	dataLevel0[3] = int(191);
+// 	vector<vector<int>> data(1);
+
+	data[0] = move(dataLevel0);
+	TextureSP texture = XREXContext::GetInstance().GetRenderingFactory().CreateTexture2D(desc, data, false);
+	return texture;
+}
+TextureSP MakeTestImageTexture1()
+{
+	array<uint32, 2> dim = {2, 2};
+	Texture2D::DataDescription<2> desc(TexelFormat::RGBA32F, dim);
+	vector<floatV4> dataLevel0(4);
+	dataLevel0[0] = floatV4(0, 0, 0.1f, 1);
+	dataLevel0[1] = floatV4(0, 0, 0.4f, 1);
+	dataLevel0[2] = floatV4(0, 0, 0.7f, 1);
+	dataLevel0[3] = floatV4(0, 0, 1.0f, 1);
+	vector<vector<floatV4>> data(1);
+	// 	vector<int> dataLevel0(4);
+	// 	dataLevel0[0] = int(255);
+	// 	dataLevel0[1] = int(63);
+	// 	dataLevel0[2] = int(127);
+	// 	dataLevel0[3] = int(191);
+	// 	vector<vector<int>> data(1);
+
+	data[0] = move(dataLevel0);
+	TextureSP texture = XREXContext::GetInstance().GetRenderingFactory().CreateTexture2D(desc, data, false);
+	return texture;
+}
+
+pair<TextureSP, SamplerSP> Make3DTexture()
+{
+	array<uint32, 3> dim = {2, 2, 2};
+	Texture2D::DataDescription<3> desc(TexelFormat::RGBA32F, dim);
+	vector<floatV4> dataLevel0(8);
+	dataLevel0[0] = floatV4(1.0f, 0, 0, 1);
+	dataLevel0[1] = floatV4(0.7f, 0, 0, 1);
+	dataLevel0[2] = floatV4(0.4f, 0, 0, 1);
+	dataLevel0[3] = floatV4(0.1f, 0, 0, 1);
+	dataLevel0[4] = floatV4(0, 0, 1.0f, 1);
+	dataLevel0[5] = floatV4(0, 0, 0.7f, 1);
+	dataLevel0[6] = floatV4(0, 0, 0.4f, 1);
+	dataLevel0[7] = floatV4(0, 0, 0.1f, 1);
+	vector<vector<floatV4>> data(1);
+	data[0] = move(dataLevel0);
+	TextureSP texture = XREXContext::GetInstance().GetRenderingFactory().CreateTexture3D(desc, data, true);
+	SamplerState ss;
+	ss.addressingModeR = SamplerState::TextureAddressingMode::MirroredRepeat;
+	ss.addressingModeS = SamplerState::TextureAddressingMode::MirroredRepeat;
+	ss.addressingModeT = SamplerState::TextureAddressingMode::MirroredRepeat;
+	ss.magFilterOperation = SamplerState::TextureFilterOperation::Linear;
+	ss.minFilterOperation = SamplerState::TextureFilterOperation::LinearMipmapLinear;
 	SamplerSP sampler = XREXContext::GetInstance().GetRenderingFactory().CreateSampler(ss);
 	return pair<TextureSP, SamplerSP>(texture, sampler);
 }
@@ -249,13 +281,13 @@ TextureTest::~TextureTest(void)
 
 void TextureTest::InitializeScene()
 {
-	scene_ = XREXContext::GetInstance().GetRenderingEngine().GetScene();
+	scene_ = XREXContext::GetInstance().GetScene();
 
 	SceneObjectSP cameraObject = MakeSP<SceneObject>("camera");
 	Settings const& settings = XREXContext::GetInstance().GetSettings();
 	CameraSP camera = MakeSP<Camera>(PI / 4, static_cast<float>(settings.renderingSettings.width) / settings.renderingSettings.height, 1.f, 10000.0f);
 	cameraObject->SetComponent(camera);
-	scene_ = XREXContext::GetInstance().GetRenderingEngine().GetScene();
+	scene_ = XREXContext::GetInstance().GetScene();
 	scene_->AddObject(cameraObject);
 
 	auto cc = MakeSP<FirstPersonCameraController>();
@@ -263,10 +295,33 @@ void TextureTest::InitializeScene()
 	XREXContext::GetInstance().GetInputCenter().AddInputHandler(cc);
 
 	SceneObjectSP cubeObject = MakeSP<SceneObject>("cube object");
-	MeshSP cube = MakeCube();
+	//MeshSP cube = MakeCube();
+	MeshSP cube = LoadTeapot();
+	std::vector<std::string> allChannels;
+	for (auto& sub : cube->GetAllSubMeshes())
+	{
+		for (auto& vb : sub->GetLayout()->GetVertexBuffers())
+		{
+			auto& desc = vb->GetDataLayoutDescription();
+			for (auto& layouts : desc.GetAllLayouts())
+			{
+				allChannels.push_back(layouts.channel);
+			}
+		}
+	}
 	RenderingEffectSP cubeEffect = MakeEffect();
 	MaterialSP material = MakeSP<Material>("cube effect parameters");
-	material->SetParameter("bumpTexture", MakeBumpTexture());
+	auto image0 = MakeTestImageTexture0()->GetImage_TEMP(0, TexelFormat::RGBA32F);
+	auto image1 = MakeTestImageTexture1()->GetImage_TEMP(0, TexelFormat::RGBA32F);
+	material->SetParameter("testImage0", image0);
+	material->SetParameter("testImage1", image1);
+	auto bump = MakeBumpTexture();
+	material->SetParameter("notUsedTexture0", std::make_pair(/*bump.first*/image0->GetTexture(), bump.second));
+	material->SetParameter("notUsedTexture1", std::make_pair(/*bump.first*/image1->GetTexture(), bump.second));
+	auto texture3D = Make3DTexture();
+	material->SetParameter("test3DTexture", texture3D);
+
+
 	for (auto& sub : cube->GetAllSubMeshes())
 	{
 		sub->SetEffect(cubeEffect);

@@ -19,38 +19,40 @@ namespace XREX
 		
 		glslVersionString_ = "#version ";
 		std::string version = "000";
+		assert(graphicsContext.GetMajorVersion() < 10);
+		assert(graphicsContext.GetMinorVersion() < 10);
 		version[0] = '0' + graphicsContext.GetMajorVersion(); // int to one byte char
 		version[1] = '0' + graphicsContext.GetMinorVersion(); // int to one byte char
 		glslVersionString_ += version + "\n\n";
 
 		auto depthOrder = std::numeric_limits<decltype(std::declval<Viewport>().GetDepthOrder())>::max();
-		defaultViewport_ = XREXContext::GetInstance().GetRenderingFactory().CreateViewport(depthOrder, 0, 0, window.GetClientRegionSize().x, window.GetClientRegionSize().y);
+		defaultViewport_ = CreateViewport(depthOrder, 0, 0, window.GetClientRegionSize().x, window.GetClientRegionSize().y);
 
 		std::array<uint32, 1> size1;
 		size1[0] = 1;
-		Texture::DataDescription<1> description1(Texture::TexelFormat::RGBA8, size1);
+		Texture::DataDescription<1> description1(TexelFormat::RGBA8, size1);
 		std::vector<std::vector<uint32>> data1(1, std::vector<uint32>(1, std::numeric_limits<uint8>::max() << 24)); // ARGB
-		blackTexture1D_ = MakeSP<Texture1D>(description1, data1, true);
+		blackTexture1D_ = CreateTexture1D(description1, data1, true);
 
 		std::array<uint32, 2> size2;
 		size2[0] = 1;
 		size2[1] = 1;
-		Texture::DataDescription<2> description2(Texture::TexelFormat::RGBA8, size2);
+		Texture::DataDescription<2> description2(TexelFormat::RGBA8, size2);
 		std::vector<std::vector<uint32>> data2(1, std::vector<uint32>(1, std::numeric_limits<uint8>::max() << 24)); // ARGB
-		blackTexture2D_ = MakeSP<Texture2D>(description2, data2, true);
+		blackTexture2D_ = CreateTexture2D(description2, data2, true);
 
 		std::array<uint32, 3> size3;
 		size3[0] = 1;
 		size3[1] = 1;
 		size3[2] = 1;
-		Texture::DataDescription<3> description3(Texture::TexelFormat::RGBA8, size3);
+		Texture::DataDescription<3> description3(TexelFormat::RGBA8, size3);
 		std::vector<std::vector<uint32>> data3(1, std::vector<uint32>(1, std::numeric_limits<uint8>::max() << 24)); // ARGB
-		blackTexture3D_ = MakeSP<Texture3D>(description3, data3, true);
+		blackTexture3D_ = CreateTexture3D(description3, data3, true);
 
 		// TODO blackTextureCube
 
 		SamplerState samplerState;
-		defaultSampler_ = MakeSP<Sampler>(samplerState);
+		defaultSampler_ = CreateSampler(samplerState);
 
 	}
 

@@ -84,6 +84,14 @@ namespace XREX
 		{
 			return MakeSP<GraphicsBuffer>(usage, data, sizeInBytes);
 		}
+		GraphicsBufferSP CreateGraphicsBuffer(GraphicsBuffer::Usage usage, uint32 sizeInBytes, BufferView::BufferType typeHint)
+		{
+			return MakeSP<GraphicsBuffer>(usage, sizeInBytes, typeHint);
+		}
+		GraphicsBufferSP CreateGraphicsBuffer(GraphicsBuffer::Usage usage, void const* data, uint32 sizeInBytes, BufferView::BufferType typeHint)
+		{
+			return MakeSP<GraphicsBuffer>(usage, data, sizeInBytes, typeHint);
+		}
 		VertexBufferSP CreateVertexBuffer(VertexBuffer::DataLayoutDescription&& description)
 		{
 			return MakeSP<VertexBuffer>(std::move(description));
@@ -134,40 +142,92 @@ namespace XREX
 		{
 			return MakeSP<Sampler>(samplerState);
 		}
+		TextureSP CreateTexture1D(Texture::DataDescription<1> const& description)
+		{
+			return MakeSP<Texture1D>(description);
+		}
 		template <typename T>
 		TextureSP CreateTexture1D(Texture::DataDescription<1> const& description, std::vector<std::vector<T>> const& data)
 		{
-			return MakeSP<Texture1D>(description, data);
+			std::vector<void const*> rawData(data.size());
+			for (uint32 i = 0; i < data.size(); ++i)
+			{
+				rawData[i] = data[i].data();
+			}
+			return MakeSP<Texture1D>(description, rawData);
 		}
 		template <typename T>
 		TextureSP CreateTexture1D(Texture::DataDescription<1> const& description, std::vector<std::vector<T>> const& data, bool generateMipmap)
 		{
-			return MakeSP<Texture1D>(description, data, generateMipmap);
+			std::vector<void const*> rawData(data.size());
+			for (uint32 i = 0; i < data.size(); ++i)
+			{
+				rawData[i] = data[i].data();
+			}
+			return MakeSP<Texture1D>(description, rawData, generateMipmap);
+		}
+		TextureSP CreateTexture2D(Texture::DataDescription<2> const& description)
+		{
+			return MakeSP<Texture2D>(description);
 		}
 		template <typename T>
 		TextureSP CreateTexture2D(Texture::DataDescription<2> const& description, std::vector<std::vector<T>> const& data)
 		{
-			return MakeSP<Texture2D>(description, data);
+			std::vector<void const*> rawData(data.size());
+			for (uint32 i = 0; i < data.size(); ++i)
+			{
+				rawData[i] = data[i].data();
+			}
+			return MakeSP<Texture2D>(description, rawData);
 		}
 		template <typename T>
 		TextureSP CreateTexture2D(Texture::DataDescription<2> const& description, std::vector<std::vector<T>> const& data, bool generateMipmap)
 		{
-			return MakeSP<Texture2D>(description, data, generateMipmap);
+			std::vector<void const*> rawData(data.size());
+			for (uint32 i = 0; i < data.size(); ++i)
+			{
+				rawData[i] = data[i].data();
+			}
+			return MakeSP<Texture2D>(description, rawData, generateMipmap);
+		}
+		TextureSP CreateTexture3D(Texture::DataDescription<3> const& description)
+		{
+			return MakeSP<Texture3D>(description);
 		}
 		template <typename T>
 		TextureSP CreateTexture3D(Texture::DataDescription<3> const& description, std::vector<std::vector<T>> const& data)
 		{
-			return MakeSP<Texture3D>(description, data);
+			std::vector<void const*> rawData(data.size());
+			for (uint32 i = 0; i < data.size(); ++i)
+			{
+				rawData[i] = data[i].data();
+			}
+			return MakeSP<Texture3D>(description, rawData);
 		}
 		template <typename T>
 		TextureSP CreateTexture3D(Texture::DataDescription<3> const& description, std::vector<std::vector<T>> const& data, bool generateMipmap)
 		{
-			return MakeSP<Texture3D>(description, data, generateMipmap);
+			std::vector<void const*> rawData(data.size());
+			for (uint32 i = 0; i < data.size(); ++i)
+			{
+				rawData[i] = data[i].data();
+			}
+			return MakeSP<Texture3D>(description, rawData, generateMipmap);
 		}
 		template <typename T>
 		TextureSP CreateTextureCube(Texture::DataDescription<2> const& description, std::array<std::vector<std::vector<T>>, 6> const& data)
 		{
-			return MakeSP<TextureCube>(description, data);
+			std::array<std::vector<void const*>, 6> rawData;
+			for (uint32 i = 0; i < 6; ++i)
+			{
+				auto& face = rawData[i];
+				face.resize(data.size());
+				for (uint32 j = 0; j < data.size(); ++j)
+				{
+					rawData[i][j] = data[i][j].data();
+				}
+			}
+			return MakeSP<TextureCube>(description, rawData);
 		}
 		template <typename T>
 		TextureSP CreateTextureCube(Texture::DataDescription<2> const& description, std::array<std::vector<std::vector<T>>, 6> const& data, bool generateMipmap)
