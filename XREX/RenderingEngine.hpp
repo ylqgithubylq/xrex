@@ -24,16 +24,13 @@ namespace XREX
 			return *graphicsContext_;
 		}
 
-		/*
-		 *	@scene: set to nullptr to make no scene to render.
-		 */
-		void SetScene(SceneSP const& scene)
+		void SetRenderingProcess(RenderingProcessSP const& process)
 		{
-			scene_ = scene;
+			process_ = process;
 		}
-		SceneSP const& GetScene() const
+		RenderingProcessSP const& GetRenderingProcess() const
 		{
-			return scene_;
+			return process_;
 		}
 
 		void Start()
@@ -46,8 +43,6 @@ namespace XREX
 
 		void RenderAFrame();
 
-		void RenderScene();
-
 
 		void OnBeforeRendering(std::function<void(double current, double delta)> const& beforeRenderingFunction)
 		{
@@ -59,14 +54,12 @@ namespace XREX
 		}
 
 	private:
-		void RenderACamera(SceneObjectSP const& cameraObject);
-
-	private:
 		std::unique_ptr<GraphicsContext> graphicsContext_;
+
+		RenderingProcessSP process_;
 
 		std::function<void(double current, double delta)> beforeRenderingFunction_;
 		std::function<void(double current, double delta)> afterRenderingFunction_;
-		SceneSP scene_;
 		Timer timer_;
 		double lastTime_;
 		RasterizerStateObjectSP defaultRasterizerState_;

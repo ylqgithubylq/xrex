@@ -121,7 +121,7 @@ namespace XREX
 		RasterizerStateObjectSP& rasterizerState, DepthStencilStateObjectSP& depthStencilState, BlendStateObjectSP& blendState)
 		: technique_(technique), program_(program), rasterizerState_(rasterizerState), depthStencilState_(depthStencilState), blendState_(blendState)
 	{
-		program->InitializeParameterSetters(technique_.GetEffect());
+		InitializeParameterSetters();
 	}
 	RenderingPass::~RenderingPass()
 	{
@@ -134,5 +134,172 @@ namespace XREX
 		blendState_->Bind(pipelineParameters_.blendFactor);
 		program_->Bind();
 	}
+
+	void RenderingPass::InitializeParameterSetters()
+	{
+		vector<EffectParameterSP> const& parameters = technique_.GetEffect().GetAllParameters();
+
+		uint32 availableSamplerLocation = 0;
+		uint32 availableImageLocation = 0;
+
+		for (auto& uniformInformation : program_->GetAllUniformInformations())
+		{
+			std::string const& name = uniformInformation.GetChannel();
+
+			auto resultIter = std::find_if(parameters.begin(), parameters.end(), [&name] (EffectParameterSP const& parameter)
+			{
+				return parameter->GetName() == name;
+			});
+
+			EffectParameterSP parameter;
+			if (resultIter == parameters.end()) // not exist
+			{
+				switch(uniformInformation.GetElementType())
+				{
+				case ElementType::Bool:
+					{
+						parameter = MakeSP<ConcreteEffectParameter<bool>>(name);
+					}
+					break;
+				case ElementType::Int32:
+					{
+						parameter = MakeSP<ConcreteEffectParameter<int32>>(name);
+					}
+					break;
+				case ElementType::IntV2:
+					{
+						parameter = MakeSP<ConcreteEffectParameter<intV2>>(name);
+					}
+					break;
+				case ElementType::IntV3:
+					{
+						parameter = MakeSP<ConcreteEffectParameter<intV3>>(name);
+					}
+					break;
+				case ElementType::IntV4:
+					{
+						parameter = MakeSP<ConcreteEffectParameter<intV4>>(name);
+					}
+					break;
+				case ElementType::Uint32:
+					{
+						parameter = MakeSP<ConcreteEffectParameter<uint32>>(name);
+					}
+					break;
+				case ElementType::UintV2:
+					{
+						parameter = MakeSP<ConcreteEffectParameter<uintV2>>(name);
+					}
+					break;
+				case ElementType::UintV3:
+					{
+						parameter = MakeSP<ConcreteEffectParameter<uintV3>>(name);
+					}
+					break;
+				case ElementType::UintV4:
+					{
+						parameter = MakeSP<ConcreteEffectParameter<uintV4>>(name);
+					}
+					break;
+				case ElementType::Float:
+					{
+						parameter = MakeSP<ConcreteEffectParameter<float>>(name);
+					}
+					break;
+				case ElementType::FloatV2:
+					{
+						parameter = MakeSP<ConcreteEffectParameter<floatV2>>(name);
+					}
+					break;
+				case ElementType::FloatV3:
+					{
+						parameter = MakeSP<ConcreteEffectParameter<floatV3>>(name);
+					}
+					break;
+				case ElementType::FloatV4:
+					{
+						parameter = MakeSP<ConcreteEffectParameter<floatV4>>(name);
+					}
+					break;
+				case ElementType::Double:
+					{
+						parameter = MakeSP<ConcreteEffectParameter<double>>(name);
+					}
+					break;
+				case ElementType::DoubleV2:
+					{
+						parameter = MakeSP<ConcreteEffectParameter<doubleV2>>(name);
+					}
+					break;
+				case ElementType::DoubleV3:
+					{
+						parameter = MakeSP<ConcreteEffectParameter<doubleV3>>(name);
+					}
+					break;
+				case ElementType::DoubleV4:
+					{
+						parameter = MakeSP<ConcreteEffectParameter<doubleV4>>(name);
+					}
+					break;
+				case ElementType::FloatM44:
+					{
+						parameter = MakeSP<ConcreteEffectParameter<floatM44>>(name);
+					}
+					break;
+				case ElementType::DoubleM44:
+					{
+						parameter = MakeSP<ConcreteEffectParameter<doubleM44>>(name);
+					}
+					break;
+				case ElementType::Sampler1D:
+				case ElementType::Sampler2D:
+				case ElementType::Sampler3D:
+				case ElementType::SamplerCube:
+					{
+						parameter = MakeSP<ConcreteEffectParameter<std::pair<TextureSP, SamplerSP>>>(name);
+					}
+					break;
+				case ElementType::Image1D:
+				case ElementType::Image2D:
+				case ElementType::Image3D:
+				case ElementType::ImageCube:
+					{
+						parameter = MakeSP<ConcreteEffectParameter<TextureImageSP>>(name);
+					}
+					break;
+				default:
+					// not support.
+					assert(false);
+				}
+				technique_.GetEffect().AddParameter(parameter);
+			}
+			else
+			{
+				parameter = *resultIter;
+				// check if uniform type in this shader not equals to type of parameter created by other shader.
+				assert(parameter->GetType() == uniformInformation.GetElementType());
+			}
+
+			ElementType type = uniformInformation.GetElementType();
+
+			if (IsSamplerType(type))
+			{
+				program_->CreateSamplerUniformBinder(uniformInformation.GetChannel(), parameter, availableSamplerLocation);
+				availableSamplerLocation++;
+			}
+			else if (IsImageType(type))
+			{
+				program_->CreateImageUniformBinder(uniformInformation.GetChannel(), parameter, availableImageLocation);
+				availableImageLocation++;
+			}
+			else
+			{
+				program_->CreateUniformBinder(uniformInformation.GetChannel(), parameter);
+			}
+		}
+
+	}
+
+
 
 }

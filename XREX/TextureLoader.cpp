@@ -108,7 +108,7 @@ namespace XREX
 	namespace
 	{
 
-		Texture::TexelFormat TexelFormatFromFreeImageFormat(FREE_IMAGE_FORMAT freeImageFormat, FIBITMAP* bitmap)
+		TexelFormat TexelFormatFromFreeImageFormat(FREE_IMAGE_FORMAT freeImageFormat, FIBITMAP* bitmap)
 		{
 			FREE_IMAGE_TYPE imageType = FreeImage_GetImageType(bitmap);
 			FREE_IMAGE_COLOR_TYPE colorType = FreeImage_GetColorType(bitmap);
@@ -117,18 +117,18 @@ namespace XREX
 			FREE_IMAGE_COLOR_TYPE::FIC_RGB;
 			FREE_IMAGE_COLOR_TYPE::FIC_RGBALPHA;
 		
-			Texture::TexelFormat texelFormat;
+			TexelFormat texelFormat;
 			if (imageType == FREE_IMAGE_TYPE::FIT_BITMAP)
 			{
-				static std::unordered_map<std::pair<FREE_IMAGE_COLOR_TYPE, bool>, Texture::TexelFormat, STLPairHasher<FREE_IMAGE_COLOR_TYPE, bool>> const colorTypeMapping = [] ()
+				static std::unordered_map<std::pair<FREE_IMAGE_COLOR_TYPE, bool>, TexelFormat, STLPairHasher<FREE_IMAGE_COLOR_TYPE, bool>> const colorTypeMapping = [] ()
 				{
 					std::remove_const<decltype(colorTypeMapping)>::type temp;
-					temp[std::make_pair(FREE_IMAGE_COLOR_TYPE::FIC_MINISBLACK, false)] = Texture::TexelFormat::R8;
-					temp[std::make_pair(FREE_IMAGE_COLOR_TYPE::FIC_RGB, false)] = Texture::TexelFormat::RGB8;
-					temp[std::make_pair(FREE_IMAGE_COLOR_TYPE::FIC_RGBALPHA, false)] = Texture::TexelFormat::RGBA8;
-					temp[std::make_pair(FREE_IMAGE_COLOR_TYPE::FIC_MINISBLACK, true)] = Texture::TexelFormat::R8;
-					temp[std::make_pair(FREE_IMAGE_COLOR_TYPE::FIC_RGB, true)] = Texture::TexelFormat::BGR8;
-					temp[std::make_pair(FREE_IMAGE_COLOR_TYPE::FIC_RGBALPHA, true)] = Texture::TexelFormat::BGRA8;
+					temp[std::make_pair(FREE_IMAGE_COLOR_TYPE::FIC_MINISBLACK, false)] = TexelFormat::R8;
+					temp[std::make_pair(FREE_IMAGE_COLOR_TYPE::FIC_RGB, false)] = TexelFormat::RGB8;
+					temp[std::make_pair(FREE_IMAGE_COLOR_TYPE::FIC_RGBALPHA, false)] = TexelFormat::RGBA8;
+					temp[std::make_pair(FREE_IMAGE_COLOR_TYPE::FIC_MINISBLACK, true)] = TexelFormat::R8;
+					temp[std::make_pair(FREE_IMAGE_COLOR_TYPE::FIC_RGB, true)] = TexelFormat::BGR8;
+					temp[std::make_pair(FREE_IMAGE_COLOR_TYPE::FIC_RGBALPHA, true)] = TexelFormat::BGRA8;
 					return temp;
 				} ();
 				uint32 blueMask = FreeImage_GetBlueMask(bitmap);
@@ -137,26 +137,26 @@ namespace XREX
 			}
 			else
 			{
-				static std::unordered_map<FREE_IMAGE_TYPE, Texture::TexelFormat> const imageTypeMapping = [] ()
+				static std::unordered_map<FREE_IMAGE_TYPE, TexelFormat> const imageTypeMapping = [] ()
 				{
 					std::remove_const<decltype(imageTypeMapping)>::type temp;
-					temp[FREE_IMAGE_TYPE::FIT_BITMAP] = Texture::TexelFormat::NotUsed;
-					temp[FREE_IMAGE_TYPE::FIT_COMPLEX] = Texture::TexelFormat::NotUsed;
-					temp[FREE_IMAGE_TYPE::FIT_DOUBLE] = Texture::TexelFormat::NotUsed;
-					temp[FREE_IMAGE_TYPE::FIT_FLOAT] = Texture::TexelFormat::NotUsed;
-					temp[FREE_IMAGE_TYPE::FIT_INT16] = Texture::TexelFormat::NotUsed;
-					temp[FREE_IMAGE_TYPE::FIT_INT32] = Texture::TexelFormat::NotUsed;
-					temp[FREE_IMAGE_TYPE::FIT_RGB16] = Texture::TexelFormat::NotUsed;
-					temp[FREE_IMAGE_TYPE::FIT_RGBA16] = Texture::TexelFormat::NotUsed;
-					temp[FREE_IMAGE_TYPE::FIT_RGBF] = Texture::TexelFormat::NotUsed;
-					temp[FREE_IMAGE_TYPE::FIT_RGBAF] = Texture::TexelFormat::NotUsed;
-					temp[FREE_IMAGE_TYPE::FIT_UINT16] = Texture::TexelFormat::NotUsed;
-					temp[FREE_IMAGE_TYPE::FIT_UINT32] = Texture::TexelFormat::NotUsed;
-					temp[FREE_IMAGE_TYPE::FIT_UNKNOWN] = Texture::TexelFormat::NotUsed;
+					temp[FREE_IMAGE_TYPE::FIT_BITMAP] = TexelFormat::NotUsed;
+					temp[FREE_IMAGE_TYPE::FIT_COMPLEX] = TexelFormat::NotUsed;
+					temp[FREE_IMAGE_TYPE::FIT_DOUBLE] = TexelFormat::NotUsed;
+					temp[FREE_IMAGE_TYPE::FIT_FLOAT] = TexelFormat::NotUsed;
+					temp[FREE_IMAGE_TYPE::FIT_INT16] = TexelFormat::NotUsed;
+					temp[FREE_IMAGE_TYPE::FIT_INT32] = TexelFormat::NotUsed;
+					temp[FREE_IMAGE_TYPE::FIT_RGB16] = TexelFormat::NotUsed;
+					temp[FREE_IMAGE_TYPE::FIT_RGBA16] = TexelFormat::NotUsed;
+					temp[FREE_IMAGE_TYPE::FIT_RGBF] = TexelFormat::NotUsed;
+					temp[FREE_IMAGE_TYPE::FIT_RGBAF] = TexelFormat::NotUsed;
+					temp[FREE_IMAGE_TYPE::FIT_UINT16] = TexelFormat::NotUsed;
+					temp[FREE_IMAGE_TYPE::FIT_UINT32] = TexelFormat::NotUsed;
+					temp[FREE_IMAGE_TYPE::FIT_UNKNOWN] = TexelFormat::NotUsed;
 					return temp;
 				} ();
 				texelFormat = imageTypeMapping.at(imageType);
-				assert(texelFormat != Texture::TexelFormat::NotUsed); // above imageTypeMapping not implement yet
+				assert(texelFormat != TexelFormat::NotUsed); // above imageTypeMapping not implement yet
 			}
 			return texelFormat;
 		}
@@ -233,11 +233,11 @@ namespace XREX
 				return true;
 			}
 
-			void BuildResult(uint32 width, uint32 height, uint32 size, Texture::TexelFormat format, uint8 const* data);
+			void BuildResult(uint32 width, uint32 height, uint32 size, TexelFormat format, uint8 const* data);
 		};
 
 		template <>
-		void TextureHandler<Texture1D>::BuildResult(uint32 width, uint32 height, uint32 size, Texture::TexelFormat format, uint8 const* data)
+		void TextureHandler<Texture1D>::BuildResult(uint32 width, uint32 height, uint32 size, TexelFormat format, uint8 const* data)
 		{
 			std::array<uint32, 1> sizes;
 			sizes[0] = width;
@@ -249,7 +249,7 @@ namespace XREX
 			result = MakeSP<TextureLoadingResultDetail<1>>(description, std::move(dataContainer), generateMipmap);
 		}
 		template <>
-		void TextureHandler<Texture2D>::BuildResult(uint32 width, uint32 height, uint32 size, Texture::TexelFormat format, uint8 const* data)
+		void TextureHandler<Texture2D>::BuildResult(uint32 width, uint32 height, uint32 size, TexelFormat format, uint8 const* data)
 		{
 			std::array<uint32, 2> sizes;
 			sizes[0] = width;
@@ -262,7 +262,7 @@ namespace XREX
 			result = MakeSP<TextureLoadingResultDetail<2>>(description, std::move(dataContainer), generateMipmap);
 		}
 		template <>
-		void TextureHandler<Texture3D>::BuildResult(uint32 width, uint32 height, uint32 size, Texture::TexelFormat format, uint8 const* data)
+		void TextureHandler<Texture3D>::BuildResult(uint32 width, uint32 height, uint32 size, TexelFormat format, uint8 const* data)
 		{
 			assert(false); // TODO not finished, how to load 3D texture?
 			std::array<uint32, 3> sizes;
@@ -277,7 +277,7 @@ namespace XREX
 			result = MakeSP<TextureLoadingResultDetail<3>>(description, std::move(dataContainer), generateMipmap);
 		}
 		template <>
-		void TextureHandler<TextureCube>::BuildResult(uint32 width, uint32 height, uint32 size, Texture::TexelFormat format, uint8 const* data)
+		void TextureHandler<TextureCube>::BuildResult(uint32 width, uint32 height, uint32 size, TexelFormat format, uint8 const* data)
 		{
 			assert(false); // TODO not finished, how to load cube texture?
 			std::array<uint32, 2> sizes;

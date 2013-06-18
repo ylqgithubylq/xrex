@@ -4,7 +4,7 @@
 #pragma warning(disable: 4482) // enum grammar extension: MyEnum::EnumValue
 #pragma warning(error: 4150) // deletion of pointer to incomplete type (destructor will not be called)
 #pragma warning(error: 4715) // not all control paths return a value
-
+#pragma warning(error: 4700) // uninitialized local variable used
 
 #include <cassert>
 
@@ -30,6 +30,9 @@ namespace XREX
 	class InputCenter;
 	class Window;
 	class GraphicsContext;
+
+	class RenderingProcess;
+	typedef std::shared_ptr<RenderingProcess> RenderingProcessSP;
 
 	class InputHandler;
 	typedef std::shared_ptr<InputHandler> InputHandlerSP;
@@ -95,7 +98,8 @@ namespace XREX
 	typedef std::shared_ptr<Texture> TextureSP;
 	class Sampler;
 	typedef std::shared_ptr<Sampler> SamplerSP;
-
+	class TextureImage;
+	typedef std::shared_ptr<TextureImage> TextureImageSP;
 
 	class Camera;
 	typedef std::shared_ptr<Camera> CameraSP;

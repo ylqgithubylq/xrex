@@ -1,6 +1,9 @@
 #include "XREX.hpp"
 
 #include "Texture.hpp"
+#include "TextureImage.hpp"
+
+#include "GLUtil.hpp"
 
 #include <CoreGL.hpp>
 
@@ -12,134 +15,12 @@ using std::vector;
 namespace XREX
 {
 
-	namespace
-	{
-		uint32 GLBindingTargetFromTextureType(Texture::TextureType type)
-		{
-			static std::array<uint32, static_cast<uint32>(Texture::TextureType::TextureTypeCount)> const mapping = [] ()
-			{
-				std::remove_const<decltype(mapping)>::type temp;
-				temp[static_cast<uint32>(Texture::TextureType::Texture1D)] = gl::GL_TEXTURE_1D;
-				temp[static_cast<uint32>(Texture::TextureType::Texture2D)] = gl::GL_TEXTURE_2D;
-				temp[static_cast<uint32>(Texture::TextureType::Texture3D)] = gl::GL_TEXTURE_3D;
-				return temp;
-			} ();
-			return mapping[static_cast<uint32>(type)];
-		}
-	}
-
-
-	struct Texture::GLTextureFormat
-	{
-		uint32 glInternalFormat;
-		uint32 glSourceFormat;
-		uint32 glTextureElementType;
-		/*
-		 *	For std::array initialization, do not use this constructor.
-		 */
-		GLTextureFormat()
-			: glInternalFormat(0), glSourceFormat(0), glTextureElementType(0)
-		{
-		}
-		GLTextureFormat(uint32 internalFormat, uint32 sourceFormat, uint32 textureElementType)
-			: glInternalFormat(internalFormat), glSourceFormat(sourceFormat), glTextureElementType(textureElementType)
-		{
-		}
-	};
-
-	Texture::GLTextureFormat const& Texture::GLTextureFormatFromTexelFormat(TexelFormat format)
-	{
-		switch (format)
-		{
-		case TexelFormat::R8:
-			{
-				static GLTextureFormat const Format(gl::GL_R8, gl::GL_RED, gl::GL_UNSIGNED_BYTE);
-				return Format;
-			}
-		case TexelFormat::RGB8:
-			{
-				static GLTextureFormat const Format(gl::GL_RGBA8, gl::GL_RGB, gl::GL_UNSIGNED_BYTE);
-				return Format;
-			}
-		case TexelFormat::BGR8:
-			{
-				static GLTextureFormat const Format(gl::GL_RGBA8, gl::GL_BGR, gl::GL_UNSIGNED_BYTE);
-				return Format;
-			}
-		case TexelFormat::RGBA8:
-			{
-				static GLTextureFormat const Format(gl::GL_RGBA8, gl::GL_RGBA, gl::GL_UNSIGNED_BYTE);
-				return Format;
-			}
-		case TexelFormat::BGRA8:
-			{
-				static GLTextureFormat const Format(gl::GL_RGBA8, gl::GL_BGRA, gl::GL_UNSIGNED_BYTE);
-				return Format;
-			}
-		case TexelFormat::R16F:
-			{
-				static GLTextureFormat const Format(gl::GL_R16F, gl::GL_RED, gl::GL_FLOAT);
-				return Format;
-			}
-		case TexelFormat::RGB16F:
-			{
-				static GLTextureFormat const Format(gl::GL_RGB16F, gl::GL_RGB, gl::GL_FLOAT);
-				return Format;
-			}
-		case TexelFormat::BGR16F:
-			{
-				static GLTextureFormat const Format(gl::GL_RGB16F, gl::GL_BGR, gl::GL_FLOAT);
-				return Format;
-			}
-		case TexelFormat::RGBA16F:
-			{
-				static GLTextureFormat const Format(gl::GL_RGBA16F, gl::GL_RGBA, gl::GL_FLOAT);
-				return Format;
-			}
-		case TexelFormat::BGRA16F:
-			{
-				static GLTextureFormat const Format(gl::GL_RGBA16F, gl::GL_BGRA, gl::GL_FLOAT);
-				return Format;
-			}
-		case TexelFormat::R32F:
-			{
-				static GLTextureFormat const Format(gl::GL_R32F, gl::GL_RED, gl::GL_FLOAT);
-				return Format;
-			}
-		case TexelFormat::RGB32F:
-			{
-				static GLTextureFormat const Format(gl::GL_RGB32F, gl::GL_RGB, gl::GL_FLOAT);
-				return Format;
-			}
-		case TexelFormat::BGR32F:
-			{
-				static GLTextureFormat const Format(gl::GL_RGB32F, gl::GL_BGR, gl::GL_FLOAT);
-				return Format;
-			}
-		case TexelFormat::RGBA32F:
-			{
-				static GLTextureFormat const Format(gl::GL_RGBA32F, gl::GL_RGBA, gl::GL_FLOAT);
-				return Format;
-			}
-		case TexelFormat::BGRA32F:
-			{
-				static GLTextureFormat const Format(gl::GL_RGBA32F, gl::GL_BGRA, gl::GL_FLOAT);
-				return Format;
-			}
-		default:
-			{
-				static GLTextureFormat const Format;
-				assert(false);
-				return Format;
-			}
-		}
-	}
-
-
-
 	Texture::Texture(TextureType type)
-		: type_(type), glTextureID_(0), mipmapCount_(0)
+		: type_(type), glTextureID_(0), mipmapCount_(0), lastBindingIndex_(0)
 	{
+		glBindingTarget_ = GLTextureTypeFromTextureType(type_);
+		gl::GenTextures(1, &glTextureID_);
+		assert(glTextureID_ != 0);
 	}
 
 	Texture::~Texture()
@@ -151,63 +32,85 @@ namespace XREX
 		}
 	}
 
-	void Texture::Bind(uint32 textureChannel)
+	void Texture::Bind(uint32 index)
 	{
-		gl::ActiveTexture(gl::GL_TEXTURE0 + textureChannel);
+		lastBindingIndex_ = index;
+		gl::ActiveTexture(gl::GL_TEXTURE0 + lastBindingIndex_);
 		gl::BindTexture(glBindingTarget_, glTextureID_);
 	}
 
-	void Texture::UnbindTexture()
+	void Texture::Unbind()
 	{
+		gl::ActiveTexture(gl::GL_TEXTURE0 + lastBindingIndex_);
 		gl::BindTexture(glBindingTarget_, 0);
 	}
 
+	XREX::TextureImageSP Texture::GetImage(uint32 level)
+	{
+		assert(level < mipmapCount_);
+		return MakeSP<TextureImage>(shared_from_this(), level);
+	}
+
+	XREX::TextureImageSP Texture::GetImage_TEMP(uint32 level, TexelFormat format)
+	{
+		assert(level < mipmapCount_);
+		return MakeSP<TextureImage>(shared_from_this(), level, format);
+	}
+
+
 
 
 
 
 	template <>
-	void ConcreteTexture<1>::DoFillTexture(uint32 mipmapLevel, GLTextureFormat const& glFormat, DataDescription<1> const& description, void const* data)
+	void ConcreteTexture<1>::DoFillTexture(DataDescription<1> const& description, uint32 mipmapLevel, void const* data)
 	{
+		GLTextureFormat const& glFormat = GLTextureFormatFromTexelFormat(description.GetFormat());
+// 		gl::TexStorage1D(glBindingTarget_, mipmapLevel, glFormat.glInternalFormat, description.GetSizes()[0]);
+// 		gl::TexSubImage1D(glBindingTarget_, mipmapLevel, 0, description.GetSizes()[0], glFormat.glSourceFormat, glFormat.glTextureElementType, data);
 		gl::TexImage1D(glBindingTarget_, mipmapLevel, glFormat.glInternalFormat, description.GetSizes()[0], 0, glFormat.glSourceFormat, glFormat.glTextureElementType, data);
 	}
 	template <>
-	void ConcreteTexture<2>::DoFillTexture(uint32 mipmapLevel, GLTextureFormat const& glFormat, DataDescription<2> const& description, void const* data)
+	void ConcreteTexture<2>::DoFillTexture(DataDescription<2> const& description, uint32 mipmapLevel, void const* data)
 	{
+		GLTextureFormat const& glFormat = GLTextureFormatFromTexelFormat(description.GetFormat());
+// 		gl::TexStorage2D(glBindingTarget_, mipmapLevel, glFormat.glInternalFormat, description.GetSizes()[0], description.GetSizes()[1]);
+// 		gl::TexSubImage2D(glBindingTarget_, mipmapLevel, 0, 0, description.GetSizes()[0], description.GetSizes()[1], glFormat.glSourceFormat, glFormat.glTextureElementType, data);
 		gl::TexImage2D(glBindingTarget_, mipmapLevel, glFormat.glInternalFormat, description.GetSizes()[0], description.GetSizes()[1], 0, glFormat.glSourceFormat, glFormat.glTextureElementType, data);
 	}
 	template <>
-	void ConcreteTexture<3>::DoFillTexture(uint32 mipmapLevel, GLTextureFormat const& glFormat, DataDescription<3> const& description, void const* data)
+	void ConcreteTexture<3>::DoFillTexture(DataDescription<3> const& description, uint32 mipmapLevel, void const* data)
 	{
+		GLTextureFormat const& glFormat = GLTextureFormatFromTexelFormat(description.GetFormat());
+// 		gl::TexStorage3D(glBindingTarget_, mipmapLevel, glFormat.glInternalFormat, description.GetSizes()[0], description.GetSizes()[1], description.GetSizes()[2]);
+// 		gl::TexSubImage3D(glBindingTarget_, mipmapLevel, 0, 0, 0, description.GetSizes()[0], description.GetSizes()[1], description.GetSizes()[2], glFormat.glSourceFormat, glFormat.glTextureElementType, data);
 		gl::TexImage3D(glBindingTarget_, mipmapLevel, glFormat.glInternalFormat, description.GetSizes()[0], description.GetSizes()[1], description.GetSizes()[2], 0, glFormat.glSourceFormat, glFormat.glTextureElementType, data);
 	}
 
 
-
 	template <uint32 Dimension>
-	ConcreteTexture<Dimension>::~ConcreteTexture()
+	XREX::ConcreteTexture<Dimension>::ConcreteTexture(DataDescription<Dimension> const& description)
+		: Texture(TextureDimensionToTextureType<Dimension>::TextureType), description_(description)
 	{
-
+		Bind(0);
+		DoFillTexture(description, 0, nullptr);
 	}
 
 	template <uint32 Dimension>
-	void ConcreteTexture<Dimension>::DoConstructTexture(std::vector<void const*>& rawData, DataDescription<Dimension> const& description, bool generateMipmap)
+	ConcreteTexture<Dimension>::ConcreteTexture(DataDescription<Dimension> const& description, std::vector<void const*> const& data, bool generateMipmap)
+		: Texture(TextureDimensionToTextureType<Dimension>::TextureType), description_(description)
 	{
-		assert(rawData.size() > 0);
-		glBindingTarget_ = GLBindingTargetFromTextureType(type_);
-		gl::GenTextures(1, &glTextureID_);
-		assert(glTextureID_ != 0);
-		gl::BindTexture(glBindingTarget_, glTextureID_);
+		assert(data.size() > 0);
+		Bind(0);
 
-		GLTextureFormat const& glFormat = GLTextureFormatFromTexelFormat(description.GetFormat());
 		if (!generateMipmap)
 		{
 			DataDescription<Dimension> descriptionOfALevel = description;
 			std::array<uint32, Dimension> sizes = description.GetSizes();
-			for (uint32 mipmapLevel = 0; mipmapLevel < rawData.size(); ++mipmapLevel)
+			for (uint32 mipmapLevel = 0; mipmapLevel < data.size(); ++mipmapLevel)
 			{
-				void const* dataOfALevel = rawData[mipmapLevel];
-				DoFillTexture(mipmapLevel, glFormat, descriptionOfALevel, dataOfALevel);
+				void const* dataOfALevel = data[mipmapLevel];
+				DoFillTexture(descriptionOfALevel, mipmapLevel, dataOfALevel);
 				for (uint32 i = 0; i < Dimension; ++i)
 				{
 					sizes[i] = std::max(sizes[i] / 2, 1u);
@@ -217,7 +120,7 @@ namespace XREX
 		}
 		else
 		{
-			DoFillTexture(0, glFormat, description, rawData[0]);
+			DoFillTexture(description, 0, data[0]);
 		}
 
 		if (generateMipmap)
@@ -236,10 +139,15 @@ namespace XREX
 		}
 		else
 		{
-			mipmapCount_ = rawData.size();
+			mipmapCount_ = data.size();
 		}
-		gl::BindTexture(glBindingTarget_, 0);
 	}
+
+	template <uint32 Dimension>
+	ConcreteTexture<Dimension>::~ConcreteTexture()
+	{
+	}
+
 
 
 	// instantiate 1, 2, 3 Dimensional Texture specialization

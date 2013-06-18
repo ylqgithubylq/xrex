@@ -8,6 +8,8 @@
 #include "GraphicsBuffer.hpp"
 #include "Texture.hpp"
 #include "Sampler.hpp"
+#include "TextureImage.hpp"
+
 #include "GLUtil.hpp"
 
 #include <CoreGL.hpp>
@@ -60,18 +62,14 @@ namespace XREX
 
 	ShaderObject::~ShaderObject()
 	{
-		Destory();
-	}
-
-
-	void ShaderObject::Destory()
-	{
 		if (glShaderID_ != 0)
 		{
 			gl::DeleteShader(glShaderID_);
 			glShaderID_ = 0;
 		}
 	}
+
+
 
 
 	bool ShaderObject::Compile(std::vector<std::string const*> const& sources)
@@ -133,16 +131,11 @@ namespace XREX
 	}
 	ProgramObject::~ProgramObject()
 	{
-		Destory();
-	}
-
-	void ProgramObject::Destory()
-	{
 		for (int32 i = 0; i < static_cast<uint32>(ShaderObject::ShaderType::CountOfShaderTypes); ++i)
 		{
 			if (shaders_[i])
 			{
-				uint32 id = shaders_[i]->GetGLID();
+				uint32 id = shaders_[i]->GetID();
 				gl::DetachShader(glProgramID_, id);
 			}
 		}
@@ -156,7 +149,7 @@ namespace XREX
 	void ProgramObject::AttachShader(ShaderObjectSP& shader)
 	{
 		assert(shader->IsValidate());
-		gl::AttachShader(glProgramID_, shader->GetGLID());
+		gl::AttachShader(glProgramID_, shader->GetID());
 		shaders_[static_cast<uint32>(shader->GetType())] = shader;
 	}
 
@@ -191,6 +184,51 @@ namespace XREX
 			std::cerr << errorString_ << std::endl;
 		}
 	#endif
+
+		if (validate_)
+		{
+			int32 uniformCount = 0;
+			gl::GetProgramiv(glProgramID_, gl::GL_ACTIVE_UNIFORMS, &uniformCount);
+			int32 maxUniformNameLength = 0;
+			gl::GetProgramiv(glProgramID_, gl::GL_ACTIVE_UNIFORM_MAX_LENGTH, &maxUniformNameLength);
+
+			for (int32 i = 0; i < uniformCount; ++i)
+			{
+				int32 nameLength;
+				int32 uniformSize;
+				uint32 glType;
+				string name;
+				name.resize(maxUniformNameLength);
+				gl::GetActiveUniform(glProgramID_, i, maxUniformNameLength, &nameLength, &uniformSize, &glType, &name[0]);
+				int32 location = gl::GetUniformLocation(glProgramID_, name.c_str());
+				name = name.substr(0, nameLength); // no '\0' included
+
+				uniformInformations_.emplace_back(UniformInformation(name, ElementTypeFromeGLType(glType), uniformSize, location));
+
+			}
+
+			int32 attributeCount = 0;
+			gl::GetProgramiv(glProgramID_, gl::GL_ACTIVE_ATTRIBUTES, &attributeCount);
+			int32 maxAttributeNameLength = 0;
+			gl::GetProgramiv(glProgramID_, gl::GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, &maxAttributeNameLength);
+
+
+			for (int32 i = 0; i < attributeCount; ++i)
+			{
+				int32 nameLength;
+				int32 attributeSize;
+				uint32 glType;
+				string name;
+				name.resize(maxAttributeNameLength);
+				gl::GetActiveAttrib(glProgramID_, i, maxAttributeNameLength, &nameLength, &attributeSize, &glType, &name[0]);
+				int32 location = gl::GetAttribLocation(glProgramID_, name.c_str());
+				name = name.substr(0, nameLength); // no '\0' included
+
+				attributeInformations_.emplace_back(AttributeInformation(std::move(name), ElementTypeFromeGLType(glType), attributeSize, location));
+			}
+
+		}
+
 		return validate_;
 	}
 
@@ -202,7 +240,7 @@ namespace XREX
 
 		for (auto i = uniformBinders_.begin(); i != uniformBinders_.end(); ++i)
 		{
-			i->setter();
+			i->setter(i->uniformInformation);
 		}
 
 
@@ -227,491 +265,361 @@ namespace XREX
 
 	std::pair<bool, ProgramObject::AttributeInformation> ProgramObject::GetAttributeInformation(std::string const& channel) const
 	{
-		auto found = std::find_if(attributeBindingInformation_.begin(), attributeBindingInformation_.end(), [&channel] (AttributeBindingInformation const& bindingInformation)
+		auto found = std::find_if(attributeInformations_.begin(), attributeInformations_.end(), [&channel] (AttributeInformation const& attributeInformation)
 		{
-			return bindingInformation.channel == channel;
+			return attributeInformation.GetChannel() == channel;
 		});
-		if (found == attributeBindingInformation_.end())
+		if (found == attributeInformations_.end())
 		{
-			return std::make_pair(false, AttributeInformation());
+			return std::make_pair(false, NullAttributeInformation);
 		}
-		return std::make_pair(true, AttributeInformation(ElementTypeFromeGLType(found->glType), found->elementCount, found->glLocation));
+		return std::make_pair(true, *found);
 	}
 
 
-	void ProgramObject::InitializeParameterSetters(RenderingEffect& effect)
+	std::pair<bool, ProgramObject::UniformInformation> ProgramObject::GetUniformInformation(std::string const& channel) const
 	{
-		vector<EffectParameterSP> const& parameters = effect.GetAllParameters();
-
-		// uniforms
-
-		uint32 availableSamplerLocation = 0;
-
-		int32 uniformCount = 0;
-		gl::GetProgramiv(glProgramID_, gl::GL_ACTIVE_UNIFORMS, &uniformCount);
-		int32 maxUniformNameLength = 0;
-		gl::GetProgramiv(glProgramID_, gl::GL_ACTIVE_UNIFORM_MAX_LENGTH, &maxUniformNameLength);
-
-		// don't change the size of uniformBinders_ after this, reference to elements in it will be kept in uniform binder.
-		uniformBinders_.resize(uniformCount);
-
-		for (int32 i = 0; i < uniformCount; ++i)
+		auto found = std::find_if(uniformInformations_.begin(), uniformInformations_.end(), [&channel] (UniformInformation const& uniformInformation)
 		{
-			UniformBinder& binder = uniformBinders_[i];
-
-			int32 nameLength;
-			int32 uniformSize;
-			uint32 glType;
-			string name;
-			name.resize(maxUniformNameLength);
-			gl::GetActiveUniform(glProgramID_, i, maxUniformNameLength, &nameLength, &uniformSize, &glType, &name[0]);
-			int32 location = gl::GetUniformLocation(glProgramID_, name.c_str());
-			name = name.substr(0, nameLength); // no '\0' included
-
-			binder.glType = glType;
-			binder.elementCount = uniformSize;
-			binder.glLocation = location;
+			return uniformInformation.GetChannel() == channel;
+		});
+		if (found == uniformInformations_.end())
+		{
+			return std::make_pair(false, NullUniformInformation);
+		}
+		return std::make_pair(true, *found);
+	}
 
 
-			auto resultIter = std::find_if(parameters.begin(), parameters.end(), [&name] (EffectParameterSP const& parameter)
+
+	void ProgramObject::CreateUniformBinder(std::string const& channel, EffectParameterSP const& parameter)
+	{
+		UniformBinder& binder = CreateBinder(channel);
+
+		ElementType type = binder.uniformInformation.GetElementType();
+
+		switch(type)
+		{
+		case ElementType::Bool:
 			{
-				return parameter->GetName() == name;
-			});
+				binder.setter = [parameter] (UniformInformation const& uniformInformation)
+				{
+					gl::Uniform1i(uniformInformation.GetLocation(), parameter->As<bool>().GetValue());
+				};
+			}
+			break;
+		case ElementType::Int32:
+			{
+				binder.setter = [parameter] (UniformInformation const& uniformInformation)
+				{
+					gl::Uniform1i(uniformInformation.GetLocation(), parameter->As<int32>().GetValue());
+				};
+			}
+			break;
+		case ElementType::IntV2:
+			{
+				binder.setter = [parameter] (UniformInformation const& uniformInformation)
+				{
+					gl::Uniform2iv(uniformInformation.GetLocation(), 1, parameter->As<intV2>().GetValue().GetArray());
+				};
+			}
+			break;
+		case ElementType::IntV3:
+			{
+				binder.setter = [parameter] (UniformInformation const& uniformInformation)
+				{
+					gl::Uniform3iv(uniformInformation.GetLocation(), 1, parameter->As<intV3>().GetValue().GetArray());
+				};
+			}
+			break;
+		case ElementType::IntV4:
+			{
+				binder.setter = [parameter] (UniformInformation const& uniformInformation)
+				{
+					gl::Uniform4iv(uniformInformation.GetLocation(), 1, parameter->As<intV4>().GetValue().GetArray());
+				};
+			}
+			break;
+		case ElementType::Uint32:
+			{
+				binder.setter = [parameter] (UniformInformation const& uniformInformation)
+				{
+					gl::Uniform1ui(uniformInformation.GetLocation(), parameter->As<uint32>().GetValue());
+				};
+			}
+			break;
+		case ElementType::UintV2:
+			{
+				binder.setter = [parameter] (UniformInformation const& uniformInformation)
+				{
+					gl::Uniform2uiv(uniformInformation.GetLocation(), 1, parameter->As<uintV2>().GetValue().GetArray());
+				};
+			}
+			break;
+		case ElementType::UintV3:
+			{
+				binder.setter = [parameter] (UniformInformation const& uniformInformation)
+				{
+					gl::Uniform3uiv(uniformInformation.GetLocation(), 1, parameter->As<uintV3>().GetValue().GetArray());
+				};
+			}
+			break;
+		case ElementType::UintV4:
+			{
+				binder.setter = [parameter] (UniformInformation const& uniformInformation)
+				{
+					gl::Uniform4uiv(uniformInformation.GetLocation(), 1, parameter->As<uintV4>().GetValue().GetArray());
+				};
+			}
+			break;
+		case ElementType::Float:
+			{
+				binder.setter = [parameter] (UniformInformation const& uniformInformation)
+				{
+					gl::Uniform1f(uniformInformation.GetLocation(), parameter->As<float>().GetValue());
+				};
+			}
+			break;
+		case ElementType::FloatV2:
+			{
+				binder.setter = [parameter] (UniformInformation const& uniformInformation)
+				{
+					gl::Uniform2fv(uniformInformation.GetLocation(), 1, parameter->As<floatV2>().GetValue().GetArray());
+				};
+			}
+			break;
+		case ElementType::FloatV3:
+			{
+				binder.setter = [parameter] (UniformInformation const& uniformInformation)
+				{
+					gl::Uniform3fv(uniformInformation.GetLocation(), 1, parameter->As<floatV3>().GetValue().GetArray());
+				};
+			}
+			break;
+		case ElementType::FloatV4:
+			{
+				binder.setter = [parameter] (UniformInformation const& uniformInformation)
+				{
+					gl::Uniform4fv(uniformInformation.GetLocation(), 1, parameter->As<floatV4>().GetValue().GetArray());
+				};
+			}
+			break;
+		case ElementType::Double:
+			{
+				binder.setter = [parameter] (UniformInformation const& uniformInformation)
+				{
+					gl::Uniform1d(uniformInformation.GetLocation(), parameter->As<double>().GetValue());
+				};
+			}
+			break;
+		case ElementType::DoubleV2:
+			{
+				binder.setter = [parameter] (UniformInformation const& uniformInformation)
+				{
+					gl::Uniform2dv(uniformInformation.GetLocation(), 1, parameter->As<doubleV2>().GetValue().GetArray());
+				};
+			}
+			break;
+		case ElementType::DoubleV3:
+			{
+				binder.setter = [parameter] (UniformInformation const& uniformInformation)
+				{
+					gl::Uniform3dv(uniformInformation.GetLocation(), 1, parameter->As<doubleV3>().GetValue().GetArray());
+				};
+			}
+			break;
+		case ElementType::DoubleV4:
+			{
+				binder.setter = [parameter] (UniformInformation const& uniformInformation)
+				{
+					gl::Uniform4dv(uniformInformation.GetLocation(), 1, parameter->As<doubleV4>().GetValue().GetArray());
+				};
+			}
+			break;
+		case ElementType::FloatM44:
+			{
+				binder.setter = [parameter] (UniformInformation const& uniformInformation)
+				{
+					gl::UniformMatrix4fv(uniformInformation.GetLocation(), 1, false, parameter->As<floatM44>().GetValue().GetArray());
+				};
+			}
+			break;
+		case ElementType::DoubleM44:
+			{
+				binder.setter = [parameter] (UniformInformation const& uniformInformation)
+				{
+					gl::UniformMatrix4dv(uniformInformation.GetLocation(), 1, false, parameter->As<doubleM44>().GetValue().GetArray());
+				};
+			}
+			break;
+			// TODO
+		default:
+			// not support.
+			assert(false);
+		}
+	}
 
+	namespace
+	{
+		struct DefaultTextureGetter1D
+		{
+			static TextureSP const& Get()
+			{
+				return XREXContext::GetInstance().GetRenderingFactory().GetBlackTexture1D();
+			}
+		};
+		struct DefaultTextureGetter2D
+		{
+			static TextureSP const& Get()
+			{
+				return XREXContext::GetInstance().GetRenderingFactory().GetBlackTexture2D();
+			}
+		};
+		struct DefaultTextureGetter3D
+		{
+			static TextureSP const& Get()
+			{
+				return XREXContext::GetInstance().GetRenderingFactory().GetBlackTexture3D();
+			}
+		};
+		struct DefaultTextureGetterCube
+		{
+			static TextureSP const& Get()
+			{
+				return XREXContext::GetInstance().GetRenderingFactory().GetBlackTextureCube();
+			}
+		};
+
+		template <typename DefaultTextureGetter>
+		struct SamplerBinder
+		{
 			EffectParameterSP parameter;
-			if (resultIter == parameters.end()) // not exist
+			uint32 samplerLocation;
+			SamplerBinder(EffectParameterSP const& parameter, uint32 samplerLocation)
+				: parameter(parameter), samplerLocation(samplerLocation)
 			{
-				switch(glType)
+			}
+
+			void operator() (ProgramObject::UniformInformation const& uniformInformation)
+			{
+				std::pair<TextureSP, SamplerSP> const& texture = parameter->As<std::pair<TextureSP, SamplerSP>>().GetValue();
+				if (texture.first)
 				{
-				case gl::GL_BOOL:
-					{
-						parameter = MakeSP<ConcreteEffectParameter<bool>>(name);
-					}
-					break;
-				case gl::GL_INT:
-					{
-						parameter = MakeSP<ConcreteEffectParameter<int32>>(name);
-					}
-					break;
-				case gl::GL_INT_VEC2:
-					{
-						parameter = MakeSP<ConcreteEffectParameter<intV2>>(name);
-					}
-					break;
-				case gl::GL_INT_VEC3:
-					{
-						parameter = MakeSP<ConcreteEffectParameter<intV3>>(name);
-					}
-					break;
-				case gl::GL_INT_VEC4:
-					{
-						parameter = MakeSP<ConcreteEffectParameter<intV4>>(name);
-					}
-					break;
-				case gl::GL_UNSIGNED_INT:
-					{
-						parameter = MakeSP<ConcreteEffectParameter<uint32>>(name);
-					}
-					break;
-				case gl::GL_UNSIGNED_INT_VEC2:
-					{
-						parameter = MakeSP<ConcreteEffectParameter<uintV2>>(name);
-					}
-					break;
-				case gl::GL_UNSIGNED_INT_VEC3:
-					{
-						parameter = MakeSP<ConcreteEffectParameter<uintV3>>(name);
-					}
-					break;
-				case gl::GL_UNSIGNED_INT_VEC4:
-					{
-						parameter = MakeSP<ConcreteEffectParameter<uintV4>>(name);
-					}
-					break;
-				case gl::GL_FLOAT:
-					{
-						parameter = MakeSP<ConcreteEffectParameter<float>>(name);
-					}
-					break;
-				case gl::GL_FLOAT_VEC2:
-					{
-						parameter = MakeSP<ConcreteEffectParameter<floatV2>>(name);
-					}
-					break;
-				case gl::GL_FLOAT_VEC3:
-					{
-						parameter = MakeSP<ConcreteEffectParameter<floatV3>>(name);
-					}
-					break;
-				case gl::GL_FLOAT_VEC4:
-					{
-						parameter = MakeSP<ConcreteEffectParameter<floatV4>>(name);
-					}
-					break;
-				case gl::GL_DOUBLE:
-					{
-						parameter = MakeSP<ConcreteEffectParameter<double>>(name);
-					}
-					break;
-				case gl::GL_DOUBLE_VEC2:
-					{
-						parameter = MakeSP<ConcreteEffectParameter<doubleV2>>(name);
-					}
-					break;
-				case gl::GL_DOUBLE_VEC3:
-					{
-						parameter = MakeSP<ConcreteEffectParameter<doubleV3>>(name);
-					}
-					break;
-				case gl::GL_DOUBLE_VEC4:
-					{
-						parameter = MakeSP<ConcreteEffectParameter<doubleV4>>(name);
-					}
-					break;
-				case gl::GL_FLOAT_MAT4:
-					{
-						parameter = MakeSP<ConcreteEffectParameter<floatM44>>(name);
-					}
-					break;
-				case gl::GL_DOUBLE_MAT4:
-					{
-						parameter = MakeSP<ConcreteEffectParameter<doubleM44>>(name);
-					}
-					break;
-				case gl::GL_SAMPLER_1D:
-				case gl::GL_SAMPLER_2D:
-				case gl::GL_SAMPLER_3D:
-				case gl::GL_SAMPLER_CUBE:
-					{
-						parameter = MakeSP<ConcreteEffectParameter<std::pair<TextureSP, SamplerSP>>>(name);
-					}
-					break;
-				default:
-					// not support.
-					assert(false);
+					texture.first->Bind(samplerLocation);
 				}
-				effect.AddParameter(parameter);
+				else
+				{
+					DefaultTextureGetter::Get()->Bind(samplerLocation);
+				}
+				gl::Uniform1i(uniformInformation.GetLocation(), samplerLocation);
+				if (texture.second)
+				{
+					texture.second->Bind(samplerLocation);
+				}
+				else
+				{
+					XREXContext::GetInstance().GetRenderingFactory().GetDefaultSampler()->Bind(samplerLocation);
+				}
 			}
-			else
-			{
-				parameter = *resultIter;
-				// check if uniform type in this shader not equals to type of parameter created by other shader.
-				assert(GLTypeFromElementType(parameter->GetType()) == glType);
-			}
-
-			InitializeUniformBinder(binder, parameter, availableSamplerLocation);
-		}
-
-
-		// attributes
-
-		int32 attributeCount;
-		gl::GetProgramiv(glProgramID_, gl::GL_ACTIVE_ATTRIBUTES, &attributeCount);
-		int32 maxAttributeNameLength;
-		gl::GetProgramiv(glProgramID_, gl::GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, &maxAttributeNameLength);
-
-		// don't change the size of attributeBindingInformation_ after this, reference to elements in it will be kept in uniform binder.
-		attributeBindingInformation_.resize(attributeCount);
-
-		for (int32 i = 0; i < attributeCount; ++i)
-		{
-			AttributeBindingInformation& bindingInformation = attributeBindingInformation_[i];
-
-			int32 nameLength;
-			int32 attributeSize;
-			uint32 glType;
-			string name;
-			name.resize(maxAttributeNameLength);
-			gl::GetActiveAttrib(glProgramID_, i, maxAttributeNameLength, &nameLength, &attributeSize, &glType, &name[0]);
-			int32 location = gl::GetAttribLocation(glProgramID_, name.c_str());
-			name = name.substr(0, nameLength); // no '\0' included
-		
-			bindingInformation.channel = std::move(name);
-			bindingInformation.glType = glType;
-			bindingInformation.elementCount = attributeSize;
-			bindingInformation.glLocation = location;
-		}
-		return;
+		};
 	}
 
-
-	void ProgramObject::InitializeUniformBinder(UniformBinder& binder, EffectParameterSP& parameter, uint32& availableSamplerLocation)
+	void ProgramObject::CreateSamplerUniformBinder(std::string const& channel, EffectParameterSP const& parameter, uint32 samplerLocation)
 	{
-		uint32 glType = binder.glType;
-		if (glType == gl::GL_SAMPLER_1D || glType == gl::GL_SAMPLER_2D || glType == gl::GL_SAMPLER_3D || glType == gl::GL_SAMPLER_CUBE)
-		{
-			int32 samplerLocation = availableSamplerLocation++;
+		UniformBinder& binder = CreateBinder(channel);
 
-			switch(glType)
-			{
-			case gl::GL_SAMPLER_1D:
-				{
-					binder.setter = [&binder, parameter, samplerLocation] ()
-					{
-						std::pair<TextureSP, SamplerSP> const& texture = parameter->As<std::pair<TextureSP, SamplerSP>>().GetValue();
-						if (texture.first)
-						{
-							texture.first->Bind(samplerLocation);
-						}
-						else
-						{
-							XREXContext::GetInstance().GetRenderingFactory().GetBlackTexture1D()->Bind(samplerLocation);
-						}
-						gl::Uniform1i(binder.glLocation, samplerLocation);
-						if (texture.second)
-						{
-							texture.second->Bind(samplerLocation);
-						}
-						else
-						{
-							XREXContext::GetInstance().GetRenderingFactory().GetDefaultSampler()->Bind(samplerLocation);
-						}
-					};
-				}
-				break;
-			case gl::GL_SAMPLER_2D:
-				{
-					binder.setter = [&binder, parameter, samplerLocation] ()
-					{
-						std::pair<TextureSP, SamplerSP> const& texture = parameter->As<std::pair<TextureSP, SamplerSP>>().GetValue();
-						if (texture.first)
-						{
-							texture.first->Bind(samplerLocation);
-						}
-						else
-						{
-							XREXContext::GetInstance().GetRenderingFactory().GetBlackTexture2D()->Bind(samplerLocation);
-						}
-						gl::Uniform1i(binder.glLocation, samplerLocation);
-						if (texture.second)
-						{
-							texture.second->Bind(samplerLocation);
-						}
-						else
-						{
-							XREXContext::GetInstance().GetRenderingFactory().GetDefaultSampler()->Bind(samplerLocation);
-						}
-					};
-				}
-				break;
-			case gl::GL_SAMPLER_3D:
-				{
-					binder.setter = [&binder, parameter, samplerLocation] ()
-					{
-						std::pair<TextureSP, SamplerSP> const& texture = parameter->As<std::pair<TextureSP, SamplerSP>>().GetValue();
-						if (texture.first)
-						{
-							texture.first->Bind(samplerLocation);
-						}
-						else
-						{
-							XREXContext::GetInstance().GetRenderingFactory().GetBlackTexture3D()->Bind(samplerLocation);
-						}
-						gl::Uniform1i(binder.glLocation, samplerLocation);
-						if (texture.second)
-						{
-							texture.second->Bind(samplerLocation);
-						}
-						else
-						{
-							XREXContext::GetInstance().GetRenderingFactory().GetDefaultSampler()->Bind(samplerLocation);
-						}
-					};
-				}
-				break;
-			case gl::GL_SAMPLER_CUBE:
-				{
-					binder.setter = [&binder, parameter, samplerLocation] ()
-					{
-						std::pair<TextureSP, SamplerSP> const& texture = parameter->As<std::pair<TextureSP, SamplerSP>>().GetValue();
-						if (texture.first)
-						{
-							texture.first->Bind(samplerLocation);
-						}
-						else
-						{
-							XREXContext::GetInstance().GetRenderingFactory().GetBlackTextureCube()->Bind(samplerLocation);
-						}
-						gl::Uniform1i(binder.glLocation, samplerLocation);
-						if (texture.second)
-						{
-							texture.second->Bind(samplerLocation);
-						}
-						else
-						{
-							XREXContext::GetInstance().GetRenderingFactory().GetDefaultSampler()->Bind(samplerLocation);
-						}
+		ElementType type = binder.uniformInformation.GetElementType();
 
-					};
-				}
-				break;
-			default:
-				// not support.
-				assert(false);
-			}
-		}
-		else
+		switch(type)
 		{
-			switch(glType)
+		case ElementType::Sampler1D:
 			{
-			case gl::GL_BOOL:
-				{
-					binder.setter = [&binder, parameter] ()
-					{
-						gl::Uniform1i(binder.glLocation, parameter->As<bool>().GetValue());
-					};
-				}
-				break;
-			case gl::GL_INT:
-				{
-					binder.setter = [&binder, parameter] ()
-					{
-						gl::Uniform1i(binder.glLocation, parameter->As<int32>().GetValue());
-					};
-				}
-				break;
-			case gl::GL_INT_VEC2:
-				{
-					binder.setter = [&binder, parameter] ()
-					{
-						gl::Uniform2iv(binder.glLocation, 1, parameter->As<intV2>().GetValue().GetArray());
-					};
-				}
-				break;
-			case gl::GL_INT_VEC3:
-				{
-					binder.setter = [&binder, parameter] ()
-					{
-						gl::Uniform3iv(binder.glLocation, 1, parameter->As<intV3>().GetValue().GetArray());
-					};
-				}
-				break;
-			case gl::GL_INT_VEC4:
-				{
-					binder.setter = [&binder, parameter] ()
-					{
-						gl::Uniform4iv(binder.glLocation, 1, parameter->As<intV4>().GetValue().GetArray());
-					};
-				}
-				break;
-			case gl::GL_UNSIGNED_INT:
-				{
-					binder.setter = [&binder, parameter] ()
-					{
-						gl::Uniform1ui(binder.glLocation, parameter->As<uint32>().GetValue());
-					};
-				}
-				break;
-			case gl::GL_UNSIGNED_INT_VEC2:
-				{
-					binder.setter = [&binder, parameter] ()
-					{
-						gl::Uniform2uiv(binder.glLocation, 1, parameter->As<uintV2>().GetValue().GetArray());
-					};
-				}
-				break;
-			case gl::GL_UNSIGNED_INT_VEC3:
-				{
-					binder.setter = [&binder, parameter] ()
-					{
-						gl::Uniform3uiv(binder.glLocation, 1, parameter->As<uintV3>().GetValue().GetArray());
-					};
-				}
-				break;
-			case gl::GL_UNSIGNED_INT_VEC4:
-				{
-					binder.setter = [&binder, parameter] ()
-					{
-						gl::Uniform4uiv(binder.glLocation, 1, parameter->As<uintV4>().GetValue().GetArray());
-					};
-				}
-				break;
-			case gl::GL_FLOAT:
-				{
-					binder.setter = [&binder, parameter] ()
-					{
-						gl::Uniform1f(binder.glLocation, parameter->As<float>().GetValue());
-					};
-				}
-				break;
-			case gl::GL_FLOAT_VEC2:
-				{
-					binder.setter = [&binder, parameter] ()
-					{
-						gl::Uniform2fv(binder.glLocation, 1, parameter->As<floatV2>().GetValue().GetArray());
-					};
-				}
-				break;
-			case gl::GL_FLOAT_VEC3:
-				{
-					binder.setter = [&binder, parameter] ()
-					{
-						gl::Uniform3fv(binder.glLocation, 1, parameter->As<floatV3>().GetValue().GetArray());
-					};
-				}
-				break;
-			case gl::GL_FLOAT_VEC4:
-				{
-					binder.setter = [&binder, parameter] ()
-					{
-						gl::Uniform4fv(binder.glLocation, 1, parameter->As<floatV4>().GetValue().GetArray());
-					};
-				}
-				break;
-			case gl::GL_DOUBLE:
-				{
-					binder.setter = [&binder, parameter] ()
-					{
-						gl::Uniform1d(binder.glLocation, parameter->As<double>().GetValue());
-					};
-				}
-				break;
-			case gl::GL_DOUBLE_VEC2:
-				{
-					binder.setter = [&binder, parameter] ()
-					{
-						gl::Uniform2dv(binder.glLocation, 1, parameter->As<doubleV2>().GetValue().GetArray());
-					};
-				}
-				break;
-			case gl::GL_DOUBLE_VEC3:
-				{
-					binder.setter = [&binder, parameter] ()
-					{
-						gl::Uniform3dv(binder.glLocation, 1, parameter->As<doubleV3>().GetValue().GetArray());
-					};
-				}
-				break;
-			case gl::GL_DOUBLE_VEC4:
-				{
-					binder.setter = [&binder, parameter] ()
-					{
-						gl::Uniform4dv(binder.glLocation, 1, parameter->As<doubleV4>().GetValue().GetArray());
-					};
-				}
-				break;
-			case gl::GL_FLOAT_MAT4:
-				{
-					binder.setter = [&binder, parameter] ()
-					{
-						gl::UniformMatrix4fv(binder.glLocation, 1, false, parameter->As<floatM44>().GetValue().GetArray());
-					};
-				}
-				break;
-			case gl::GL_DOUBLE_MAT4:
-				{
-					binder.setter = [&binder, parameter] ()
-					{
-						gl::UniformMatrix4dv(binder.glLocation, 1, false, parameter->As<doubleM44>().GetValue().GetArray());
-					};
-				}
-				break;
-				// TODO
-			default:
-				// not support.
-				assert(false);
+				binder.setter = SamplerBinder<DefaultTextureGetter1D>(parameter, samplerLocation);
 			}
+			break;
+		case ElementType::Sampler2D:
+			{
+				binder.setter = SamplerBinder<DefaultTextureGetter2D>(parameter, samplerLocation);
+			}
+			break;
+		case ElementType::Sampler3D:
+			{
+				binder.setter = SamplerBinder<DefaultTextureGetter3D>(parameter, samplerLocation);
+			}
+			break;
+		case ElementType::SamplerCube:
+			{
+				binder.setter = SamplerBinder<DefaultTextureGetterCube>(parameter, samplerLocation);
+			}
+			break;
+		default:
+			// not support.
+			assert(false);
 		}
 	}
+
+	namespace
+	{
+		struct ImageBinder
+		{
+			EffectParameterSP parameter;
+			TexelFormat format;
+			uint32 imageLocation;
+			ImageBinder(EffectParameterSP const& parameter, TexelFormat format, uint32 imageLocation)
+				: parameter(parameter), format(format), imageLocation(imageLocation)
+			{
+			}
+
+			void operator() (ProgramObject::UniformInformation const& uniformInformation)
+			{
+				TextureImageSP const& image = parameter->As<TextureImageSP>().GetValue();
+				assert(image);
+				assert(GetTexelSizeInBytes(image->GetFormat()) == GetTexelSizeInBytes(format));
+				// TODO format should be the format declared in shader, not the image format
+				// image->Bind(imageLocation, format);
+				image->Bind(imageLocation, image->GetBindingFormat_TEMP());
+				gl::Uniform1i(uniformInformation.GetLocation(), imageLocation);
+			}
+		};
+	}
+
+	void ProgramObject::CreateImageUniformBinder(std::string const& channel, EffectParameterSP const& parameter, uint32 imageLocation)
+	{
+		UniformBinder& binder = CreateBinder(channel);
+
+		ElementType type = binder.uniformInformation.GetElementType();
+
+		switch(type)
+		{
+		case ElementType::Image1D:
+		case ElementType::Image2D:
+		case ElementType::Image3D:
+		case ElementType::ImageCube:
+			{
+				 // TODO format should be the format declared in shader, not the image format
+				binder.setter = ImageBinder(parameter, TexelFormat::BGRA32F, imageLocation);
+			}
+			break;
+		default:
+			// not support.
+			assert(false);
+		}
+	}
+
+
+	ProgramObject::UniformBinder& ProgramObject::CreateBinder(std::string const& channel)
+	{
+		auto found = std::find_if(uniformInformations_.begin(), uniformInformations_.end(), [&channel] (UniformInformation const& uniformInformation)
+		{
+			return uniformInformation.GetChannel() == channel;
+		});
+		assert(found != uniformInformations_.end());
+
+		uniformBinders_.emplace_back(UniformBinder(*found));
+		return uniformBinders_.back();
+	}
+
+	ProgramObject::AttributeInformation const ProgramObject::NullAttributeInformation;
+	ProgramObject::UniformInformation const ProgramObject::NullUniformInformation;
 
 }

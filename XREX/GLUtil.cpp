@@ -52,8 +52,7 @@ namespace XREX
 		case ElementType::FloatV4:
 			return gl::GL_FLOAT_VEC4;
 		case ElementType::FloatM44:
-			assert(false);
-			return 0;
+			return gl::GL_FLOAT_MAT4;
 		case ElementType::Sampler1D:
 			return gl::GL_SAMPLER_1D;
 		case ElementType::Sampler2D:
@@ -282,6 +281,209 @@ namespace XREX
 		}
 	}
 
+	uint32 GLTextureTypeFromTextureType(Texture::TextureType type)
+	{
+		switch (type)
+		{
+		case Texture::TextureType::Texture1D:
+			return gl::GL_TEXTURE_1D;
+		case Texture::TextureType::Texture2D:
+			return gl::GL_TEXTURE_2D;
+		case Texture::TextureType::Texture3D:
+			return gl::GL_TEXTURE_3D;
+		case Texture::TextureType::TextureCube:
+			return gl::GL_TEXTURE_CUBE_MAP;
+		case Texture::TextureType::TextureTypeCount:
+			assert(false);
+			return 0;
+		default:
+			assert(false);
+			return 0;
+		}
+	}
+
+
+	uint32 GLUsageFromUsage(GraphicsBuffer::Usage usage)
+	{
+		switch (usage)
+		{
+		case GraphicsBuffer::Usage::Static:
+			return gl::GL_STATIC_DRAW;
+		case GraphicsBuffer::Usage::Dynamic:
+			return gl::GL_DYNAMIC_DRAW;
+		case GraphicsBuffer::Usage::Stream:
+			return gl::GL_STREAM_DRAW;
+		case GraphicsBuffer::Usage::UsageCount:
+			assert(false);
+			return 0;
+		default:
+			assert(false);
+			return 0;
+		}
+	}
+
+	uint32 GlAccessTypeFromAccessType(GraphicsBuffer::AccessType type)
+	{
+		switch (type)
+		{
+		case GraphicsBuffer::AccessType::ReadOnly:
+			return gl::GL_READ_ONLY;
+		case GraphicsBuffer::AccessType::WriteOnly:
+			return gl::GL_WRITE_ONLY;
+		case GraphicsBuffer::AccessType::ReadWrite:
+			return gl::GL_READ_WRITE;
+		default:
+			assert(false);
+			return 0;
+		}
+	}
+
+	GLTextureFormat const& GLTextureFormatFromTexelFormat(TexelFormat format)
+	{
+		switch (format)
+		{
+		case TexelFormat::R8:
+			{
+				static GLTextureFormat const Format(gl::GL_R8, gl::GL_RED, gl::GL_UNSIGNED_BYTE);
+				return Format;
+			}
+		case TexelFormat::RG8:
+			{
+				static GLTextureFormat const Format(gl::GL_RG8, gl::GL_RG, gl::GL_UNSIGNED_BYTE);
+				return Format;
+			}
+		case TexelFormat::RGB8:
+			{
+				static GLTextureFormat const Format(gl::GL_RGB8, gl::GL_RGB, gl::GL_UNSIGNED_BYTE);
+				return Format;
+			}
+		case TexelFormat::RGBA8:
+			{
+				static GLTextureFormat const Format(gl::GL_RGBA8, gl::GL_RGBA, gl::GL_UNSIGNED_BYTE);
+				return Format;
+			}
+		case TexelFormat::R16I:
+			{
+				static GLTextureFormat const Format(gl::GL_R16I, gl::GL_RED_INTEGER, gl::GL_SHORT);
+				return Format;
+			}
+		case TexelFormat::RG16I:
+			{
+				static GLTextureFormat const Format(gl::GL_RG16I, gl::GL_RG_INTEGER, gl::GL_SHORT);
+				return Format;
+			}
+		case TexelFormat::RGB16I:
+			{
+				static GLTextureFormat const Format(gl::GL_RGB16I, gl::GL_RGB_INTEGER, gl::GL_SHORT);
+				return Format;
+			}
+		case TexelFormat::RGBA16I:
+			{
+				static GLTextureFormat const Format(gl::GL_RGBA16I, gl::GL_RGBA_INTEGER, gl::GL_SHORT);
+				return Format;
+			}
+		case TexelFormat::R16UI:
+			{
+				static GLTextureFormat const Format(gl::GL_R16UI, gl::GL_RED_INTEGER, gl::GL_UNSIGNED_SHORT);
+				return Format;
+			}
+		case TexelFormat::RG16UI:
+			{
+				static GLTextureFormat const Format(gl::GL_RG16UI, gl::GL_RG_INTEGER, gl::GL_UNSIGNED_SHORT);
+				return Format;
+			}
+		case TexelFormat::RGB16UI:
+			{
+				static GLTextureFormat const Format(gl::GL_RGB16UI, gl::GL_RGB_INTEGER, gl::GL_UNSIGNED_SHORT);
+				return Format;
+			}
+		case TexelFormat::RGBA16UI:
+			{
+				static GLTextureFormat const Format(gl::GL_RGBA16UI, gl::GL_RGBA_INTEGER, gl::GL_UNSIGNED_SHORT);
+				return Format;
+			}
+		case TexelFormat::R16F:
+			{
+				static GLTextureFormat const Format(gl::GL_R16F, gl::GL_RED, gl::GL_FLOAT);
+				return Format;
+			}
+		case TexelFormat::RG16F:
+			{
+				static GLTextureFormat const Format(gl::GL_RG16F, gl::GL_RG, gl::GL_FLOAT);
+				return Format;
+			}
+		case TexelFormat::RGB16F:
+			{
+				static GLTextureFormat const Format(gl::GL_RGB16F, gl::GL_RGB, gl::GL_FLOAT);
+				return Format;
+			}
+		case TexelFormat::RGBA16F:
+			{
+				static GLTextureFormat const Format(gl::GL_RGBA16F, gl::GL_RGBA, gl::GL_FLOAT);
+				return Format;
+			}
+		case TexelFormat::R32F:
+			{
+				static GLTextureFormat const Format(gl::GL_R32F, gl::GL_RED, gl::GL_FLOAT);
+				return Format;
+			}
+		case TexelFormat::RG32F:
+			{
+				static GLTextureFormat const Format(gl::GL_RG32F, gl::GL_RG, gl::GL_FLOAT);
+				return Format;
+			}
+		case TexelFormat::RGB32F:
+			{
+				static GLTextureFormat const Format(gl::GL_RGB32F, gl::GL_RGB, gl::GL_FLOAT);
+				return Format;
+			}
+		case TexelFormat::RGBA32F:
+			{
+				static GLTextureFormat const Format(gl::GL_RGBA32F, gl::GL_RGBA, gl::GL_FLOAT);
+				return Format;
+			}
+
+
+		case TexelFormat::BGR8:
+			{
+				static GLTextureFormat const Format(gl::GL_RGB8, gl::GL_BGR, gl::GL_UNSIGNED_BYTE);
+				return Format;
+			}
+		case TexelFormat::BGRA8:
+			{
+				static GLTextureFormat const Format(gl::GL_RGBA8, gl::GL_BGRA, gl::GL_UNSIGNED_BYTE);
+				return Format;
+			}
+		case TexelFormat::BGR16F:
+			{
+				static GLTextureFormat const Format(gl::GL_RGB16F, gl::GL_BGR, gl::GL_FLOAT);
+				return Format;
+			}
+		case TexelFormat::BGRA16F:
+			{
+				static GLTextureFormat const Format(gl::GL_RGBA16F, gl::GL_BGRA, gl::GL_FLOAT);
+				return Format;
+			}
+		case TexelFormat::BGR32F:
+			{
+				static GLTextureFormat const Format(gl::GL_RGB32F, gl::GL_BGR, gl::GL_FLOAT);
+				return Format;
+			}
+		case TexelFormat::BGRA32F:
+			{
+				static GLTextureFormat const Format(gl::GL_RGBA32F, gl::GL_BGRA, gl::GL_FLOAT);
+				return Format;
+			}
+
+		default:
+			{
+				static GLTextureFormat const Format;
+				assert(false);
+				return Format;
+			}
+		}
+	}
+
 
 	ElementType ElementTypeFromeGLType(uint32 glType)
 	{
@@ -333,45 +535,18 @@ namespace XREX
 			return ElementType::Sampler3D;
 		case gl::GL_SAMPLER_CUBE:
 			return ElementType::SamplerCube;
+		case gl::GL_IMAGE_1D:
+			return ElementType::Image1D;
+		case gl::GL_IMAGE_2D:
+			return ElementType::Image2D;
+		case gl::GL_IMAGE_3D:
+			return ElementType::Image3D;
+		case gl::GL_IMAGE_CUBE:
+			return ElementType::ImageCube;
 		default:
 			// not support.
 			assert(false);
 			return ElementType::Void;
-		}
-	}
-
-	uint32 GLUsageFromUsage(GraphicsBuffer::Usage usage)
-	{
-		switch (usage)
-		{
-		case GraphicsBuffer::Usage::Static:
-			return gl::GL_STATIC_DRAW;
-		case GraphicsBuffer::Usage::Dynamic:
-			return gl::GL_DYNAMIC_DRAW;
-		case GraphicsBuffer::Usage::Stream:
-			return gl::GL_STREAM_DRAW;
-		case GraphicsBuffer::Usage::UsageCount:
-			assert(false);
-			return 0;
-		default:
-			assert(false);
-			return 0;
-		}
-	}
-
-	uint32 GlAccessTypeFromAccessType(GraphicsBuffer::AccessType type)
-	{
-		switch (type)
-		{
-		case GraphicsBuffer::AccessType::ReadOnly:
-			return gl::GL_READ_ONLY;
-		case GraphicsBuffer::AccessType::WriteOnly:
-			return gl::GL_WRITE_ONLY;
-		case GraphicsBuffer::AccessType::ReadWrite:
-			return gl::GL_READ_WRITE;
-		default:
-			assert(false);
-			return 0;
 		}
 	}
 

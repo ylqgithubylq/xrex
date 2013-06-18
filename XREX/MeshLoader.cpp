@@ -614,6 +614,7 @@ namespace XREX
 		Assimp::Importer importer;
 
 		aiScene const* scene = importer.ReadFile(fileName,
+			aiProcess_GenSmoothNormals |
 			aiProcess_CalcTangentSpace |
 			aiProcess_Triangulate |
 			aiProcess_JoinIdenticalVertices |

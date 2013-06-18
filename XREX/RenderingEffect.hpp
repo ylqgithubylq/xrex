@@ -231,6 +231,8 @@ namespace XREX
 		{
 			return pipelineParameters_;
 		}
+	private:
+		void InitializeParameterSetters();
 
 	private:
 		RenderingTechnique& technique_;

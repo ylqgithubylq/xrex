@@ -11,6 +11,7 @@
 #include <type_traits>
 #include <sstream>
 #include <iosfwd>
+#include <assert.h>
 
 
 
@@ -224,7 +225,7 @@ struct TempScene
 		cameraCube->GetComponent<Transformation>()->SetParent(camera_->GetComponent<Transformation>());
 		cameraCube->GetComponent<Transformation>()->Translate(0, 0, 20);
 		cameraCube->SetComponent(cubeMesh->GetShallowClone());
-		scene_ = XREXContext::GetInstance().GetRenderingEngine().GetScene();
+		scene_ = XREXContext::GetInstance().GetScene();
 		scene_->AddObject(camera_);
 		//scene_->AddObject(cameraCube);
 		
@@ -404,13 +405,13 @@ void Main()
 
 	function<void(double current, double delta)> f = [&s] (double current, double delta)
 	{
-		//assert(gl::GetError() == gl::GL_NO_ERROR);
+		assert(XREXContext::GetInstance().GetRenderingEngine().GetGLError() == 0);
 		s(current, delta);
 	};
 	XREXContext::GetInstance().GetRenderingEngine().OnBeforeRendering(f);
 	function<bool(double current, double delta)> l = [&s] (double current, double delta)
 	{
-		//assert(gl::GetError() == gl::GL_NO_ERROR);
+		assert(XREXContext::GetInstance().GetRenderingEngine().GetGLError() == 0);
 		s.Logic(current, delta);
 		return true;
 	};
@@ -431,8 +432,8 @@ void Main()
 
 int main()
 {
-	//TextureTest textest;
-	//return 0;
+	TextureTest textest;
+	return 0;
 	//TestMath();
 	//SQRTSpeedTest();
 	//return 0;
@@ -440,9 +441,6 @@ int main()
 	//t.TestTransformation();
 	Main();
 
-	shared_ptr<int> isp = MakeSP<int>(1);
-	unique_ptr<int> iup = MakeUP<int>(1);
-	
 // 	struct LeakTest
 // 	{
 // 		shared_ptr<LeakTest> p;
@@ -455,7 +453,7 @@ int main()
 }
 
 //memory leak check
-
+// 
 // #define _CRTDBG_MAP_ALLOC
 // #include <crtdbg.h>
 // 

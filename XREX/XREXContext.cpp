@@ -11,11 +11,15 @@
 #include "ResourceManager.hpp"
 #include "LocalResourceLoader.hpp"
 
+#include "NaiveManagedScene.hpp"
+#include "DefaultRenderingProcess.hpp"
+
+
 namespace XREX
 {
 
 	XREXContext::XREXContext()
-		: settings_("") // temp root path
+		: scene_(MakeSP<NaiveManagedScene>()), settings_("") // temp root path
 	{
 	}
 
@@ -27,6 +31,8 @@ namespace XREX
 		resourceLoader_.reset();
 		resourceManager_.reset();
 		inputCenter_.reset();
+
+		scene_.reset();
 
 		// make these two released last
 		renderingFactory_.reset();
@@ -69,6 +75,7 @@ namespace XREX
 	{
 		renderingFactory_ = MakeUP<RenderingFactory>(*mainWindow_, settings_);
 		renderingEngine_ = &renderingFactory_->GetRenderingEngine();
+		renderingEngine_->SetRenderingProcess(MakeSP<DefaultRenderingProcess>());
 	}
 
 

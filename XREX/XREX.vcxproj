@@ -186,6 +186,7 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Color.cpp" />
     <ClCompile Include="Component.cpp" />
+    <ClCompile Include="DefaultRenderingProcess.cpp" />
     <ClCompile Include="DLLMain.cpp" />
     <ClCompile Include="FirstPersonCameraController.cpp" />
     <ClCompile Include="FreeRoamCameraController.cpp" />
@@ -209,6 +210,7 @@
     <ClCompile Include="RenderingFactory.cpp" />
     <ClCompile Include="RenderingLayout.cpp" />
     <ClCompile Include="RenderingPipelineState.cpp" />
+    <ClCompile Include="RenderingProcess.cpp" />
     <ClCompile Include="ResourceManager.cpp" />
     <ClCompile Include="Sampler.cpp" />
     <ClCompile Include="Scene.cpp" />
@@ -216,6 +218,7 @@
     <ClCompile Include="Settings.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="Texture.cpp" />
+    <ClCompile Include="TextureImage.cpp" />
     <ClCompile Include="TextureLoader.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="Transformation.cpp" />
@@ -237,6 +240,7 @@
     <ClInclude Include="Color.hpp" />
     <ClInclude Include="Component.hpp" />
     <ClInclude Include="Declare.hpp" />
+    <ClInclude Include="DefaultRenderingProcess.hpp" />
     <ClInclude Include="DefinedShaderName.hpp" />
     <ClInclude Include="FirstPersonCameraController.hpp" />
     <ClInclude Include="FreeRoamCameraController.hpp" />
@@ -265,6 +269,7 @@
     <ClInclude Include="RenderingFactory.hpp" />
     <ClInclude Include="RenderingLayout.hpp" />
     <ClInclude Include="RenderingPipelineState.hpp" />
+    <ClInclude Include="RenderingProcess.hpp" />
     <ClInclude Include="ResourceManager.hpp" />
     <ClInclude Include="Sampler.hpp" />
     <ClInclude Include="Scene.hpp" />
@@ -272,6 +277,7 @@
     <ClInclude Include="Settings.hpp" />
     <ClInclude Include="Shader.hpp" />
     <ClInclude Include="Texture.hpp" />
+    <ClInclude Include="TextureImage.hpp" />
     <ClInclude Include="TextureLoader.hpp" />
     <ClInclude Include="Timer.hpp" />
     <ClInclude Include="Transformation.hpp" />

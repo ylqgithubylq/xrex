@@ -75,6 +75,9 @@ namespace XREX
 		GraphicsBuffer(Usage usage, uint32 sizeInBytes);
 		GraphicsBuffer(Usage usage, void const* data, uint32 sizeInBytes);
 
+		GraphicsBuffer(Usage usage, uint32 sizeInBytes, BufferView::BufferType typeHint);
+		GraphicsBuffer(Usage usage, void const* data, uint32 sizeInBytes, BufferView::BufferType typeHint);
+
 		virtual ~GraphicsBuffer();
 
 		Usage GetUsage() const
@@ -111,6 +114,7 @@ namespace XREX
 
 	private:
 		void DoConsctruct(void const* data, uint32 sizeInBytes);
+		void DoConsctruct(void const* data, uint32 sizeInBytes, BufferView::BufferType typeHint);
 
 		void* Map(AccessType accessType);
 		void Unmap();
