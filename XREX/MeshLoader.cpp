@@ -433,8 +433,8 @@ namespace XREX
 
 
 					uint32 totalLengthPerElement = 0;
-					uint32 textureCoordinateCount = 0;
-					uint32 vertexColorCount = 0;
+					uint32 textureCoordinateCount = mesh->GetNumUVChannels();
+					uint32 vertexColorCount = mesh->GetNumColorChannels();
 					if (mesh->HasPositions())
 					{
 						totalLengthPerElement += sizeof(*mesh->mVertices);
@@ -443,22 +443,8 @@ namespace XREX
 					{
 						totalLengthPerElement += sizeof(*mesh->mNormals);
 					}
-					for (uint32 j = 0; j < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++j)
-					{
-						if (mesh->HasTextureCoords(j))
-						{
-							totalLengthPerElement += sizeof(*mesh->mTextureCoords[0]);
-							++textureCoordinateCount;
-						}
-					}
-					for (uint32 j = 0; j < AI_MAX_NUMBER_OF_COLOR_SETS; ++j)
-					{
-						if (mesh->HasVertexColors(j))
-						{
-							totalLengthPerElement += sizeof(*mesh->mColors[0]);
-							++vertexColorCount;
-						}
-					}
+					totalLengthPerElement += textureCoordinateCount * sizeof(*mesh->mTextureCoords[0]);
+					totalLengthPerElement += vertexColorCount * sizeof(*mesh->mColors[0]);
 
 					int startLocation = 0;
 					VertexBuffer::DataLayoutDescription dataDescription = VertexBuffer::DataLayoutDescription(mesh->mNumVertices);
