@@ -40,7 +40,7 @@ ShaderCodes::ShaderCodes()
 	{\n\
 		//position = ReturnSelf(position);\n\
 		mPosition = position;\n\
-		eNormal = viewMatrix * modelMatrix * vec4(normal, 0);\n\
+		eNormal = (viewMatrix * modelMatrix * vec4(normal, 0)).xyz;\n\
 		gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(position, 1.0);\n\
 		pixelTextureCoordinate = textureCoordinate0.st;\n\
 		//gl_Position += texture(notUsedTexture, pixelTextureCoordinate) * 0.0001;\n\
