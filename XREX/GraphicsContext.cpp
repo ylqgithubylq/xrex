@@ -4,9 +4,11 @@
 
 #include "Settings.hpp"
 #include "Window.hpp"
+#include "Logger.hpp"
+
+#include "GLUtil.hpp"
 
 #include <sstream>
-#include <iostream>
 
 #include <glload/gll.hpp>
 #include <glload/wgl_exts.h>
@@ -18,14 +20,16 @@
 #include <WinGDI.h>
 
 
-using std::cout;
-using std::cerr;
-using std::endl;
 using std::string;
 using std::wstring;
 
 namespace XREX
 {
+	namespace
+	{
+		int32 const MinMajorVersion = 4;
+		int32 const MinMinorVersion = 4;
+	}
 
 	struct GraphicsContext::GLHideWindows_
 	{
@@ -46,6 +50,7 @@ namespace XREX
 
 
 	GraphicsContext::GraphicsContext(Window& window, Settings const& settings)
+		: correctlyCreated_(false)
 	{
 
 		glHideWindows_ = MakeUP<GLHideWindows_>(window);
@@ -82,7 +87,8 @@ namespace XREX
 
 		if (glload::LoadWinFunctions(glHideWindows_->hDC_) == glload::LS_LOAD_FAILED)
 		{
-			cerr << "wgl initialize failed." << endl;
+			XREXContext::GetInstance().GetLogger().LogLine("wgl initialize failed.");
+			return;
 		}
 
 
@@ -181,12 +187,12 @@ namespace XREX
 
 		if (glload::LoadFunctions() != glload::LS_LOAD_FUNCTIONS_ALL)
 		{
-			cout << "not all GL function are loaded." << endl;
+			XREXContext::GetInstance().GetLogger().LogLine("not all GL function are loaded.");
 		}
 
 		gl::GetIntegerv(gl::GL_MAJOR_VERSION, &majorVersion_);
 		gl::GetIntegerv(gl::GL_MINOR_VERSION,&minorVersion_);
-		cout << "OpenGL version: " << majorVersion_ << "." << minorVersion_ << endl;
+		XREXContext::GetInstance().GetLogger().Log("OpenGL version: ").Log(majorVersion_).Log(".").Log(minorVersion_).EndLine();
 
 
 		string vendor, renderer, glVersion, glslVersion;
@@ -195,7 +201,7 @@ namespace XREX
 		glVersion = reinterpret_cast<char const*>(gl::GetString(gl::GL_VERSION));
 		glslVersion = reinterpret_cast<char const*>(gl::GetString(gl::GL_SHADING_LANGUAGE_VERSION));
 		std::stringstream oss;
-		oss << vendor << " " << renderer << endl;
+		oss << vendor << ". " << renderer << std::endl;
 		oss << glVersion << ", GLSL version: " << glslVersion;
 		if (sampleCount_ > 1)
 		{
@@ -203,13 +209,20 @@ namespace XREX
 		}
 		description_ = oss.str();
 
-		cout << description_ << endl;
+		XREXContext::GetInstance().GetLogger().LogLine(description_);
+
+		if (majorVersion_ < MinMajorVersion && minorVersion_ < MinMinorVersion)
+		{
+			XREXContext::GetInstance().GetLogger().Log("OpenGL version too low to run XREX, ").Log(majorVersion_).Log(".").Log(MinMinorVersion).Log(" required.");
+			return;
+		}
 
 		uint32 glError = gl::GetError();
 		if (glError != gl::GL_NO_ERROR)
 		{
-			cout << "GL error: " << glError << endl;
+			XREXContext::GetInstance().GetLogger().LogLine("GL error: " + ErrorStringFromGLError(glError));
 		}
+		correctlyCreated_ = true;
 	}
 
 

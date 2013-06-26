@@ -8,9 +8,12 @@
 #include "GraphicsBuffer.hpp"
 #include "Texture.hpp"
 
+#include <string>
 
 namespace XREX
 {
+
+	XREX_API std::string const& ErrorStringFromGLError(uint32 glError);
 
 	XREX_API void SetGLState(uint32 glState, bool on);
 

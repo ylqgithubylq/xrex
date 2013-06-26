@@ -76,6 +76,7 @@ namespace XREX
 
 		virtual void GetValueFrom(EffectParameter const& right) override
 		{
+			assert(GetType() == right.GetType());
 			value_ = CheckedCast<ConcreteEffectParameter const*>(&right)->value_;
 		}
 

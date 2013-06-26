@@ -20,6 +20,8 @@ namespace XREX
 	struct Settings;
 	struct RenderingSettings;
 
+	class Logger;
+
 	class XREXContext;
 	class LocalResourceLoader;
 	class MeshLoader;

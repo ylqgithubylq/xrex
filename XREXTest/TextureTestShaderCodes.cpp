@@ -1,8 +1,8 @@
 #include "XREXAll.hpp"
-#include "ShaderCodes.h"
+#include "TextureTestShaderCodes.h"
 
 
-ShaderCodes::ShaderCodes()
+TextureTestShaderCodes::TextureTestShaderCodes()
 {
 	codes.emplace_back(
 	"\n\
@@ -87,11 +87,14 @@ ShaderCodes::ShaderCodes()
 }
 
 
-ShaderCodes::~ShaderCodes()
+TextureTestShaderCodes::~TextureTestShaderCodes()
 {
 }
 
-std::vector<std::string> const& ShaderCodes::GetShaderCodes()
+std::vector<std::string> const& TextureTestShaderCodes::GetShaderCodes()
 {
 	return codes;
 }
+
+
+

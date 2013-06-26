@@ -2,15 +2,14 @@
 #include <string>
 #include <vector>
 
-class ShaderCodes
+class VoxelTestShaderCodes
 {
 public:
-	ShaderCodes();
-	~ShaderCodes();
+	VoxelTestShaderCodes();
 
 	std::vector<std::string> const& GetShaderCodes();
 
 private:
 	std::vector<std::string> codes;
-};
 
+};
