@@ -27,6 +27,11 @@ namespace XREX
 		{
 			return minorVersion_;
 		}
+
+		bool IsCorrectlyCreated() const
+		{
+			return correctlyCreated_;
+		}
 	protected:
 		void OnMessageIdle();
 
@@ -44,6 +49,8 @@ namespace XREX
 		uint32 sampleCount_;
 
 		std::string description_;
+
+		bool correctlyCreated_;
 	};
 
 }

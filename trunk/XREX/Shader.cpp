@@ -1,6 +1,7 @@
 #include "XREX.hpp"
 
 #include "XREXContext.hpp"
+#include "Logger.hpp"
 #include "RenderingFactory.hpp"
 #include "Shader.hpp"
 #include "RenderingEffect.hpp"
@@ -15,7 +16,6 @@
 #include <CoreGL.hpp>
 
 
-#include <iostream>
 #include <algorithm>
 #include <array>
 
@@ -109,7 +109,7 @@ namespace XREX
 			{
 				errorString_ = "Unknown compiling error.";
 			}
-			std::cerr << errorString_ << std::endl;
+			XREXContext::GetInstance().GetLogger().LogLine(errorString_);
 		}
 	#endif
 
@@ -181,7 +181,7 @@ namespace XREX
 			{
 				errorString_ = "Unknown linking error.";
 			}
-			std::cerr << errorString_ << std::endl;
+			XREXContext::GetInstance().GetLogger().LogLine(errorString_);
 		}
 	#endif
 
@@ -257,7 +257,7 @@ namespace XREX
 			{
 				errorString_.resize(length, 0);
 				gl::GetProgramInfoLog(glProgramID_, length, &length, &errorString_[0]);
-				std::cerr << errorString_ << std::endl;
+				XREXContext::GetInstance().GetLogger().LogLine(errorString_);
 			}
 		}
 	#endif

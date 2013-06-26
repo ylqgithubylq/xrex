@@ -8,6 +8,39 @@
 
 namespace XREX
 {
+	XREX_API std::string const& ErrorStringFromGLError(uint32 glError)
+	{
+		switch (glError)
+		{
+		case gl::GL_INVALID_ENUM:
+			{
+				static std::string const errorString = "INVALID_ENUM";
+				return errorString;
+			}
+		case gl::GL_INVALID_VALUE:
+			{
+				static std::string const errorString = "INVALID_VALUE";
+				return errorString;
+			}
+		case gl::GL_INVALID_OPERATION:
+			{
+				static std::string const errorString = "INVALID_OPERATION";
+				return errorString;
+			}
+		case gl::GL_OUT_OF_MEMORY:
+			{
+				static std::string const errorString = "OUT_OF_MEMORY";
+				return errorString;
+			}
+		default:
+			{
+				assert(false);
+				static std::string const errorString = "";
+				return errorString;
+			}
+		}
+	}
+
 	void SetGLState(uint32 glState, bool on)
 	{
 		// 	static decltype(&gl::Enable) Functions[] = { gl::Enable, gl::Disable };

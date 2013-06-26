@@ -19,6 +19,10 @@ namespace XREX
 			static XREXContext context;
 			return context;
 		}
+		Logger& GetLogger() const
+		{
+			return *logger_;
+		}
 		RenderingFactory& GetRenderingFactory() const
 		{
 			return *renderingFactory_;
@@ -99,6 +103,8 @@ namespace XREX
 		std::unique_ptr<InputCenter> inputCenter_;
 		std::unique_ptr<ResourceManager> resourceManager_;
 		std::unique_ptr<LocalResourceLoader> resourceLoader_;
+
+		std::unique_ptr<Logger> logger_;
 
 		RenderingEngine* renderingEngine_;
 

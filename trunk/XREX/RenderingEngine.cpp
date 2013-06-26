@@ -3,6 +3,7 @@
 #include "RenderingEngine.hpp"
 
 #include "XREXContext.hpp"
+#include "Logger.hpp"
 #include "RenderingFactory.hpp"
 #include "RenderingPipelineState.hpp"
 #include "GLUtil.hpp"
@@ -12,11 +13,106 @@
 #include <CoreGL.hpp>
 
 #include <map>
+#include <string>
 
 using std::vector;
 
 namespace XREX
 {
+	namespace
+	{
+		struct DebugCallback
+		{
+			static void APIENTRY Callback(uint32 source, uint32 type, uint32 id, uint32 severity, int32 length, char const* message, void* userParam)
+			{
+				RenderingEngine* engine = reinterpret_cast<RenderingEngine*>(userParam);
+				
+				std::string sourceString;
+				switch (source)
+				{
+				case gl::GL_DEBUG_SOURCE_API:
+					sourceString = "DEBUG_SOURCE_API";
+					break;
+				case gl::GL_DEBUG_SOURCE_WINDOW_SYSTEM:
+					sourceString = "DEBUG_SOURCE_WINDOW_SYSTEM";
+					break;
+				case gl::GL_DEBUG_SOURCE_SHADER_COMPILER:
+					sourceString = "DEBUG_SOURCE_SHADER_COMPILER";
+					break;
+				case gl::GL_DEBUG_SOURCE_THIRD_PARTY:
+					sourceString = "DEBUG_SOURCE_THIRD_PARTY";
+					break;
+				case gl::GL_DEBUG_SOURCE_APPLICATION:
+					sourceString = "DEBUG_SOURCE_APPLICATION";
+					break;
+				case gl::GL_DEBUG_SOURCE_OTHER:
+					sourceString = "DEBUG_SOURCE_OTHER";
+					break;
+				default:
+					assert(false);
+					break;
+				}
+
+				std::string typeString;
+				switch (type)
+				{
+				case gl::GL_DEBUG_TYPE_ERROR:
+					typeString = "DEBUG_TYPE_ERROR";
+					break;
+				case gl::GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+					typeString = "DEBUG_TYPE_DEPRECATED_BEHAVIOR";
+					break;
+				case gl::GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+					typeString = "DEBUG_TYPE_UNDEFINED_BEHAVIOR";
+					break;
+				case gl::GL_DEBUG_TYPE_PORTABILITY:
+					typeString = "DEBUG_TYPE_PORTABILITY";
+					break;
+				case gl::GL_DEBUG_TYPE_PERFORMANCE:
+					typeString = "DEBUG_TYPE_PERFORMANCE";
+					break;
+				case gl::GL_DEBUG_TYPE_MARKER:
+					typeString = "DEBUG_TYPE_MARKER";
+					break;
+				case gl::GL_DEBUG_TYPE_PUSH_GROUP:
+					typeString = "DEBUG_TYPE_PUSH_GROUP";
+					break;
+				case gl::GL_DEBUG_TYPE_POP_GROUP:
+					typeString = "DEBUG_TYPE_POP_GROUP";
+					break;
+				case gl::GL_DEBUG_TYPE_OTHER:
+					typeString = "DEBUG_TYPE_OTHER";
+					break;
+				default:
+					assert(false);
+					break;
+				}
+
+				std::string severityString;
+				switch (severity)
+				{
+				case gl::GL_DEBUG_SEVERITY_LOW:
+					severityString = "DEBUG_SEVERITY_LOW";
+					break;
+				case gl::GL_DEBUG_SEVERITY_MEDIUM:
+					severityString = "DEBUG_SEVERITY_MEDIUM";
+					break;
+				case gl::GL_DEBUG_SEVERITY_HIGH:
+					severityString = "DEBUG_SEVERITY_HIGH";
+					break;
+				case gl::GL_DEBUG_SEVERITY_NOTIFICATION:
+					severityString = "DEBUG_SEVERITY_NOTIFICATION";
+					break;
+				default:
+					assert(false);
+					break;
+				}
+				XREXContext::GetInstance().GetLogger().Log("from: " + sourceString + ", ").Log("type: " + typeString + ", ")
+					.Log("id: ").Log(id).Log(", ").Log("severity: " + severityString + ", ").EndLine()
+					.Log("message: ").Log(message).EndLine();
+			}
+		};
+	}
 
 	RenderingEngine::RenderingEngine(Window& window, Settings const& settings)
 		: defaultBlendColor_(0, 0, 0, 1)
@@ -24,8 +120,7 @@ namespace XREX
 		// initialize the graphics context first
 		graphicsContext_ = MakeUP<GraphicsContext>(window, settings);
 
-		// move gl context creation here?
-		//gl::Enable(gl::GL_DEBUG_OUTPUT); // ogl 4.3
+		gl::DebugMessageCallback(&DebugCallback::Callback, this);
 
 		gl::PixelStorei(gl::GL_UNPACK_ALIGNMENT, 1); // default 4
 		gl::PixelStorei(gl::GL_PACK_ALIGNMENT, 1); // default 4

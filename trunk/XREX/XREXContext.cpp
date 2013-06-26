@@ -2,6 +2,7 @@
 
 #include "XREXContext.hpp"
 
+#include "Logger.hpp"
 #include "Window.hpp"
 #include "GraphicsContext.hpp"
 
@@ -19,7 +20,7 @@ namespace XREX
 {
 
 	XREXContext::XREXContext()
-		: scene_(MakeSP<NaiveManagedScene>()), settings_("") // temp root path
+		: settings_("") // temp root path
 	{
 	}
 
@@ -44,6 +45,8 @@ namespace XREX
 	void XREXContext::Initialize(Settings const& settings)
 	{
 		settings_ = settings;
+		logger_ = MakeUP<Logger>();
+		scene_ = MakeSP<NaiveManagedScene>();
 		resourceManager_ = MakeUP<ResourceManager>(settings_.rootPath);
 		inputCenter_ = MakeUP<InputCenter>();
 		resourceLoader_ = MakeUP<LocalResourceLoader>();

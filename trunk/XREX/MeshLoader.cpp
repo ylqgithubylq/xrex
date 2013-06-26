@@ -1,6 +1,8 @@
 #include "XREX.hpp"
 #include "MeshLoader.hpp"
 
+#include "XREXContext.hpp"
+#include "Logger.hpp"
 #include "DefinedShaderName.hpp"
 #include "Mesh.hpp"
 #include "RenderingLayout.hpp"
@@ -609,8 +611,7 @@ namespace XREX
 
 		if(!scene)
 		{
-			// TODO log the error?
-			std::cout << importer.GetErrorString() << std::endl;
+			XREXContext::GetInstance().GetLogger().LogLine(importer.GetErrorString());
 			return MakeSP<NullModelLoadingResult>();
 		}
 		// Everything will be cleaned up by the importer destructor
