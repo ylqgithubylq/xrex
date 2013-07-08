@@ -23,10 +23,8 @@
 #include "FirstPersonCameraController.hpp"
 
 #include "Window.hpp"
-#include "GraphicsContext.hpp"
 
 #include "Scene.hpp"
-#include "NaiveManagedScene.hpp"
 #include "SceneObject.hpp"
 
 #include "Component.hpp"
@@ -36,7 +34,9 @@
 #include "Mesh.hpp"
 
 #include "RenderingFactory.hpp"
+#include "GraphicsContext.hpp"
 #include "RenderingEngine.hpp"
+#include "RenderingProcess.hpp"
 #include "DefinedShaderName.hpp"
 #include "Shader.hpp"
 #include "RenderingLayout.hpp"
@@ -46,5 +46,6 @@
 #include "RenderingPipelineState.hpp"
 #include "Texture.hpp"
 #include "Sampler.hpp"
+#include "TextureImage.hpp"
 
 #include "Viewport.hpp"

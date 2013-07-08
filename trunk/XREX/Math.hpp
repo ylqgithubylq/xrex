@@ -143,7 +143,7 @@ namespace XREX
 	QuaternionT<T> FaceToQuaternion(VectorT<T, 3> const& to, VectorT<T, 3> const& up, VectorT<T, 3> const& localFront, VectorT<T, 3> const& localUp);
 
 	/*
-	 *	Creating view matrix of camera. With assumption of camera front is +z.
+	 *	Create a view matrix of camera. With assumption of camera front is +z.
 	 *	@eye: eye position.
 	 *	@to: look to direction.
 	 *	@up: up direction in world space.
@@ -154,8 +154,18 @@ namespace XREX
 
 
 	template <typename T>
-	Matrix4T<T> FrustumMatrix(T const& fieldOfView, T const& aspectRatio, T const& near, T const& far);
+	Matrix4T<T> FrustumProjectionMatrix(T const& fieldOfView, T const& aspectRatio, T const& near, T const& far);
 	template <typename T>
-	Matrix4T<T> FrustumMatrix(T const& top, T const& bottom, T const& left, T const& right, T const& near, T const& far);
+	Matrix4T<T> FrustumProjectionMatrix(T const& left, T const& right, T const& bottom, T const& top, T const& near, T const& far);
+
+	/*
+	 *	Create a orthogonal projection matrix, with camera at the center of near plane.
+	 */
+	template <typename T>
+	Matrix4T<T> OrthogonalProjectionMatrix(T const& width, T const& height, T const& depth);
+	template <typename T>
+	Matrix4T<T> OrthogonalProjectionMatrix(T const& left, T const& right, T const& bottom, T const& top, T const& near, T const& far);
 
 }
+
+

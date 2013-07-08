@@ -104,31 +104,31 @@ namespace XREX
 				floatM44 const& modelMatrix = ownerRenderable.GetOwnerSceneObject()->GetComponent<Transformation>()->GetWorldMatrix();
 				floatM44 normalMatrix = modelMatrix; // TODO do inverse transpose to the upper floatV3 of modelMatrix
 
-				RenderingEffect const& effect = technique->GetEffect();
+				RenderingEffectSP effect = technique->GetEffect();
 
 				// are these too hard coded?
 				{
-					EffectParameterSP const& model = effect.GetParameterByName(GetUniformString(DefinedUniform::ModelMatrix));
+					EffectParameterSP const& model = effect->GetParameterByName(GetUniformString(DefinedUniform::ModelMatrix));
 					if (model)
 					{
 						model->As<floatM44>().SetValue(modelMatrix);
 					}
-					EffectParameterSP const& normal = effect.GetParameterByName(GetUniformString(DefinedUniform::NormalMatrix));
+					EffectParameterSP const& normal = effect->GetParameterByName(GetUniformString(DefinedUniform::NormalMatrix));
 					if (normal)
 					{
 						normal->As<floatM44>().SetValue(normalMatrix);
 					}
-					EffectParameterSP const& view = effect.GetParameterByName(GetUniformString(DefinedUniform::ViewMatrix));
+					EffectParameterSP const& view = effect->GetParameterByName(GetUniformString(DefinedUniform::ViewMatrix));
 					if (view)
 					{
 						view->As<floatM44>().SetValue(viewMatrix);
 					}
-					EffectParameterSP const& projection = effect.GetParameterByName(GetUniformString(DefinedUniform::ProjectionMatrix));
+					EffectParameterSP const& projection = effect->GetParameterByName(GetUniformString(DefinedUniform::ProjectionMatrix));
 					if (projection)
 					{
 						projection->As<floatM44>().SetValue(projectionMatrix);
 					}
-					EffectParameterSP const& position = effect.GetParameterByName(GetUniformString(DefinedUniform::CameraPosition));
+					EffectParameterSP const& position = effect->GetParameterByName(GetUniformString(DefinedUniform::CameraPosition));
 					if (position)
 					{
 						position->As<floatV3>().SetValue(cameraPosition);
@@ -137,7 +137,7 @@ namespace XREX
 
 				if (material)
 				{
-					material->BindToEffect(renderablePack->technique->GetEffect().shared_from_this());
+					material->BindToEffect(renderablePack->technique->GetEffect());
 					material->SetAllEffectParameterValues();
 				}
 

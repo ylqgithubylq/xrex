@@ -18,6 +18,7 @@ namespace XREX
 			Texture2D,
 			Texture3D,
 			TextureCube,
+			TextureBuffer,
 
 			TextureTypeCount
 		};
@@ -83,7 +84,9 @@ namespace XREX
 		void Bind(uint32 index);
 		void Unbind();
 
-		TextureImageSP GetImage_TEMP(uint32 level, TexelFormat format);
+		void RecreateMipmap();
+
+		TextureImageSP GetImage_TEMP(uint32 level, TexelFormat format); // shader should provide interface to get image format
 		TextureImageSP GetImage(uint32 level);
 
 	protected:
@@ -132,7 +135,7 @@ namespace XREX
 		/*
 		 *	@generateMipmap: true will generate mipmap, ignore data vector except data at index 0.
 		 */
-		ConcreteTexture(DataDescription<Dimension> const& description, std::vector<void const*> const& data, bool generateMipmap = true);
+		ConcreteTexture(DataDescription<Dimension> const& description, std::vector<void const*> const& data, bool generateMipmap);
 		virtual ~ConcreteTexture() override;
 
 		virtual TexelFormat GetFormat() const override
@@ -162,6 +165,23 @@ namespace XREX
 
 	private:
 		std::array<DataDescription<2>, static_cast<uint32>(CubeFace::CubeFaceElementCount)> description_;
+	};
+
+
+	class XREX_API TextureBuffer
+		: public Texture
+	{
+	public:
+		TextureBuffer(GraphicsBufferSP const& buffer, TexelFormat format);
+		virtual ~TextureBuffer() override;
+
+		virtual TexelFormat GetFormat() const override
+		{
+			return format_;
+		}
+	private:
+		GraphicsBufferSP buffer_;
+		TexelFormat format_;
 	};
 
 }

@@ -515,7 +515,7 @@ namespace XREX
 		}
 
 		
-		VectorT<T, 3> zAxis(-to.Normalize());
+		VectorT<T, 3> zAxis(to.Normalize());
 		VectorT<T, 3> xAxis(Cross(up, zAxis).Normalize());
 		VectorT<T, 3> yAxis(Cross(zAxis, xAxis));
 
@@ -544,26 +544,27 @@ namespace XREX
 	template XREX_API floatM44 LookToViewMatrix(floatV3 const& eye, floatV3 const& at, floatV3 const& up);
 
 	template <typename T>
-	Matrix4T<T> FrustumMatrix(T const& fieldOfView, T const& aspectRatio, T const& near, T const& far)
+	Matrix4T<T> FrustumProjectionMatrix(T const& fieldOfView, T const& aspectRatio, T const& near, T const& far)
 	{
 		T top = std::tan(fieldOfView * T(0.5)) * near;
 		T bottom = -top;
 		T right = top * aspectRatio;
 		T left = -right;
-		return FrustumMatrix<T>(top, bottom, left, right, near, far);
+		return FrustumProjectionMatrix<T>(left, right, bottom, top, near, far);
 	}
-	template XREX_API floatM44 FrustumMatrix(float const& fieldOfView, float const& aspectRatio, float const& near, float const& far);
+	template XREX_API floatM44 FrustumProjectionMatrix(float const& fieldOfView, float const& aspectRatio, float const& near, float const& far);
 
 	template <typename T>
-	Matrix4T<T> FrustumMatrix(T const& top, T const& bottom, T const& left, T const& right, T const& near, T const& far)
+	Matrix4T<T> FrustumProjectionMatrix(T const& left, T const& right, T const& bottom, T const& top, T const& near, T const& far)
 	{
 		Matrix4T<T> temp;
 		T* resultArray = const_cast<T*>(temp.GetArray());
 
 		// for details, see 'Real-time Rendering, 3rd', 4.6.2
 		// or 'Mathematics for 3D Game Programming and Computer Graphics, 3rd', 5.5.1
+		// the code here is different from the books because there +z is the view direction.
 		T rl = (right - left), tb = (top - bottom), fn = (far - near);
-		resultArray[0] = (near * 2) / rl;
+		resultArray[0] = -(near * 2) / rl;
 		resultArray[1] = 0;
 		resultArray[2] = 0;
 		resultArray[3] = 0;
@@ -571,10 +572,10 @@ namespace XREX
 		resultArray[5] = (near * 2) / tb;
 		resultArray[6] = 0;
 		resultArray[7] = 0;
-		resultArray[8] = (right + left) / rl;
+		resultArray[8] = -(right + left) / rl;
 		resultArray[9] = (top + bottom) / tb;
-		resultArray[10] = -(far + near) / fn;
-		resultArray[11] = -1;
+		resultArray[10] = (far + near) / fn;
+		resultArray[11] = 1;
 		resultArray[12] = 0;
 		resultArray[13] = 0;
 		resultArray[14] = -(far * near * 2) / fn;
@@ -582,8 +583,44 @@ namespace XREX
 
 		return temp;
 	};
-	template XREX_API floatM44 FrustumMatrix(float const& top, float const& bottom, float const& left, float const& right, float const& near, float const& far);
+	template XREX_API floatM44 FrustumProjectionMatrix(float const& left, float const& right, float const& bottom, float const& top, float const& near, float const& far);
 
+	template <typename T>
+	Matrix4T<T> OrthogonalProjectionMatrix(T const& width, T const& height, T const& depth)
+	{
+		return OrthogonalProjectionMatrix<T>(-width * T(0.5), width * T(0.5), -height * T(0.5), height * T(0.5), T(0), depth);
+	}
+	template XREX_API floatM44 OrthogonalProjectionMatrix(float const& width, float const& height, float const& depth);
 
+	template <typename T>
+	Matrix4T<T> OrthogonalProjectionMatrix(T const& left, T const& right, T const& bottom, T const& top, T const& near, T const& far)
+	{
+		Matrix4T<T> temp;
+		T* resultArray = const_cast<T*>(temp.GetArray());
+
+		// for details, see 'Real-time Rendering, 3rd', 4.6.1
+		// or 'Mathematics for 3D Game Programming and Computer Graphics, 3rd', 5.5.2
+		// the code here is different from the books because there +z is the view direction.
+		T rl = (right - left), tb = (top - bottom), fn = (far - near);
+		resultArray[0] = -2 / rl;
+		resultArray[1] = 0;
+		resultArray[2] = 0;
+		resultArray[3] = 0;
+		resultArray[4] = 0;
+		resultArray[5] = 2 / tb;
+		resultArray[6] = 0;
+		resultArray[7] = 0;
+		resultArray[8] = 0;
+		resultArray[9] = 0;
+		resultArray[10] = 2 / fn;
+		resultArray[11] = 0;
+		resultArray[12] = (right + left) / rl;
+		resultArray[13] = -(top + bottom) / tb;
+		resultArray[14] = -(far + near) / fn;
+		resultArray[15] = 1;
+
+		return temp;
+	}
+	template XREX_API floatM44 OrthogonalProjectionMatrix(float const& left, float const& right, float const& bottom, float const& top, float const& near, float const& far);
 
 }

@@ -14,9 +14,20 @@ namespace XREX
 		switch (type)
 		{
 		case ElementType::Sampler1D:
+		case ElementType::IntSampler1D:
+		case ElementType::UintSampler1D:
 		case ElementType::Sampler2D:
+		case ElementType::IntSampler2D:
+		case ElementType::UintSampler2D:
 		case ElementType::Sampler3D:
+		case ElementType::IntSampler3D:
+		case ElementType::UintSampler3D:
 		case ElementType::SamplerCube:
+		case ElementType::IntSamplerCube:
+		case ElementType::UintSamplerCube:
+		case ElementType::SamplerBuffer:
+		case ElementType::IntSamplerBuffer:
+		case ElementType::UintSamplerBuffer:
 			return true;
 		case ElementType::ParameterTypeCount:
 			assert(false);
@@ -31,9 +42,21 @@ namespace XREX
 		switch (type)
 		{
 		case ElementType::Image1D:
+		case ElementType::IntImage1D:
+		case ElementType::UintImage1D:
 		case ElementType::Image2D:
+		case ElementType::IntImage2D:
+		case ElementType::UintImage2D:
 		case ElementType::Image3D:
+		case ElementType::IntImage3D:
+		case ElementType::UintImage3D:
 		case ElementType::ImageCube:
+		case ElementType::IntImageCube:
+		case ElementType::UintImageCube:
+		case ElementType::ImageBuffer:
+		case ElementType::IntImageBuffer:
+		case ElementType::UintImageBuffer:
+
 			return true;
 		case ElementType::ParameterTypeCount:
 			assert(false);
@@ -43,35 +66,87 @@ namespace XREX
 		}
 	}
 
-	XREX_API uint32 GetElementPrimitiveCount(ElementType type)
+	bool IsAtomicBufferType(ElementType type)
 	{
-		static array<uint32, static_cast<uint32>(ElementType::ParameterTypeCount)> const counts = [] ()
+		switch (type)
 		{
-			array<uint32, static_cast<uint32>(ElementType::ParameterTypeCount)> temp;
-			temp[static_cast<uint32>(ElementType::Void)] = 0;
-			temp[static_cast<uint32>(ElementType::Bool)] = 1;
-			temp[static_cast<uint32>(ElementType::Uint8)] = 1;
-			temp[static_cast<uint32>(ElementType::Uint16)] = 1;
-			temp[static_cast<uint32>(ElementType::Uint32)] = 1;
-			temp[static_cast<uint32>(ElementType::Int8)] = 1;
-			temp[static_cast<uint32>(ElementType::Int16)] = 1;
-			temp[static_cast<uint32>(ElementType::Int32)] = 1;
-			temp[static_cast<uint32>(ElementType::Float)] = 1;
-			temp[static_cast<uint32>(ElementType::FloatV2)] = 2;
-			temp[static_cast<uint32>(ElementType::FloatV3)] = 3;
-			temp[static_cast<uint32>(ElementType::FloatV4)] = 4;
-			temp[static_cast<uint32>(ElementType::FloatM44)] = 16;
-			temp[static_cast<uint32>(ElementType::Sampler1D)] = 1;
-			temp[static_cast<uint32>(ElementType::Sampler2D)] = 1;
-			temp[static_cast<uint32>(ElementType::Sampler3D)] = 1;
-			temp[static_cast<uint32>(ElementType::SamplerCube)] = 1;
-			return temp;
-		} ();
-		assert(type != ElementType::Void);
-		return counts[static_cast<uint32>(type)];
+		case ElementType::AtomicUint32Counter:
+			return true;
+			break;
+		case ElementType::ParameterTypeCount:
+			assert(false);
+			return false;
+			break;
+		default:
+			return false;
+			break;
+		}
 	}
 
-	XREX_API uint32 GetElementSizeInBytes(ElementType type)
+	uint32 GetElementPrimitiveCount(ElementType type)
+	{
+		switch (type)
+		{
+		case ElementType::Void:
+			assert(false);
+			return 0;
+		case ElementType::Bool:
+			return 1;
+		case ElementType::Uint8:
+			return 1;
+		case ElementType::Uint16:
+			return 1;
+		case ElementType::Uint32:
+			return 1;
+		case ElementType::Int8:
+			return 1;
+		case ElementType::Int16:
+			return 1;
+		case ElementType::Int32:
+			return 1;
+		case ElementType::IntV2:
+			return 2;
+		case ElementType::IntV3:
+			return 3;
+		case ElementType::IntV4:
+			return 4;
+		case ElementType::UintV2:
+			return 2;
+		case ElementType::UintV3:
+			return 3;
+		case ElementType::UintV4:
+			return 4;
+		case ElementType::Float:
+			return 1;
+		case ElementType::FloatV2:
+			return 2;
+		case ElementType::FloatV3:
+			return 3;
+		case ElementType::FloatV4:
+			return 4;
+		case ElementType::FloatM44:
+			return 16;
+		case ElementType::Double:
+			return 1;
+		case ElementType::DoubleV2:
+			return 2;
+		case ElementType::DoubleV3:
+			return 3;
+		case ElementType::DoubleV4:
+			return 4;
+		case ElementType::DoubleM44:
+			return 16;
+
+		case ElementType::ParameterTypeCount:
+			assert(false);
+			return 0;
+		default:
+			assert(false);
+			return 0;
+		}
+	}
+
+	uint32 GetElementSizeInBytes(ElementType type)
 	{
 		switch (type)
 		{
@@ -124,15 +199,7 @@ namespace XREX
 			return sizeof(doubleV4);
 		case ElementType::DoubleM44:
 			return sizeof(doubleM44);
-		case ElementType::Sampler1D:
-		case ElementType::Sampler2D:
-		case ElementType::Sampler3D:
-		case ElementType::SamplerCube:
-		case ElementType::Image1D:
-		case ElementType::Image2D:
-		case ElementType::Image3D:
-		case ElementType::ImageCube:
-			return sizeof(int32);
+
 		case ElementType::ParameterTypeCount:
 			assert(false);
 			return 0;
@@ -142,116 +209,193 @@ namespace XREX
 		}
 	}
 
-	XREX_API ElementType GetElementPrimitiveType(ElementType type)
+	ElementType GetElementPrimitiveType(ElementType type)
 	{
-		static array<ElementType, static_cast<uint32>(ElementType::ParameterTypeCount)> const primitiveTypes = [] ()
+		switch (type)
 		{
-			array<ElementType, static_cast<uint32>(ElementType::ParameterTypeCount)> temp;
-			temp[static_cast<uint32>(ElementType::Void)] = ElementType::Void;
-			temp[static_cast<uint32>(ElementType::Bool)] = ElementType::Bool;
-			temp[static_cast<uint32>(ElementType::Uint8)] = ElementType::Uint8;
-			temp[static_cast<uint32>(ElementType::Uint16)] = ElementType::Uint16;
-			temp[static_cast<uint32>(ElementType::Uint32)] = ElementType::Uint32;
-			temp[static_cast<uint32>(ElementType::Int8)] = ElementType::Int8;
-			temp[static_cast<uint32>(ElementType::Int16)] = ElementType::Int16;
-			temp[static_cast<uint32>(ElementType::Int32)] = ElementType::Int32;
-			temp[static_cast<uint32>(ElementType::Float)] = ElementType::Float;
-			temp[static_cast<uint32>(ElementType::FloatV2)] = ElementType::Float;
-			temp[static_cast<uint32>(ElementType::FloatV3)] = ElementType::Float;
-			temp[static_cast<uint32>(ElementType::FloatV4)] = ElementType::Float;
-			temp[static_cast<uint32>(ElementType::FloatM44)] = ElementType::Float;
-			temp[static_cast<uint32>(ElementType::Sampler1D)] = ElementType::Void;
-			temp[static_cast<uint32>(ElementType::Sampler2D)] = ElementType::Void;
-			temp[static_cast<uint32>(ElementType::Sampler3D)] = ElementType::Void;
-			temp[static_cast<uint32>(ElementType::SamplerCube)] = ElementType::Void;
-			return temp;
-		} ();
-		ElementType primitiveType = primitiveTypes[static_cast<uint32>(type)];
-		assert(primitiveType != ElementType::Void);
-		return primitiveType;
+		case ElementType::Void:
+			return ElementType::Void;
+		case ElementType::Bool:
+			return ElementType::Bool;
+		case ElementType::Uint8:
+			return ElementType::Uint8;
+		case ElementType::Uint16:
+			return ElementType::Uint16;
+		case ElementType::Uint32:
+			return ElementType::Uint32;
+		case ElementType::Int8:
+			return ElementType::Int8;
+		case ElementType::Int16:
+			return ElementType::Int16;
+		case ElementType::Int32:
+			return ElementType::Int32;
+		case ElementType::IntV2:
+			return ElementType::Int32;
+		case ElementType::IntV3:
+			return ElementType::Int32;
+		case ElementType::IntV4:
+			return ElementType::Int32;
+		case ElementType::UintV2:
+			return ElementType::Uint32;
+		case ElementType::UintV3:
+			return ElementType::Uint32;
+		case ElementType::UintV4:
+			return ElementType::Uint32;
+		case ElementType::Float:
+			return ElementType::Float;
+		case ElementType::FloatV2:
+			return ElementType::Float;
+		case ElementType::FloatV3:
+			return ElementType::Float;
+		case ElementType::FloatV4:
+			return ElementType::Float;
+		case ElementType::FloatM44:
+			return ElementType::Float;
+		case ElementType::Double:
+			return ElementType::Double;
+		case ElementType::DoubleV2:
+			return ElementType::Double;
+		case ElementType::DoubleV3:
+			return ElementType::Double;
+		case ElementType::DoubleV4:
+			return ElementType::Double;
+		case ElementType::DoubleM44:
+			return ElementType::Double;
+
+		case ElementType::ParameterTypeCount:
+			assert(false);
+			return ElementType::Void;
+		default:
+			assert(false);
+			return ElementType::Void;
+		}
 	}
 
 	uint32 GetTexelSizeInBytes(TexelFormat format)
 	{
 		switch (format)
 		{
-		case XREX::TexelFormat::R8:
+		case TexelFormat::R8:
 			return 1;
-		case XREX::TexelFormat::RG8:
+		case TexelFormat::RG8:
 			return 2;
-		case XREX::TexelFormat::RGB8:
+		case TexelFormat::RGB8:
 			return 3;
-		case XREX::TexelFormat::RGBA8:
+		case TexelFormat::RGBA8:
 			return 4;
-		case XREX::TexelFormat::R16I:
+		case TexelFormat::R16I:
 			return 2;
-		case XREX::TexelFormat::RG16I:
+		case TexelFormat::RG16I:
 			return 4;
-		case XREX::TexelFormat::RGB16I:
+		case TexelFormat::RGB16I:
 			return 6;
-		case XREX::TexelFormat::RGBA16I:
+		case TexelFormat::RGBA16I:
 			return 8;
-		case XREX::TexelFormat::R16UI:
+		case TexelFormat::R16UI:
 			return 2;
-		case XREX::TexelFormat::RG16UI:
+		case TexelFormat::RG16UI:
 			return 4;
-		case XREX::TexelFormat::RGB16UI:
+		case TexelFormat::RGB16UI:
 			return 6;
-		case XREX::TexelFormat::RGBA16UI:
+		case TexelFormat::RGBA16UI:
 			return 8;
-		case XREX::TexelFormat::R16F:
+		case TexelFormat::R16F:
 			return 2;
-		case XREX::TexelFormat::RG16F:
+		case TexelFormat::RG16F:
 			return 4;
-		case XREX::TexelFormat::RGB16F:
+		case TexelFormat::RGB16F:
 			return 6;
-		case XREX::TexelFormat::RGBA16F:
+		case TexelFormat::RGBA16F:
 			return 8;
-		case XREX::TexelFormat::R32I:
+		case TexelFormat::R32I:
 			return 4;
-		case XREX::TexelFormat::RG32I:
+		case TexelFormat::RG32I:
 			return 8;
-		case XREX::TexelFormat::RGB32I:
+		case TexelFormat::RGB32I:
 			return 12;
-		case XREX::TexelFormat::RGBA32I:
+		case TexelFormat::RGBA32I:
 			return 16;
-		case XREX::TexelFormat::R32UI:
+		case TexelFormat::R32UI:
 			return 4;
-		case XREX::TexelFormat::RG32UI:
+		case TexelFormat::RG32UI:
 			return 8;
-		case XREX::TexelFormat::RGB32UI:
+		case TexelFormat::RGB32UI:
 			return 12;
-		case XREX::TexelFormat::RGBA32UI:
+		case TexelFormat::RGBA32UI:
 			return 16;
-		case XREX::TexelFormat::R32F:
+		case TexelFormat::R32F:
 			return 4;
-		case XREX::TexelFormat::RG32F:
+		case TexelFormat::RG32F:
 			return 8;
-		case XREX::TexelFormat::RGB32F:
+		case TexelFormat::RGB32F:
 			return 12;
-		case XREX::TexelFormat::RGBA32F:
+		case TexelFormat::RGBA32F:
 			return 16;
-		case XREX::TexelFormat::BGR8:
+		case TexelFormat::BGR8:
 			return 3;
-		case XREX::TexelFormat::BGRA8:
+		case TexelFormat::BGRA8:
 			return 4;
-		case XREX::TexelFormat::BGR16F:
+		case TexelFormat::BGR16F:
 			return 6;
-		case XREX::TexelFormat::BGRA16F:
+		case TexelFormat::BGRA16F:
 			return 8;
-		case XREX::TexelFormat::BGR32F:
+		case TexelFormat::BGR32F:
 			return 12;
-		case XREX::TexelFormat::BGRA32F:
+		case TexelFormat::BGRA32F:
 			return 16;
-		case XREX::TexelFormat::NotUsed:
-			assert(false);
-			return 0;
-		case XREX::TexelFormat::TexelFormatCount:
+		case TexelFormat::TexelFormatCount:
 			assert(false);
 			return 0;
 		default:
 			assert(false);
 			return 0;
+		}
+	}
+
+	XREX_API TexelFormat GetCorrespondingTexelFormat(ElementType type)
+	{
+		switch (type)
+		{
+		case ElementType::Uint8:
+			return TexelFormat::R8UI;
+		case ElementType::Uint16:
+			return TexelFormat::R16UI;
+		case ElementType::Uint32:
+			return TexelFormat::R32UI;
+		case ElementType::Int8:
+			return TexelFormat::R8I;
+		case ElementType::Int16:
+			return TexelFormat::R16I;
+		case ElementType::Int32:
+			return TexelFormat::R32I;
+		case ElementType::IntV2:
+			return TexelFormat::RG32I;
+		case ElementType::IntV3:
+			return TexelFormat::RGB32I;
+		case ElementType::IntV4:
+			return TexelFormat::RGBA32I;
+		case ElementType::UintV2:
+			return TexelFormat::RG32UI;
+		case ElementType::UintV3:
+			return TexelFormat::RGB32UI;
+		case ElementType::UintV4:
+			return TexelFormat::RGBA32UI;
+		case ElementType::Float:
+			return TexelFormat::R32F;
+		case ElementType::FloatV2:
+			return TexelFormat::RG32F;
+		case ElementType::FloatV3:
+			return TexelFormat::RGB32F;
+		case ElementType::FloatV4:
+			return TexelFormat::RGBA32F;
+
+
+		case ElementType::ParameterTypeCount:
+			assert(false);
+			return TexelFormat::TexelFormatCount;
+		default:
+			assert(false);
+			return TexelFormat::TexelFormatCount;
 		}
 	}
 

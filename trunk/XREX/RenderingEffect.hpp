@@ -17,7 +17,6 @@ namespace XREX
 	{
 	public:
 		static EffectParameterSP const NullEffectParameter;
-
 	public:
 		EffectParameter(std::string const& name)
 			: name_(name)
@@ -40,6 +39,7 @@ namespace XREX
 		template <typename T>
 		ConcreteEffectParameter<T>& As()
 		{
+			assert(this != nullptr);
 			return *CheckedCast<ConcreteEffectParameter<T>*>(this);
 		}
 
@@ -84,6 +84,7 @@ namespace XREX
 		T value_;
 	};
 
+
 	struct XREX_API EffectPipelineParameters
 		: Noncopyable
 	{
@@ -96,11 +97,96 @@ namespace XREX
 	};
 
 
+	class XREX_API RenderingTechnique
+		: Noncopyable
+	{
+		friend class RenderingEffect;
+		friend class RenderingPass;
+
+		// this struct is used to break the cyclic reference between RenderingTEchnique and RenderingEffect.
+		// RenderingEffect holds RenderingTechniqueInternals, but return RenderingTechnique to outside.
+		struct RenderingTechniqueInternal
+			: private Noncopyable
+		{
+			RenderingEffect& effect_;
+			std::string name_;
+			std::vector<RenderingPassSP> passes_;
+
+			RenderingTechniqueInternal(RenderingEffect& effect, std::string const& name);
+		};
+
+		explicit RenderingTechnique(RenderingTechniqueInternal& techniqueInternal);
+
+	public:
+		~RenderingTechnique();
+
+		RenderingEffectSP GetEffect() const;
+
+		std::string const& GetName() const
+		{
+			return techniqueInternal_.name_;
+		}
+
+		uint32 GetPassCount() const
+		{
+			return techniqueInternal_.passes_.size();
+		}
+		RenderingPassSP const& GetPass(uint32 passIndex) const
+		{
+			return techniqueInternal_.passes_[passIndex];
+		}
+		RenderingPassSP const& CreatePass(ProgramObjectSP& program,
+			RasterizerStateObjectSP& rasterizerState, DepthStencilStateObjectSP& depthStencilState, BlendStateObjectSP& blendState);
+
+	private:
+		RenderingEffectSP effect_;
+		RenderingTechniqueInternal& techniqueInternal_;
+	};
+
+
+
+	class XREX_API RenderingPass
+		: Noncopyable
+	{
+		friend class RenderingTechnique;
+		RenderingPass(RenderingTechnique::RenderingTechniqueInternal& technique, ProgramObjectSP& program,
+			RasterizerStateObjectSP& rasterizerState, DepthStencilStateObjectSP& depthStencilState, BlendStateObjectSP& blendState);
+
+	public:
+		~RenderingPass();
+
+		RenderingTechniqueSP GetTechnique() const;
+
+		void Use();
+
+		ProgramObjectSP const& GetProgram() const
+		{
+			return program_;
+		}
+
+		EffectPipelineParameters& GetEffectPipelineParameters()
+		{
+			return pipelineParameters_;
+		}
+	private:
+		void InitializeParameterSetters();
+
+	private:
+		RenderingTechnique::RenderingTechniqueInternal& technique_;
+		ProgramObjectSP program_;
+		RasterizerStateObjectSP rasterizerState_;
+		DepthStencilStateObjectSP depthStencilState_;
+		BlendStateObjectSP blendState_;
+	
+		EffectPipelineParameters pipelineParameters_;
+	};
+
 
 
 	class XREX_API RenderingEffect
 		: public std::enable_shared_from_this<RenderingEffect>, Noncopyable
 	{
+		static RenderingTechniqueSP const NullRenderingTechnique;
 
 	public:
 		explicit RenderingEffect(std::string const& name);
@@ -150,17 +236,11 @@ namespace XREX
 		{
 			return techniques_.size();
 		}
-		RenderingTechniqueSP const& GetTechnique(uint32 techniqueIndex) const
-		{
-			return techniques_[techniqueIndex];
-		}
+		RenderingTechniqueSP GetTechnique(uint32 techniqueIndex) const;
 
-		RenderingTechniqueSP const& GetAvailableTechnique(int32 lodLevel) const
-		{
-			return techniques_[0]; // TODO
-		}
+		RenderingTechniqueSP GetTechniqueByName(std::string const& name) const;
 
-		RenderingTechniqueSP const& CreateTechnique();
+		RenderingTechniqueSP CreateTechnique(std::string const& name);
 
 	private:
 		std::string name_;
@@ -169,80 +249,9 @@ namespace XREX
 		std::vector<std::string> shaderCodes_;
 
 		std::vector<EffectParameterSP> parameters_;
-		std::vector<RenderingTechniqueSP> techniques_;
+		std::vector<std::unique_ptr<RenderingTechnique::RenderingTechniqueInternal>> techniques_;
 	};
 
 
-
-	class XREX_API RenderingTechnique
-		: Noncopyable
-	{
-		friend class RenderingEffect;
-		explicit RenderingTechnique(RenderingEffect& effect);
-
-	public:
-		~RenderingTechnique();
-
-		RenderingEffect& GetEffect() const
-		{
-			return effect_;
-		}
-
-		uint32 GetPassCount() const
-		{
-			return passes_.size();
-		}
-		RenderingPassSP const& GetPass(uint32 passIndex) const
-		{
-			return passes_[passIndex];
-		}
-		RenderingPassSP const& CreatePass(ProgramObjectSP& program,
-			RasterizerStateObjectSP& rasterizerState, DepthStencilStateObjectSP& depthStencilState, BlendStateObjectSP& blendState);
-
-	private:
-		RenderingEffect& effect_;
-		std::vector<RenderingPassSP> passes_;
-	};
-
-
-
-	class XREX_API RenderingPass
-		: Noncopyable
-	{
-		friend class RenderingTechnique;
-		RenderingPass(RenderingTechnique& technique, ProgramObjectSP& program,
-			RasterizerStateObjectSP& rasterizerState, DepthStencilStateObjectSP& depthStencilState, BlendStateObjectSP& blendState);
-
-	public:
-		~RenderingPass();
-
-		RenderingTechnique& GetTechnique() const
-		{
-			return technique_;
-		}
-
-		void Use();
-
-		ProgramObjectSP const& GetProgram() const
-		{
-			return program_;
-		}
-
-		EffectPipelineParameters& GetEffectPipelineParameters()
-		{
-			return pipelineParameters_;
-		}
-	private:
-		void InitializeParameterSetters();
-
-	private:
-		RenderingTechnique& technique_;
-		ProgramObjectSP program_;
-		RasterizerStateObjectSP rasterizerState_;
-		DepthStencilStateObjectSP depthStencilState_;
-		BlendStateObjectSP blendState_;
-	
-		EffectPipelineParameters pipelineParameters_;
-	};
 
 }

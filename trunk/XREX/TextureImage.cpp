@@ -28,13 +28,10 @@ namespace XREX
 		return texture_->GetFormat();
 	}
 
-	void TextureImage::Bind(uint32 index, TexelFormat format)
+	void TextureImage::Bind(uint32 index, TexelFormat format, AccessType accessType)
 	{
 		lastBindingIndex_ = index;
-//		texture_->Bind(lastBindingIndex_);
-// 		gl::ActiveTexture(gl::GL_TEXTURE0 + lastBindingIndex_);
-// 		gl::BindTexture(gl::GL_TEXTURE_2D, texture_->GetID());
-		gl::BindImageTexture(lastBindingIndex_, texture_->GetID(), level_, false, 0, gl::GL_READ_ONLY, GLTextureFormatFromTexelFormat(format).glInternalFormat);
+		gl::BindImageTexture(lastBindingIndex_, texture_->GetID(), level_, false, 0, GLAccessTypeFromAccessType(accessType), GLTextureFormatFromTexelFormat(format).glInternalFormat);
 	}
 
 	void TextureImage::Unbind()

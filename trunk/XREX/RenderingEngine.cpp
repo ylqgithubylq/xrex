@@ -110,6 +110,7 @@ namespace XREX
 				XREXContext::GetInstance().GetLogger().Log("from: " + sourceString + ", ").Log("type: " + typeString + ", ")
 					.Log("id: ").Log(id).Log(", ").Log("severity: " + severityString + ", ").EndLine()
 					.Log("message: ").Log(message).EndLine();
+				//assert(false);
 			}
 		};
 	}
@@ -120,7 +121,10 @@ namespace XREX
 		// initialize the graphics context first
 		graphicsContext_ = MakeUP<GraphicsContext>(window, settings);
 
+#ifdef XREX_DEBUG
 		gl::DebugMessageCallback(&DebugCallback::Callback, this);
+#endif // XREX_DEBUG
+
 
 		gl::PixelStorei(gl::GL_UNPACK_ALIGNMENT, 1); // default 4
 		gl::PixelStorei(gl::GL_PACK_ALIGNMENT, 1); // default 4

@@ -86,14 +86,37 @@ namespace XREX
 			return gl::GL_FLOAT_VEC4;
 		case ElementType::FloatM44:
 			return gl::GL_FLOAT_MAT4;
-		case ElementType::Sampler1D:
-			return gl::GL_SAMPLER_1D;
-		case ElementType::Sampler2D:
-			return gl::GL_SAMPLER_2D;
-		case ElementType::Sampler3D:
-			return gl::GL_SAMPLER_3D;
-		case ElementType::SamplerCube:
-			return gl::GL_SAMPLER_CUBE;
+// 		case ElementType::Sampler1D:
+// 			return gl::GL_SAMPLER_1D;
+// 		case ElementType::IntSampler1D:
+// 			return gl::GL_INT_SAMPLER_1D;
+// 		case ElementType::UintSampler1D:
+// 			return gl::GL_UNSIGNED_INT_SAMPLER_1D;
+// 		case ElementType::Sampler2D:
+// 			return gl::GL_SAMPLER_2D;
+// 		case ElementType::IntSampler2D:
+// 			return gl::GL_INT_SAMPLER_2D;
+// 		case ElementType::UintSampler2D:
+// 			return gl::GL_UNSIGNED_INT_SAMPLER_2D;
+// 		case ElementType::Sampler3D:
+// 			return gl::GL_SAMPLER_3D;
+// 		case ElementType::IntSampler3D:
+// 			return gl::GL_INT_SAMPLER_3D;
+// 		case ElementType::UintSampler3D:
+// 			return gl::GL_UNSIGNED_INT_SAMPLER_3D;
+// 		case ElementType::SamplerCube:
+// 			return gl::GL_SAMPLER_CUBE;
+// 		case ElementType::IntSamplerCube:
+// 			return gl::GL_INT_SAMPLER_CUBE;
+// 		case ElementType::UintSamplerCube:
+// 			return gl::GL_UNSIGNED_INT_SAMPLER_CUBE;
+// 		case ElementType::SamplerBuffer:
+// 			return gl::GL_SAMPLER_BUFFER;
+// 		case ElementType::IntSamplerBuffer:
+// 			return gl::GL_INT_SAMPLER_BUFFER;
+// 		case ElementType::UintSamplerBuffer:
+// 			return gl::GL_UNSIGNED_INT_SAMPLER_BUFFER;
+
 		case ElementType::ParameterTypeCount:
 			assert(false);
 			return 0;
@@ -305,6 +328,10 @@ namespace XREX
 			return gl::GL_TRANSFORM_FEEDBACK_BUFFER;
 		case BufferView::BufferType::Texture:
 			return gl::GL_TEXTURE_BUFFER;
+		case BufferView::BufferType::AtomicCounter:
+			return gl::GL_ATOMIC_COUNTER_BUFFER;
+		case BufferView::BufferType::ShaderStorage:
+			return gl::GL_SHADER_STORAGE_BUFFER;
 		case BufferView::BufferType::TypeCount:
 			assert(false);
 			return 0;
@@ -326,6 +353,8 @@ namespace XREX
 			return gl::GL_TEXTURE_3D;
 		case Texture::TextureType::TextureCube:
 			return gl::GL_TEXTURE_CUBE_MAP;
+		case Texture::TextureType::TextureBuffer:
+			return gl::GL_TEXTURE_BUFFER;
 		case Texture::TextureType::TextureTypeCount:
 			assert(false);
 			return 0;
@@ -340,12 +369,24 @@ namespace XREX
 	{
 		switch (usage)
 		{
-		case GraphicsBuffer::Usage::Static:
+		case GraphicsBuffer::Usage::StaticDraw:
 			return gl::GL_STATIC_DRAW;
-		case GraphicsBuffer::Usage::Dynamic:
+		case GraphicsBuffer::Usage::DynamicDraw:
 			return gl::GL_DYNAMIC_DRAW;
-		case GraphicsBuffer::Usage::Stream:
+		case GraphicsBuffer::Usage::StreamDraw:
 			return gl::GL_STREAM_DRAW;
+		case GraphicsBuffer::Usage::StaticRead:
+			return gl::GL_STATIC_READ;
+		case GraphicsBuffer::Usage::DynamicRead:
+			return gl::GL_DYNAMIC_READ;
+		case GraphicsBuffer::Usage::StreamRead:
+			return gl::GL_STREAM_READ;
+		case GraphicsBuffer::Usage::StaticCopy:
+			return gl::GL_STATIC_COPY;
+		case GraphicsBuffer::Usage::DynamicCopy:
+			return gl::GL_DYNAMIC_COPY;
+		case GraphicsBuffer::Usage::StreamCopy:
+			return gl::GL_STREAM_COPY;	
 		case GraphicsBuffer::Usage::UsageCount:
 			assert(false);
 			return 0;
@@ -355,15 +396,15 @@ namespace XREX
 		}
 	}
 
-	uint32 GlAccessTypeFromAccessType(GraphicsBuffer::AccessType type)
+	uint32 GLAccessTypeFromAccessType(AccessType type)
 	{
 		switch (type)
 		{
-		case GraphicsBuffer::AccessType::ReadOnly:
+		case AccessType::ReadOnly:
 			return gl::GL_READ_ONLY;
-		case GraphicsBuffer::AccessType::WriteOnly:
+		case AccessType::WriteOnly:
 			return gl::GL_WRITE_ONLY;
-		case GraphicsBuffer::AccessType::ReadWrite:
+		case AccessType::ReadWrite:
 			return gl::GL_READ_WRITE;
 		default:
 			assert(false);
@@ -393,6 +434,46 @@ namespace XREX
 		case TexelFormat::RGBA8:
 			{
 				static GLTextureFormat const Format(gl::GL_RGBA8, gl::GL_RGBA, gl::GL_UNSIGNED_BYTE);
+				return Format;
+			}
+		case TexelFormat::R8I:
+			{
+				static GLTextureFormat const Format(gl::GL_R8I, gl::GL_RED_INTEGER, gl::GL_BYTE);
+				return Format;
+			}
+		case TexelFormat::RG8I:
+			{
+				static GLTextureFormat const Format(gl::GL_RG8I, gl::GL_RG_INTEGER, gl::GL_BYTE);
+				return Format;
+			}
+		case TexelFormat::RGB8I:
+			{
+				static GLTextureFormat const Format(gl::GL_RGB8I, gl::GL_RGB_INTEGER, gl::GL_BYTE);
+				return Format;
+			}
+		case TexelFormat::RGBA8I:
+			{
+				static GLTextureFormat const Format(gl::GL_RGBA8I, gl::GL_RGBA_INTEGER, gl::GL_BYTE);
+				return Format;
+			}
+		case TexelFormat::R8UI:
+			{
+				static GLTextureFormat const Format(gl::GL_R8UI, gl::GL_RED_INTEGER, gl::GL_BYTE);
+				return Format;
+			}
+		case TexelFormat::RG8UI:
+			{
+				static GLTextureFormat const Format(gl::GL_RG8UI, gl::GL_RG_INTEGER, gl::GL_BYTE);
+				return Format;
+			}
+		case TexelFormat::RGB8UI:
+			{
+				static GLTextureFormat const Format(gl::GL_RGB8UI, gl::GL_RGB_INTEGER, gl::GL_BYTE);
+				return Format;
+			}
+		case TexelFormat::RGBA8UI:
+			{
+				static GLTextureFormat const Format(gl::GL_RGBA8UI, gl::GL_RGBA_INTEGER, gl::GL_BYTE);
 				return Format;
 			}
 		case TexelFormat::R16I:
@@ -453,6 +534,46 @@ namespace XREX
 		case TexelFormat::RGBA16F:
 			{
 				static GLTextureFormat const Format(gl::GL_RGBA16F, gl::GL_RGBA, gl::GL_FLOAT);
+				return Format;
+			}
+		case TexelFormat::R32I:
+			{
+				static GLTextureFormat const Format(gl::GL_R32I, gl::GL_RED_INTEGER, gl::GL_INT);
+				return Format;
+			}
+		case TexelFormat::RG32I:
+			{
+				static GLTextureFormat const Format(gl::GL_RG32I, gl::GL_RG_INTEGER, gl::GL_INT);
+				return Format;
+			}
+		case TexelFormat::RGB32I:
+			{
+				static GLTextureFormat const Format(gl::GL_RGB32I, gl::GL_RGB_INTEGER, gl::GL_INT);
+				return Format;
+			}
+		case TexelFormat::RGBA32I:
+			{
+				static GLTextureFormat const Format(gl::GL_RGBA32I, gl::GL_RGBA_INTEGER, gl::GL_INT);
+				return Format;
+			}
+		case TexelFormat::R32UI:
+			{
+				static GLTextureFormat const Format(gl::GL_R32UI, gl::GL_RED_INTEGER, gl::GL_UNSIGNED_INT);
+				return Format;
+			}
+		case TexelFormat::RG32UI:
+			{
+				static GLTextureFormat const Format(gl::GL_RG32UI, gl::GL_RG_INTEGER, gl::GL_UNSIGNED_INT);
+				return Format;
+			}
+		case TexelFormat::RGB32UI:
+			{
+				static GLTextureFormat const Format(gl::GL_RGB32UI, gl::GL_RGB_INTEGER, gl::GL_UNSIGNED_INT);
+				return Format;
+			}
+		case TexelFormat::RGBA32UI:
+			{
+				static GLTextureFormat const Format(gl::GL_RGBA32UI, gl::GL_RGBA_INTEGER, gl::GL_UNSIGNED_INT);
 				return Format;
 			}
 		case TexelFormat::R32F:
@@ -562,20 +683,66 @@ namespace XREX
 			return ElementType::DoubleM44;
 		case gl::GL_SAMPLER_1D:
 			return ElementType::Sampler1D;
+		case gl::GL_INT_SAMPLER_1D:
+			return ElementType::IntSampler1D;
+		case gl::GL_UNSIGNED_INT_SAMPLER_1D:
+			return ElementType::UintSampler1D;
 		case gl::GL_SAMPLER_2D:
 			return ElementType::Sampler2D;
+		case gl::GL_INT_SAMPLER_2D:
+			return ElementType::IntSampler2D;
+		case gl::GL_UNSIGNED_INT_SAMPLER_2D:
+			return ElementType::UintSampler2D;
 		case gl::GL_SAMPLER_3D:
 			return ElementType::Sampler3D;
+		case gl::GL_INT_SAMPLER_3D:
+			return ElementType::IntSampler3D;
+		case gl::GL_UNSIGNED_INT_SAMPLER_3D:
+			return ElementType::UintSampler3D;
 		case gl::GL_SAMPLER_CUBE:
 			return ElementType::SamplerCube;
+		case gl::GL_INT_SAMPLER_CUBE:
+			return ElementType::IntSamplerCube;
+		case gl::GL_UNSIGNED_INT_SAMPLER_CUBE:
+			return ElementType::UintSamplerCube;
+		case gl::GL_SAMPLER_BUFFER:
+			return ElementType::SamplerBuffer;
+		case gl::GL_INT_SAMPLER_BUFFER:
+			return ElementType::IntSamplerBuffer;
+		case gl::GL_UNSIGNED_INT_SAMPLER_BUFFER:
+			return ElementType::UintSamplerBuffer;
 		case gl::GL_IMAGE_1D:
 			return ElementType::Image1D;
+		case gl::GL_INT_IMAGE_1D:
+			return ElementType::IntImage1D;
+		case gl::GL_UNSIGNED_INT_IMAGE_1D:
+			return ElementType::UintImage1D;
 		case gl::GL_IMAGE_2D:
 			return ElementType::Image2D;
+		case gl::GL_INT_IMAGE_2D:
+			return ElementType::IntImage2D;
+		case gl::GL_UNSIGNED_INT_IMAGE_2D:
+			return ElementType::UintImage2D;
 		case gl::GL_IMAGE_3D:
 			return ElementType::Image3D;
+		case gl::GL_INT_IMAGE_3D:
+			return ElementType::IntImage3D;
+		case gl::GL_UNSIGNED_INT_IMAGE_3D:
+			return ElementType::UintImage3D;
 		case gl::GL_IMAGE_CUBE:
 			return ElementType::ImageCube;
+		case gl::GL_INT_IMAGE_CUBE:
+			return ElementType::IntImageCube;
+		case gl::GL_UNSIGNED_INT_IMAGE_CUBE:
+			return ElementType::UintImageCube;
+		case gl::GL_IMAGE_BUFFER:
+			return ElementType::ImageBuffer;
+		case gl::GL_INT_IMAGE_BUFFER:
+			return ElementType::IntImageBuffer;
+		case gl::GL_UNSIGNED_INT_IMAGE_BUFFER:
+			return ElementType::UintImageBuffer;
+		case gl::GL_UNSIGNED_INT_ATOMIC_COUNTER:
+			return ElementType::AtomicUint32Counter;
 		default:
 			// not support.
 			assert(false);

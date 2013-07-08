@@ -160,6 +160,8 @@ namespace XREX
 	{
 		Void, // for special use
 
+		Structure, // for special use
+
 		Bool,
 	
 		Uint8,
@@ -189,21 +191,52 @@ namespace XREX
 		DoubleV4,
 		DoubleM44,
 
+		Sampler, // for EffectParameter use
+
 		Sampler1D,
+		IntSampler1D,
+		UintSampler1D,
 		Sampler2D,
+		IntSampler2D,
+		UintSampler2D,
 		Sampler3D,
+		IntSampler3D,
+		UintSampler3D,
 		SamplerCube,
+		IntSamplerCube,
+		UintSamplerCube,
+		SamplerBuffer,
+		IntSamplerBuffer,
+		UintSamplerBuffer,
+
+		Image, // for EffectParameter use
 
 		Image1D,
+		IntImage1D,
+		UintImage1D,
 		Image2D,
+		IntImage2D,
+		UintImage2D,
 		Image3D,
+		IntImage3D,
+		UintImage3D,
 		ImageCube,
+		IntImageCube,
+		UintImageCube,
+		ImageBuffer,
+		IntImageBuffer,
+		UintImageBuffer,
+
+		Buffer,
+
+		AtomicUint32Counter,
 
 		ParameterTypeCount,
 	};
 
 	XREX_API bool IsSamplerType(ElementType type);
 	XREX_API bool IsImageType(ElementType type);
+	XREX_API bool IsAtomicBufferType(ElementType type);
 
 	/*
 	 *	@return: how many primitive element in a type.
@@ -279,7 +312,47 @@ namespace XREX
 	{
 		static ElementType const Type = ElementType::FloatM44;
 	};
-	// TODO samplers
+	template <>
+	struct TypeToElementType<double>
+	{
+		static ElementType const Type = ElementType::Double;
+	};
+	template <>
+	struct TypeToElementType<doubleV2>
+	{
+		static ElementType const Type = ElementType::DoubleV2;
+	};
+	template <>
+	struct TypeToElementType<doubleV3>
+	{
+		static ElementType const Type = ElementType::DoubleV3;
+	};
+	template <>
+	struct TypeToElementType<doubleV4>
+	{
+		static ElementType const Type = ElementType::DoubleV4;
+	};
+	template <>
+	struct TypeToElementType<doubleM44>
+	{
+		static ElementType const Type = ElementType::DoubleM44;
+	};
+
+	template <>
+	struct TypeToElementType<std::pair<TextureSP, SamplerSP>>
+	{
+		static ElementType const Type = ElementType::Sampler;
+	};
+	template <>
+	struct TypeToElementType<TextureImageSP>
+	{
+		static ElementType const Type = ElementType::Image;
+	};
+	template <>
+	struct TypeToElementType<GraphicsBufferSP>
+	{
+		static ElementType const Type = ElementType::Buffer;
+	};
 
 
 	enum class TexelFormat
@@ -288,6 +361,16 @@ namespace XREX
 		RG8,
 		RGB8,
 		RGBA8,
+
+		R8I,
+		RG8I,
+		RGB8I,
+		RGBA8I,
+
+		R8UI,
+		RG8UI,
+		RGB8UI,
+		RGBA8UI,
 
 		R16I,
 		RG16I,
@@ -327,10 +410,17 @@ namespace XREX
 		BGRA32F,
 
 		// TODO
-		NotUsed,
 		TexelFormatCount
 	};
 
 	XREX_API uint32 GetTexelSizeInBytes(TexelFormat format);
 
+	XREX_API TexelFormat GetCorrespondingTexelFormat(ElementType type);
+
+	enum class AccessType
+	{
+		ReadOnly,
+		WriteOnly,
+		ReadWrite,
+	};
 }

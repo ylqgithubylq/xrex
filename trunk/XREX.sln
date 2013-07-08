@@ -1,8 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CPPTest", "CPPTest\CPPTest.vcxproj", "{D4CD4D33-D488-4177-9D07-2AF8BC8E30EB}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "XREX", "XREX\XREX.vcxproj", "{A6418138-949C-4E1A-AD48-36B5BAC8CCAE}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "XREXTest", "XREXTest\XREXTest.vcxproj", "{EE954CC3-2258-4AD7-9EF6-3491D023E24C}"
@@ -20,14 +18,6 @@ Global
 		Release-Static|Win32 = Release-Static|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{D4CD4D33-D488-4177-9D07-2AF8BC8E30EB}.Debug|Win32.ActiveCfg = Debug|Win32
-		{D4CD4D33-D488-4177-9D07-2AF8BC8E30EB}.Debug|Win32.Build.0 = Debug|Win32
-		{D4CD4D33-D488-4177-9D07-2AF8BC8E30EB}.Debug-Static|Win32.ActiveCfg = Debug|Win32
-		{D4CD4D33-D488-4177-9D07-2AF8BC8E30EB}.Debug-Static|Win32.Build.0 = Debug|Win32
-		{D4CD4D33-D488-4177-9D07-2AF8BC8E30EB}.Release|Win32.ActiveCfg = Release|Win32
-		{D4CD4D33-D488-4177-9D07-2AF8BC8E30EB}.Release|Win32.Build.0 = Release|Win32
-		{D4CD4D33-D488-4177-9D07-2AF8BC8E30EB}.Release-Static|Win32.ActiveCfg = Release|Win32
-		{D4CD4D33-D488-4177-9D07-2AF8BC8E30EB}.Release-Static|Win32.Build.0 = Release|Win32
 		{A6418138-949C-4E1A-AD48-36B5BAC8CCAE}.Debug|Win32.ActiveCfg = Debug|Win32
 		{A6418138-949C-4E1A-AD48-36B5BAC8CCAE}.Debug|Win32.Build.0 = Debug|Win32
 		{A6418138-949C-4E1A-AD48-36B5BAC8CCAE}.Debug-Static|Win32.ActiveCfg = Debug-Static|Win32

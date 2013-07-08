@@ -119,7 +119,7 @@ void TestFile::TestMath()
 	floatM44 sc = ScalingMatrix(floatV3(1, 2, 1));
 	floatM44 rotft = RotationMatrixFromTo(floatV3(0, 1, 0), floatV3(1, 0, 1));
 
-	floatM44 frustum = FrustumMatrix(PI / 4, 8.0f / 6.0f, 1.0f, 10.0f);
+	floatM44 frustum = FrustumProjectionMatrix(PI / 4, 8.0f / 6.0f, 1.0f, 10.0f);
 
 	floatQ quat0(sin(PI / 2 / 2) * floatV3(1, 1, 0).Normalize(), cos(PI / 2 / 2));
 	floatQ quat1 = quat0.Normalize();

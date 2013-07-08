@@ -8,9 +8,5 @@ public:
 	TextureTest(void);
 	~TextureTest(void);
 
-	void InitializeScene();
-
-private:
-	SceneSP scene_;
 };
 

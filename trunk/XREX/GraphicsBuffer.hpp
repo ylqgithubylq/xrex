@@ -16,18 +16,16 @@ namespace XREX
 
 		enum class Usage
 		{
-			Static,
-			Dynamic,
-			Stream,
-
+			StaticDraw,
+			DynamicDraw,
+			StreamDraw,
+			StaticRead,
+			DynamicRead,
+			StreamRead,
+			StaticCopy,
+			DynamicCopy,
+			StreamCopy,
 			UsageCount
-		};
-
-		enum class AccessType
-		{
-			ReadOnly,
-			WriteOnly,
-			ReadWrite,
 		};
 
 	public:
@@ -39,26 +37,13 @@ namespace XREX
 		{
 			friend class GraphicsBuffer;
 		private:
-			BufferMapper(GraphicsBuffer& buffer, AccessType type)
-				: buffer_(buffer)
-			{
-				data_ = buffer_.Map(type);
-			}
+			BufferMapper(GraphicsBuffer& buffer, AccessType type);
 		public:
-			BufferMapper(BufferMapper&& right)
-				: buffer_(right.buffer_), data_(right.data_)
-			{
-				right.data_ = nullptr; // prevent Unmap of right in destructor
-			}
+			BufferMapper(BufferMapper&& right);
 
-			~BufferMapper()
-			{
-				if (data_)
-				{
-					data_ = nullptr;
-					buffer_.Unmap();
-				}
-			}
+			~BufferMapper();
+
+			void Finish();
 
 			template <typename T>
 			T* GetPointer()
@@ -80,6 +65,11 @@ namespace XREX
 
 		virtual ~GraphicsBuffer();
 
+		uint32 GetID() const
+		{
+			return glBufferID_;
+		}
+
 		Usage GetUsage() const
 		{
 			return usage_;
@@ -98,6 +88,15 @@ namespace XREX
 		void Resize(uint32 sizeInBytes);
 
 		void UpdateData(void const* data);
+
+		template <typename T>
+		void Clear(T const& data)
+		{
+			ElementType type = TypeToElementType<T>::Type;
+			assert(type != ElementType::ParameterTypeCount);
+			Clear(type, &data);
+		}
+		void Clear(ElementType dataType, void const* data);
 
 		void BindWrite();
 		void BindRead();

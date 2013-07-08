@@ -2,6 +2,7 @@
 
 #include "Texture.hpp"
 #include "TextureImage.hpp"
+#include "GraphicsBuffer.hpp"
 
 #include "GLUtil.hpp"
 
@@ -57,6 +58,11 @@ namespace XREX
 		return MakeSP<TextureImage>(shared_from_this(), level, format);
 	}
 
+	void Texture::RecreateMipmap()
+	{
+		gl::GenerateMipmap(glBindingTarget_);
+	}
+
 
 
 
@@ -94,6 +100,7 @@ namespace XREX
 	{
 		Bind(0);
 		DoFillTexture(description, 0, nullptr);
+		mipmapCount_ = 1;
 	}
 
 	template <uint32 Dimension>
@@ -135,7 +142,7 @@ namespace XREX
 				}
 				++mipmapCount_;
 			}
-			gl::GenerateMipmap(glBindingTarget_);
+			RecreateMipmap();
 		}
 		else
 		{
@@ -154,5 +161,20 @@ namespace XREX
 	template class XREX_API ConcreteTexture<1>;
 	template class XREX_API ConcreteTexture<2>;
 	template class XREX_API ConcreteTexture<3>;
+
+
+
+	TextureBuffer::TextureBuffer(GraphicsBufferSP const& buffer, TexelFormat format)
+		: Texture(TextureType::TextureBuffer), buffer_(buffer), format_(format)
+	{
+		assert(buffer_ != nullptr);
+		mipmapCount_ = 1;
+		Bind(0);
+		gl::TexBuffer(gl::GL_TEXTURE_BUFFER, GLTextureFormatFromTexelFormat(format_).glInternalFormat, buffer_->GetID());
+	}
+
+	TextureBuffer::~TextureBuffer()
+	{
+	}
 
 }

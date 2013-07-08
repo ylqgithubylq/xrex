@@ -95,7 +95,7 @@ namespace XREX
 		gl::GetShaderiv(glShaderID_, gl::GL_COMPILE_STATUS, &compiled);
 		validate_ = compiled == 1;
 
-	#ifdef XREX_DEBUG
+#ifdef XREX_DEBUG
 		if (!validate_)
 		{
 			int32 length = 0;
@@ -111,7 +111,7 @@ namespace XREX
 			}
 			XREXContext::GetInstance().GetLogger().LogLine(errorString_);
 		}
-	#endif
+#endif
 
 		return validate_;
 	}
@@ -167,7 +167,7 @@ namespace XREX
 		gl::GetProgramiv(glProgramID_, gl::GL_LINK_STATUS, &linked);
 		validate_ = linked == 1;
 
-	#ifdef XREX_DEBUG
+#ifdef XREX_DEBUG
 		if (!validate_)
 		{
 			int32 length = 0;
@@ -183,50 +183,135 @@ namespace XREX
 			}
 			XREXContext::GetInstance().GetLogger().LogLine(errorString_);
 		}
-	#endif
+#endif
 
 		if (validate_)
 		{
-			int32 uniformCount = 0;
-			gl::GetProgramiv(glProgramID_, gl::GL_ACTIVE_UNIFORMS, &uniformCount);
 			int32 maxUniformNameLength = 0;
 			gl::GetProgramiv(glProgramID_, gl::GL_ACTIVE_UNIFORM_MAX_LENGTH, &maxUniformNameLength);
 
-			for (int32 i = 0; i < uniformCount; ++i)
-			{
-				int32 nameLength;
-				int32 uniformSize;
-				uint32 glType;
-				string name;
-				name.resize(maxUniformNameLength);
-				gl::GetActiveUniform(glProgramID_, i, maxUniformNameLength, &nameLength, &uniformSize, &glType, &name[0]);
-				int32 location = gl::GetUniformLocation(glProgramID_, name.c_str());
-				name = name.substr(0, nameLength); // no '\0' included
-
-				uniformInformations_.emplace_back(UniformInformation(name, ElementTypeFromeGLType(glType), uniformSize, location));
-
+			{ // uniform
+				int32 uniformCount = 0;
+				gl::GetProgramiv(glProgramID_, gl::GL_ACTIVE_UNIFORMS, &uniformCount);
+				for (int32 i = 0; i < uniformCount; ++i)
+				{
+					int32 nameLength;
+					int32 uniformSize;
+					uint32 glType;
+					string name;
+					name.resize(maxUniformNameLength);
+					gl::GetActiveUniform(glProgramID_, i, maxUniformNameLength, &nameLength, &uniformSize, &glType, &name[0]);
+					name = name.substr(0, nameLength); // no '\0' included
+					int32 location = gl::GetUniformLocation(glProgramID_, name.c_str());
+					if (location != -1) // if -1, it is in a buffer. this is handled at buffer part
+					{
+						uniformInformations_.emplace_back(UniformInformation(name, ElementTypeFromeGLType(glType), uniformSize, location));
+					}
+				}
 			}
+			{ // attribute
+				int32 attributeCount = 0;
+				gl::GetProgramiv(glProgramID_, gl::GL_ACTIVE_ATTRIBUTES, &attributeCount);
+				int32 maxAttributeNameLength = 0;
+				gl::GetProgramiv(glProgramID_, gl::GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, &maxAttributeNameLength);
+				for (int32 i = 0; i < attributeCount; ++i)
+				{
+					int32 nameLength;
+					int32 attributeSize;
+					uint32 glType;
+					string name;
+					name.resize(maxAttributeNameLength);
+					gl::GetActiveAttrib(glProgramID_, i, maxAttributeNameLength, &nameLength, &attributeSize, &glType, &name[0]);
+					name = name.substr(0, nameLength); // no '\0' included
+					int32 location = gl::GetAttribLocation(glProgramID_, name.c_str());
+					assert(location != -1);
 
-			int32 attributeCount = 0;
-			gl::GetProgramiv(glProgramID_, gl::GL_ACTIVE_ATTRIBUTES, &attributeCount);
-			int32 maxAttributeNameLength = 0;
-			gl::GetProgramiv(glProgramID_, gl::GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, &maxAttributeNameLength);
-
-
-			for (int32 i = 0; i < attributeCount; ++i)
-			{
-				int32 nameLength;
-				int32 attributeSize;
-				uint32 glType;
-				string name;
-				name.resize(maxAttributeNameLength);
-				gl::GetActiveAttrib(glProgramID_, i, maxAttributeNameLength, &nameLength, &attributeSize, &glType, &name[0]);
-				int32 location = gl::GetAttribLocation(glProgramID_, name.c_str());
-				name = name.substr(0, nameLength); // no '\0' included
-
-				attributeInformations_.emplace_back(AttributeInformation(std::move(name), ElementTypeFromeGLType(glType), attributeSize, location));
+					attributeInformations_.emplace_back(AttributeInformation(std::move(name), ElementTypeFromeGLType(glType), attributeSize, location));
+				}
 			}
-
+			{ // uniform buffer
+				int32 uniformBufferCount = 0;
+				gl::GetProgramiv(glProgramID_, gl::GL_ACTIVE_UNIFORM_BLOCKS, &uniformBufferCount);
+				for (int32 i = 0; i < uniformBufferCount; ++i)
+				{
+					int32 bindingIndex;
+					int32 dataSize;
+					int32 nameLength;
+					string bufferName;
+					int32 variableCount;
+					std::vector<int32> variableIndices;
+					std::vector<int32> variableOffsets;
+					std::vector<int32> arrayStrides;
+					std::vector<int32> matrixStrides;
+					gl::GetActiveUniformBlockiv(glProgramID_, i, gl::GL_UNIFORM_BLOCK_BINDING, &bindingIndex);
+					gl::GetActiveUniformBlockiv(glProgramID_, i, gl::GL_UNIFORM_BLOCK_DATA_SIZE, &dataSize);
+					gl::GetActiveUniformBlockiv(glProgramID_, i, gl::GL_UNIFORM_BLOCK_NAME_LENGTH, &nameLength);
+					bufferName.resize(nameLength);
+					gl::GetActiveUniformBlockiv(glProgramID_, i, gl::GL_UNIFORM_BLOCK_ACTIVE_UNIFORMS, &variableCount);
+					variableIndices.resize(variableCount);
+					gl::GetActiveUniformBlockiv(glProgramID_, i, gl::GL_UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES, &variableIndices[0]);
+					gl::GetActiveUniformBlockName(glProgramID_, i, nameLength, &nameLength, &bufferName[0]);
+					variableOffsets.resize(variableCount);
+					arrayStrides.resize(variableCount);
+					matrixStrides.resize(variableCount);
+					gl::GetActiveUniformsiv(glProgramID_, variableCount, reinterpret_cast<uint32 const*>(variableIndices.data()), gl::GL_UNIFORM_OFFSET, &variableOffsets[0]);
+					gl::GetActiveUniformsiv(glProgramID_, variableCount, reinterpret_cast<uint32 const*>(variableIndices.data()), gl::GL_UNIFORM_ARRAY_STRIDE, &arrayStrides[0]);
+					gl::GetActiveUniformsiv(glProgramID_, variableCount, reinterpret_cast<uint32 const*>(variableIndices.data()), gl::GL_UNIFORM_MATRIX_STRIDE, &matrixStrides[0]);
+					std::vector<BufferInformation::BufferVariableInformation> bufferVariableInformations;
+					for (int32 j = 0; j < variableCount; ++j)
+					{
+						int32 index = variableIndices[j];
+						int32 nameLength;
+						int32 variableSize;
+						uint32 glType;
+						string variableName;
+						variableName.resize(maxUniformNameLength);
+						gl::GetActiveUniform(glProgramID_, index, maxUniformNameLength, &nameLength, &variableSize, &glType, &variableName[0]);
+						variableName = variableName.substr(0, nameLength); // no '\0' included
+						bufferVariableInformations.emplace_back(BufferInformation::BufferVariableInformation(
+							std::move(variableName), ElementTypeFromeGLType(glType), variableSize, variableOffsets[j], arrayStrides[j], matrixStrides[j]));
+					}
+					bufferInformations_.emplace_back(BufferInformation(
+						std::move(bufferName), BufferInformation::BufferType::UniformBuffer, bindingIndex, dataSize, std::move(bufferVariableInformations)));
+				}
+			}
+			{ // atomic counter
+				int32 atomicBufferCount = 0;
+				gl::GetProgramiv(glProgramID_, gl::GL_ACTIVE_ATOMIC_COUNTER_BUFFERS, &atomicBufferCount);
+				for (int32 i = 0; i < atomicBufferCount; ++i)
+				{
+					int32 bindingIndex;
+					int32 dataSize;
+					int32 variableCount;
+					std::vector<int32> variableIndices;
+					std::vector<int32> variableOffsets;
+					std::vector<int32> arrayStrides;
+					gl::GetActiveAtomicCounterBufferiv(glProgramID_, i, gl::GL_ATOMIC_COUNTER_BUFFER_BINDING, &bindingIndex);
+					gl::GetActiveAtomicCounterBufferiv(glProgramID_, i, gl::GL_ATOMIC_COUNTER_BUFFER_DATA_SIZE, &dataSize);
+					gl::GetActiveAtomicCounterBufferiv(glProgramID_, i, gl::GL_ATOMIC_COUNTER_BUFFER_ACTIVE_ATOMIC_COUNTERS, &variableCount);
+					variableIndices.resize(variableCount);
+					gl::GetActiveAtomicCounterBufferiv(glProgramID_, i, gl::GL_ATOMIC_COUNTER_BUFFER_ACTIVE_ATOMIC_COUNTER_INDICES, &variableIndices[0]);
+					variableOffsets.resize(variableCount);
+					arrayStrides.resize(variableCount);
+					gl::GetActiveUniformsiv(glProgramID_, variableCount, reinterpret_cast<uint32 const*>(variableIndices.data()), gl::GL_UNIFORM_OFFSET, &variableOffsets[0]);
+					gl::GetActiveUniformsiv(glProgramID_, variableCount, reinterpret_cast<uint32 const*>(variableIndices.data()), gl::GL_UNIFORM_ARRAY_STRIDE, &arrayStrides[0]);
+					std::vector<BufferInformation::BufferVariableInformation> bufferVariableInformations;
+					for (int32 j = 0; j < variableCount; ++j)
+					{
+						int32 index = variableIndices[j];
+						int32 nameLength;
+						int32 variableSize;
+						uint32 glType;
+						string variableName;
+						variableName.resize(maxUniformNameLength);
+						gl::GetActiveUniform(glProgramID_, index, maxUniformNameLength, &nameLength, &variableSize, &glType, &variableName[0]);
+						bufferVariableInformations.emplace_back(BufferInformation::BufferVariableInformation(
+							std::move(variableName), ElementTypeFromeGLType(glType), variableSize, variableOffsets[j], arrayStrides[j], 0));
+					}
+					bufferInformations_.emplace_back(BufferInformation(
+						std::to_string(bindingIndex), BufferInformation::BufferType::AtomicCounterBuffer, bindingIndex, dataSize, std::move(bufferVariableInformations)));
+				}
+			}
 		}
 
 		return validate_;
@@ -291,10 +376,23 @@ namespace XREX
 	}
 
 
+	std::pair<bool, ProgramObject::BufferInformation> ProgramObject::GetBufferInformation(std::string const& bufferName) const
+	{
+		auto found = std::find_if(bufferInformations_.begin(), bufferInformations_.end(), [&bufferName] (BufferInformation const& bufferInformation)
+		{
+			return bufferInformation.GetName() == bufferName;
+		});
+		if (found == bufferInformations_.end())
+		{
+			return std::make_pair(false, NullBufferInformation);
+		}
+		return std::make_pair(true, *found);
+	}
 
 	void ProgramObject::CreateUniformBinder(std::string const& channel, EffectParameterSP const& parameter)
 	{
-		UniformBinder& binder = CreateBinder(channel);
+		assert(parameter != nullptr);
+		UniformBinder& binder = DoCreateUniformBinder(channel);
 
 		ElementType type = binder.uniformInformation.GetElementType();
 
@@ -489,6 +587,13 @@ namespace XREX
 				return XREXContext::GetInstance().GetRenderingFactory().GetBlackTextureCube();
 			}
 		};
+		struct DefaultTextureGetterBuffer
+		{
+			static TextureSP const& Get()
+			{
+				return XREXContext::GetInstance().GetRenderingFactory().GetBlackTexture1D();
+			}
+		};
 
 		template <typename DefaultTextureGetter>
 		struct SamplerBinder
@@ -526,32 +631,47 @@ namespace XREX
 
 	void ProgramObject::CreateSamplerUniformBinder(std::string const& channel, EffectParameterSP const& parameter, uint32 samplerLocation)
 	{
-		UniformBinder& binder = CreateBinder(channel);
+		assert(parameter != nullptr);
+		UniformBinder& binder = DoCreateUniformBinder(channel);
 
 		ElementType type = binder.uniformInformation.GetElementType();
 
 		switch(type)
 		{
 		case ElementType::Sampler1D:
+		case ElementType::IntSampler1D:
+		case ElementType::UintSampler1D:
 			{
 				binder.setter = SamplerBinder<DefaultTextureGetter1D>(parameter, samplerLocation);
 			}
 			break;
 		case ElementType::Sampler2D:
+		case ElementType::IntSampler2D:
+		case ElementType::UintSampler2D:
 			{
 				binder.setter = SamplerBinder<DefaultTextureGetter2D>(parameter, samplerLocation);
 			}
 			break;
 		case ElementType::Sampler3D:
+		case ElementType::IntSampler3D:
+		case ElementType::UintSampler3D:
 			{
 				binder.setter = SamplerBinder<DefaultTextureGetter3D>(parameter, samplerLocation);
 			}
 			break;
 		case ElementType::SamplerCube:
+		case ElementType::IntSamplerCube:
+		case ElementType::UintSamplerCube:
 			{
 				binder.setter = SamplerBinder<DefaultTextureGetterCube>(parameter, samplerLocation);
 			}
 			break;
+		case ElementType::SamplerBuffer:
+		case ElementType::IntSamplerBuffer:
+		case ElementType::UintSamplerBuffer:
+			{
+				binder.setter = SamplerBinder<DefaultTextureGetterBuffer>(parameter, samplerLocation);
+			}
 		default:
 			// not support.
 			assert(false);
@@ -574,10 +694,10 @@ namespace XREX
 			{
 				TextureImageSP const& image = parameter->As<TextureImageSP>().GetValue();
 				assert(image);
-				assert(GetTexelSizeInBytes(image->GetFormat()) == GetTexelSizeInBytes(format));
+				assert(GetTexelSizeInBytes(image->GetFormat()) == GetTexelSizeInBytes(image->GetBindingFormat_TEMP()));
 				// TODO format should be the format declared in shader, not the image format
 				// image->Bind(imageLocation, format);
-				image->Bind(imageLocation, image->GetBindingFormat_TEMP());
+				image->Bind(imageLocation, image->GetBindingFormat_TEMP(), AccessType::ReadWrite);
 				gl::Uniform1i(uniformInformation.GetLocation(), imageLocation);
 			}
 		};
@@ -585,29 +705,58 @@ namespace XREX
 
 	void ProgramObject::CreateImageUniformBinder(std::string const& channel, EffectParameterSP const& parameter, uint32 imageLocation)
 	{
-		UniformBinder& binder = CreateBinder(channel);
+		assert(parameter != nullptr);
+		UniformBinder& binder = DoCreateUniformBinder(channel);
 
 		ElementType type = binder.uniformInformation.GetElementType();
-
-		switch(type)
-		{
-		case ElementType::Image1D:
-		case ElementType::Image2D:
-		case ElementType::Image3D:
-		case ElementType::ImageCube:
-			{
-				 // TODO format should be the format declared in shader, not the image format
-				binder.setter = ImageBinder(parameter, TexelFormat::BGRA32F, imageLocation);
-			}
-			break;
-		default:
-			// not support.
-			assert(false);
-		}
+		assert(IsImageType(type));
+		// TODO format should be the format declared in shader, not the image format
+		binder.setter = ImageBinder(parameter, TexelFormat::TexelFormatCount, imageLocation);
 	}
 
+	namespace
+	{
+		struct BufferResourceBinder
+		{
+			EffectParameterSP parameter;
+			BufferResourceBinder(EffectParameterSP const& parameter)
+				: parameter(parameter)
+			{
+			}
 
-	ProgramObject::UniformBinder& ProgramObject::CreateBinder(std::string const& channel)
+			void operator() (ProgramObject::BufferInformation const& bufferInformation)
+			{
+				GraphicsBufferSP const& buffer = parameter->As<GraphicsBufferSP>().GetValue();
+				assert(buffer);
+				BufferView::BufferType type;
+				switch (bufferInformation.GetBufferType())
+				{
+				case ProgramObject::BufferInformation::BufferType::UniformBuffer:
+					type = BufferView::BufferType::Uniform;
+					break;
+				case ProgramObject::BufferInformation::BufferType::AtomicCounterBuffer:
+					type = BufferView::BufferType::AtomicCounter;
+					break;
+				case ProgramObject::BufferInformation::BufferType::ShaderStorageBuffer:
+					type = BufferView::BufferType::ShaderStorage;
+					break;
+				default:
+					assert(false);
+					break;
+				}
+				buffer->BindIndex(type, bufferInformation.GetBindingIndex());
+			}
+		};
+	}
+
+	void ProgramObject::CreateBufferBinder(std::string const& name, EffectParameterSP const& parameter)
+	{
+		assert(parameter != nullptr);
+		BufferBinder& binder = DoCreateBufferBinder(name);
+		binder.setter = BufferResourceBinder(parameter);
+	}
+
+	ProgramObject::UniformBinder& ProgramObject::DoCreateUniformBinder(std::string const& channel)
 	{
 		auto found = std::find_if(uniformInformations_.begin(), uniformInformations_.end(), [&channel] (UniformInformation const& uniformInformation)
 		{
@@ -619,7 +768,20 @@ namespace XREX
 		return uniformBinders_.back();
 	}
 
+	ProgramObject::BufferBinder& ProgramObject::DoCreateBufferBinder(std::string const& name)
+	{
+		auto found = std::find_if(bufferInformations_.begin(), bufferInformations_.end(), [&name] (BufferInformation const& bufferInformation)
+		{
+			return bufferInformation.GetName() == name;
+		});
+		assert(found != bufferInformations_.end());
+
+		bufferBinders_.emplace_back(BufferBinder(*found));
+		return bufferBinders_.back();
+	}
+
 	ProgramObject::AttributeInformation const ProgramObject::NullAttributeInformation;
 	ProgramObject::UniformInformation const ProgramObject::NullUniformInformation;
+	ProgramObject::BufferInformation const ProgramObject::NullBufferInformation;
 
 }

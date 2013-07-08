@@ -23,7 +23,14 @@ namespace XREX
 	}
 
 
-	uint32 XREX::BufferView::GetBufferSize() const
+	void BufferView::SetBuffer(GraphicsBufferSP const& buffer)
+	{
+		assert(SetBufferCheck(buffer));
+		buffer_ = buffer;
+	}
+
+
+	uint32 BufferView::GetBufferSize() const
 	{
 		assert(HaveBuffer());
 		return buffer_->GetSize();
@@ -54,6 +61,12 @@ namespace XREX
 		buffer_->UnbindIndex();
 	}
 
+	bool BufferView::SetBufferCheck(GraphicsBufferSP const& newBuffer)
+	{
+		return true;
+	}
+
+
 
 	VertexBuffer::VertexBuffer(DataLayoutDescription&& layoutDescription)
 		: BufferView(BufferType::Vertex), layoutDescription_(std::move(layoutDescription))
@@ -69,14 +82,19 @@ namespace XREX
 
 
 	IndexBuffer::IndexBuffer(TopologicalType topologicalType, ElementType elementType, uint32 elementCount)
-		: BufferView(BufferType::Index)
+		: BufferView(BufferType::Index), topologicalType_(topologicalType), elementType_(elementType), elementCount_(elementCount)
 	{
 	}
 
 	IndexBuffer::IndexBuffer(GraphicsBufferSP const& buffer, TopologicalType topologicalType, ElementType elementType, uint32 elementCount)
 		: BufferView(BufferType::Index, buffer), topologicalType_(topologicalType), elementType_(elementType), elementCount_(elementCount)
 	{
-		assert(GetElementSizeInBytes(elementType) * elementCount_ == GetBuffer()->GetSize());
+		assert(SetBufferCheck(buffer));
+	}
+
+	bool IndexBuffer::SetBufferCheck(GraphicsBufferSP const& newBuffer)
+	{
+		return GetElementSizeInBytes(elementType_) * elementCount_ == newBuffer->GetSize();
 	}
 
 

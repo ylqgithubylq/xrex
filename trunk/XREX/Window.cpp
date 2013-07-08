@@ -30,7 +30,8 @@ namespace XREX
 
 			if (thiz && thiz->hideWindows_->hWnd_)
 			{
-				return thiz->hideWindows_->InstanceWndProc(thiz->hideWindows_->hWnd_, message, wParam, lParam);
+				assert(hWnd == thiz->hideWindows_->hWnd_);
+				return thiz->hideWindows_->InstanceWndProc(hWnd, message, wParam, lParam);
 			}
 			else
 			{
@@ -151,6 +152,7 @@ namespace XREX
 				{
 				}
 			}
+			hWnd = hWnd; // meaningless, just to set breakpoint
 			return DefWindowProc(hWnd, message, wParam, lParam);
 		}
 
