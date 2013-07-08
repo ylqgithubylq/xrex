@@ -18,6 +18,8 @@ namespace XREX
 			Uniform,
 			TransformFeedback,
 			Texture,
+			AtomicCounter,
+			ShaderStorage,
 
 			TypeCount,
 		};
@@ -42,10 +44,7 @@ namespace XREX
 		{
 			return buffer_;
 		}
-		void SetBuffer(GraphicsBufferSP const& buffer)
-		{
-			buffer_ = buffer;
-		}
+		void SetBuffer(GraphicsBufferSP const& buffer);
 
 		uint32 GetBufferSize() const;
 
@@ -54,6 +53,9 @@ namespace XREX
 
 		virtual void Unbind();
 		virtual void UnbindIndex();
+
+	protected:
+		virtual bool SetBufferCheck(GraphicsBufferSP const& newBuffer);
 
 	private:
 		GraphicsBufferSP buffer_;
@@ -134,8 +136,6 @@ namespace XREX
 			return layoutDescription_.GetVertexCount();
 		}
 
-
-
 	private:
 		DataLayoutDescription layoutDescription_;
 	};
@@ -177,8 +177,15 @@ namespace XREX
 		}
 
 	private:
+		virtual bool SetBufferCheck(GraphicsBufferSP const& newBuffer) override;
+
+
+	private:
 		TopologicalType topologicalType_;
 		ElementType elementType_;
 		uint32 elementCount_;
 	};
+
+
+
 }

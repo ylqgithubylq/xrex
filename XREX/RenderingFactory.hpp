@@ -235,6 +235,12 @@ namespace XREX
 			return MakeSP<TextureCube>(description, data, generateMipmap);
 		}
 
+		TextureSP CreateTextureBuffer(GraphicsBufferSP const& textureBuffer, TexelFormat format)
+		{
+			return MakeSP<TextureBuffer>(textureBuffer, format);
+		}
+
+
 		ViewportSP CreateViewport(int32 depthOrder, int32 left, int32 bottom, uint32 width, uint32 height)
 		{
 			return MakeSP<Viewport>(depthOrder, left, bottom, width, height);

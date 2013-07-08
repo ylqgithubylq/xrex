@@ -33,9 +33,6 @@
     <ClInclude Include="TextureTestShaderCodes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="VoxelTestShaderCodes.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -59,9 +56,6 @@
     <ClCompile Include="TextureTestShaderCodes.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="VoxelTestShaderCodes.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Effects\Test.glsl">
@@ -71,6 +65,12 @@
       <Filter>Effect Files</Filter>
     </None>
     <None Include="..\Effects\ConeTracing.glsl">
+      <Filter>Effect Files</Filter>
+    </None>
+    <None Include="..\Effects\ListGeneration.glsl">
+      <Filter>Effect Files</Filter>
+    </None>
+    <None Include="..\Effects\VoxelGeneration.glsl">
       <Filter>Effect Files</Filter>
     </None>
   </ItemGroup>

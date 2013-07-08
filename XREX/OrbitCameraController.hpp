@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Declare.hpp"
-#include "inputhandler.hpp"
+#include "InputHandler.hpp"
 
 namespace XREX
 {

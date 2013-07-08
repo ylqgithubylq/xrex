@@ -29,7 +29,7 @@ namespace XREX
 		: alphaToCoverageEnable(false), blendEnable(false),
 		blendOperation(BlendOperation::Add), sourceBlend(AlphaBlendFactor::One), destinationBlend(AlphaBlendFactor::Zero),
 		blendOperationAlpha(BlendOperation::Add), sourceBlendAlpha(AlphaBlendFactor::One), destinationBlendAlpha(AlphaBlendFactor::Zero),
-		redMask(true), greenMask(true), blueMask(true)
+		redMask(true), greenMask(true), blueMask(true), alphaMask(true)
 	{
 	}
 

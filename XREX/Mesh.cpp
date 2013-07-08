@@ -39,9 +39,9 @@ namespace XREX
 		subMeshes_.emplace_back(new SubMesh(*this, name, layout, nullptr, nullptr, RenderablePack::DefaultRenderingGroup));
 		return subMeshes_.back();
 	}
-	SubMeshSP const& Mesh::CreateSubMesh(std::string const& name, RenderingLayoutSP const& layout, MaterialSP const& material, RenderingEffectSP const& effect, int32 renderingGroup /*= RenderablePack::DefaultRenderingGroup*/)
+	SubMeshSP const& Mesh::CreateSubMesh(std::string const& name, RenderingLayoutSP const& layout, MaterialSP const& material, RenderingTechniqueSP const& technique, int32 renderingGroup /*= RenderablePack::DefaultRenderingGroup*/)
 	{
-		subMeshes_.emplace_back(new SubMesh(*this, name, layout, material, effect, renderingGroup));
+		subMeshes_.emplace_back(new SubMesh(*this, name, layout, material, technique, renderingGroup));
 		return subMeshes_.back();
 	}
 
@@ -64,18 +64,18 @@ namespace XREX
 		clone.SetVisible(IsVisible());
 		for (auto& subMesh : subMeshes_)
 		{
-			clone.CreateSubMesh(subMesh->GetName(), subMesh->GetLayout(), subMesh->GetMaterial(), subMesh->GetEffect());
+			clone.CreateSubMesh(subMesh->GetName(), subMesh->GetLayout(), subMesh->GetMaterial(), subMesh->GetTechnique());
 		}
 		return cloneSP;
 	}
 
 
 
-	SubMesh::SubMesh(Mesh& mesh, std::string const& name, RenderingLayoutSP const& layout, MaterialSP const& material, RenderingEffectSP const& effect, int32 renderingGroup)
+	SubMesh::SubMesh(Mesh& mesh, std::string const& name, RenderingLayoutSP const& layout, MaterialSP const& material, RenderingTechniqueSP const& technique, int32 renderingGroup)
 		: mesh_(mesh), name_(name), material_(material), layout_(layout), renderingGroup_(renderingGroup)
 	{
 		assert(layout_ != nullptr);
-		SetEffect(effect);
+		SetTechnique(technique);
 	}
 
 	SubMesh::~SubMesh()
@@ -85,26 +85,32 @@ namespace XREX
 
 	Renderable::RenderablePack SubMesh::GetRenderablePack(SceneObjectSP const& camera) const
 	{
-		// TODO camera dependence technique
-		assert(effect_ != nullptr);
-		return Renderable::RenderablePack(this->mesh_, layout_, material_, effect_->GetAvailableTechnique(0), renderingGroup_);
+		// assert(technique_ != nullptr);
+		return Renderable::RenderablePack(this->mesh_, layout_, material_, technique_, renderingGroup_);
 	}
 
-	void SubMesh::SetEffect(RenderingEffectSP const& effect)
+	void SubMesh::SetTechnique(RenderingTechniqueSP const& technique)
 	{
-		effect_ = effect;
+		technique_ = technique;
 		if (material_)
 		{
-			material_->BindToEffect(effect_);
+			if (technique_)
+			{
+				material_->BindToEffect(technique_->GetEffect());
+			}
+			else
+			{
+				material_->BindToEffect(nullptr);
+			}
 		}
 	}
 
 	void SubMesh::SetMaterial(MaterialSP const& material)
 	{
 		material_ = material;
-		if (effect_)
+		if (material_ && technique_)
 		{
-			material_->BindToEffect(effect_);
+			material_->BindToEffect(technique_->GetEffect());
 		}
 	}
 

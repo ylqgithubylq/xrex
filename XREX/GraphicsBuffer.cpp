@@ -17,7 +17,34 @@ using std::vector;
 namespace XREX
 {
 
-	GraphicsBuffer::GraphicsBuffer( Usage usage, uint32 sizeInBytes)
+	GraphicsBuffer::BufferMapper::BufferMapper(GraphicsBuffer& buffer, AccessType type)
+		: buffer_(buffer)
+	{
+		data_ = buffer_.Map(type);
+	}
+
+	GraphicsBuffer::BufferMapper::BufferMapper(BufferMapper&& right)
+		: buffer_(right.buffer_), data_(right.data_)
+	{
+		right.data_ = nullptr; // prevent Unmap of right in destructor
+	}
+
+	GraphicsBuffer::BufferMapper::~BufferMapper()
+	{
+		Finish();
+	}
+
+	void GraphicsBuffer::BufferMapper::Finish()
+	{
+		if (data_)
+		{
+			data_ = nullptr;
+			buffer_.Unmap();
+		}
+	}
+
+
+	GraphicsBuffer::GraphicsBuffer(Usage usage, uint32 sizeInBytes)
 		: usage_(usage), sizeInBytes_(sizeInBytes)
 	{
 		DoConsctruct(nullptr, sizeInBytes);
@@ -89,6 +116,21 @@ namespace XREX
 	}
 
 
+	void GraphicsBuffer::Clear(ElementType type, void const* data)
+	{
+		ElementType primitiveType = GetElementPrimitiveType(type);
+		uint32 elementCount = GetElementPrimitiveCount(type);
+		BindWrite();
+		TexelFormat format = GetCorrespondingTexelFormat(type);
+		uint32 componentCount = GetElementPrimitiveCount(type);
+		GLTextureFormat const& glFormat = GLTextureFormatFromTexelFormat(format);
+		gl::ClearBufferData(gl::GL_COPY_WRITE_BUFFER, glFormat.glInternalFormat, glFormat.glSourceFormat, glFormat.glTextureElementType, data);
+	}
+
+
+
+
+
 	void GraphicsBuffer::BindWrite()
 	{
 		gl::BindBuffer(gl::GL_COPY_WRITE_BUFFER, glBufferID_);
@@ -126,7 +168,7 @@ namespace XREX
 
 	void* GraphicsBuffer::Map(AccessType accessType)
 	{
-		uint32 glAccessType = GlAccessTypeFromAccessType(accessType);
+		uint32 glAccessType = GLAccessTypeFromAccessType(accessType);
 		BindWrite();
 		void* p = gl::MapBuffer(gl::GL_COPY_WRITE_BUFFER, glAccessType);
 		assert(p != nullptr);
@@ -139,10 +181,6 @@ namespace XREX
 		bool result = gl::UnmapBuffer(gl::GL_COPY_WRITE_BUFFER) == gl::GL_TRUE;
 		assert(result);
 	}
-
-
-
-
 
 	bool VertexBuffer::DataLayoutDescription::AddChannelLayout(ElementLayoutDescription&& elementLayout)
 	{
@@ -160,6 +198,7 @@ namespace XREX
 		assert(found != channelLayouts_.end());
 		return *found;
 	}
+
 
 
 }

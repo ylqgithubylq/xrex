@@ -17,18 +17,12 @@ namespace XREX
 	{
 	public:
 		static Color const DefaultBackgroundColor;
+
+	protected:
+		Camera();
 	public:
-		Camera(float fieldOfView, float aspectRatio, float near, float far);
 		virtual ~Camera() override;
 
-		float GetFieldOfView() const
-		{
-			return fieldOfView_;
-		}
-		float GetAspectRatio() const
-		{
-			return aspectRatio_;
-		}
 
 		bool IsActive() const
 		{
@@ -91,16 +85,12 @@ namespace XREX
 		void Update() const;
 
 
-	private:
-		float fieldOfView_;
-		float aspectRatio_;
-		float near_;
-		float far_;
+	protected:
 
 		floatM44 mutable viewMatrix_;
 		floatM44 mutable projectionMatrix_;
 
-
+	private:
 		Color backgroundColor_;
 
 		ViewportSP viewport_;
@@ -110,6 +100,64 @@ namespace XREX
 		bool mutable dirty_;
 
 	};
+
+	class XREX_API PerspectiveCamera
+		: public Camera
+	{
+	public:
+		PerspectiveCamera(float fieldOfView, float aspectRatio, float near, float far);
+		virtual ~PerspectiveCamera() override;
+
+
+		float GetFieldOfView() const
+		{
+			return fieldOfView_;
+		}
+		float GetAspectRatio() const
+		{
+			return aspectRatio_;
+		}
+		float GetNear() const
+		{
+			return near_;
+		}
+		float GetFar() const
+		{
+			return far_;
+		}
+	private:
+		float fieldOfView_;
+		float aspectRatio_;
+		float near_;
+		float far_;
+
+	};
+
+	class OrthogonalCamera
+		: public Camera
+	{
+	public:
+		OrthogonalCamera(float width, float height, float depth);
+		~OrthogonalCamera();
+
+		float GetWidth() const
+		{
+			return width_;
+		}
+		float GetHeight() const
+		{
+			return height_;
+		}
+		float GetDepth() const
+		{
+			return depth_;
+		}
+	private:
+		float width_;
+		float height_;
+		float depth_;
+	};
+
 
 }
 

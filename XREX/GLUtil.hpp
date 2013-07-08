@@ -39,7 +39,7 @@ namespace XREX
 
 	XREX_API uint32 GLUsageFromUsage(GraphicsBuffer::Usage usage);
 
-	XREX_API uint32 GlAccessTypeFromAccessType(GraphicsBuffer::AccessType type);
+	XREX_API uint32 GLAccessTypeFromAccessType(AccessType type);
 
 	XREX_API uint32 GLTextureTypeFromTextureType(Texture::TextureType type);
 

@@ -140,23 +140,23 @@ namespace XREX
 				static std::unordered_map<FREE_IMAGE_TYPE, TexelFormat> const imageTypeMapping = [] ()
 				{
 					std::remove_const<decltype(imageTypeMapping)>::type temp;
-					temp[FREE_IMAGE_TYPE::FIT_BITMAP] = TexelFormat::NotUsed;
-					temp[FREE_IMAGE_TYPE::FIT_COMPLEX] = TexelFormat::NotUsed;
-					temp[FREE_IMAGE_TYPE::FIT_DOUBLE] = TexelFormat::NotUsed;
-					temp[FREE_IMAGE_TYPE::FIT_FLOAT] = TexelFormat::NotUsed;
-					temp[FREE_IMAGE_TYPE::FIT_INT16] = TexelFormat::NotUsed;
-					temp[FREE_IMAGE_TYPE::FIT_INT32] = TexelFormat::NotUsed;
-					temp[FREE_IMAGE_TYPE::FIT_RGB16] = TexelFormat::NotUsed;
-					temp[FREE_IMAGE_TYPE::FIT_RGBA16] = TexelFormat::NotUsed;
-					temp[FREE_IMAGE_TYPE::FIT_RGBF] = TexelFormat::NotUsed;
-					temp[FREE_IMAGE_TYPE::FIT_RGBAF] = TexelFormat::NotUsed;
-					temp[FREE_IMAGE_TYPE::FIT_UINT16] = TexelFormat::NotUsed;
-					temp[FREE_IMAGE_TYPE::FIT_UINT32] = TexelFormat::NotUsed;
-					temp[FREE_IMAGE_TYPE::FIT_UNKNOWN] = TexelFormat::NotUsed;
+					temp[FREE_IMAGE_TYPE::FIT_BITMAP] = TexelFormat::TexelFormatCount;
+					temp[FREE_IMAGE_TYPE::FIT_COMPLEX] = TexelFormat::TexelFormatCount;
+					temp[FREE_IMAGE_TYPE::FIT_DOUBLE] = TexelFormat::TexelFormatCount;
+					temp[FREE_IMAGE_TYPE::FIT_FLOAT] = TexelFormat::TexelFormatCount;
+					temp[FREE_IMAGE_TYPE::FIT_INT16] = TexelFormat::TexelFormatCount;
+					temp[FREE_IMAGE_TYPE::FIT_INT32] = TexelFormat::TexelFormatCount;
+					temp[FREE_IMAGE_TYPE::FIT_RGB16] = TexelFormat::TexelFormatCount;
+					temp[FREE_IMAGE_TYPE::FIT_RGBA16] = TexelFormat::TexelFormatCount;
+					temp[FREE_IMAGE_TYPE::FIT_RGBF] = TexelFormat::TexelFormatCount;
+					temp[FREE_IMAGE_TYPE::FIT_RGBAF] = TexelFormat::TexelFormatCount;
+					temp[FREE_IMAGE_TYPE::FIT_UINT16] = TexelFormat::TexelFormatCount;
+					temp[FREE_IMAGE_TYPE::FIT_UINT32] = TexelFormat::TexelFormatCount;
+					temp[FREE_IMAGE_TYPE::FIT_UNKNOWN] = TexelFormat::TexelFormatCount;
 					return temp;
 				} ();
 				texelFormat = imageTypeMapping.at(imageType);
-				assert(texelFormat != TexelFormat::NotUsed); // above imageTypeMapping not implement yet
+				assert(texelFormat != TexelFormat::TexelFormatCount); // above imageTypeMapping not implement yet
 			}
 			return texelFormat;
 		}

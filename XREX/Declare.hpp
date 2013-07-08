@@ -105,6 +105,10 @@ namespace XREX
 
 	class Camera;
 	typedef std::shared_ptr<Camera> CameraSP;
+	class PerspectiveCamera;
+	typedef std::shared_ptr<PerspectiveCamera> PerspectiveCameraSP;
+	class OrthogonalCamera;
+	typedef std::shared_ptr<OrthogonalCamera> OrthogonalCameraSP;
 
 	class Viewport;
 	typedef std::shared_ptr<Viewport> ViewportSP;

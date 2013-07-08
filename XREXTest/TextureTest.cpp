@@ -86,8 +86,8 @@ namespace
 		VertexBuffer::DataLayoutDescription layoutDesc(8);
 		layoutDesc.AddChannelLayout(VertexBuffer::DataLayoutDescription::ElementLayoutDescription(0, 2 * sizeof(floatV3), ElementType::FloatV3, "position"));
 		layoutDesc.AddChannelLayout(VertexBuffer::DataLayoutDescription::ElementLayoutDescription(sizeof(floatV3), 2 * sizeof(floatV3), ElementType::FloatV3, "textureCoordinate0"));
-		VertexBufferSP vertices = XREXContext::GetInstance().GetRenderingFactory().CreateVertexBuffer(GraphicsBuffer::Usage::Static, vertexData, move(layoutDesc));
-		IndexBufferSP indices = XREXContext::GetInstance().GetRenderingFactory().CreateIndexBuffer(GraphicsBuffer::Usage::Static, indexData, IndexBuffer::TopologicalType::Triangles);
+		VertexBufferSP vertices = XREXContext::GetInstance().GetRenderingFactory().CreateVertexBuffer(GraphicsBuffer::Usage::StaticDraw, vertexData, move(layoutDesc));
+		IndexBufferSP indices = XREXContext::GetInstance().GetRenderingFactory().CreateIndexBuffer(GraphicsBuffer::Usage::StaticDraw, indexData, IndexBuffer::TopologicalType::Triangles);
 		RenderingLayoutSP layout = MakeSP<RenderingLayout>(vector<VertexBufferSP>(1, vertices), indices);
 
 		MeshSP cubeMesh = MakeSP<Mesh>("cube mesh");
@@ -146,7 +146,7 @@ namespace
 		DepthStencilStateObjectSP dsso = XREXContext::GetInstance().GetRenderingFactory().CreateDepthStencilStateObject(depthStencilState);
 		BlendStateObjectSP bso = XREXContext::GetInstance().GetRenderingFactory().CreateBlendStateObject(blendState);
 
-		RenderingTechniqueSP cubeTechnique = cubeEffect->CreateTechnique();
+		RenderingTechniqueSP cubeTechnique = cubeEffect->CreateTechnique("test cube technique");
 		RenderingPassSP cubePass = cubeTechnique->CreatePass(cubeProgram, rso, dsso, bso);
 
 		return cubeEffect;
@@ -244,57 +244,21 @@ namespace
 
 }
 
-TextureTest::TextureTest(void)
+SceneObjectSP theCameraObject_;
+
+void InitializeScene()
 {
-	Settings settings("../../");
-	settings.windowTitle = L"GL4 window";
-
-	settings.renderingSettings.colorBits = 32;
-	settings.renderingSettings.depthBits = 24;
-	settings.renderingSettings.stencilBits = 8;
-	settings.renderingSettings.sampleCount = 4;
-
-	settings.renderingSettings.left = 300;
-	settings.renderingSettings.top = 200;
-	settings.renderingSettings.width = 800;
-	settings.renderingSettings.height = 600;
-
-	XREXContext::GetInstance().Initialize(settings);
-
-
-	function<void(double current, double delta)> f = [] (double current, double delta)
-	{
-		assert(gl::GetError() == gl::GL_NO_ERROR);
-	};
-	XREXContext::GetInstance().GetRenderingEngine().OnBeforeRendering(f);
-	XREXContext::GetInstance().GetRenderingEngine().OnAfterRendering(f);
-	function<bool(double current, double delta)> l = [] (double current, double delta)
-	{
-		assert(gl::GetError() == gl::GL_NO_ERROR);
-		return true;
-	};
-	XREXContext::GetInstance().SetLogicFunction(l);
-
-	InitializeScene();
-
-	XREXContext::GetInstance().Start();
-}
-
-
-TextureTest::~TextureTest(void)
-{
-}
-
-void TextureTest::InitializeScene()
-{
-	scene_ = XREXContext::GetInstance().GetScene();
+	SceneSP scene;
+	scene = XREXContext::GetInstance().GetScene();
 
 	SceneObjectSP cameraObject = MakeSP<SceneObject>("camera");
 	Settings const& settings = XREXContext::GetInstance().GetSettings();
-	CameraSP camera = MakeSP<Camera>(PI / 4, static_cast<float>(settings.renderingSettings.width) / settings.renderingSettings.height, 1.f, 10000.0f);
+	float aspectRatio = static_cast<float>(settings.renderingSettings.width) / settings.renderingSettings.height;
+	CameraSP camera = MakeSP<PerspectiveCamera>(PI / 4, aspectRatio, 1.f, 100.0f);
+	//CameraSP camera = MakeSP<OrthogonalCamera>(100.f * aspectRatio, 100.f, 100.f);
 	cameraObject->SetComponent(camera);
-	scene_ = XREXContext::GetInstance().GetScene();
-	scene_->AddObject(cameraObject);
+	scene = XREXContext::GetInstance().GetScene();
+	scene->AddObject(cameraObject);
 
 	auto cc = MakeSP<FirstPersonCameraController>();
 	cc->AttachToCamera(cameraObject);
@@ -330,11 +294,101 @@ void TextureTest::InitializeScene()
 
 	for (auto& sub : cube->GetAllSubMeshes())
 	{
-		sub->SetEffect(cubeEffect);
+		sub->SetTechnique(cubeEffect->GetTechnique(0));
 		sub->SetMaterial(material);
 	}
 	cubeObject->SetComponent(cube);
 	TransformationSP trans = cubeObject->GetComponent<Transformation>();
-	trans->SetPosition(0, 0, 10);
-	scene_->AddObject(cubeObject);
+	trans->SetPosition(0, 0, 50);
+	scene->AddObject(cubeObject);
+
+	theCameraObject_ = cameraObject;
 }
+
+#include <sstream>
+
+TextureTest::TextureTest(void)
+{
+	Settings settings("../../");
+	settings.windowTitle = L"GL4 window";
+
+	settings.renderingSettings.colorBits = 32;
+	settings.renderingSettings.depthBits = 24;
+	settings.renderingSettings.stencilBits = 8;
+	settings.renderingSettings.sampleCount = 4;
+
+	settings.renderingSettings.left = 300;
+	settings.renderingSettings.top = 200;
+	settings.renderingSettings.width = 800;
+	settings.renderingSettings.height = 600;
+
+	XREXContext::GetInstance().Initialize(settings);
+
+
+	function<void(double current, double delta)> f = [] (double current, double delta)
+	{
+		assert(gl::GetError() == gl::GL_NO_ERROR);
+	};
+	XREXContext::GetInstance().GetRenderingEngine().OnBeforeRendering(f);
+	XREXContext::GetInstance().GetRenderingEngine().OnAfterRendering(f);
+	function<bool(double current, double delta)> l = [] (double current, double delta)
+	{
+		auto& transformation = theCameraObject_->GetComponent<Transformation>();
+		floatV3 const& position = transformation->GetWorldPosition();
+		floatV3 to = TransformDirection(transformation->GetWorldMatrix(), transformation->GetModelFrontDirection());
+		floatV3 up = TransformDirection(transformation->GetWorldMatrix(), transformation->GetModelUpDirection());
+
+		Ray ray = theCameraObject_->GetComponent<Camera>()->GetViewRay(floatV2(0, 0), Camera::ViewportOrigin::ViewportCenter);
+
+		wstringstream wss;
+		wss << "p: (" << position.X() << ", " << position.Y() << ", " << position.Z() << "), ";
+		wss << "d: (" << to.X() << ", " << to.Y() << ", " << to.Z() << "), ";
+		wss << "ray: (" << ray.GetDirection().X() << ", " << ray.GetDirection().Y() << ", " << ray.GetDirection().Z() << "), ";
+		//wss << "up: (" << up.X() << ", " << up.Y() << ", " << up.Z() << "), ";
+
+		XREXContext::GetInstance().GetMainWindow().SetTitleText(wss.str());
+
+		assert(gl::GetError() == gl::GL_NO_ERROR);
+		return true;
+	};
+	XREXContext::GetInstance().SetLogicFunction(l);
+
+	InitializeScene();
+
+	struct QuitHandler
+		: InputHandler
+	{
+		static ActionMap GetActionMap()
+		{
+			ActionMap am;
+			am.Set(InputCenter::InputSemantic::K_Escape, 0);
+			return am;
+		}
+
+		QuitHandler()
+			: InputHandler(GetActionMap())
+		{
+		}
+		virtual std::pair<bool, std::function<void()>> GenerateAction(InputCenter::InputEvent const& inputEvent) override
+		{
+			if (inputEvent.data == 0)
+			{
+				return std::make_pair(true, [] ()
+				{
+					XREXContext::GetInstance().GetMainWindow().SetRunning(false);
+				});
+			}
+			return std::make_pair(false, [] () {});
+		}
+	};
+	InputHandlerSP quitHandler = MakeSP<QuitHandler>();
+	XREXContext::GetInstance().GetInputCenter().AddInputHandler(quitHandler);
+
+	XREXContext::GetInstance().Start();
+}
+
+
+TextureTest::~TextureTest(void)
+{
+}
+

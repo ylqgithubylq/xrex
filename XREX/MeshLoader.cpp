@@ -156,10 +156,13 @@ namespace XREX
 					createdLayouts.reserve(layouts.size());
 					for (auto& layoutToCreate : layouts)
 					{
-						VertexBufferSP vertices = XREXContext::GetInstance().GetRenderingFactory().CreateVertexBuffer(GraphicsBuffer::Usage::Static, layoutToCreate.vertex, std::move(layoutToCreate.description));
+						VertexBufferSP vertices = XREXContext::GetInstance().GetRenderingFactory().CreateVertexBuffer(
+							GraphicsBuffer::Usage::StaticDraw, layoutToCreate.vertex, std::move(layoutToCreate.description));
 						IndexBufferSP indices = (layoutToCreate.indexType == ElementType::Uint16)
-							? XREXContext::GetInstance().GetRenderingFactory().CreateIndexBuffer(GraphicsBuffer::Usage::Static, layoutToCreate.index16, layoutToCreate.primitiveType)
-							: XREXContext::GetInstance().GetRenderingFactory().CreateIndexBuffer(GraphicsBuffer::Usage::Static, layoutToCreate.index32, layoutToCreate.primitiveType);
+							? XREXContext::GetInstance().GetRenderingFactory().CreateIndexBuffer(
+								GraphicsBuffer::Usage::StaticDraw, layoutToCreate.index16, layoutToCreate.primitiveType)
+							: XREXContext::GetInstance().GetRenderingFactory().CreateIndexBuffer(
+								GraphicsBuffer::Usage::StaticDraw, layoutToCreate.index32, layoutToCreate.primitiveType);
 
 						vector<VertexBufferSP> vertexBuffers(1);
 						vertexBuffers[0] = vertices;

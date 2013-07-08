@@ -11,11 +11,9 @@ namespace XREX
 
 	Color const Camera::DefaultBackgroundColor = Color(0.4f, 0.6f, 0.9f, 1.0f);
 
-	Camera::Camera(float fieldOfView, float aspectRatio, float near, float far)
-		: fieldOfView_(fieldOfView), aspectRatio_(aspectRatio), near_(near), far_(far),
-		backgroundColor_(DefaultBackgroundColor), active_(true), dirty_(true)
+	Camera::Camera()
+		: backgroundColor_(DefaultBackgroundColor), active_(true), dirty_(true)
 	{
-		projectionMatrix_ = FrustumMatrix(fieldOfView, aspectRatio, near, far);
 		viewport_ = XREXContext::GetInstance().GetRenderingFactory().GetDefaultViewport();
 	}
 
@@ -78,4 +76,27 @@ namespace XREX
 	}
 
 
+
+	PerspectiveCamera::PerspectiveCamera(float fieldOfView, float aspectRatio, float near, float far)
+		: fieldOfView_(fieldOfView), aspectRatio_(aspectRatio), near_(near), far_(far)
+	{
+		projectionMatrix_ = FrustumProjectionMatrix(fieldOfView, aspectRatio, near, far);
+	}
+
+
+	PerspectiveCamera::~PerspectiveCamera()
+	{
+	}
+
+
+
+	OrthogonalCamera::OrthogonalCamera(float width, float height, float depth)
+		: width_(width), height_(height), depth_(depth)
+	{
+		projectionMatrix_ = OrthogonalProjectionMatrix(width, height, depth);
+	}
+
+	OrthogonalCamera::~OrthogonalCamera()
+	{
+	}
 }

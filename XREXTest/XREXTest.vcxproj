@@ -174,7 +174,6 @@
     <ClInclude Include="TextureTest.h" />
     <ClInclude Include="TextureTestShaderCodes.h" />
     <ClInclude Include="VoxelTest.h" />
-    <ClInclude Include="VoxelTestShaderCodes.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GeneralTest.cpp" />
@@ -189,7 +188,6 @@
     <ClCompile Include="TextureTest.cpp" />
     <ClCompile Include="TextureTestShaderCodes.cpp" />
     <ClCompile Include="VoxelTest.cpp" />
-    <ClCompile Include="VoxelTestShaderCodes.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\XREX\XREX.vcxproj">
@@ -198,12 +196,14 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Effects\ConeTracing.glsl" />
+    <None Include="..\Effects\ListGeneration.glsl" />
     <None Include="..\Effects\Test.glsl">
       <FileType>Document</FileType>
     </None>
     <None Include="..\Effects\TestCube.glsl">
       <FileType>Document</FileType>
     </None>
+    <None Include="..\Effects\VoxelGeneration.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
