@@ -124,7 +124,7 @@ namespace XREX
 	public:
 
 		explicit VertexBuffer(DataLayoutDescription&& layoutDescription);
-		VertexBuffer(GraphicsBufferSP const& buffer, DataLayoutDescription&& layoutDescription);
+		VertexBuffer(DataLayoutDescription&& layoutDescription, GraphicsBufferSP const& buffer);
 
 		DataLayoutDescription const& GetDataLayoutDescription() const
 		{
@@ -161,7 +161,7 @@ namespace XREX
 
 	public:
 		IndexBuffer(TopologicalType topologicalType, ElementType elementType, uint32 elementCount);
-		IndexBuffer(GraphicsBufferSP const& buffer, TopologicalType topologicalType, ElementType elementType, uint32 elementCount);
+		IndexBuffer(TopologicalType topologicalType, ElementType elementType, uint32 elementCount, GraphicsBufferSP const& buffer);
 
 		TopologicalType GetTopologicalType() const
 		{
@@ -185,7 +185,5 @@ namespace XREX
 		ElementType elementType_;
 		uint32 elementCount_;
 	};
-
-
 
 }

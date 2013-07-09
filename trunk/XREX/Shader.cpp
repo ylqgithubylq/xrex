@@ -11,6 +11,7 @@
 #include "Sampler.hpp"
 #include "TextureImage.hpp"
 
+
 #include "GLUtil.hpp"
 
 #include <CoreGL.hpp>
@@ -120,7 +121,19 @@ namespace XREX
 
 
 
-
+	std::pair<bool, ProgramObject::BufferInformation::BufferVariableInformation> ProgramObject::BufferInformation::GetBufferVariableInformation(std::string const& name) const
+	{
+		//auto found = bufferVariableInformations_.begin();
+		auto found = std::find_if(bufferVariableInformations_.begin(), bufferVariableInformations_.end(), [&name] (BufferVariableInformation const& bufferVariableInformation)
+		{
+			return bufferVariableInformation.GetName() == name;
+		});
+		if (found == bufferVariableInformations_.end())
+		{
+			return std::make_pair(false, NullBufferVariableInformation);
+		}
+		return std::make_pair(true, *found);
+	}
 
 
 	ProgramObject::ProgramObject()
@@ -268,11 +281,12 @@ namespace XREX
 						variableName.resize(maxUniformNameLength);
 						gl::GetActiveUniform(glProgramID_, index, maxUniformNameLength, &nameLength, &variableSize, &glType, &variableName[0]);
 						variableName = variableName.substr(0, nameLength); // no '\0' included
+
 						bufferVariableInformations.emplace_back(BufferInformation::BufferVariableInformation(
 							std::move(variableName), ElementTypeFromeGLType(glType), variableSize, variableOffsets[j], arrayStrides[j], matrixStrides[j]));
 					}
 					bufferInformations_.emplace_back(BufferInformation(
-						std::move(bufferName), BufferInformation::BufferType::UniformBuffer, bindingIndex, dataSize, std::move(bufferVariableInformations)));
+						std::move(bufferName), BufferView::BufferType::Uniform, bindingIndex, dataSize, std::move(bufferVariableInformations)));
 				}
 			}
 			{ // atomic counter
@@ -305,11 +319,13 @@ namespace XREX
 						string variableName;
 						variableName.resize(maxUniformNameLength);
 						gl::GetActiveUniform(glProgramID_, index, maxUniformNameLength, &nameLength, &variableSize, &glType, &variableName[0]);
+						variableName = variableName.substr(0, nameLength); // no '\0' included
+
 						bufferVariableInformations.emplace_back(BufferInformation::BufferVariableInformation(
 							std::move(variableName), ElementTypeFromeGLType(glType), variableSize, variableOffsets[j], arrayStrides[j], 0));
 					}
 					bufferInformations_.emplace_back(BufferInformation(
-						std::to_string(bindingIndex), BufferInformation::BufferType::AtomicCounterBuffer, bindingIndex, dataSize, std::move(bufferVariableInformations)));
+						std::to_string(bindingIndex), BufferView::BufferType::AtomicCounter, bindingIndex, dataSize, std::move(bufferVariableInformations)));
 				}
 			}
 		}
@@ -323,9 +339,14 @@ namespace XREX
 		assert(validate_);
 		gl::UseProgram(glProgramID_);
 
-		for (auto i = uniformBinders_.begin(); i != uniformBinders_.end(); ++i)
+		for (auto& bufferBinder : bufferBinders_)
 		{
-			i->setter(i->uniformInformation);
+			bufferBinder.setter(bufferBinder.bufferInformation);
+		}
+
+		for (auto uniformBinder : uniformBinders_)
+		{
+			uniformBinder.setter(uniformBinder.uniformInformation);
 		}
 
 
@@ -726,25 +747,25 @@ namespace XREX
 
 			void operator() (ProgramObject::BufferInformation const& bufferInformation)
 			{
-				GraphicsBufferSP const& buffer = parameter->As<GraphicsBufferSP>().GetValue();
+				ShaderResourceBufferSP const& buffer = parameter->As<ShaderResourceBufferSP>().GetValue();
 				assert(buffer);
-				BufferView::BufferType type;
-				switch (bufferInformation.GetBufferType())
-				{
-				case ProgramObject::BufferInformation::BufferType::UniformBuffer:
-					type = BufferView::BufferType::Uniform;
-					break;
-				case ProgramObject::BufferInformation::BufferType::AtomicCounterBuffer:
-					type = BufferView::BufferType::AtomicCounter;
-					break;
-				case ProgramObject::BufferInformation::BufferType::ShaderStorageBuffer:
-					type = BufferView::BufferType::ShaderStorage;
-					break;
-				default:
-					assert(false);
-					break;
-				}
-				buffer->BindIndex(type, bufferInformation.GetBindingIndex());
+// 				BufferView::BufferType type;
+// 				switch (bufferInformation.GetBufferType())
+// 				{
+// 				case ProgramObject::BufferInformation::BufferType::UniformBuffer:
+// 					type = BufferView::BufferType::Uniform;
+// 					break;
+// 				case ProgramObject::BufferInformation::BufferType::AtomicCounterBuffer:
+// 					type = BufferView::BufferType::AtomicCounter;
+// 					break;
+// 				case ProgramObject::BufferInformation::BufferType::ShaderStorageBuffer:
+// 					type = BufferView::BufferType::ShaderStorage;
+// 					break;
+// 				default:
+// 					assert(false);
+// 					break;
+// 				}
+				buffer->BindIndex(bufferInformation.GetBindingIndex());
 			}
 		};
 	}
@@ -783,5 +804,76 @@ namespace XREX
 	ProgramObject::AttributeInformation const ProgramObject::NullAttributeInformation;
 	ProgramObject::UniformInformation const ProgramObject::NullUniformInformation;
 	ProgramObject::BufferInformation const ProgramObject::NullBufferInformation;
+	ProgramObject::BufferInformation::BufferVariableInformation const ProgramObject::NullBufferVariableInformation;
+
+
+
+	namespace
+	{
+		bool IsResourceBufferType(BufferView::BufferType type)
+		{
+			switch (type)
+			{
+			case BufferView::BufferType::Uniform:
+			case BufferView::BufferType::AtomicCounter:
+			case BufferView::BufferType::ShaderStorage:
+				return true;
+				break;
+			case BufferView::BufferType::TypeCount:
+				assert(false);
+				return false;
+			default:
+				return false;
+				break;
+			}
+		}
+	}
+
+
+	ShaderResourceBuffer::BufferVariableSetter::BufferVariableSetter(ShaderResourceBuffer& buffer)
+		: buffer_(buffer), mapper_(buffer.GetBuffer()->GetMapper(AccessType::WriteOnly))
+	{
+	}
+
+	ShaderResourceBuffer::BufferVariableSetter::BufferVariableSetter(BufferVariableSetter&& right)
+		: buffer_(right.buffer_), mapper_(std::move(right.mapper_))
+	{
+	}
+
+	void ShaderResourceBuffer::BufferVariableSetter::Finish()
+	{
+		mapper_.Finish();
+	}
+
+
+
+
+
+	ShaderResourceBuffer::ShaderResourceBuffer(ProgramObject::BufferInformation const& information)
+		: BufferView(information.GetBufferType()), information_(information)
+	{
+		assert(IsResourceBufferType(information.GetBufferType()));
+	}
+
+	ShaderResourceBuffer::ShaderResourceBuffer(ProgramObject::BufferInformation const& information, GraphicsBufferSP const& buffer)
+		: BufferView(information.GetBufferType(), buffer), information_(information)
+	{
+		assert(IsResourceBufferType(information.GetBufferType()));
+	}
+
+
+	ShaderResourceBuffer::~ShaderResourceBuffer()
+	{
+	}
+
+
+	bool ShaderResourceBuffer::SetBufferCheck(GraphicsBufferSP const& newBuffer)
+	{
+		if (newBuffer)
+		{
+			return newBuffer->GetSize() == information_.GetDataSize();
+		}
+		return true;
+	}
 
 }

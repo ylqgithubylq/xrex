@@ -5,6 +5,8 @@
 #include "Texture.hpp"
 #include "Sampler.hpp"
 #include "RenderingPipelineState.hpp"
+#include "XREXContext.hpp"
+#include "RenderingFactory.hpp"
 
 #include <algorithm>
 
@@ -100,8 +102,11 @@ namespace XREX
 			EffectParameterSP parameter;
 			if (resultIter == parameters.end()) // not exist
 			{
-				 // TODO should use UniformBufferView instead of raw buffer
-				parameter = MakeSP<ConcreteEffectParameter<GraphicsBufferSP>>(bufferName);
+				std::shared_ptr<ConcreteEffectParameter<ShaderResourceBufferSP>> bufferParameter = MakeSP<ConcreteEffectParameter<ShaderResourceBufferSP>>(bufferName);
+				ShaderResourceBufferSP buffer = XREXContext::GetInstance().GetRenderingFactory().CreateShaderResourceBuffer(bufferInformation, true);
+				bufferParameter->SetValue(buffer);
+				parameter = bufferParameter;
+				technique_.effect_.AddParameter(parameter);
 			}
 			else
 			{

@@ -420,7 +420,7 @@ namespace
 				GraphicsBufferSP buffer = XREXContext::GetInstance().GetRenderingFactory().CreateGraphicsBuffer(GraphicsBuffer::Usage::StreamCopy, poolSize, BufferView::BufferType::Texture);
 				TextureSP linkedListNodePool = XREXContext::GetInstance().GetRenderingFactory().CreateTextureBuffer(buffer, linkedListNodeFormat);
 				nodePools[i] = linkedListNodePool;
-				GraphicsBufferSP atomicBuffer = XREXContext::GetInstance().GetRenderingFactory().CreateGraphicsBuffer(GraphicsBuffer::Usage::StreamCopy, poolSize, BufferView::BufferType::AtomicCounter);
+				GraphicsBufferSP atomicBuffer = XREXContext::GetInstance().GetRenderingFactory().CreateGraphicsBuffer(GraphicsBuffer::Usage::StreamCopy, 4, BufferView::BufferType::AtomicCounter);
 				atomicCounterBuffers[i] = atomicBuffer;
 			}
 
@@ -457,14 +457,17 @@ namespace
 			}
 			BuildVoxelVolume();
 
-
+// EffectParameterSP const& atomicCounter = voxelizationEffect->GetParameterByName("0");
+// ShaderResourceBufferSP atomicBuffer = atomicCounter->As<ShaderResourceBufferSP>().GetValue();
+// ShaderResourceBuffer::BufferVariableSetter setter = atomicBuffer->GetVariableSetter();
+// bool settingResult = setter.SetValue("nodeCounter", 0u);
 		}
 
 		void BuildFragmentLists(std::vector<Renderable::RenderablePack> const& allRenderableNeedToRender)
 		{
 			for (uint32 i = 0; i < 3; ++i)
 			{
-				atomicCounterBuffers[i]->Clear(0);
+				//atomicCounterBuffers[i]->Clear(0);
 				// TODO clear linked list heads texture
 				// 
 				CameraSP const& camera = voxelizationCameras[i]->GetComponent<Camera>();
@@ -479,8 +482,15 @@ namespace
 				linkedListNodePool->As<TextureImageSP>().SetValue(nodePools[i]->GetImage_TEMP(0, nodePools[i]->GetFormat()));
 				EffectParameterSP const& headPointer = voxelizationEffect->GetParameterByName("header");
 				headPointer->As<TextureImageSP>().SetValue(headPointers[i]->GetImage_TEMP(0, headPointers[i]->GetFormat()));
-				EffectParameterSP const& atomicCounter = voxelizationEffect->GetParameterByName("nodeCounter");
-				atomicCounter->As<GraphicsBufferSP>().SetValue(atomicCounterBuffers[i]);
+				EffectParameterSP const& atomicCounter = voxelizationEffect->GetParameterByName("0");
+				ShaderResourceBufferSP atomicBuffer = atomicCounter->As<ShaderResourceBufferSP>().GetValue();
+				atomicBuffer->SetBuffer(atomicCounterBuffers[i]);
+				{
+					ShaderResourceBuffer::BufferVariableSetter setter = atomicBuffer->GetVariableSetter();
+					bool settingResult = setter.SetValue("nodeCounter", 0u);
+					assert(settingResult);
+				}
+
 
 				RenderingTechniqueSP const& rasterizeTechnique = voxelizationEffect->GetTechnique(0);
 				RenderingPassSP rasterizePass = rasterizeTechnique->GetPass(0);
