@@ -96,6 +96,8 @@ namespace XREX
 	typedef std::shared_ptr<VertexBuffer> VertexBufferSP;
 	class IndexBuffer;
 	typedef std::shared_ptr<IndexBuffer> IndexBufferSP;
+	class ShaderResourceBuffer;
+	typedef std::shared_ptr<ShaderResourceBuffer> ShaderResourceBufferSP;
 	class Texture;
 	typedef std::shared_ptr<Texture> TextureSP;
 	class Sampler;

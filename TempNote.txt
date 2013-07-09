@@ -3,12 +3,8 @@ using regular expressions(Ctrl+Shift+F):
 
 temp note:
 
-texture 3D.
-abstract a Pipeline subpart from RenderingEngine.
 multi-thread?
 framebuffer / how to set channels from shader?
-EffectParameter add a As<T> (with type check) function to convert to sub class, then have a SetValue/GetValue ... etc.
-Effect add shader string inside, Pass get shader program from shader string directly.
 
 TODO:
 
@@ -21,7 +17,6 @@ the shading process that use light shader and material shader
 
 optional:
 change all enum cast to use: ValueFromEnum, EnumFromValue
-?change EffectParameter to use something like boost::any, change to use type EffectParameter, remove type EffectParameterSP.
 how to make a dll that can work correctly?
 (now have a lot of warning about stl class and may have some other warning, and exe using this dll cannot work)
 thread for logic/rendering call generation/rendering api calls

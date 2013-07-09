@@ -43,6 +43,11 @@ namespace XREX
 
 			~BufferMapper();
 
+			GraphicsBuffer& GetBuffer() const
+			{
+				return buffer_;
+			}
+
 			void Finish();
 
 			template <typename T>

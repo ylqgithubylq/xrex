@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Declare.hpp"
+#include "BufferView.hpp"
+#include "GraphicsBuffer.hpp"
 
 
 #include <string>
@@ -146,14 +148,6 @@ namespace XREX
 		class XREX_API BufferInformation
 		{
 		public:
-			enum class BufferType
-			{
-				UniformBuffer,
-				AtomicCounterBuffer,
-				ShaderStorageBuffer,
-
-				BufferTypeCount,
-			};
 
 			class XREX_API BufferVariableInformation
 			{
@@ -205,14 +199,14 @@ namespace XREX
 			};
 		public:
 			BufferInformation()
-				: bindingIndex_(-1), dataSize_(0), type_(BufferType::BufferTypeCount)
+				: bindingIndex_(-1), dataSize_(0), type_(BufferView::BufferType::TypeCount)
 			{
 			}
-			BufferInformation(std::string const& name, BufferType type, int32 bindingIndex, uint32 dataSize, std::vector<BufferVariableInformation>&& bufferVariableInformations)
+			BufferInformation(std::string const& name, BufferView::BufferType type, int32 bindingIndex, uint32 dataSize, std::vector<BufferVariableInformation>&& bufferVariableInformations)
 				: name_(name), type_(type), bindingIndex_(bindingIndex), dataSize_(dataSize), bufferVariableInformations_(std::move(bufferVariableInformations))
 			{
 			}
-			BufferInformation(std::string&& name, BufferType type, int32 bindingIndex, uint32 dataSize, std::vector<BufferVariableInformation>&& bufferVariableInformations)
+			BufferInformation(std::string&& name, BufferView::BufferType type, int32 bindingIndex, uint32 dataSize, std::vector<BufferVariableInformation>&& bufferVariableInformations)
 				: name_(std::move(name)), type_(type), bindingIndex_(bindingIndex), dataSize_(dataSize), bufferVariableInformations_(std::move(bufferVariableInformations))
 			{
 			}
@@ -221,7 +215,7 @@ namespace XREX
 			{
 				return name_;
 			}
-			BufferType GetBufferType() const
+			BufferView::BufferType GetBufferType() const
 			{
 				return type_;
 			}
@@ -234,9 +228,16 @@ namespace XREX
 				return dataSize_;
 			}
 
+			std::pair<bool, BufferVariableInformation> GetBufferVariableInformation(std::string const& name) const;
+
+			std::vector<BufferVariableInformation> const& GetAllBufferVariableInformations() const
+			{
+				return bufferVariableInformations_;
+			}
+
 		private:
 			std::string name_;
-			BufferType type_;
+			BufferView::BufferType type_;
 			int32 bindingIndex_;
 			uint32 dataSize_;
 
@@ -302,6 +303,7 @@ namespace XREX
 		static AttributeInformation const NullAttributeInformation;
 		static UniformInformation const NullUniformInformation;
 		static BufferInformation const NullBufferInformation;
+		static BufferInformation::BufferVariableInformation const NullBufferVariableInformation;
 
 		struct UniformBinder
 		{
@@ -339,4 +341,92 @@ namespace XREX
 		std::vector<BufferBinder> bufferBinders_;
 	};
 
+
+
+	class XREX_API ShaderResourceBuffer
+		: public BufferView
+	{
+		friend class BufferVariableSetter;
+
+	public:
+		class XREX_API BufferVariableSetter
+			: XREX::Noncopyable
+		{
+			friend class ShaderResourceBuffer;
+		private:
+			explicit BufferVariableSetter(ShaderResourceBuffer& buffer);
+
+		public:
+			BufferVariableSetter(BufferVariableSetter&& right);
+
+			template <typename T>
+			bool SetValue(std::string const& name, T const& value)
+			{
+				std::pair<bool, ProgramObject::BufferInformation::BufferVariableInformation> result = buffer_.GetBufferInformation().GetBufferVariableInformation(name);
+				if (result.first)
+				{
+					uint8* pointer = mapper_.GetPointer<uint8>();
+					*reinterpret_cast<T*>(pointer + result.second.GetOffset()) = value;
+					return true;
+				}
+				return false;
+			}
+
+			template <typename T>
+			bool SetArrayValue(std::string const& name, std::vector<T> const& value)
+			{
+				std::pair<bool, ProgramObject::BufferInformation::BufferVariableInformation> result = buffer_.GetBufferInformation().GetBufferVariableInformation(name);
+				if (result.first)
+				{
+					assert(result.second.GetElementCount() == value.size());
+					uint8* pointer = mapper_.GetPointer<uint8>();
+					uint8* start = pointer + result.second.GetOffset();
+					if (result.second.GetArrayStride() == 0) // tightly packed data
+					{
+						for (uint32 i = 0; i < result.second.GetElementCount(); ++i)
+						{
+							*reinterpret_cast<T*>(start)[i] = value[i];
+						}
+					}
+					else
+					{
+						for (uint32 i = 0; i < result.second.GetElementCount(); ++i)
+						{
+							*static_cast<T*>(start + result.second.GetArrayStride() * i) = value[i];
+						}
+					}
+					return true;
+				}
+				return false;
+			}
+
+			void Finish();
+
+		private:
+			ShaderResourceBuffer& buffer_;
+			GraphicsBuffer::BufferMapper mapper_;
+		};
+
+	public:
+		explicit ShaderResourceBuffer(ProgramObject::BufferInformation const& information);
+		ShaderResourceBuffer(ProgramObject::BufferInformation const& information, GraphicsBufferSP const& buffer);
+		virtual ~ShaderResourceBuffer() override;
+
+		ProgramObject::BufferInformation const& GetBufferInformation() const
+		{
+			return information_;
+		}
+
+		BufferVariableSetter GetVariableSetter()
+		{
+			assert(HaveBuffer());
+			return BufferVariableSetter(*this);
+		}
+
+	private:
+		virtual bool SetBufferCheck(GraphicsBufferSP const& newBuffer) override;
+
+	private:
+		ProgramObject::BufferInformation const& information_;
+	};
 }
