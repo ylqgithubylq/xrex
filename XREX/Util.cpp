@@ -283,6 +283,22 @@ namespace XREX
 			return 3;
 		case TexelFormat::RGBA8:
 			return 4;
+		case TexelFormat::R8I:
+			return 1;
+		case TexelFormat::RG8I:
+			return 2;
+		case TexelFormat::RGB8I:
+			return 3;
+		case TexelFormat::RGBA8I:
+			return 4;
+		case TexelFormat::R8UI:
+			return 1;
+		case TexelFormat::RG8UI:
+			return 2;
+		case TexelFormat::RGB8UI:
+			return 3;
+		case TexelFormat::RGBA8UI:
+			return 4;
 		case TexelFormat::R16I:
 			return 2;
 		case TexelFormat::RG16I:

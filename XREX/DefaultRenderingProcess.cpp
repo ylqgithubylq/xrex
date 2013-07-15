@@ -3,6 +3,7 @@
 #include "DefaultRenderingProcess.hpp"
 
 #include "XREXContext.hpp"
+#include "Window.hpp"
 #include "Scene.hpp"
 #include "SceneObject.hpp"
 #include "Camera.hpp"
@@ -57,8 +58,8 @@ namespace XREX
 	void DefaultRenderingProcess::RenderACamera(SceneSP const& scene, SceneObjectSP const& cameraObject)
 	{
 		CameraSP camera = cameraObject->GetComponent<Camera>();
-		RenderingSettings const& settings = XREXContext::GetInstance().GetSettings().renderingSettings;
-		camera->GetViewport()->Bind(settings.width, settings.height);
+		Size<uint32> windowSize = XREXContext::GetInstance().GetMainWindow().GetClientRegionSize();
+		camera->GetViewport()->Bind(windowSize.x, windowSize.y);
 
 		Color const& backgroundColor = camera->GetBackgroundColor();
 		gl::ClearColor(backgroundColor.R(), backgroundColor.G(), backgroundColor.B(), backgroundColor.A());

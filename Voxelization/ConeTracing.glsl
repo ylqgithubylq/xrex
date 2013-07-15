@@ -3,7 +3,7 @@
  */
 vec4 AdjustResult(vec4 value, float r)
 {
-	if (value.a < 0.001)
+	if (value.a < 0.0001)
 	{
 		return value;
 	}
@@ -115,8 +115,7 @@ void main()
 {
 	vec3 direction = normalize(wPosition - cameraPosition);
 	vec4 color = ConeTrace(voxels, voxelVolumeCenter, voxelVolumeHalfSize, cameraPosition, direction, aperture, alphaThreshold);
-	//vec4 color = vec4(0.5, 0.5, 0, 0.8);
-	finalColor = color/* * 0.001 + vec4(5 * t, 5 * t, 5 * t, 1)*/;
+	finalColor = color;
 }
 
 #endif
