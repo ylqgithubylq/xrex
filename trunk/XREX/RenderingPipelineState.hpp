@@ -137,6 +137,11 @@ namespace XREX
 	public:
 		explicit RasterizerStateObject(RasterizerState const& state);
 		void Bind(float polygonOffsetFactor, float polygonOffsetUnits);
+
+		RasterizerState const& GetState() const
+		{
+			return state_;
+		}
 	private:
 		RasterizerState state_;
 
@@ -153,6 +158,11 @@ namespace XREX
 	public:
 		explicit DepthStencilStateObject(DepthStencilState const& state);
 		void Bind(uint16 frontStencilReference, uint16 backStencilReference);
+
+		DepthStencilState const& GetState() const
+		{
+			return state_;
+		}
 	private:
 		DepthStencilState state_;
 
@@ -174,6 +184,11 @@ namespace XREX
 	public:
 		explicit BlendStateObject(BlendState const& state);
 		void Bind(Color const& blendFactor);
+
+		BlendState const& GetState() const
+		{
+			return state_;
+		}
 	private:
 		BlendState state_;
 

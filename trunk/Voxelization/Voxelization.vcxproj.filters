@@ -14,49 +14,40 @@
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
     <Filter Include="Effect Files">
-      <UniqueIdentifier>{80d9d6b1-b5fc-4dc2-94b7-efdeb288fcd2}</UniqueIdentifier>
+      <UniqueIdentifier>{6749cf2c-21d7-4a24-a485-3d14f9d965f5}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="TestFile.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TextureTest.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneralTest.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TextureTestShaderCodes.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="Main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="TestFile.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="PrecompiledHeaderHost.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TextureTest.cpp">
+    <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GeneralTest.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="TextureTestShaderCodes.cpp">
+    <ClCompile Include="VoxelTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\Effects\Test.glsl">
+    <ClInclude Include="VoxelTest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ConeTracing.glsl">
       <Filter>Effect Files</Filter>
     </None>
-    <None Include="..\Effects\TestCube.glsl">
+    <None Include="ListGeneration.glsl">
       <Filter>Effect Files</Filter>
     </None>
+    <None Include="VoxelGeneration.glsl">
+      <Filter>Effect Files</Filter>
+    </None>
+    <None Include="VoxelMerge.glsl">
+      <Filter>Effect Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="TODO.txt" />
   </ItemGroup>
 </Project>

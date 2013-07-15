@@ -693,6 +693,7 @@ namespace XREX
 			{
 				binder.setter = SamplerBinder<DefaultTextureGetterBuffer>(parameter, samplerLocation);
 			}
+			break;
 		default:
 			// not support.
 			assert(false);

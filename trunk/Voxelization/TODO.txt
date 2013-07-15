@@ -1,0 +1,13 @@
+如何制定分辨率光栅化
+填充临时体素时，链表是从不同主轴建立的，坐标需要转换
+从临时体素生成最终体素
+孔径追踪最终体素
+
+clear 3d纹理改成buffer
+在每帧构造volume之前清除一次
+
+重构，分文件
+
+
+bufferTexture不需要sampler
+添加ClearState/ClearStateObject

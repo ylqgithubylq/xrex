@@ -60,6 +60,7 @@ namespace XREX
 
 	void Texture::RecreateMipmap()
 	{
+		Bind(lastBindingIndex_);
 		gl::GenerateMipmap(glBindingTarget_);
 	}
 
@@ -95,12 +96,27 @@ namespace XREX
 
 
 	template <uint32 Dimension>
-	XREX::ConcreteTexture<Dimension>::ConcreteTexture(DataDescription<Dimension> const& description)
+	XREX::ConcreteTexture<Dimension>::ConcreteTexture(DataDescription<Dimension> const& description, bool generateMipmap)
 		: Texture(TextureDimensionToTextureType<Dimension>::TextureType), description_(description)
 	{
 		Bind(0);
 		DoFillTexture(description, 0, nullptr);
 		mipmapCount_ = 1;
+
+		if (generateMipmap)
+		{
+			std::array<uint32, Dimension> sizes = description.GetSizes();
+			mipmapCount_ = 1;
+			while (*std::max_element(sizes.begin(), sizes.end()) > 1)
+			{
+				for (uint32 i = 0; i < Dimension; ++i)
+				{
+					sizes[i] = std::max(sizes[i] / 2, 1u);
+				}
+				++mipmapCount_;
+			}
+			RecreateMipmap();
+		}
 	}
 
 	template <uint32 Dimension>

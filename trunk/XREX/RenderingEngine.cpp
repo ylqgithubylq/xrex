@@ -110,7 +110,7 @@ namespace XREX
 				XREXContext::GetInstance().GetLogger().Log("from: " + sourceString + ", ").Log("type: " + typeString + ", ")
 					.Log("id: ").Log(id).Log(", ").Log("severity: " + severityString + ", ").EndLine()
 					.Log("message: ").Log(message).EndLine();
-				//assert(false);
+				assert(false);
 			}
 		};
 	}
@@ -123,6 +123,7 @@ namespace XREX
 
 #ifdef XREX_DEBUG
 		gl::DebugMessageCallback(&DebugCallback::Callback, this);
+		gl::Enable(gl::GL_DEBUG_OUTPUT_SYNCHRONOUS);
 #endif // XREX_DEBUG
 
 

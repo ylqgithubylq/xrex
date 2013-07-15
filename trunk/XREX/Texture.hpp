@@ -131,7 +131,7 @@ namespace XREX
 
 	public:
 
-		explicit ConcreteTexture(DataDescription<Dimension> const& description);
+		explicit ConcreteTexture(DataDescription<Dimension> const& description, bool generateMipmap);
 		/*
 		 *	@generateMipmap: true will generate mipmap, ignore data vector except data at index 0.
 		 */
@@ -141,6 +141,11 @@ namespace XREX
 		virtual TexelFormat GetFormat() const override
 		{
 			return description_.GetFormat();
+		}
+
+		DataDescription<Dimension> const& GetDescription() const
+		{
+			return description_;
 		}
 
 	private:

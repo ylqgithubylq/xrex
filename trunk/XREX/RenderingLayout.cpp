@@ -36,10 +36,10 @@ namespace XREX
 				return gl::GL_TRIANGLES;
 			case IndexBuffer::TopologicalType::DrawingModeCount:
 				assert(false);
-				return gl::GL_TRIANGLES;
+				return 0;
 			default:
 				assert(false);
-				return gl::GL_TRIANGLES;
+				return 0;
 			}
 		};
 	}

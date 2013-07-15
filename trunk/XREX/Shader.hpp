@@ -357,49 +357,75 @@ namespace XREX
 			explicit BufferVariableSetter(ShaderResourceBuffer& buffer);
 
 		public:
-			BufferVariableSetter(BufferVariableSetter&& right);
-
-			template <typename T>
-			bool SetValue(std::string const& name, T const& value)
+			class XREX_API Setter
 			{
-				std::pair<bool, ProgramObject::BufferInformation::BufferVariableInformation> result = buffer_.GetBufferInformation().GetBufferVariableInformation(name);
-				if (result.first)
+				friend class BufferVariableSetter;
+			private:
+
+#ifdef XREX_DEBUG
+				Setter(ProgramObject::BufferInformation::BufferVariableInformation const& variableInformation, ShaderResourceBuffer const& buffer)
+					: variableInformation_(variableInformation), buffer_(buffer)
 				{
-					uint8* pointer = mapper_.GetPointer<uint8>();
-					*reinterpret_cast<T*>(pointer + result.second.GetOffset()) = value;
-					return true;
 				}
-				return false;
-			}
-
-			template <typename T>
-			bool SetArrayValue(std::string const& name, std::vector<T> const& value)
-			{
-				std::pair<bool, ProgramObject::BufferInformation::BufferVariableInformation> result = buffer_.GetBufferInformation().GetBufferVariableInformation(name);
-				if (result.first)
+#else
+				explicit Setter(ProgramObject::BufferInformation::BufferVariableInformation const& variableInformation)
+					: variableInformation_(variableInformation)
 				{
-					assert(result.second.GetElementCount() == value.size());
+				}
+#endif
+
+			public:
+				template <typename T>
+				void SetValue(BufferVariableSetter& setter, T const& value)
+				{
+					assert(&setter.buffer_ == &buffer_);
+					uint8* pointer = setter.mapper_.GetPointer<uint8>();
+					*reinterpret_cast<T*>(pointer + variableInformation_.GetOffset()) = value;
+				}
+
+
+				template <typename T>
+				void SetArrayValue(BufferVariableSetter& setter, std::vector<T> const& value)
+				{
+					assert(variableInformation_.GetElementCount() == value.size());
+					assert(&setter.buffer_ == &buffer_);
 					uint8* pointer = mapper_.GetPointer<uint8>();
-					uint8* start = pointer + result.second.GetOffset();
-					if (result.second.GetArrayStride() == 0) // tightly packed data
+					uint8* start = pointer + variableInformation_.GetOffset();
+					if (variableInformation_.GetArrayStride() == 0) // tightly packed data
 					{
-						for (uint32 i = 0; i < result.second.GetElementCount(); ++i)
+						for (uint32 i = 0; i < variableInformation_.GetElementCount(); ++i)
 						{
 							*reinterpret_cast<T*>(start)[i] = value[i];
 						}
 					}
 					else
 					{
-						for (uint32 i = 0; i < result.second.GetElementCount(); ++i)
+						for (uint32 i = 0; i < variableInformation_.GetElementCount(); ++i)
 						{
-							*static_cast<T*>(start + result.second.GetArrayStride() * i) = value[i];
+							*static_cast<T*>(start + variableInformation_.GetArrayStride() * i) = value[i];
 						}
 					}
-					return true;
 				}
-				return false;
-			}
+			private:
+				ProgramObject::BufferInformation::BufferVariableInformation variableInformation_;
+#ifdef XREX_DEBUG
+				ShaderResourceBuffer const& buffer_;
+#endif
+			};
 
+		public:
+			BufferVariableSetter(BufferVariableSetter&& right);
+
+			std::pair<bool, Setter> GetSetter(std::string const& name)
+			{
+				std::pair<bool, ProgramObject::BufferInformation::BufferVariableInformation> result = buffer_.GetBufferInformation().GetBufferVariableInformation(name);
+#ifdef XREX_DEBUG
+				return std::make_pair(result.first, Setter(result.second, buffer_));
+#else
+				return std::make_pair(result.first, Setter(result.second));
+#endif
+			}
+		
 			void Finish();
 
 		private:

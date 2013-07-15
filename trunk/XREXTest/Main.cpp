@@ -7,7 +7,6 @@
 
 #include "TestFile.hpp"
 #include "TextureTest.h"
-#include "VoxelTest.h"
 #include "GeneralTest.h"
 
 
@@ -22,11 +21,6 @@ int main()
 		}
 		break;
 	case 2:
-		{
-			VoxelTest voxeltest;
-		}
-		break;
-	case 3:
 		{
 			GeneralTest generaltest;
 		}
