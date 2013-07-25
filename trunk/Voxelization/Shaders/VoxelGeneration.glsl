@@ -1,10 +1,7 @@
 
 layout (r32ui) uniform readonly uimage2D heads; // edge size twice larges than intermediateVolume
 layout (rgba32ui) uniform readonly uimageBuffer nodePool;
-layout (r32ui) uniform writeonly uimage3D intermediateVolume;
 layout (rgba8) uniform writeonly image3D volume;
-
-uniform int resolutionMultiplyer; // rasterization resolution / voxel resolution
 
 uniform int axis;
 
@@ -171,14 +168,8 @@ ivec3 TransformToVolumeCoordinate(ivec3 originalCoordinate, int axis)
 }
 
 
-void StoreIntermediate(layout (r32ui) writeonly uimage3D intermediateVolume, ivec3 coordinate, uint packedValue)
-{
-	imageStore(intermediateVolume, coordinate, uvec4(1, 0, 0, 0));
-}
-
 void StoreFinal(layout (rgba8) writeonly image3D volume, ivec3 coordinate, vec4 unpackedValue)
 {
-
 	imageStore(volume, coordinate, unpackedValue);
 }
 
@@ -203,14 +194,17 @@ Unpaired Pairing(inout Unpaired objectUnpairedBuffer[ObjectUnpairedMaxCount], in
 	bool frontFacing = GetFrontFacing(objectIDAndFrontFacing);
 	// find
 	int pairedIndex = -1;
-	for (int i = size - 1; i >= 0; --i)
+	if (frontFacing == false) // only back facing fragment need to find pair
 	{
-		//if (GetFrontFacing(objectUnpairedBuffer[i].objectIDAndFrontFacing) != frontFacing && GetObjectID(objectUnpairedBuffer[i].objectIDAndFrontFacing) == objectID)
-		if (GetFrontFacing(objectUnpairedBuffer[i].objectIDAndFrontFacing) != frontFacing)
-		//if (GetObjectID(objectUnpairedBuffer[i].objectIDAndFrontFacing) == objectID)
-		{ // found
-			pairedIndex = i;
-			break;
+		for (int i = size - 1; i >= 0; --i)
+		{
+			//if (GetFrontFacing(objectUnpairedBuffer[i].objectIDAndFrontFacing) != frontFacing && GetObjectID(objectUnpairedBuffer[i].objectIDAndFrontFacing) == objectID)
+			if (GetFrontFacing(objectUnpairedBuffer[i].objectIDAndFrontFacing) != frontFacing)
+			//if (GetObjectID(objectUnpairedBuffer[i].objectIDAndFrontFacing) == objectID)
+			{ // found
+				pairedIndex = i;
+				break;
+			}
 		}
 	}
 
@@ -233,7 +227,7 @@ Unpaired Pairing(inout Unpaired objectUnpairedBuffer[ObjectUnpairedMaxCount], in
 }
 
 
-//#define SOLID
+#define SOLID
 
 void main()
 {
@@ -266,35 +260,25 @@ void main()
 			vec4 pairedUnpackedValue = unpackSnorm4x8(pairingResult.packedValue);
 			for (int j = currentLocation; j <= pairedGrid; ++j)
 			{
-				//StoreIntermediate(intermediateVolume, TransformToVolumeCoordinate(ivec3(coordinate, j), axis) / resolutionMultiplyer, packedValue);
 				// linear interpolate from paired grid to current grid
 				vec4 finalValue = mix(pairedUnpackedValue, unpackedValue, float(j - currentLocation) / (pairedGrid - currentLocation));
-				StoreFinal(volume, TransformToVolumeCoordinate(ivec3(coordinate, j), axis) / resolutionMultiplyer, finalValue);
+				StoreFinal(volume, TransformToVolumeCoordinate(ivec3(coordinate, j), axis), finalValue);
 			}
 		}
 #else
-		StoreFinal(volume, TransformToVolumeCoordinate(ivec3(coordinate, currentLocation), axis) / resolutionMultiplyer, unpackedValue);
+		StoreFinal(volume, TransformToVolumeCoordinate(ivec3(coordinate, currentLocation), axis), unpackedValue);
 #endif
 	}
 
+	// surface voxelize all unpaired fragments
 	for (int i = 0; i < unpairedCount; ++i)
 	{
 		int location = DepthToCoordinate(heads, objectUnpairedBuffer[i].depth);
 		vec4 unpacked = unpackSnorm4x8(objectUnpairedBuffer[i].packedValue);
-		StoreFinal(volume, TransformToVolumeCoordinate(ivec3(coordinate, location), axis) / resolutionMultiplyer, unpacked);
+		StoreFinal(volume, TransformToVolumeCoordinate(ivec3(coordinate, location), axis), unpacked);
 	}
 
 
-// 	while (HasNext(i) == true) // write HasNext(i) directly will crash the NV driver
-// 	{
-// 		i = Next(nodePool, i);
-// 		float depth = GetDepth(i);
-// 		bool frontFacing = GetFrontFacing(i);
-// 		int objectID = GetObjectID(i);
-// 		ivec3 originalCoordinate = ivec3(coordinate, DepthToCoordinate(heads, depth));
-// 		// find if object id exist in the buffer, if not, insert into it, if exist, remove it and do a solid fill
-// 		StoreIntermediate(intermediateVolume, TransformToVolumeCoordinate(originalCoordinate, axis) / resolutionMultiplyer, frontFacing);
-// 	}
 }
 
 #endif

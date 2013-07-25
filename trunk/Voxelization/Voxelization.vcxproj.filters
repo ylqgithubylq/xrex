@@ -34,23 +34,26 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="ConeTracing.glsl">
-      <Filter>Effect Files</Filter>
-    </None>
-    <None Include="ListGeneration.glsl">
-      <Filter>Effect Files</Filter>
-    </None>
-    <None Include="VoxelGeneration.glsl">
-      <Filter>Effect Files</Filter>
-    </None>
-    <None Include="VoxelMerge.glsl">
-      <Filter>Effect Files</Filter>
-    </None>
-    <None Include="ListSort.glsl">
-      <Filter>Effect Files</Filter>
-    </None>
+    <Text Include="TODO.txt" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="TODO.txt" />
+    <None Include="Shaders\AnisotropicVoxelGeneration.glsl">
+      <Filter>Effect Files</Filter>
+    </None>
+    <None Include="Shaders\ConeTracing.glsl">
+      <Filter>Effect Files</Filter>
+    </None>
+    <None Include="Shaders\ListGeneration.glsl">
+      <Filter>Effect Files</Filter>
+    </None>
+    <None Include="Shaders\ListSort.glsl">
+      <Filter>Effect Files</Filter>
+    </None>
+    <None Include="Shaders\VoxelGeneration.glsl">
+      <Filter>Effect Files</Filter>
+    </None>
+    <None Include="Shaders\VoxelMerge.glsl">
+      <Filter>Effect Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

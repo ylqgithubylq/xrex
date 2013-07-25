@@ -12,6 +12,13 @@ layout (binding = 0, offset = 0) uniform atomic_uint nodeCounter; // should be i
 uniform int objectID; // start from 0
 uniform float voxelVolumeHalfSize;
 
+uniform int axis;
+
+const int AxisX = 0;
+const int AxisY = 1;
+const int AxisZ = 2;
+
+
 #ifdef VS
 
 in vec3 position;
@@ -31,6 +38,19 @@ void main()
 
 #ifdef FS
 
+vec3 TransformByAxis(vec3 value, int axis)
+{ // TODO extract this out?
+	switch (axis)
+	{
+	case AxisX: // from +x, +z is up
+		return value.zxy;
+	case AxisY: // from +y, +x is up
+		return value.yzx;
+	case AxisZ: // from +z, +y is up
+		return value.xyz;
+	}
+}
+
 
 void InsertToLinkedList(layout (r32ui) uimage2D heads, layout (rgba32ui) writeonly uimageBuffer nodePool, atomic_uint nodeCounter, ivec2 coordinate, float depth, int objectID, bool frontFacing, vec3 value)
 {
@@ -47,7 +67,7 @@ void main()
 {
 	// gl_FragCoord.xy will round to integer as it has form of (x.5, y.5)
 	// gl_fragCoord.z is linear, due to orthogonal projection. range [0, 1]
-	InsertToLinkedList(heads, nodePool, nodeCounter, ivec2(gl_FragCoord.xy), gl_FragCoord.z, objectID, gl_FrontFacing, vPosition / voxelVolumeHalfSize);
+	InsertToLinkedList(heads, nodePool, nodeCounter, ivec2(gl_FragCoord.xy), gl_FragCoord.z, objectID, gl_FrontFacing, TransformByAxis(vPosition / voxelVolumeHalfSize, axis));
 }
 
 #endif

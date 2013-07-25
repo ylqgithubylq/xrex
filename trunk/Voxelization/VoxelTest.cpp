@@ -116,8 +116,9 @@ namespace
 	{
 		RenderingEffectSP listBuild;
 		RenderingEffectSP listSort;
-		RenderingEffectSP intermediateVolumeBuild;
 		RenderingEffectSP volumeBuild;
+		RenderingEffectSP anisotropicVolumeBuild;
+		RenderingEffectSP volumeMerge;
 	};
 
 	UsedEffects MakeVoxelizationEffect()
@@ -126,7 +127,7 @@ namespace
 		RenderingEffectSP listEffect = [] ()
 		{
 			string shaderString;
-			string shaderFile = "../../Voxelization/ListGeneration.glsl";
+			string shaderFile = "../../Voxelization/Shaders/ListGeneration.glsl";
 			if (!XREXContext::GetInstance().GetResourceLoader().LoadString(shaderFile, &shaderString))
 			{
 				XREXContext::GetInstance().GetLogger().LogLine("file not found. file: " + shaderFile);
@@ -176,7 +177,7 @@ namespace
 		RenderingEffectSP sortEffect = [] ()
 		{
 			string shaderString;
-			string shaderFile = "../../Voxelization/ListSort.glsl";
+			string shaderFile = "../../Voxelization/Shaders/ListSort.glsl";
 			if (!XREXContext::GetInstance().GetResourceLoader().LoadString(shaderFile, &shaderString))
 			{
 				XREXContext::GetInstance().GetLogger().LogLine("file not found. file: " + shaderFile);
@@ -225,7 +226,7 @@ namespace
 		RenderingEffectSP generationEffect = [] ()
 		{
 			string shaderString;
-			string shaderFile = "../../Voxelization/VoxelGeneration.glsl";
+			string shaderFile = "../../Voxelization/Shaders/VoxelGeneration.glsl";
 			if (!XREXContext::GetInstance().GetResourceLoader().LoadString(shaderFile, &shaderString))
 			{
 				XREXContext::GetInstance().GetLogger().LogLine("file not found. file: " + shaderFile);
@@ -270,11 +271,59 @@ namespace
 			return effect;
 		} ();
 
+		RenderingEffectSP anisotropicGenerationEffect = [] ()
+		{
+			string shaderString;
+			string shaderFile = "../../Voxelization/Shaders/AnisotropicVoxelGeneration.glsl";
+			if (!XREXContext::GetInstance().GetResourceLoader().LoadString(shaderFile, &shaderString))
+			{
+				XREXContext::GetInstance().GetLogger().LogLine("file not found. file: " + shaderFile);
+			}
+			RenderingEffectSP effect = MakeSP<RenderingEffect>("voxelization anisotropic generation effect");
+			effect->AddShaderCode(std::move(shaderString));
+
+			ProgramObjectSP program = XREXContext::GetInstance().GetRenderingFactory().CreateProgramObject();
+
+			std::vector<std::string const*> shaderStrings = effect->GetFullShaderCode();
+			ShaderObjectSP vs = XREXContext::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::VertexShader);
+			ShaderObjectSP fs = XREXContext::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::FragmentShader);
+			vs->Compile(shaderStrings);
+			fs->Compile(shaderStrings);
+
+			program->AttachShader(vs);
+			program->AttachShader(fs);
+			program->Link();
+			if (!program->IsValidate())
+			{
+				effect.reset();
+				return effect;
+			}
+
+			RasterizerState resterizerState;
+			resterizerState.cullMode = RenderingPipelineState::CullMode::None;
+			DepthStencilState depthStencilState;
+			depthStencilState.depthEnable = false;
+			depthStencilState.depthWriteMask = false;
+			BlendState blendState;
+			blendState.blendEnable = false;
+			blendState.redMask = false;
+			blendState.greenMask = false;
+			blendState.blueMask = false;
+			blendState.alphaMask = false;
+			RasterizerStateObjectSP rso = XREXContext::GetInstance().GetRenderingFactory().CreateRasterizerStateObject(resterizerState);
+			DepthStencilStateObjectSP dsso = XREXContext::GetInstance().GetRenderingFactory().CreateDepthStencilStateObject(depthStencilState);
+			BlendStateObjectSP bso = XREXContext::GetInstance().GetRenderingFactory().CreateBlendStateObject(blendState);
+
+			RenderingTechniqueSP voxelGenerationTechnique = effect->CreateTechnique("voxel anisotropic generation technique");
+			RenderingPassSP voxelGenerationCubePass = voxelGenerationTechnique->CreatePass(program, rso, dsso, bso);
+			return effect;
+		} ();
+
 
 		RenderingEffectSP mergeEffect = [] ()
 		{
 			string shaderString;
-			string shaderFile = "../../Voxelization/VoxelMerge.glsl";
+			string shaderFile = "../../Voxelization/Shaders/VoxelMerge.glsl";
 			if (!XREXContext::GetInstance().GetResourceLoader().LoadString(shaderFile, &shaderString))
 			{
 				XREXContext::GetInstance().GetLogger().LogLine("file not found. file: " + shaderFile);
@@ -322,7 +371,7 @@ namespace
 			return effect;
 		} ();
 		
-		UsedEffects effects = {listEffect, sortEffect, generationEffect, mergeEffect};
+		UsedEffects effects = {listEffect, sortEffect, generationEffect, anisotropicGenerationEffect, mergeEffect};
 		return effects;
 	}
 
@@ -401,7 +450,7 @@ namespace
 	RenderingEffectSP MakeConeTracingEffect()
 	{
 		string shaderString;
-		string shaderFile = "../../Voxelization/ConeTracing.glsl";
+		string shaderFile = "../../Voxelization/Shaders/ConeTracing.glsl";
 		if (!XREXContext::GetInstance().GetResourceLoader().LoadString(shaderFile, &shaderString))
 		{
 			XREXContext::GetInstance().GetLogger().LogLine("file not found. file: " + shaderFile);
@@ -644,7 +693,7 @@ namespace
 				}
 			}
 
-			//BuildFragmentLists(allRenderableNeedToRender);
+			BuildFragmentLists(allRenderableNeedToRender);
 // 			for (uint32 i = 0; i < 3; ++i)
 // 			{
 // 				GraphicsBuffer::BufferMapper mapper = atomicCounterBuffers[i]->GetMapper(AccessType::ReadOnly);
@@ -657,14 +706,14 @@ namespace
 			BuildVoxelVolume();
 			//MergeVoxelVolume();
 
-			//ConeTracing();
+			ConeTracing();
 		}
 
 		void BuildFragmentLists(std::vector<Renderable::RenderablePack> const& allRenderableNeedToRender)
 		{
 			RenderingEffectSP listEffect = voxelizationEffect.listBuild;
 
-			for (uint32 i = 0; i < 3; ++i)
+			for (uint32 i = 0; i < 1; ++i)
 			{
 				{ // clear headPointer texture
 					uint32 glClearPointer = clearPointer->GetID();
@@ -703,6 +752,8 @@ namespace
 				}
 				EffectParameterSP const& halfSize = listEffect->GetParameterByName("voxelVolumeHalfSize");
 				halfSize->As<float>().SetValue(sceneHalfSize);
+				EffectParameterSP const& axis = listEffect->GetParameterByName("axis");
+				axis->As<int32>().SetValue(i);
 
 				RenderingTechniqueSP const& rasterizeTechnique = listEffect->GetTechnique(0);
 				RenderingPassSP rasterizePass = rasterizeTechnique->GetPass(0);
@@ -766,7 +817,7 @@ namespace
 			voxelMergeViewport->Bind(0, 0);
 
 
-			RenderingEffectSP voxelizeEffect = voxelizationEffect.intermediateVolumeBuild;
+			RenderingEffectSP voxelizeEffect = voxelizationEffect.volumeBuild;
 
 			{ // clear voxelVolume texture
 				uint32 glClearVoxelVolume = clearVoxelVolume->GetID();
@@ -801,11 +852,6 @@ namespace
 				linkedListNodePool->As<TextureImageSP>().SetValue(nodePools[i]->GetImage_TEMP(0, nodePools[i]->GetFormat()));
 				EffectParameterSP const& headPointer = voxelizeEffect->GetParameterByName("heads");
 				headPointer->As<TextureImageSP>().SetValue(headPointers[i]->GetImage_TEMP(0, headPointers[i]->GetFormat()));
-				EffectParameterSP const& intermediateVolume = voxelizeEffect->GetParameterByName("intermediateVolume");
-				if (intermediateVolume)
-				{
-					intermediateVolume->As<TextureImageSP>().SetValue(intermediateVoxelVolume->GetImage_TEMP(0, intermediateVoxelVolume->GetFormat()));
-				}
 				EffectParameterSP const& volume = voxelizeEffect->GetParameterByName("volume");
 				if (voxelVolume)
 				{
@@ -813,8 +859,6 @@ namespace
 				}
 				EffectParameterSP const& axis = voxelizeEffect->GetParameterByName("axis");
 				axis->As<int32>().SetValue(i);
-				EffectParameterSP const& resolutionMultiplyer = voxelizeEffect->GetParameterByName("resolutionMultiplyer");
-				resolutionMultiplyer->As<int32>().SetValue(anisotropic ? 2 : 1);
 
 				RenderingTechniqueSP const& technique = voxelizeEffect->GetTechnique(0);
 				RenderingPassSP pass = technique->GetPass(0);
@@ -825,7 +869,65 @@ namespace
 				layout->BindToProgram(pass->GetProgram());
 				layout->Draw();
 				layout->Unbind();
+			}
+		}
 
+		void BuildAnisotropicVoxelVolume()
+		{
+			//listBuildingViewport->Bind(0, 0);
+			voxelMergeViewport->Bind(0, 0);
+
+
+			RenderingEffectSP voxelizeEffect = voxelizationEffect.anisotropicVolumeBuild;
+
+			{ // clear voxelVolume texture
+				uint32 glClearVoxelVolume = clearVoxelVolume->GetID();
+				std::shared_ptr<Texture3D> voxelVolumeAs3D = CheckedSPCast<Texture3D>(voxelVolume);
+				voxelVolumeAs3D->Bind(0);
+				GLTextureFormat glFormat = GLTextureFormatFromTexelFormat(voxelVolumeAs3D->GetDescription().GetFormat());
+
+				gl::BindBuffer(gl::GL_PIXEL_UNPACK_BUFFER, glClearVoxelVolume);
+				gl::TexSubImage3D(gl::GL_TEXTURE_3D, 0, 0, 0, 0, voxelVolumeAs3D->GetDescription().GetSizes()[0], voxelVolumeAs3D->GetDescription().GetSizes()[1], voxelVolumeAs3D->GetDescription().GetSizes()[2],
+					glFormat.glSourceFormat, glFormat.glTextureElementType, nullptr);
+				gl::BindBuffer(gl::GL_PIXEL_UNPACK_BUFFER, 0);
+			}
+
+			gl::MemoryBarrier(gl::GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+
+			for (uint32 i = 0; i < 3; ++i)
+			{
+
+				{
+					BlendState blendState;
+					DepthStencilState depthStencilState;
+					BlendStateObjectSP bso = XREXContext::GetInstance().GetRenderingFactory().CreateBlendStateObject(blendState);
+					DepthStencilStateObjectSP dsso = XREXContext::GetInstance().GetRenderingFactory().CreateDepthStencilStateObject(depthStencilState);
+					bso->Bind(Color(0, 0, 0, 1));
+					dsso->Bind(0, 0);
+				}
+
+				EffectParameterSP const& linkedListNodePool = voxelizeEffect->GetParameterByName("nodePool");
+				linkedListNodePool->As<TextureImageSP>().SetValue(nodePools[i]->GetImage_TEMP(0, nodePools[i]->GetFormat()));
+				EffectParameterSP const& headPointer = voxelizeEffect->GetParameterByName("heads");
+				headPointer->As<TextureImageSP>().SetValue(headPointers[i]->GetImage_TEMP(0, headPointers[i]->GetFormat()));
+
+				EffectParameterSP const& volume = voxelizeEffect->GetParameterByName("volume");
+				if (voxelVolume)
+				{
+					volume->As<TextureImageSP>().SetValue(voxelVolume->GetImage_TEMP(0, TexelFormat::R32UI));
+				}
+				EffectParameterSP const& axis = voxelizeEffect->GetParameterByName("axis");
+				axis->As<int32>().SetValue(i);
+
+				RenderingTechniqueSP const& technique = voxelizeEffect->GetTechnique(0);
+				RenderingPassSP pass = technique->GetPass(0);
+
+				RenderingLayoutSP const& layout = screenQuad;
+
+				pass->Use();
+				layout->BindToProgram(pass->GetProgram());
+				layout->Draw();
+				layout->Unbind();
 			}
 		}
 
@@ -844,7 +946,7 @@ namespace
 					glFormat.glSourceFormat, glFormat.glTextureElementType, nullptr);
 				gl::BindBuffer(gl::GL_PIXEL_UNPACK_BUFFER, 0);
 			}
-			RenderingEffectSP voxelMergeEffect = voxelizationEffect.volumeBuild;
+			RenderingEffectSP voxelMergeEffect = voxelizationEffect.volumeMerge;
 
 			gl::MemoryBarrier(gl::GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
@@ -952,21 +1054,14 @@ namespace
 	};
 
 
-	SceneObjectSP LoadTeapot()
+	SceneObjectSP LoadTeapot(std::string const& path)
 	{
-		MeshSP model = XREXContext::GetInstance().GetResourceManager().LoadModel("Data/teapot/teapot.obj")->Create();
+		MeshSP model = XREXContext::GetInstance().GetResourceManager().LoadModel(path)->Create();
 		SceneObjectSP sceneObject = MakeSP<SceneObject>("scene object");
 		sceneObject->SetComponent(model);
 		return sceneObject;
 	}
 
-	SceneObjectSP LoadSponza()
-	{
-		MeshSP model = XREXContext::GetInstance().GetResourceManager().LoadModel("Data/crytek-sponza/sponza.obj")->Create();
-		SceneObjectSP sceneObject = MakeSP<SceneObject>("scene object");
-		sceneObject->SetComponent(model);
-		return sceneObject;
-	}
 
 	void InitializeScene()
 	{
@@ -974,20 +1069,29 @@ namespace
 		{
 			Teapot,
 			Sponza,
-		} target = Scene::Sponza;
+			CrytekSponza,
+		} target = Scene::Teapot;
 
 		floatV3 center;
 		float halfSize;
+		std::string filePath;
 
 		switch (target)
 		{
 		case Scene::Teapot:
 			center = floatV3(0, 32.f, 0);
 			halfSize = 64;
+			filePath = "Data/teapot/teapot.obj";
 			break;
 		case Scene::Sponza:
+			center = floatV3(0, 5.f, 0);
+			halfSize = 16;
+			filePath = "Data/dabrovic-sponza/sponza.obj";
+			break;
+		case Scene::CrytekSponza:
 			center = floatV3(0, 512.f, 0);
 			halfSize = 2048;
+			filePath = "Data/crytek-sponza/sponza.obj";
 			break;
 		default:
 			assert(false);
@@ -1002,19 +1106,8 @@ namespace
 			return true;
 		};
 		XREXContext::GetInstance().SetLogicFunction(l);
-		SceneObjectSP sceneObject;
-		switch (target)
-		{
-		case Teapot:
-			sceneObject = LoadTeapot();
-			break;
-		case Sponza:
-			sceneObject = LoadSponza();
-			break;
-		default:
-			assert(false);
-			break;
-		};
+		SceneObjectSP sceneObject = LoadTeapot(filePath);
+
 		assert(sceneObject);
 		XREXContext::GetInstance().GetScene()->AddObject(sceneObject);
 
