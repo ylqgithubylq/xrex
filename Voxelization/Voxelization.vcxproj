@@ -22,14 +22,15 @@
     <ClInclude Include="VoxelTest.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="ConeTracing.glsl" />
-    <None Include="ListGeneration.glsl" />
-    <None Include="ListSort.glsl" />
-    <None Include="VoxelGeneration.glsl" />
-    <None Include="VoxelMerge.glsl" />
+    <Text Include="TODO.txt" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="TODO.txt" />
+    <None Include="Shaders\AnisotropicVoxelGeneration.glsl" />
+    <None Include="Shaders\ConeTracing.glsl" />
+    <None Include="Shaders\ListGeneration.glsl" />
+    <None Include="Shaders\ListSort.glsl" />
+    <None Include="Shaders\VoxelGeneration.glsl" />
+    <None Include="Shaders\VoxelMerge.glsl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{D8AC2A74-F164-4C49-A533-C0E75220BF52}</ProjectGuid>
