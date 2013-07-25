@@ -51,13 +51,15 @@ vec4 ConeTrace(sampler3D vexelVolume, vec3 volumeCenter, float volumeHalfSize, v
 	vec4 finalColor = vec4(0, 0, 0, 0); // alpha pre-multiplied color
 
 	// the volume of first sample point should include the startPoint
-	float currentSampleDistance = smallestGridSize / 4;
+	float currentSampleDistance = smallestGridSize / 2;
 	float currentSampleRadius = currentSampleDistance;
 
 	while (currentSampleDistance + currentSampleRadius < maxTracingDistance)
 	{
 		vec3 currentSamplePoint = startPoint - volumeCenter + viewDirection * currentSampleDistance;
 		vec4 color = Sample(vexelVolume, float(1) / gridCount, currentSamplePoint / volumeHalfSize, currentSampleRadius / volumeHalfSize); // normalized to [-1, 1]
+		//vec4 modifiedColor = mix(vec4(0, 1, 0, color.a), vec4(0, 1, 1, color.a), currentSampleDistance / maxTracingDistance); // TODO temp
+		//finalColor = AccumulateColor(finalColor, modifiedColor);
 		finalColor = AccumulateColor(finalColor, color);
 		if (finalColor.a > alphaThreshold)
 		{
@@ -67,7 +69,7 @@ vec4 ConeTrace(sampler3D vexelVolume, vec3 volumeCenter, float volumeHalfSize, v
 		// (currentSampleDistance + currentSampleRadius + nextSampleRadius) * sin(sinHalfAperture) = nextSampleRadius
 		float nextSampleRadius = (currentSampleDistance + currentSampleRadius) * sinHalfAperture / (1 - sinHalfAperture);
 		float tracingStep = currentSampleRadius + nextSampleRadius;
-		if (tracingStep < smallestGridSize / 2) // make the tracingStep always larger than half a voxel
+		if (tracingStep < smallestGridSize) // make the tracingStep always larger than a voxel
 		{
 			tracingStep = smallestGridSize / 2;
 			nextSampleRadius = tracingStep / 2;
