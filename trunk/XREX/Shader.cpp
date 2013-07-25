@@ -39,6 +39,7 @@ namespace XREX
 				macros[static_cast<uint32>(ShaderObject::ShaderType::GeometryShader)] = "#define GS\n";
 				macros[static_cast<uint32>(ShaderObject::ShaderType::TessellationControlShader)] = "#define TCS\n";
 				macros[static_cast<uint32>(ShaderObject::ShaderType::TessellationEvaluationShader)] = "#define TES\n";
+				macros[static_cast<uint32>(ShaderObject::ShaderType::ComputeShader)] = "#define CS\n";
 				return macros;
 			} ();
 			return mapping[static_cast<uint32>(type)];

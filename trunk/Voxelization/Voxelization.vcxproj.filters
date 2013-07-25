@@ -46,6 +46,9 @@
     <None Include="VoxelMerge.glsl">
       <Filter>Effect Files</Filter>
     </None>
+    <None Include="ListSort.glsl">
+      <Filter>Effect Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="TODO.txt" />

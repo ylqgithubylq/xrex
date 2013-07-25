@@ -25,6 +25,7 @@ namespace XREX
 			GeometryShader,
 			TessellationControlShader,
 			TessellationEvaluationShader,
+			ComputeShader,
 
 			CountOfShaderTypes
 		};

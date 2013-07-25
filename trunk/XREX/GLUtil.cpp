@@ -301,9 +301,11 @@ namespace XREX
 		case ShaderObject::ShaderType::GeometryShader:
 			return gl::GL_GEOMETRY_SHADER;
 		case ShaderObject::ShaderType::TessellationControlShader:
-			gl::GL_TESS_CONTROL_SHADER;
+			return gl::GL_TESS_CONTROL_SHADER;
 		case ShaderObject::ShaderType::TessellationEvaluationShader:
-			gl::GL_TESS_EVALUATION_SHADER;
+			return gl::GL_TESS_EVALUATION_SHADER;
+		case ShaderObject::ShaderType::ComputeShader:
+			return gl::GL_COMPUTE_SHADER;
 		case ShaderObject::ShaderType::CountOfShaderTypes:
 			assert(false);
 			return 0;

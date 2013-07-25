@@ -24,6 +24,7 @@
   <ItemGroup>
     <None Include="ConeTracing.glsl" />
     <None Include="ListGeneration.glsl" />
+    <None Include="ListSort.glsl" />
     <None Include="VoxelGeneration.glsl" />
     <None Include="VoxelMerge.glsl" />
   </ItemGroup>
