@@ -23,6 +23,7 @@ namespace XREX
 
 	void SceneObject::SetComponent(ComponentSP const& component)
 	{
+		assert(component);
 		assert(component->GetOwnerSceneObject() == nullptr);
 		ComponentSP const& original = components_[static_cast<uint32>(component->GetComponentType())];
 		if (original != nullptr)

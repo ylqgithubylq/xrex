@@ -11,6 +11,7 @@ layout (binding = 0, offset = 0) uniform atomic_uint nodeCounter; // should be i
 
 uniform int objectID; // start from 0
 uniform float voxelVolumeHalfSize;
+uniform vec3 voxelVolumeCenter;
 
 uniform int axis;
 
@@ -23,12 +24,12 @@ const int AxisZ = 2;
 
 in vec3 position;
 
-out vec3 vPosition;
+out vec3 wPosition;
 
 void main()
 {
-	vPosition = (viewMatrix * modelMatrix * vec4(position, 1)).xyz;
-	gl_Position = projectionMatrix * vec4(vPosition, 1);
+	wPosition = (modelMatrix * vec4(position, 1)).xyz;
+	gl_Position = projectionMatrix * viewMatrix * vec4(wPosition, 1);
 }
 
 #endif
@@ -37,19 +38,6 @@ void main()
 
 
 #ifdef FS
-
-vec3 TransformByAxis(vec3 value, int axis)
-{ // TODO extract this out?
-	switch (axis)
-	{
-	case AxisX: // from +x, +z is up
-		return value.zxy;
-	case AxisY: // from +y, +x is up
-		return value.yzx;
-	case AxisZ: // from +z, +y is up
-		return value.xyz;
-	}
-}
 
 
 void InsertToLinkedList(layout (r32ui) uimage2D heads, layout (rgba32ui) writeonly uimageBuffer nodePool, atomic_uint nodeCounter, ivec2 coordinate, float depth, int objectID, bool frontFacing, vec3 value)
@@ -61,13 +49,13 @@ void InsertToLinkedList(layout (r32ui) uimage2D heads, layout (rgba32ui) writeon
 }
 
 
-in vec3 vPosition;
+in vec3 wPosition;
 
 void main()
 {
 	// gl_FragCoord.xy will round to integer as it has form of (x.5, y.5)
 	// gl_fragCoord.z is linear, due to orthogonal projection. range [0, 1]
-	InsertToLinkedList(heads, nodePool, nodeCounter, ivec2(gl_FragCoord.xy), gl_FragCoord.z, objectID, gl_FrontFacing, TransformByAxis(vPosition / voxelVolumeHalfSize, axis));
+	InsertToLinkedList(heads, nodePool, nodeCounter, ivec2(gl_FragCoord.xy), gl_FragCoord.z, objectID, gl_FrontFacing, (wPosition - voxelVolumeCenter) / voxelVolumeHalfSize);
 }
 
 #endif

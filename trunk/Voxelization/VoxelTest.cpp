@@ -536,14 +536,14 @@ namespace
 		return cubeObject;
 	}
 
-	SceneObjectSP MakeCamera()
+	SceneObjectSP MakeCamera(float cameraSpeedScaler)
 	{
 		SceneObjectSP cameraObject = MakeSP<SceneObject>("camera");
 		Settings const& settings = XREXContext::GetInstance().GetSettings();
-		CameraSP camera = MakeSP<PerspectiveCamera>(PI / 4, static_cast<float>(settings.renderingSettings.width) / settings.renderingSettings.height, 0.01f, 10000.0f);
+		CameraSP camera = MakeSP<PerspectiveCamera>(PI / 4, static_cast<float>(settings.renderingSettings.width) / settings.renderingSettings.height, 0.01f, 100000.0f);
 		cameraObject->SetComponent(camera);
 
-		auto cc = MakeSP<FirstPersonCameraController>(10.f);
+		auto cc = MakeSP<FirstPersonCameraController>(cameraSpeedScaler);
 		cc->AttachToCamera(cameraObject);
 		XREXContext::GetInstance().GetInputCenter().AddInputHandler(cc);
 
@@ -592,7 +592,7 @@ namespace
 		bool anisotropic;
 		
 
-		VoxelizationAndRenderProcess(floatV3 const& sceneCenter, float sceneHalfSize, uint32 voxelVolumeResolution, bool anisotropic)
+		VoxelizationAndRenderProcess(floatV3 const& sceneCenter, float sceneHalfSize, uint32 voxelVolumeResolution, bool anisotropic, float cameraSpeedScaler)
 			: frame(0), anisotropic(anisotropic)
 		{
 			this->sceneCenter = sceneCenter;
@@ -603,7 +603,7 @@ namespace
 
 			CreateVoxelizationObjects();
 
-			viewCameraObject = MakeCamera();
+			viewCameraObject = MakeCamera(cameraSpeedScaler);
 			coneTracingProxyCube = MakeConeTracingProxyCube(CheckedSPCast<PerspectiveCamera>(viewCameraObject->GetComponent<Camera>()), sceneCenter, sceneHalfSize);
 			voxelVolumeToTrace = std::make_pair(nullptr, CreateConeTracingSampler());
 
@@ -628,15 +628,15 @@ namespace
 				cameraObject->SetComponent(camera);
 				voxelizationCameras[i] = cameraObject;
 			}
-			// from +x, up is +y
+			// from +x, up is +z
 			TransformationSP const& cameraTransformation0 = voxelizationCameras[0]->GetComponent<Transformation>();
 			cameraTransformation0->Translate(sceneCenter + floatV3(sceneHalfSize, 0, 0));
 			cameraTransformation0->FaceToDirection(floatV3(-1, 0, 0), floatV3(0, 0, 1));
-			// from +y, up is +z
+			// from +y, up is +x
 			TransformationSP const& cameraTransformation1 = voxelizationCameras[1]->GetComponent<Transformation>();
 			cameraTransformation1->Translate(sceneCenter + floatV3(0, sceneHalfSize, 0));
 			cameraTransformation1->FaceToDirection(floatV3(0, -1, 0), floatV3(1, 0, 0));
-			// from +z, up is +x
+			// from +z, up is +y
 			TransformationSP const& cameraTransformation2 = voxelizationCameras[2]->GetComponent<Transformation>();
 			cameraTransformation2->Translate(sceneCenter + floatV3(0, 0, sceneHalfSize));
 			cameraTransformation2->FaceToDirection(floatV3(0, 0, -1), floatV3(0, 1, 0));
@@ -701,7 +701,7 @@ namespace
 // 				XREXContext::GetInstance().GetLogger().LogLine("count: " + std::to_string(count));
 // 			}
 
-			SortFragmentLists();
+			//SortFragmentLists();
 
 			BuildVoxelVolume();
 			//MergeVoxelVolume();
@@ -713,7 +713,8 @@ namespace
 		{
 			RenderingEffectSP listEffect = voxelizationEffect.listBuild;
 
-			for (uint32 i = 0; i < 1; ++i)
+
+			for (uint32 i = 0; i < 3; ++i)
 			{
 				{ // clear headPointer texture
 					uint32 glClearPointer = clearPointer->GetID();
@@ -744,20 +745,30 @@ namespace
 				EffectParameterSP const& atomicCounter = listEffect->GetParameterByName("0");
 				ShaderResourceBufferSP atomicBuffer = atomicCounter->As<ShaderResourceBufferSP>().GetValue();
 				atomicBuffer->SetBuffer(atomicCounterBuffers[i]);
-				{
-					ShaderResourceBuffer::BufferVariableSetter setter = atomicBuffer->GetVariableSetter();
-					std::pair<bool, ShaderResourceBuffer::BufferVariableSetter::Setter> nodeCounterSetter = setter.GetSetter("nodeCounter");
-					assert(nodeCounterSetter.first);
-					nodeCounterSetter.second.SetValue(setter, 1u);
-				}
+				atomicCounterBuffers[i]->Clear(1u);
+// 				{
+// 					ShaderResourceBuffer::BufferVariableSetter setter = atomicBuffer->GetVariableSetter();
+// 					std::pair<bool, ShaderResourceBuffer::BufferVariableSetter::Setter> nodeCounterSetter = setter.GetSetter("nodeCounter");
+// 					assert(nodeCounterSetter.first);
+// 					nodeCounterSetter.second.SetValue(setter, 1u);
+// 				}
 				EffectParameterSP const& halfSize = listEffect->GetParameterByName("voxelVolumeHalfSize");
 				halfSize->As<float>().SetValue(sceneHalfSize);
+				EffectParameterSP const& voxelVolumeCenter = listEffect->GetParameterByName("voxelVolumeCenter");
+				voxelVolumeCenter->As<floatV3>().SetValue(sceneCenter);
 				EffectParameterSP const& axis = listEffect->GetParameterByName("axis");
-				axis->As<int32>().SetValue(i);
+				if (axis)
+				{
+					axis->As<int32>().SetValue(i);
+				}
+
+				int objectID = 0;
 
 				RenderingTechniqueSP const& rasterizeTechnique = listEffect->GetTechnique(0);
 				RenderingPassSP rasterizePass = rasterizeTechnique->GetPass(0);
-				int objectID = 0;
+
+				rasterizePass->Use();
+
 				for (auto& renderablePack : allRenderableNeedToRender)
 				{
 					Renderable& ownerRenderable = *renderablePack.renderable;
@@ -769,7 +780,7 @@ namespace
 					EffectParameterSP const& object = listEffect->GetParameterByName("objectID");
 					object->As<int32>().SetValue(objectID);
 
-					rasterizePass->Use();
+					rasterizePass->GetProgram()->SetAllUniforms();
 					layout->BindToProgram(rasterizePass->GetProgram());
 					layout->Draw();
 					layout->Unbind();
@@ -1054,7 +1065,7 @@ namespace
 	};
 
 
-	SceneObjectSP LoadTeapot(std::string const& path)
+	SceneObjectSP LoadModel(std::string const& path)
 	{
 		MeshSP model = XREXContext::GetInstance().GetResourceManager().LoadModel(path)->Create();
 		SceneObjectSP sceneObject = MakeSP<SceneObject>("scene object");
@@ -1070,7 +1081,12 @@ namespace
 			Teapot,
 			Sponza,
 			CrytekSponza,
-		} target = Scene::Teapot;
+			Conference,
+			Dragon, // cannot work
+			Buddha, // cannot work
+			LostEmpire, // cannot work
+			SponzaWithTeapots,
+		} target = Scene::CrytekSponza;
 
 		floatV3 center;
 		float halfSize;
@@ -1080,25 +1096,49 @@ namespace
 		{
 		case Scene::Teapot:
 			center = floatV3(0, 32.f, 0);
-			halfSize = 64;
+			halfSize = 96;
 			filePath = "Data/teapot/teapot.obj";
 			break;
 		case Scene::Sponza:
 			center = floatV3(0, 5.f, 0);
-			halfSize = 16;
+			halfSize = 24;
 			filePath = "Data/dabrovic-sponza/sponza.obj";
 			break;
 		case Scene::CrytekSponza:
 			center = floatV3(0, 512.f, 0);
-			halfSize = 2048;
+			halfSize = 1024;
 			filePath = "Data/crytek-sponza/sponza.obj";
+			break;
+		case Scene::Conference:
+			center = floatV3(0, 0, 0);
+			halfSize = 1536;
+			filePath = "Data/conference/conference.obj";
+			break;
+		case Scene::Dragon:
+			center = floatV3(0, 0, 0);
+			halfSize = 128;
+			filePath = "Data/dragon/dragon.obj";
+			break;
+		case Scene::Buddha:
+			center = floatV3(0, 0, 0);
+			halfSize = 128;
+			filePath = "Data/buddha/buddha.obj";
+			break;
+		case Scene::LostEmpire:
+			center = floatV3(0, 0, 0);
+			halfSize = 1024;
+			filePath = "Data/lost_empire/lost_empire.obj";
+			break;
+		case Scene::SponzaWithTeapots:
+			center = floatV3(0, 32.f, 0);
+			halfSize = 128;
 			break;
 		default:
 			assert(false);
 			break;
 		}
 
-		std::shared_ptr<VoxelizationAndRenderProcess> renderingProcess = MakeSP<VoxelizationAndRenderProcess>(center, halfSize, 256, false);
+		std::shared_ptr<VoxelizationAndRenderProcess> renderingProcess = MakeSP<VoxelizationAndRenderProcess>(center, halfSize, 512, false, halfSize / 50);
 		XREXContext::GetInstance().GetRenderingEngine().SetRenderingProcess(renderingProcess);
 		function<bool(double current, double delta)> l = [renderingProcess] (double current, double delta)
 		{
@@ -1106,10 +1146,47 @@ namespace
 			return true;
 		};
 		XREXContext::GetInstance().SetLogicFunction(l);
-		SceneObjectSP sceneObject = LoadTeapot(filePath);
 
-		assert(sceneObject);
-		XREXContext::GetInstance().GetScene()->AddObject(sceneObject);
+		SceneObjectSP sceneObject;
+
+		if (target == Scene::SponzaWithTeapots)
+		{
+			//filePath = "Data/dabrovic-sponza/sponza.obj";
+			filePath = "Data/teapot/teapot.obj";
+			
+			sceneObject = LoadModel(filePath);
+			sceneObject->GetComponent<Transformation>()->SetScaling(2);
+			assert(sceneObject);
+			XREXContext::GetInstance().GetScene()->AddObject(sceneObject);
+
+			filePath = "Data/teapot/teapot.obj";
+			//SceneObjectSP innerSceneObject = LoadModel(filePath);
+			SceneObjectSP innerSceneObject = MakeSP<SceneObject>("teapot");
+			innerSceneObject->SetComponent(sceneObject->GetComponent<Renderable>()->ShallowClone());
+
+			MeshSP mesh = CheckedSPCast<Mesh>(innerSceneObject->GetComponent<Renderable>());
+			for (int32 i = 0; i < 2; ++i)
+			{
+				MeshSP cloned = mesh->GetShallowClone();
+				SceneObjectSP clonedSceneObject = MakeSP<SceneObject>("so " + to_string(i));
+				clonedSceneObject->SetComponent(cloned);
+				TransformationSP transformation = clonedSceneObject->GetComponent<Transformation>();
+				const int positionScaler = 32;
+				floatV3 position((i & 1) * 2 * positionScaler - positionScaler, ((i & 2) >> 1) * 2 * positionScaler - positionScaler, ((i & 4) >> 2) * 2 * positionScaler - positionScaler);
+				transformation->Translate(position + floatV3(0, positionScaler, 0));
+				transformation->Rotate(0.2f * PI, position);
+				transformation->SetParent(sceneObject->GetComponent<Transformation>());
+				XREXContext::GetInstance().GetScene()->AddObject(clonedSceneObject);
+			}
+
+		}
+		else
+		{
+			sceneObject = LoadModel(filePath);
+			assert(sceneObject);
+			XREXContext::GetInstance().GetScene()->AddObject(sceneObject);
+		}
+
 
 		struct TeapotController
 			: public InputHandler
@@ -1134,8 +1211,8 @@ namespace
 				actions.Set(InputCenter::InputSemantic::K_PageDown, Semantic::NY);
 				return actions;
 			}
-			TeapotController(SceneObjectSP& object)
-				: InputHandler(GenerateActionMap()), object(object)
+			TeapotController(SceneObjectSP& object, float scaler)
+				: InputHandler(GenerateActionMap()), object(object), scaler(scaler)
 			{
 
 			}
@@ -1144,12 +1221,13 @@ namespace
 				float x = static_cast<float>((inputEvent.mappedSemantic == Semantic::NX ? -1 : 0) + (inputEvent.mappedSemantic == Semantic::PX ? 1 : 0));
 				float y = static_cast<float>((inputEvent.mappedSemantic == Semantic::NY ? -1 : 0) + (inputEvent.mappedSemantic == Semantic::PY ? 1 : 0));
 				float z = static_cast<float>((inputEvent.mappedSemantic == Semantic::NZ ? -1 : 0) + (inputEvent.mappedSemantic == Semantic::PZ ? 1 : 0));
-				object->GetComponent<Transformation>()->Translate(floatV3(x, y, z));
+				object->GetComponent<Transformation>()->Translate(floatV3(x * scaler, y * scaler, z * scaler));
 				return std::make_pair(false, function<void()>());
 			}
 			SceneObjectSP object;
+			float scaler;
 		};
-		std::shared_ptr<TeapotController> c = MakeSP<TeapotController>(sceneObject);
+		std::shared_ptr<TeapotController> c = MakeSP<TeapotController>(sceneObject, halfSize / 100);
 		XREXContext::GetInstance().GetInputCenter().AddInputHandler(c);
 
 

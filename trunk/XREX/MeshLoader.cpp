@@ -605,11 +605,12 @@ namespace XREX
 		Assimp::Importer importer;
 
 		aiScene const* scene = importer.ReadFile(fileName,
-			aiProcess_GenSmoothNormals |
-			aiProcess_CalcTangentSpace |
+			//aiProcess_GenSmoothNormals |
+			//aiProcess_CalcTangentSpace |
 			aiProcess_Triangulate |
 			aiProcess_JoinIdenticalVertices |
-			aiProcess_SortByPType
+			//aiProcess_SortByPType |
+			0
 			);
 
 		if(!scene)

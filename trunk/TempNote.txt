@@ -3,6 +3,9 @@ using regular expressions(Ctrl+Shift+F):
 
 temp note:
 
+bufferTexture do not use sampler
+add ClearState/ClearStateObject
+
 multi-thread?
 framebuffer / how to set channels from shader?
 

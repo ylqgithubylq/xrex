@@ -263,6 +263,8 @@ namespace XREX
 
 		void Bind();
 
+		void SetAllUniforms();
+
 		/*
 		 *	@return: return.first indicates whether the channel is found.
 		 */
