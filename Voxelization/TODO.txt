@@ -5,5 +5,3 @@
 重构，分文件
 
 
-bufferTexture不需要sampler
-添加ClearState/ClearStateObject

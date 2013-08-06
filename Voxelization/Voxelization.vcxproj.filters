@@ -55,5 +55,6 @@
     <None Include="Shaders\VoxelMerge.glsl">
       <Filter>Effect Files</Filter>
     </None>
+    <None Include="..\GLActivity.nvact" />
   </ItemGroup>
 </Project>

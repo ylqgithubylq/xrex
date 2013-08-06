@@ -340,16 +340,7 @@ namespace XREX
 		assert(validate_);
 		gl::UseProgram(glProgramID_);
 
-		for (auto& bufferBinder : bufferBinders_)
-		{
-			bufferBinder.setter(bufferBinder.bufferInformation);
-		}
-
-		for (auto uniformBinder : uniformBinders_)
-		{
-			uniformBinder.setter(uniformBinder.uniformInformation);
-		}
-
+		SetAllUniforms();
 
 	#ifdef XREX_DEBUG
 		gl::ValidateProgram(glProgramID_);
@@ -369,6 +360,21 @@ namespace XREX
 		}
 	#endif
 	}
+
+
+	void ProgramObject::SetAllUniforms()
+	{
+		for (auto& bufferBinder : bufferBinders_)
+		{
+			bufferBinder.setter(bufferBinder.bufferInformation);
+		}
+
+		for (auto uniformBinder : uniformBinders_)
+		{
+			uniformBinder.setter(uniformBinder.uniformInformation);
+		}
+	}
+
 
 	std::pair<bool, ProgramObject::AttributeInformation> ProgramObject::GetAttributeInformation(std::string const& channel) const
 	{
