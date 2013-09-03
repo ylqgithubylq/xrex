@@ -11,8 +11,10 @@
 
 
 
+
 int main()
 {
+
 	switch (2)
 	{
 	case 1:
