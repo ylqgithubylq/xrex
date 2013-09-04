@@ -1,321 +1,344 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
-    </Filter>
     <Filter Include="Resource Files">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Effect Files">
+    <Filter Include="Base">
+      <UniqueIdentifier>{a250f246-38d3-4948-83d2-dabd37bcc79f}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd;cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Rendering">
+      <UniqueIdentifier>{b37c57b4-8bf8-4192-9777-1e9fe818bce5}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd;cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Input">
+      <UniqueIdentifier>{8fdd5934-4af6-40d3-9de6-bd583e9a9577}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd;cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="HelperFacility">
+      <UniqueIdentifier>{996b379c-8037-4f25-8a5f-6454f4427f19}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource">
+      <UniqueIdentifier>{2652a297-a04c-4862-9b7c-f1792e4512d3}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd;cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="EffectFiles">
       <UniqueIdentifier>{f0bac215-49a8-4267-aa4a-2e0d94d415ec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scene">
+      <UniqueIdentifier>{b29cc3f2-5f2f-4f43-80b1-0f9987e39b6b}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd;cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Rendering\GL">
+      <UniqueIdentifier>{f1920aef-8ace-41d1-a5df-de73ff13738a}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd;cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="_">
+      <UniqueIdentifier>{02c1e628-ab7b-47f6-9a1d-7d4f27bfc9ae}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd;cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Camera.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Color.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Component.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="DLLMain.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="FreeRoamCameraController.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GLUtil.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GraphicsBuffer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="InputCenter.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="InputHandler.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="LocalResourceLoader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Logger.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Material.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Math.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Mesh.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MeshLoader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NaiveManagedScene.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Renderable.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="RenderingEffect.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="RenderingEngine.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="RenderingFactory.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="RenderingLayout.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="RenderingPipelineState.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ResourceManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Scene.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SceneObject.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Settings.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Shader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Texture.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="TextureLoader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Timer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Transformation.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Util.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Window.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="XREX.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="XREXContext.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Viewport.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeometricalMath.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="OrbitCameraController.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="FirstPersonCameraController.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Sampler.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GraphicsContext.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BufferView.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="TextureImage.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="RenderingProcess.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="DefaultRenderingProcess.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="BasicType.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Base\Logger.hpp">
+      <Filter>Base</Filter>
     </ClInclude>
-    <ClInclude Include="Camera.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Base\Math.hpp">
+      <Filter>Base</Filter>
     </ClInclude>
-    <ClInclude Include="Color.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Base\MathHelper.hpp">
+      <Filter>Base</Filter>
     </ClInclude>
-    <ClInclude Include="Component.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Base\Matrix.hpp">
+      <Filter>Base</Filter>
     </ClInclude>
-    <ClInclude Include="Declare.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Base\Quaternion.hpp">
+      <Filter>Base</Filter>
     </ClInclude>
-    <ClInclude Include="DefinedShaderName.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Base\Settings.hpp">
+      <Filter>Base</Filter>
     </ClInclude>
-    <ClInclude Include="FreeRoamCameraController.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Base\Timer.hpp">
+      <Filter>Base</Filter>
     </ClInclude>
-    <ClInclude Include="GLUtil.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Base\Util.hpp">
+      <Filter>Base</Filter>
     </ClInclude>
-    <ClInclude Include="GraphicsBuffer.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Base\Vector.hpp">
+      <Filter>Base</Filter>
     </ClInclude>
-    <ClInclude Include="InputCenter.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Base\Window.hpp">
+      <Filter>Base</Filter>
     </ClInclude>
-    <ClInclude Include="InputHandler.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Base\XREXContext.hpp">
+      <Filter>Base</Filter>
     </ClInclude>
-    <ClInclude Include="LocalResourceLoader.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Base\BasicType.hpp">
+      <Filter>Base</Filter>
     </ClInclude>
-    <ClInclude Include="Logger.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Base\Color.hpp">
+      <Filter>Base</Filter>
     </ClInclude>
-    <ClInclude Include="Material.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Base\GeometricalMath.hpp">
+      <Filter>Base</Filter>
     </ClInclude>
-    <ClInclude Include="Math.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Base\Geometry.hpp">
+      <Filter>Base</Filter>
     </ClInclude>
-    <ClInclude Include="MathHelper.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="HelperFacility\DefaultRenderingProcess.hpp">
+      <Filter>HelperFacility</Filter>
     </ClInclude>
-    <ClInclude Include="Matrix.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="HelperFacility\FirstPersonCameraController.hpp">
+      <Filter>HelperFacility</Filter>
     </ClInclude>
-    <ClInclude Include="Mesh.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="HelperFacility\FreeRoamCameraController.hpp">
+      <Filter>HelperFacility</Filter>
     </ClInclude>
-    <ClInclude Include="MeshLoader.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="HelperFacility\NaiveManagedScene.hpp">
+      <Filter>HelperFacility</Filter>
     </ClInclude>
-    <ClInclude Include="NaiveManagedScene.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="HelperFacility\OrbitCameraController.hpp">
+      <Filter>HelperFacility</Filter>
     </ClInclude>
-    <ClInclude Include="Quaternion.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Resource\LoadingResult.hpp">
+      <Filter>Resource</Filter>
     </ClInclude>
-    <ClInclude Include="Renderable.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Resource\LocalResourceLoader.hpp">
+      <Filter>Resource</Filter>
     </ClInclude>
-    <ClInclude Include="RenderingEffect.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Resource\MeshLoader.hpp">
+      <Filter>Resource</Filter>
     </ClInclude>
-    <ClInclude Include="RenderingEngine.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Resource\ResourceManager.hpp">
+      <Filter>Resource</Filter>
     </ClInclude>
-    <ClInclude Include="RenderingFactory.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Resource\TextureLoader.hpp">
+      <Filter>Resource</Filter>
     </ClInclude>
-    <ClInclude Include="RenderingLayout.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Scene\Component.hpp">
+      <Filter>Scene</Filter>
     </ClInclude>
-    <ClInclude Include="RenderingPipelineState.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Scene\Scene.hpp">
+      <Filter>Scene</Filter>
     </ClInclude>
-    <ClInclude Include="ResourceManager.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Scene\SceneObject.hpp">
+      <Filter>Scene</Filter>
     </ClInclude>
-    <ClInclude Include="Scene.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Scene\Transformation.hpp">
+      <Filter>Scene</Filter>
     </ClInclude>
-    <ClInclude Include="SceneObject.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Rendering\BufferView.hpp">
+      <Filter>Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="Settings.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Rendering\Camera.hpp">
+      <Filter>Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="Shader.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Rendering\DefinedShaderName.hpp">
+      <Filter>Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="Texture.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Rendering\GraphicsBuffer.hpp">
+      <Filter>Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="TextureLoader.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Rendering\GraphicsContext.hpp">
+      <Filter>Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="Timer.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Rendering\Material.hpp">
+      <Filter>Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="Transformation.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Rendering\Mesh.hpp">
+      <Filter>Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="Util.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Rendering\Renderable.hpp">
+      <Filter>Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="Vector.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Rendering\RenderingEffect.hpp">
+      <Filter>Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="Window.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Rendering\RenderingEngine.hpp">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\RenderingFactory.hpp">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\RenderingLayout.hpp">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\RenderingPipelineState.hpp">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\RenderingProcess.hpp">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\Sampler.hpp">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\Shader.hpp">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\Texture.hpp">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\TextureImage.hpp">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\Viewport.hpp">
+      <Filter>Rendering</Filter>
     </ClInclude>
     <ClInclude Include="XREX.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>_</Filter>
     </ClInclude>
     <ClInclude Include="XREXAll.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>_</Filter>
     </ClInclude>
-    <ClInclude Include="XREXContext.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Declare.hpp">
+      <Filter>_</Filter>
     </ClInclude>
-    <ClInclude Include="Viewport.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Input\InputCenter.hpp">
+      <Filter>Input</Filter>
     </ClInclude>
-    <ClInclude Include="Geometry.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Input\InputHandler.hpp">
+      <Filter>Input</Filter>
     </ClInclude>
-    <ClInclude Include="GeometricalMath.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Rendering\GL\GLUtil.hpp">
+      <Filter>Rendering\GL</Filter>
     </ClInclude>
-    <ClInclude Include="OrbitCameraController.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="FirstPersonCameraController.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Sampler.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="LoadingResult.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GraphicsContext.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="BufferView.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TextureImage.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RenderingProcess.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DefaultRenderingProcess.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Base\Math.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Base\Settings.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Base\Timer.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Base\Util.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Base\Window.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Base\XREXContext.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Base\Color.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Base\DLLMain.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Base\GeometricalMath.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Base\Logger.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
+    <ClCompile Include="HelperFacility\FirstPersonCameraController.cpp">
+      <Filter>HelperFacility</Filter>
+    </ClCompile>
+    <ClCompile Include="HelperFacility\FreeRoamCameraController.cpp">
+      <Filter>HelperFacility</Filter>
+    </ClCompile>
+    <ClCompile Include="HelperFacility\NaiveManagedScene.cpp">
+      <Filter>HelperFacility</Filter>
+    </ClCompile>
+    <ClCompile Include="HelperFacility\OrbitCameraController.cpp">
+      <Filter>HelperFacility</Filter>
+    </ClCompile>
+    <ClCompile Include="HelperFacility\DefaultRenderingProcess.cpp">
+      <Filter>HelperFacility</Filter>
+    </ClCompile>
+    <ClCompile Include="Resource\LocalResourceLoader.cpp">
+      <Filter>Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Resource\MeshLoader.cpp">
+      <Filter>Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Resource\ResourceManager.cpp">
+      <Filter>Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Resource\TextureLoader.cpp">
+      <Filter>Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\Component.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\Scene.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\SceneObject.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\Transformation.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\Camera.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\GraphicsBuffer.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\GraphicsContext.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\Material.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\Mesh.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\Renderable.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\RenderingEffect.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\RenderingEngine.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\RenderingFactory.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\RenderingLayout.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\RenderingPipelineState.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\RenderingProcess.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\Sampler.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\Shader.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\Texture.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\TextureImage.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\Viewport.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\BufferView.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="XREX.cpp">
+      <Filter>_</Filter>
+    </ClCompile>
+    <ClCompile Include="Input\InputCenter.cpp">
+      <Filter>Input</Filter>
+    </ClCompile>
+    <ClCompile Include="Input\InputHandler.cpp">
+      <Filter>Input</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\GL\GLUtil.cpp">
+      <Filter>Rendering\GL</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

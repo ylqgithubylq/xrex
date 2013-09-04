@@ -118,12 +118,12 @@ namespace XREX
 }
 
 
-#include "BasicType.hpp"
+#include "Base/BasicType.hpp"
 
-#include "Math.hpp"
-#include "GeometricalMath.hpp"
+#include "Base/Math.hpp"
+#include "Base/GeometricalMath.hpp"
 
-#include "Color.hpp"
+#include "Base/Color.hpp"
 
-#include "Util.hpp"
+#include "Base/Util.hpp"
 

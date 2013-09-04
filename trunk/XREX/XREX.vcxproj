@@ -18,6 +18,114 @@
       <Platform>Win32</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Base\BasicType.hpp" />
+    <ClInclude Include="Base\Color.hpp" />
+    <ClInclude Include="Base\GeometricalMath.hpp" />
+    <ClInclude Include="Base\Geometry.hpp" />
+    <ClInclude Include="Base\Logger.hpp" />
+    <ClInclude Include="Base\Math.hpp" />
+    <ClInclude Include="Base\MathHelper.hpp" />
+    <ClInclude Include="Base\Matrix.hpp" />
+    <ClInclude Include="Base\Quaternion.hpp" />
+    <ClInclude Include="Base\Settings.hpp" />
+    <ClInclude Include="Base\Timer.hpp" />
+    <ClInclude Include="Base\Util.hpp" />
+    <ClInclude Include="Base\Vector.hpp" />
+    <ClInclude Include="Base\Window.hpp" />
+    <ClInclude Include="Base\XREXContext.hpp" />
+    <ClInclude Include="Declare.hpp" />
+    <ClInclude Include="HelperFacility\DefaultRenderingProcess.hpp" />
+    <ClInclude Include="HelperFacility\FirstPersonCameraController.hpp" />
+    <ClInclude Include="HelperFacility\FreeRoamCameraController.hpp" />
+    <ClInclude Include="HelperFacility\NaiveManagedScene.hpp" />
+    <ClInclude Include="HelperFacility\OrbitCameraController.hpp" />
+    <ClInclude Include="Input\InputCenter.hpp" />
+    <ClInclude Include="Input\InputHandler.hpp" />
+    <ClInclude Include="Rendering\BufferView.hpp" />
+    <ClInclude Include="Rendering\Camera.hpp" />
+    <ClInclude Include="Rendering\DefinedShaderName.hpp" />
+    <ClInclude Include="Rendering\GL\GLUtil.hpp" />
+    <ClInclude Include="Rendering\GraphicsBuffer.hpp" />
+    <ClInclude Include="Rendering\GraphicsContext.hpp" />
+    <ClInclude Include="Rendering\Material.hpp" />
+    <ClInclude Include="Rendering\Mesh.hpp" />
+    <ClInclude Include="Rendering\Renderable.hpp" />
+    <ClInclude Include="Rendering\RenderingEffect.hpp" />
+    <ClInclude Include="Rendering\RenderingEngine.hpp" />
+    <ClInclude Include="Rendering\RenderingFactory.hpp" />
+    <ClInclude Include="Rendering\RenderingLayout.hpp" />
+    <ClInclude Include="Rendering\RenderingPipelineState.hpp" />
+    <ClInclude Include="Rendering\RenderingProcess.hpp" />
+    <ClInclude Include="Rendering\Sampler.hpp" />
+    <ClInclude Include="Rendering\Shader.hpp" />
+    <ClInclude Include="Rendering\Texture.hpp" />
+    <ClInclude Include="Rendering\TextureImage.hpp" />
+    <ClInclude Include="Rendering\Viewport.hpp" />
+    <ClInclude Include="Resource\LoadingResult.hpp" />
+    <ClInclude Include="Resource\LocalResourceLoader.hpp" />
+    <ClInclude Include="Resource\MeshLoader.hpp" />
+    <ClInclude Include="Resource\ResourceManager.hpp" />
+    <ClInclude Include="Resource\TextureLoader.hpp" />
+    <ClInclude Include="Scene\Component.hpp" />
+    <ClInclude Include="Scene\Scene.hpp" />
+    <ClInclude Include="Scene\SceneObject.hpp" />
+    <ClInclude Include="Scene\Transformation.hpp" />
+    <ClInclude Include="XREX.hpp" />
+    <ClInclude Include="XREXAll.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Base\Color.cpp" />
+    <ClCompile Include="Base\DLLMain.cpp" />
+    <ClCompile Include="Base\GeometricalMath.cpp" />
+    <ClCompile Include="Base\Logger.cpp" />
+    <ClCompile Include="Base\Math.cpp" />
+    <ClCompile Include="Base\Settings.cpp" />
+    <ClCompile Include="Base\Timer.cpp" />
+    <ClCompile Include="Base\Util.cpp" />
+    <ClCompile Include="Base\Window.cpp" />
+    <ClCompile Include="Base\XREXContext.cpp" />
+    <ClCompile Include="HelperFacility\DefaultRenderingProcess.cpp" />
+    <ClCompile Include="HelperFacility\FirstPersonCameraController.cpp" />
+    <ClCompile Include="HelperFacility\FreeRoamCameraController.cpp" />
+    <ClCompile Include="HelperFacility\NaiveManagedScene.cpp" />
+    <ClCompile Include="HelperFacility\OrbitCameraController.cpp" />
+    <ClCompile Include="Input\InputCenter.cpp" />
+    <ClCompile Include="Input\InputHandler.cpp" />
+    <ClCompile Include="Rendering\BufferView.cpp" />
+    <ClCompile Include="Rendering\Camera.cpp" />
+    <ClCompile Include="Rendering\GL\GLUtil.cpp" />
+    <ClCompile Include="Rendering\GraphicsBuffer.cpp" />
+    <ClCompile Include="Rendering\GraphicsContext.cpp" />
+    <ClCompile Include="Rendering\Material.cpp" />
+    <ClCompile Include="Rendering\Mesh.cpp" />
+    <ClCompile Include="Rendering\Renderable.cpp" />
+    <ClCompile Include="Rendering\RenderingEffect.cpp" />
+    <ClCompile Include="Rendering\RenderingEngine.cpp" />
+    <ClCompile Include="Rendering\RenderingFactory.cpp" />
+    <ClCompile Include="Rendering\RenderingLayout.cpp" />
+    <ClCompile Include="Rendering\RenderingPipelineState.cpp" />
+    <ClCompile Include="Rendering\RenderingProcess.cpp" />
+    <ClCompile Include="Rendering\Sampler.cpp" />
+    <ClCompile Include="Rendering\Shader.cpp" />
+    <ClCompile Include="Rendering\Texture.cpp" />
+    <ClCompile Include="Rendering\TextureImage.cpp" />
+    <ClCompile Include="Rendering\Viewport.cpp" />
+    <ClCompile Include="Resource\LocalResourceLoader.cpp" />
+    <ClCompile Include="Resource\MeshLoader.cpp" />
+    <ClCompile Include="Resource\ResourceManager.cpp" />
+    <ClCompile Include="Resource\TextureLoader.cpp" />
+    <ClCompile Include="Scene\Component.cpp" />
+    <ClCompile Include="Scene\Scene.cpp" />
+    <ClCompile Include="Scene\SceneObject.cpp" />
+    <ClCompile Include="Scene\Transformation.cpp" />
+    <ClCompile Include="XREX.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug-Static|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release-Static|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{A6418138-949C-4E1A-AD48-36B5BAC8CCAE}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
@@ -96,7 +204,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;XREX_SOURCE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)\Dependencies\Include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\Include;$(ProjectDir)</AdditionalIncludeDirectories>
       <PrecompiledHeaderFile>XREX.hpp</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
@@ -116,7 +224,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;XREX_SOURCE;STATIC_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)\Dependencies\Include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\Include;$(ProjectDir)</AdditionalIncludeDirectories>
       <PrecompiledHeaderFile>XREX.hpp</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
@@ -142,7 +250,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;XREX_SOURCE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)\Dependencies\Include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\Include;$(ProjectDir)</AdditionalIncludeDirectories>
       <PrecompiledHeaderFile>XREX.hpp</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
@@ -166,7 +274,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;XREX_SOURCE;STATIC_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)\Dependencies\Include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\Include;$(ProjectDir)</AdditionalIncludeDirectories>
       <PrecompiledHeaderFile>XREX.hpp</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
@@ -185,114 +293,6 @@
       <AdditionalDependencies>glload.lib;opengl32.lib;assimp.lib;FreeImage.lib;</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="BufferView.cpp" />
-    <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="Color.cpp" />
-    <ClCompile Include="Component.cpp" />
-    <ClCompile Include="DefaultRenderingProcess.cpp" />
-    <ClCompile Include="DLLMain.cpp" />
-    <ClCompile Include="FirstPersonCameraController.cpp" />
-    <ClCompile Include="FreeRoamCameraController.cpp" />
-    <ClCompile Include="GeometricalMath.cpp" />
-    <ClCompile Include="GLUtil.cpp" />
-    <ClCompile Include="GraphicsBuffer.cpp" />
-    <ClCompile Include="GraphicsContext.cpp" />
-    <ClCompile Include="InputCenter.cpp" />
-    <ClCompile Include="InputHandler.cpp" />
-    <ClCompile Include="LocalResourceLoader.cpp" />
-    <ClCompile Include="Logger.cpp" />
-    <ClCompile Include="Material.cpp" />
-    <ClCompile Include="Math.cpp" />
-    <ClCompile Include="Mesh.cpp" />
-    <ClCompile Include="MeshLoader.cpp" />
-    <ClCompile Include="NaiveManagedScene.cpp" />
-    <ClCompile Include="OrbitCameraController.cpp" />
-    <ClCompile Include="Renderable.cpp" />
-    <ClCompile Include="RenderingEffect.cpp" />
-    <ClCompile Include="RenderingEngine.cpp" />
-    <ClCompile Include="RenderingFactory.cpp" />
-    <ClCompile Include="RenderingLayout.cpp" />
-    <ClCompile Include="RenderingPipelineState.cpp" />
-    <ClCompile Include="RenderingProcess.cpp" />
-    <ClCompile Include="ResourceManager.cpp" />
-    <ClCompile Include="Sampler.cpp" />
-    <ClCompile Include="Scene.cpp" />
-    <ClCompile Include="SceneObject.cpp" />
-    <ClCompile Include="Settings.cpp" />
-    <ClCompile Include="Shader.cpp" />
-    <ClCompile Include="Texture.cpp" />
-    <ClCompile Include="TextureImage.cpp" />
-    <ClCompile Include="TextureLoader.cpp" />
-    <ClCompile Include="Timer.cpp" />
-    <ClCompile Include="Transformation.cpp" />
-    <ClCompile Include="Util.cpp" />
-    <ClCompile Include="Viewport.cpp" />
-    <ClCompile Include="Window.cpp" />
-    <ClCompile Include="XREX.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug-Static|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release-Static|Win32'">Create</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="XREXContext.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="BasicType.hpp" />
-    <ClInclude Include="BufferView.hpp" />
-    <ClInclude Include="Camera.hpp" />
-    <ClInclude Include="Color.hpp" />
-    <ClInclude Include="Component.hpp" />
-    <ClInclude Include="Declare.hpp" />
-    <ClInclude Include="DefaultRenderingProcess.hpp" />
-    <ClInclude Include="DefinedShaderName.hpp" />
-    <ClInclude Include="FirstPersonCameraController.hpp" />
-    <ClInclude Include="FreeRoamCameraController.hpp" />
-    <ClInclude Include="GeometricalMath.hpp" />
-    <ClInclude Include="Geometry.hpp" />
-    <ClInclude Include="GLUtil.hpp" />
-    <ClInclude Include="GraphicsBuffer.hpp" />
-    <ClInclude Include="GraphicsContext.hpp" />
-    <ClInclude Include="InputCenter.hpp" />
-    <ClInclude Include="InputHandler.hpp" />
-    <ClInclude Include="LoadingResult.hpp" />
-    <ClInclude Include="LocalResourceLoader.hpp" />
-    <ClInclude Include="Logger.hpp" />
-    <ClInclude Include="Material.hpp" />
-    <ClInclude Include="Math.hpp" />
-    <ClInclude Include="MathHelper.hpp" />
-    <ClInclude Include="Matrix.hpp" />
-    <ClInclude Include="Mesh.hpp" />
-    <ClInclude Include="MeshLoader.hpp" />
-    <ClInclude Include="NaiveManagedScene.hpp" />
-    <ClInclude Include="OrbitCameraController.hpp" />
-    <ClInclude Include="Quaternion.hpp" />
-    <ClInclude Include="Renderable.hpp" />
-    <ClInclude Include="RenderingEffect.hpp" />
-    <ClInclude Include="RenderingEngine.hpp" />
-    <ClInclude Include="RenderingFactory.hpp" />
-    <ClInclude Include="RenderingLayout.hpp" />
-    <ClInclude Include="RenderingPipelineState.hpp" />
-    <ClInclude Include="RenderingProcess.hpp" />
-    <ClInclude Include="ResourceManager.hpp" />
-    <ClInclude Include="Sampler.hpp" />
-    <ClInclude Include="Scene.hpp" />
-    <ClInclude Include="SceneObject.hpp" />
-    <ClInclude Include="Settings.hpp" />
-    <ClInclude Include="Shader.hpp" />
-    <ClInclude Include="Texture.hpp" />
-    <ClInclude Include="TextureImage.hpp" />
-    <ClInclude Include="TextureLoader.hpp" />
-    <ClInclude Include="Timer.hpp" />
-    <ClInclude Include="Transformation.hpp" />
-    <ClInclude Include="Util.hpp" />
-    <ClInclude Include="Vector.hpp" />
-    <ClInclude Include="Viewport.hpp" />
-    <ClInclude Include="Window.hpp" />
-    <ClInclude Include="XREX.hpp" />
-    <ClInclude Include="XREXAll.hpp" />
-    <ClInclude Include="XREXContext.hpp" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
