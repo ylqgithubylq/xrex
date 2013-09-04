@@ -1,7 +1,7 @@
 #include "XREXAll.hpp"
 #include "VoxelTest.h"
 
-#include "GLUtil.hpp"
+#include "Rendering/GL/GLUtil.hpp"
 #include <CoreGL.hpp>
 
 #include <iostream>
@@ -1086,7 +1086,7 @@ namespace
 			Buddha, // cannot work
 			LostEmpire, // cannot work
 			SponzaWithTeapots,
-		} target = Scene::CrytekSponza;
+		} target = Scene::Sponza;
 
 		floatV3 center;
 		float halfSize;

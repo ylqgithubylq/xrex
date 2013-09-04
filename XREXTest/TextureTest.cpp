@@ -1,7 +1,6 @@
 #include "XREXAll.hpp"
 #include "TextureTest.h"
 #include "TextureTestShaderCodes.h"
-#include "TextureImage.hpp"
 #include <CoreGL.hpp>
 #include <assert.h>
 #include <iostream>
