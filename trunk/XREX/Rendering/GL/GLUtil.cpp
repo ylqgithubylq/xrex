@@ -414,6 +414,33 @@ namespace XREX
 		}
 	}
 
+	uint32 GLDrawModeFromTopologicalType(IndexBuffer::TopologicalType primitiveType)
+	{
+		switch (primitiveType)
+		{
+		case IndexBuffer::TopologicalType::Points:
+			return gl::GL_POINTS;
+		case IndexBuffer::TopologicalType::LineStrip:
+			return gl::GL_LINE_STRIP;
+		case IndexBuffer::TopologicalType::LineLoop:
+			return gl::GL_LINE_LOOP;
+		case IndexBuffer::TopologicalType::Lines:
+			return gl::GL_LINES;
+		case IndexBuffer::TopologicalType::TriangleStrip:
+			return gl::GL_TRIANGLE_STRIP;
+		case IndexBuffer::TopologicalType::TriangleFan:
+			return gl::GL_TRIANGLE_FAN;
+		case IndexBuffer::TopologicalType::Triangles:
+			return gl::GL_TRIANGLES;
+		case IndexBuffer::TopologicalType::DrawingModeCount:
+			assert(false);
+			return 0;
+		default:
+			assert(false);
+			return 0;
+		}
+	}
+
 	GLTextureFormat const& GLTextureFormatFromTexelFormat(TexelFormat format)
 	{
 		switch (format)

@@ -203,6 +203,12 @@
     <ClInclude Include="Rendering\GL\GLUtil.hpp">
       <Filter>Rendering\GL</Filter>
     </ClInclude>
+    <ClInclude Include="Rendering\WorkLauncher.hpp">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\BufferAndProgramConnector.hpp">
+      <Filter>Rendering</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Base\Math.cpp">
@@ -339,6 +345,12 @@
     </ClCompile>
     <ClCompile Include="Rendering\GL\GLUtil.cpp">
       <Filter>Rendering\GL</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\WorkLauncher.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\BufferAndProgramConnector.cpp">
+      <Filter>Rendering</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

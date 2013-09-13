@@ -1,10 +1,12 @@
 #pragma once
+
 #include "Declare.hpp"
+
 #include "Rendering/RenderingProcess.hpp"
 
 namespace XREX
 {
-	class DefaultRenderingProcess
+	class XREX_API DefaultRenderingProcess
 		: public RenderingProcess
 	{
 	public:

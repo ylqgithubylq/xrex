@@ -13,6 +13,8 @@
 #include "Rendering/DefinedShaderName.hpp"
 #include "Rendering/Material.hpp"
 #include "Rendering/RenderingLayout.hpp"
+#include "Rendering/BufferAndProgramConnector.hpp"
+#include "Rendering/WorkLauncher.hpp"
 
 #include <CoreGL.hpp>
 
@@ -71,8 +73,8 @@ namespace XREX
 
 		std::vector<SceneObjectSP> sceneObjects = scene->GetRenderableQueue(cameraObject);
 
-		std::vector<Renderable::RenderablePack> allRenderableNeedToRender;
 
+		RenderablePackCollector collector;
 		for (SceneObjectSP sceneObject : sceneObjects)
 		{
 			TransformationSP transformation = sceneObject->GetComponent<Transformation>();
@@ -80,12 +82,11 @@ namespace XREX
 			assert(renderable != nullptr);
 			assert(renderable->IsVisible());
 
-			std::vector<Renderable::RenderablePack> renderablePacks = renderable->GetRenderablePack(cameraObject);
-			for (auto& renderablePack : renderablePacks)
-			{
-				allRenderableNeedToRender.push_back(std::move(renderablePack));
-			}
+			renderable->GetRenderablePack(collector, cameraObject);
 		}
+
+		std::vector<Renderable::RenderablePack> allRenderableNeedToRender = collector.ExtractRenderablePacks();
+
 		// TODO do some sorting works
 		std::map<int32, std::vector<Renderable::RenderablePack*>> renderingGroups;
 		for (auto& renderablePack : allRenderableNeedToRender)
@@ -93,12 +94,14 @@ namespace XREX
 			renderingGroups[renderablePack.renderingGroup].push_back(&renderablePack);
 		}
 
+		IndexedDrawer drawer;
 		for (auto& group : renderingGroups)
 		{
 			for (auto& renderablePack : group.second)
 			{
 				Renderable& ownerRenderable = *renderablePack->renderable;
 				RenderingTechniqueSP const& technique = renderablePack->technique;
+				ConnectorPackSP const& connectors = renderablePack->connectors;
 				RenderingLayoutSP const& layout = renderablePack->layout;
 				MaterialSP const& material = renderablePack->material;
 
@@ -143,14 +146,16 @@ namespace XREX
 				}
 
 				uint32 passCount = technique->GetPassCount();
+				assert(connectors->GetAllConnectors().size() == passCount);
 
 				for (uint32 passIndex = 0; passIndex < passCount; ++passIndex)
 				{
 					RenderingPassSP pass = technique->GetPass(passIndex);
 					pass->Use();
-					layout->BindToProgram(pass->GetProgram());
-					layout->Draw();
-					layout->Unbind();
+					connectors->GetAllConnectors()[passIndex]->Bind();
+					drawer.SetRenderingLayout(layout);
+					drawer.Launch();
+					connectors->GetAllConnectors()[passIndex]->Unbind();
 				}
 			}
 		}

@@ -83,9 +83,18 @@ namespace XREX
 	typedef std::shared_ptr<RenderingTechnique> RenderingTechniqueSP;
 	class RenderingPass;
 	typedef std::shared_ptr<RenderingPass> RenderingPassSP;
+	struct IWorkLauncher;
+	typedef std::shared_ptr<IWorkLauncher> IWorkLauncherSP;
+	class IndexedDrawer;
+	typedef std::shared_ptr<IndexedDrawer> IndexedDrawerSP;
+
+	class BufferAndProgramConnector;
+	typedef std::shared_ptr<BufferAndProgramConnector> BufferAndProgramConnectorSP;
+	class ConnectorPack;
+	typedef std::shared_ptr<ConnectorPack> ConnectorPackSP;
+
 	class Material;
 	typedef std::shared_ptr<Material> MaterialSP;
-
 	class RenderingLayout;
 	typedef std::shared_ptr<RenderingLayout> RenderingLayoutSP;
 	class GraphicsBuffer;

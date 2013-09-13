@@ -6,6 +6,7 @@
 #include "Rendering/GraphicsBuffer.hpp"
 #include "Rendering/BufferView.hpp"
 #include "Rendering/RenderingLayout.hpp"
+#include "Rendering/BufferAndProgramConnector.hpp"
 #include "Rendering/Texture.hpp"
 #include "Rendering/RenderingPipelineState.hpp"
 #include "Rendering/Sampler.hpp"
@@ -54,7 +55,10 @@ namespace XREX
 			return defaultSampler_;
 		}
 
-		RenderingEngine& GetRenderingEngine();
+		RenderingEngine& GetRenderingEngine()
+		{
+			return *renderingEngine_;
+		}
 
 		RasterizerStateObjectSP CreateRasterizerStateObject(RasterizerState const& rasterizerState)
 		{
@@ -159,6 +163,10 @@ namespace XREX
 		{
 			return MakeSP<RenderingLayout>(buffers, indexBuffer);
 		}
+		BufferAndProgramConnectorSP CreateBufferAndProgramConnector(RenderingLayoutSP const& layout, ProgramObjectSP const& program)
+		{
+			return MakeSP<BufferAndProgramConnector>(layout, program);
+		}
 
 		SamplerSP CreateSampler(SamplerState const& samplerState)
 		{
@@ -227,6 +235,8 @@ namespace XREX
 			return MakeSP<Viewport>(depthOrder, left, bottom, width, height);
 		}
 
+		ConnectorPackSP GetConnectorPack(RenderingLayoutSP const& layout, RenderingTechniqueSP const& technique);
+
 	private:
 		std::string glslVersionString_;
 		ViewportSP defaultViewport_;
@@ -237,6 +247,7 @@ namespace XREX
 		SamplerSP defaultSampler_;
 		std::unique_ptr<RenderingEngine> renderingEngine_;
 
+		std::unordered_map<std::pair<RenderingLayoutSP, RenderingTechniqueSP>, ConnectorPackSP, STLPairHasher<RenderingLayoutSP, RenderingTechniqueSP>> connectors_;
 	};
 
 }

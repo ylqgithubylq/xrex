@@ -29,7 +29,8 @@ namespace XREX
 		SubMeshSP const& CreateSubMesh(std::string const& name, RenderingLayoutSP const& layout);
 		SubMeshSP const& CreateSubMesh(std::string const& name, RenderingLayoutSP const& layout, MaterialSP const& material, RenderingTechniqueSP const& technique, int32 renderingGroup = RenderablePack::DefaultRenderingGroup);
 
-		virtual std::vector<RenderablePack> GetRenderablePack(SceneObjectSP const& camera) override;
+		virtual void GetRenderablePack(RenderablePackCollector& collector, SceneObjectSP const& camera) override;
+		virtual void GetSmallRenderablePack(RenderablePackCollector& collector, SceneObjectSP const& camera) override;
 
 		/*
 		 *	Only mesh and sub meshes are cloned. Material, layout, effect are shared.
@@ -91,15 +92,19 @@ namespace XREX
 		}
 
 		Renderable::RenderablePack GetRenderablePack(SceneObjectSP const& camera) const;
+		Renderable::SmallRenderablePack GetSmallRenderablePack(SceneObjectSP const& camera) const;
 
 	private:
 		SubMesh(Mesh& mesh, std::string const& name, RenderingLayoutSP const& layout, MaterialSP const& material, RenderingTechniqueSP const& technique, int32 renderingGroup);
+
+		void SetConnectorPack();
 
 	private:
 		Mesh& mesh_;
 		std::string name_;
 		MaterialSP material_;
 		RenderingLayoutSP layout_;
+		ConnectorPackSP connectors_;
 		RenderingTechniqueSP technique_;
 		int32 renderingGroup_;
 	};
