@@ -2,10 +2,11 @@
 
 #include "RenderingFactory.hpp"
 
+#include "Base/Window.hpp"
 #include "Base/XREXContext.hpp"
 #include "Rendering/RenderingEngine.hpp"
 #include "Rendering/GraphicsContext.hpp"
-#include "Base/Window.hpp"
+#include "Rendering/RenderingEffect.hpp"
 
 #include "Rendering/Viewport.hpp"
 
@@ -61,10 +62,28 @@ namespace XREX
 	{
 	}
 
-
-	RenderingEngine& RenderingFactory::GetRenderingEngine()
+	XREX::ConnectorPackSP RenderingFactory::GetConnectorPack(RenderingLayoutSP const& layout, RenderingTechniqueSP const& technique)
 	{
-		return *renderingEngine_;
+		// TODO use weak_ptr, but weak_ptr cannot be hashed
+		assert(layout);
+		assert(technique);
+		auto toFind = std::make_pair(layout, technique);
+		auto found = connectors_.find(toFind);
+		if (found != connectors_.end())
+		{
+			return found->second;
+		}
+
+		std::vector<BufferAndProgramConnectorSP> connectors(technique->GetPassCount());
+		for (uint32 i = 0; i < technique->GetPassCount(); ++i)
+		{
+			connectors[i] = CreateBufferAndProgramConnector(layout, technique->GetPass(i)->GetProgram());
+		}
+		ConnectorPackSP connectorPack = MakeSP<ConnectorPack>(std::move(connectors));
+		connectors_[toFind] = connectorPack;
+		return connectorPack;
 	}
+
+
 
 }

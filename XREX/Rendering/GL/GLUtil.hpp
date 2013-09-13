@@ -44,6 +44,8 @@ namespace XREX
 
 	XREX_API uint32 GLTextureTypeFromTextureType(Texture::TextureType type);
 
+	XREX_API uint32 GLDrawModeFromTopologicalType(IndexBuffer::TopologicalType primitiveType);
+
 	struct XREX_API GLTextureFormat
 	{
 		uint32 glInternalFormat;

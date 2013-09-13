@@ -2,6 +2,8 @@
 
 #include "Mesh.hpp"
 
+#include "Base/XREXContext.hpp"
+#include "Rendering/RenderingFactory.hpp"
 #include "Rendering/RenderingEffect.hpp"
 #include "Rendering/Material.hpp"
 
@@ -47,14 +49,20 @@ namespace XREX
 
 
 
-	vector<Renderable::RenderablePack> Mesh::GetRenderablePack(SceneObjectSP const& camera)
+	void Mesh::GetRenderablePack(RenderablePackCollector& collector, SceneObjectSP const& camera)
 	{
-		std::vector<RenderablePack> renderablePacks;
 		for (uint32 i = 0; i < subMeshes_.size(); ++i)
 		{
-			renderablePacks.push_back(subMeshes_[i]->GetRenderablePack(camera));
+			collector.AddRenderablePack(subMeshes_[i]->GetRenderablePack(camera));
 		}
-		return renderablePacks;
+	}
+
+	void Mesh::GetSmallRenderablePack(RenderablePackCollector& collector, SceneObjectSP const& camera)
+	{
+		for (uint32 i = 0; i < subMeshes_.size(); ++i)
+		{
+			collector.AddSmallRenderablePack(subMeshes_[i]->GetSmallRenderablePack(camera));
+		}
 	}
 
 	RenderableSP Mesh::ShallowClone() const
@@ -85,13 +93,25 @@ namespace XREX
 
 	Renderable::RenderablePack SubMesh::GetRenderablePack(SceneObjectSP const& camera) const
 	{
-		// assert(technique_ != nullptr);
-		return Renderable::RenderablePack(this->mesh_, layout_, material_, technique_, renderingGroup_);
+		assert(technique_ != nullptr);
+		assert(connectors_ != nullptr);
+		assert(layout_ != nullptr);
+		return Renderable::RenderablePack(this->mesh_, layout_, material_, connectors_, technique_, renderingGroup_);
+	}
+
+	Renderable::SmallRenderablePack SubMesh::GetSmallRenderablePack(SceneObjectSP const& camera) const
+	{
+		assert(layout_ != nullptr);
+		return Renderable::SmallRenderablePack(this->mesh_, layout_, material_, renderingGroup_);
 	}
 
 	void SubMesh::SetTechnique(RenderingTechniqueSP const& technique)
 	{
 		technique_ = technique;
+		if (technique_)
+		{
+			SetConnectorPack();
+		}
 		if (material_)
 		{
 			if (technique_)
@@ -112,6 +132,11 @@ namespace XREX
 		{
 			material_->BindToEffect(technique_->GetEffect());
 		}
+	}
+
+	void SubMesh::SetConnectorPack()
+	{
+		connectors_ = XREXContext::GetInstance().GetRenderingFactory().GetConnectorPack(layout_, technique_);
 	}
 
 }

@@ -1,11 +1,13 @@
 #include "XREXAll.hpp"
 #include "VoxelTest.h"
 
+#include "Rendering/WorkLauncher.hpp"
 #include "Rendering/GL/GLUtil.hpp"
 #include <CoreGL.hpp>
 
 #include <iostream>
 #include <sstream>
+
 
 
 #undef LoadString
@@ -677,8 +679,8 @@ namespace
 			//XREXContext::GetInstance().GetLogger().LogLine("frame: " + std::to_string(frame++));
 			std::vector<SceneObjectSP> sceneObjects = scene->GetRenderableQueue(nullptr);
 
-			std::vector<Renderable::RenderablePack> allRenderableNeedToRender;
 
+			RenderablePackCollector collector;
 			for (SceneObjectSP sceneObject : sceneObjects)
 			{
 				TransformationSP transformation = sceneObject->GetComponent<Transformation>();
@@ -686,12 +688,9 @@ namespace
 				assert(renderable != nullptr);
 				assert(renderable->IsVisible());
 
-				std::vector<Renderable::RenderablePack> renderablePacks = renderable->GetRenderablePack(nullptr);
-				for (auto& renderablePack : renderablePacks)
-				{
-					allRenderableNeedToRender.emplace_back(std::move(renderablePack));
-				}
+				renderable->GetSmallRenderablePack(collector, nullptr);
 			}
+			std::vector<Renderable::SmallRenderablePack> allRenderableNeedToRender = collector.ExtractSmallRenderablePack();
 
 			BuildFragmentLists(allRenderableNeedToRender);
 // 			for (uint32 i = 0; i < 3; ++i)
@@ -709,10 +708,10 @@ namespace
 			ConeTracing();
 		}
 
-		void BuildFragmentLists(std::vector<Renderable::RenderablePack> const& allRenderableNeedToRender)
+		void BuildFragmentLists(std::vector<Renderable::SmallRenderablePack> const& allRenderableNeedToRender)
 		{
 			RenderingEffectSP listEffect = voxelizationEffect.listBuild;
-
+			IndexedDrawer drawer;
 
 			for (uint32 i = 0; i < 3; ++i)
 			{
@@ -781,9 +780,12 @@ namespace
 					object->As<int32>().SetValue(objectID);
 
 					rasterizePass->GetProgram()->SetAllUniforms();
-					layout->BindToProgram(rasterizePass->GetProgram());
-					layout->Draw();
-					layout->Unbind();
+					ConnectorPackSP connectors = XREXContext::GetInstance().GetRenderingFactory().GetConnectorPack(layout, rasterizeTechnique);
+					connectors->GetAllConnectors()[0]->Bind();
+					drawer.SetRenderingLayout(layout);
+					drawer.Launch();
+					connectors->GetAllConnectors()[0]->Unbind();
+
 				}
 			}
 
@@ -797,6 +799,7 @@ namespace
 
 			gl::MemoryBarrier(gl::GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
+			IndexedDrawer drawer;
 			for (uint32 i = 0; i < 3; ++i)
 			{
 				EffectParameterSP const& linkedListNodePool = sortEffect->GetParameterByName("nodePool");
@@ -816,9 +819,11 @@ namespace
 				RenderingLayoutSP const& layout = screenQuad;
 
 				pass->Use();
-				layout->BindToProgram(pass->GetProgram());
-				layout->Draw();
-				layout->Unbind();
+				ConnectorPackSP connectors = XREXContext::GetInstance().GetRenderingFactory().GetConnectorPack(layout, technique);
+				connectors->GetAllConnectors()[0]->Bind();
+				drawer.SetRenderingLayout(layout);
+				drawer.Launch();
+				connectors->GetAllConnectors()[0]->Unbind();
 			}
 		}
 
@@ -844,6 +849,7 @@ namespace
 
 			gl::MemoryBarrier(gl::GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
+			IndexedDrawer drawer;
 			for (uint32 i = 0; i < 3; ++i)
 			{
 // 				if (i == 1)
@@ -877,9 +883,11 @@ namespace
 				RenderingLayoutSP const& layout = screenQuad;
 
 				pass->Use();
-				layout->BindToProgram(pass->GetProgram());
-				layout->Draw();
-				layout->Unbind();
+				ConnectorPackSP connectors = XREXContext::GetInstance().GetRenderingFactory().GetConnectorPack(layout, technique);
+				connectors->GetAllConnectors()[0]->Bind();
+				drawer.SetRenderingLayout(layout);
+				drawer.Launch();
+				connectors->GetAllConnectors()[0]->Unbind();
 			}
 		}
 
@@ -905,9 +913,9 @@ namespace
 
 			gl::MemoryBarrier(gl::GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
+			IndexedDrawer drawer;
 			for (uint32 i = 0; i < 3; ++i)
 			{
-
 				{
 					BlendState blendState;
 					DepthStencilState depthStencilState;
@@ -936,9 +944,11 @@ namespace
 				RenderingLayoutSP const& layout = screenQuad;
 
 				pass->Use();
-				layout->BindToProgram(pass->GetProgram());
-				layout->Draw();
-				layout->Unbind();
+				ConnectorPackSP connectors = XREXContext::GetInstance().GetRenderingFactory().GetConnectorPack(layout, technique);
+				connectors->GetAllConnectors()[0]->Bind();
+				drawer.SetRenderingLayout(layout);
+				drawer.Launch();
+				connectors->GetAllConnectors()[0]->Unbind();
 			}
 		}
 
@@ -1008,10 +1018,13 @@ namespace
 
 			TransformationSP transformation = coneTracingProxyCube->GetComponent<Transformation>();
 
-			std::vector<Renderable::RenderablePack> allRenderableNeedToRender = coneTracingProxyCube->GetComponent<Renderable>()->GetRenderablePack(nullptr);
+			RenderablePackCollector collector;
+			coneTracingProxyCube->GetComponent<Renderable>()->GetRenderablePack(collector, nullptr);
+			std::vector<Renderable::RenderablePack> allRenderableNeedToRender = collector.ExtractRenderablePacks();
 
 			gl::MemoryBarrier(gl::GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
+			IndexedDrawer drawer;
 			for (auto& renderable : allRenderableNeedToRender)
 			{
 				Renderable& ownerRenderable = *renderable.renderable;
@@ -1038,9 +1051,11 @@ namespace
 				RenderingPassSP pass = technique->GetPass(0);
 				
 				pass->Use();
-				layout->BindToProgram(pass->GetProgram());
-				layout->Draw();
-				layout->Unbind();
+				ConnectorPackSP connectors = XREXContext::GetInstance().GetRenderingFactory().GetConnectorPack(layout, technique);
+				connectors->GetAllConnectors()[0]->Bind();
+				drawer.SetRenderingLayout(layout);
+				drawer.Launch();
+				connectors->GetAllConnectors()[0]->Unbind();
 			}
 
 		}
