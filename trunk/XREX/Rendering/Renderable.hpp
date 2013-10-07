@@ -21,13 +21,13 @@ namespace XREX
 			Renderable* renderable;
 			RenderingLayoutSP layout;
 			MaterialSP material;
-			ConnectorPackSP connectors;
+			BufferAndProgramConnectorSP connector;
 			RenderingTechniqueSP technique;
 			int32 renderingGroup;
 
 			RenderablePack(RenderablePack&& right)
 				: renderable(right.renderable), layout(std::move(right.layout)), material(std::move(right.material)),
-				connectors(std::move(right.connectors)), technique(std::move(right.technique)), renderingGroup(right.renderingGroup)
+				connector(std::move(right.connector)), technique(std::move(right.technique)), renderingGroup(right.renderingGroup)
 			{
 			}
 			explicit RenderablePack(Renderable& ownerRenderable)
@@ -38,7 +38,7 @@ namespace XREX
 			 *	@renderingGroup: smaller value will be rendered before any RenderablePack with larger value.
 			 */
 			RenderablePack(Renderable& ownerRenderable, RenderingLayoutSP const& renderingLayout, MaterialSP const& material,
-				ConnectorPackSP const& connectors, RenderingTechniqueSP const& renderingTechnique, int32 renderingGroup = DefaultRenderingGroup);
+				BufferAndProgramConnectorSP const& connector, RenderingTechniqueSP const& renderingTechnique, int32 renderingGroup = DefaultRenderingGroup);
 			
 			RenderablePack& operator =(RenderablePack&& right)
 			{
@@ -47,7 +47,7 @@ namespace XREX
 					renderable = right.renderable;
 					layout = std::move(right.layout);
 					material = std::move(right.material);
-					connectors = std::move(right.connectors);
+					connector = std::move(right.connector);
 					technique = std::move(right.technique);
 					renderingGroup = right.renderingGroup;
 				}

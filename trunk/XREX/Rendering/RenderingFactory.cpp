@@ -6,7 +6,7 @@
 #include "Base/XREXContext.hpp"
 #include "Rendering/RenderingEngine.hpp"
 #include "Rendering/GraphicsContext.hpp"
-#include "Rendering/RenderingEffect.hpp"
+#include "Rendering/RenderingTechnique.hpp"
 
 #include "Rendering/Viewport.hpp"
 
@@ -62,7 +62,7 @@ namespace XREX
 	{
 	}
 
-	XREX::ConnectorPackSP RenderingFactory::GetConnectorPack(RenderingLayoutSP const& layout, RenderingTechniqueSP const& technique)
+	BufferAndProgramConnectorSP RenderingFactory::GetConnector(RenderingLayoutSP const& layout, RenderingTechniqueSP const& technique)
 	{
 		// TODO use weak_ptr, but weak_ptr cannot be hashed
 		assert(layout);
@@ -74,14 +74,9 @@ namespace XREX
 			return found->second;
 		}
 
-		std::vector<BufferAndProgramConnectorSP> connectors(technique->GetPassCount());
-		for (uint32 i = 0; i < technique->GetPassCount(); ++i)
-		{
-			connectors[i] = CreateBufferAndProgramConnector(layout, technique->GetPass(i)->GetProgram());
-		}
-		ConnectorPackSP connectorPack = MakeSP<ConnectorPack>(std::move(connectors));
-		connectors_[toFind] = connectorPack;
-		return connectorPack;
+		BufferAndProgramConnectorSP connector = CreateBufferAndProgramConnector(layout, technique->GetProgram());
+		connectors_[toFind] = connector;
+		return connector;
 	}
 
 

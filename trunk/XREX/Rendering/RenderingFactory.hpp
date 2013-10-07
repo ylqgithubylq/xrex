@@ -2,7 +2,7 @@
 
 #include "Declare.hpp"
 
-#include "Rendering/Shader.hpp"
+#include "Rendering/ShaderProgram.hpp"
 #include "Rendering/GraphicsBuffer.hpp"
 #include "Rendering/BufferView.hpp"
 #include "Rendering/RenderingLayout.hpp"
@@ -106,9 +106,9 @@ namespace XREX
 		{
 			return MakeSP<GraphicsBuffer>(usage, data.data(), data.size() * sizeof(T), typeHint);
 		}
-		ShaderResourceBufferSP CreateShaderResourceBuffer(ProgramObject::BufferInformation const& information, bool createBuffer)
+		ShaderResourceBufferSP CreateShaderResourceBuffer(BufferInformation const& information, bool createBuffer)
 		{
-			if (createBuffer)
+			if (createBuffer) // TODO split into two methods, GraphicsBufferSP CreateBufferWithBufferInformation(BufferInformation const&, GraphicsBuffer::Usage)
 			{
 				GraphicsBufferSP buffer = MakeSP<GraphicsBuffer>(GraphicsBuffer::Usage::StreamDraw, information.GetDataSize(), information.GetBufferType());
 				return MakeSP<ShaderResourceBuffer>(information, std::move(buffer));
@@ -235,7 +235,7 @@ namespace XREX
 			return MakeSP<Viewport>(depthOrder, left, bottom, width, height);
 		}
 
-		ConnectorPackSP GetConnectorPack(RenderingLayoutSP const& layout, RenderingTechniqueSP const& technique);
+		BufferAndProgramConnectorSP GetConnector(RenderingLayoutSP const& layout, RenderingTechniqueSP const& technique);
 
 	private:
 		std::string glslVersionString_;
@@ -247,7 +247,7 @@ namespace XREX
 		SamplerSP defaultSampler_;
 		std::unique_ptr<RenderingEngine> renderingEngine_;
 
-		std::unordered_map<std::pair<RenderingLayoutSP, RenderingTechniqueSP>, ConnectorPackSP, STLPairHasher<RenderingLayoutSP, RenderingTechniqueSP>> connectors_;
+		std::unordered_map<std::pair<RenderingLayoutSP, RenderingTechniqueSP>, BufferAndProgramConnectorSP, STLPairHasher<RenderingLayoutSP, RenderingTechniqueSP>> connectors_;
 	};
 
 }

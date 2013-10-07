@@ -106,67 +106,34 @@ struct TempScene
 
 		assert(indexData.size() == 36);
 
-		ProgramObjectSP program = XREXContext::GetInstance().GetRenderingFactory().CreateProgramObject();
-		string shaderString;
+
+		
 		string shaderFile = "../../Effects/Test.glsl";
-		if (!XREXContext::GetInstance().GetResourceLoader().LoadString(shaderFile, &shaderString))
+		shared_ptr<string> shaderString = XREXContext::GetInstance().GetResourceLoader().LoadString(shaderFile);
+		if (!shaderString)
 		{
 			cerr << "file not found. file: " << shaderFile << endl;
 		}
 
-		vector<string const*> shaderStrings(1);
-		shaderStrings[0] = &shaderString;
-		ShaderObjectSP vs = XREXContext::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::VertexShader);
-		ShaderObjectSP fs = XREXContext::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::FragmentShader);
-		vs->Compile(shaderStrings);
-		fs->Compile(shaderStrings);
+		TechniqueBuilderSP testBuilder = MakeSP<TechniqueBuilder>("test technique");
 
-		if (!vs->IsValidate())
-		{
-			cerr << vs->GetCompileError() << endl;
-		}
-		if (!fs->IsValidate())
-		{
-			cerr << fs->GetCompileError() << endl;
-		}
-		program->AttachShader(vs);
-		program->AttachShader(fs);
-		program->Link();
-		if (!program->IsValidate())
-		{
-			cerr << program->GetLinkError() << endl;
-			return;
-		}
-		ProgramObjectSP cubeProgram = XREXContext::GetInstance().GetRenderingFactory().CreateProgramObject();
+		testBuilder->AddCommonCode(shaderString);
+		testBuilder->SetStageCode(ShaderObject::ShaderType::VertexShader, MakeSP<string>());
+		testBuilder->SetStageCode(ShaderObject::ShaderType::FragmentShader, MakeSP<string>());
+
+
 		shaderFile = "../../Effects/TestCube.glsl";
-		if (!XREXContext::GetInstance().GetResourceLoader().LoadString(shaderFile, &shaderString))
+		shaderString = XREXContext::GetInstance().GetResourceLoader().LoadString(shaderFile);
+		if (!shaderString)
 		{
 			cerr << "file not found. file: " << shaderFile << endl;
 		}
 
-		shaderStrings[0] = &shaderString;
-		vs = XREXContext::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::VertexShader);
-		fs = XREXContext::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::FragmentShader);
-		vs->Compile(shaderStrings);
-		fs->Compile(shaderStrings);
+		TechniqueBuilderSP testCubeBuilder = MakeSP<TechniqueBuilder>("test cube technique");
+		testCubeBuilder->AddCommonCode(shaderString);
+		testCubeBuilder->SetStageCode(ShaderObject::ShaderType::VertexShader, MakeSP<string>());
+		testCubeBuilder->SetStageCode(ShaderObject::ShaderType::FragmentShader, MakeSP<string>());
 
-
-		if (!vs->IsValidate())
-		{
-			cerr << vs->GetCompileError() << endl;
-		}
-		if (!fs->IsValidate())
-		{
-			cerr << fs->GetCompileError() << endl;
-		}
-		cubeProgram->AttachShader(vs);
-		cubeProgram->AttachShader(fs);
-		cubeProgram->Link();
-		if (!cubeProgram->IsValidate())
-		{
-			cerr << cubeProgram->GetLinkError() << endl;
-			return;
-		}
 
 		RasterizerState resterizerState;
 		DepthStencilState depthStencilState;
@@ -178,10 +145,28 @@ struct TempScene
 		blendState.sourceBlendAlpha = RenderingPipelineState::AlphaBlendFactor::SourceAlpha;
 		blendState.destinationBlend = RenderingPipelineState::AlphaBlendFactor::OneMinusSourceAlpha;
 		blendState.destinationBlendAlpha = RenderingPipelineState::AlphaBlendFactor::OneMinusSourceAlpha;
-		RasterizerStateObjectSP rso = XREXContext::GetInstance().GetRenderingFactory().CreateRasterizerStateObject(resterizerState);
-		DepthStencilStateObjectSP dsso = XREXContext::GetInstance().GetRenderingFactory().CreateDepthStencilStateObject(depthStencilState);
-		BlendStateObjectSP bso = XREXContext::GetInstance().GetRenderingFactory().CreateBlendStateObject(blendState);
 
+		SamplerState defaultSampler;
+		testBuilder->SetSamplerState("defaultSampler", defaultSampler);
+		testBuilder->SetSamplerChannelToSamplerStateMapping("diffuseMap", "defaultSampler");
+		testBuilder->SetSamplerChannelToSamplerStateMapping("specularMap", "defaultSampler");
+		testBuilder->SetSamplerChannelToSamplerStateMapping("normalMap", "defaultSampler");
+		testBuilder->SetSamplerChannelToSamplerStateMapping("shininessMap", "defaultSampler");
+		testBuilder->SetSamplerChannelToSamplerStateMapping("opacityMap", "defaultSampler");
+
+		testBuilder->SetRasterizerState(resterizerState);
+		testBuilder->SetDepthStencilState(depthStencilState);
+		testBuilder->SetBlendState(blendState);
+
+		testCubeBuilder->SetRasterizerState(resterizerState);
+		testCubeBuilder->SetDepthStencilState(depthStencilState);
+		testCubeBuilder->SetBlendState(blendState);
+
+		testBuilder->SpecifyFragmentOutput("finalColor");
+		testCubeBuilder->SpecifyFragmentOutput("finalColor");
+
+		RenderingTechniqueSP effect = testBuilder->GetRenderingTechnique();
+		RenderingTechniqueSP cubeEffect = testCubeBuilder->GetRenderingTechnique();
 
 		VertexBufferSP vertices = XREXContext::GetInstance().GetRenderingFactory().CreateVertexBuffer(GraphicsBuffer::Usage::StaticDraw, vertexData, "position");
 		IndexBufferSP indices = XREXContext::GetInstance().GetRenderingFactory().CreateIndexBuffer(GraphicsBuffer::Usage::StaticDraw, indexData, IndexBuffer::TopologicalType::Triangles);
@@ -189,25 +174,17 @@ struct TempScene
 
 		MeshSP cubeMesh = MakeSP<Mesh>("cube mesh");
 
+
+		SubMeshSP const& subMesh = cubeMesh->CreateSubMesh("cube sub mesh", layout, nullptr, cubeEffect);
 		centerPosition_ = floatV3(0, 0, 0000);
 
-		RenderingEffectSP cubeEffect = MakeSP<RenderingEffect>("test cube effect");
-		RenderingTechniqueSP cubeTechnique = cubeEffect->CreateTechnique("test cube technique");
-		RenderingPassSP cubePass = cubeTechnique->CreatePass(cubeProgram, rso, dsso, bso);
 
-		RenderingEffectSP effect = MakeSP<RenderingEffect>("test effect");
-		RenderingTechniqueSP technique = effect->CreateTechnique("test technique");
-		RenderingPassSP pass = technique->CreatePass(program, rso, dsso, bso);
-
-		SubMeshSP const& subMesh = cubeMesh->CreateSubMesh("cube sub mesh", layout, nullptr, cubeEffect->GetTechnique(0));
-
-
-		EffectParameterSP const& lightColor = effect->GetParameterByName("lightColor");
+		TechniqueParameterSP const& lightColor = effect->GetParameterByName("lightColor");
 		if (lightColor)
 		{
 			lightColor->As<floatV3>().SetValue(floatV3(50000, 50000, 60000));
 		}
-		EffectParameterSP const& centerPosition = effect->GetParameterByName("centerPosition");
+		TechniqueParameterSP const& centerPosition = effect->GetParameterByName("centerPosition");
 		if (centerPosition)
 		{
 			centerPosition->As<floatV3>().SetValue(centerPosition_);
@@ -297,7 +274,7 @@ struct TempScene
 
 		//camera_->GetComponent<Transformation>()->SetParent(rootTransform);
 
-		EffectParameterSP const& cubeCenterPosition = cubeEffect->GetParameterByName("centerPosition");
+		TechniqueParameterSP const& cubeCenterPosition = cubeEffect->GetParameterByName("centerPosition");
 		if (cubeCenterPosition)
 		{
 			cubeCenterPosition->As<floatV3>().SetValue(floatV3(0, 50, 0));
@@ -323,7 +300,7 @@ struct TempScene
 		{
 			for (auto& subMesh : model->GetAllSubMeshes())
 			{
-				subMesh->SetTechnique(effect->GetTechnique(0));
+				subMesh->SetTechnique(effect);
 			}
 			SceneObjectSP sceneObject = MakeSP<SceneObject>("model");
 			sceneObject->SetComponent(model);

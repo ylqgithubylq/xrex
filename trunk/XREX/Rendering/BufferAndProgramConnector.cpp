@@ -4,7 +4,7 @@
 
 #include "Rendering/RenderingLayout.hpp"
 #include "Rendering/BufferView.hpp"
-#include "Rendering/Shader.hpp"
+#include "Rendering/ShaderProgram.hpp"
 #include "Rendering/GL/GLUtil.hpp"
 
 #include <CoreGL.hpp>
@@ -33,7 +33,7 @@ namespace XREX
 			for (uint32 i = 0; i < dataLayout.GetChannelLayoutCount(); ++i)
 			{
 				VertexBuffer::DataLayoutDescription::ElementLayoutDescription const& channelLayout = dataLayout.GetChannelLayoutAtIndex(i);
-				std::pair<bool, ProgramObject::AttributeInformation> attributeInformation = program->GetAttributeInformation(channelLayout.channel);
+				std::pair<bool, AttributeInformation const&> attributeInformation = program->GetAttributeInformation(channelLayout.channel);
 				if (attributeInformation.first)
 				{
 					lastAttributeLocations[bufferIndex][i] = attributeInformation.second.GetLocation();

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Declare.hpp"
-#include "Rendering/Shader.hpp"
+#include "Rendering/ShaderProgram.hpp"
 #include "LoadingResult.hpp"
 
 #include <string>
@@ -15,14 +15,8 @@ namespace XREX
 		LocalResourceLoader();
 		~LocalResourceLoader();
 
-		bool LoadString(std::string const& fileName, std::string* result);
-		bool LoadWString(std::string const& fileName, std::wstring* result);
-
-		// TODO not implement yet
-		RenderingEffectSP LoadEffect(std::string const& fileName, std::vector<std::string> const& macros);
-
-		// temp
-		ProgramObjectSP LoadProgram(std::string const& fileName, std::vector<std::string> const& macros);
+		std::shared_ptr<std::string> LoadString(std::string const& fileName);
+		std::shared_ptr<std::wstring> LoadWString(std::string const& fileName);
 
 		MeshLoadingResultSP LoadMesh(std::string const& fileName);
 		TextureLoadingResultSP LoadTexture1D(std::string const& fileName, bool generateMipmap);

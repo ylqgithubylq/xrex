@@ -9,7 +9,7 @@
 #include "Rendering/Camera.hpp"
 #include "Rendering/Viewport.hpp"
 #include "Rendering/Renderable.hpp"
-#include "Rendering/RenderingEffect.hpp"
+#include "Rendering/RenderingTechnique.hpp"
 #include "Rendering/DefinedShaderName.hpp"
 #include "Rendering/Material.hpp"
 #include "Rendering/RenderingLayout.hpp"
@@ -101,38 +101,36 @@ namespace XREX
 			{
 				Renderable& ownerRenderable = *renderablePack->renderable;
 				RenderingTechniqueSP const& technique = renderablePack->technique;
-				ConnectorPackSP const& connectors = renderablePack->connectors;
+				BufferAndProgramConnectorSP const& connector = renderablePack->connector;
 				RenderingLayoutSP const& layout = renderablePack->layout;
 				MaterialSP const& material = renderablePack->material;
 
 				floatM44 const& modelMatrix = ownerRenderable.GetOwnerSceneObject()->GetComponent<Transformation>()->GetWorldMatrix();
 				floatM44 normalMatrix = modelMatrix; // TODO do inverse transpose to the upper floatV3 of modelMatrix
 
-				RenderingEffectSP effect = technique->GetEffect();
-
 				// are these too hard coded?
 				{
-					EffectParameterSP const& model = effect->GetParameterByName(GetUniformString(DefinedUniform::ModelMatrix));
+					TechniqueParameterSP const& model = technique->GetParameterByName(GetUniformString(DefinedUniform::ModelMatrix));
 					if (model)
 					{
 						model->As<floatM44>().SetValue(modelMatrix);
 					}
-					EffectParameterSP const& normal = effect->GetParameterByName(GetUniformString(DefinedUniform::NormalMatrix));
+					TechniqueParameterSP const& normal = technique->GetParameterByName(GetUniformString(DefinedUniform::NormalMatrix));
 					if (normal)
 					{
 						normal->As<floatM44>().SetValue(normalMatrix);
 					}
-					EffectParameterSP const& view = effect->GetParameterByName(GetUniformString(DefinedUniform::ViewMatrix));
+					TechniqueParameterSP const& view = technique->GetParameterByName(GetUniformString(DefinedUniform::ViewMatrix));
 					if (view)
 					{
 						view->As<floatM44>().SetValue(viewMatrix);
 					}
-					EffectParameterSP const& projection = effect->GetParameterByName(GetUniformString(DefinedUniform::ProjectionMatrix));
+					TechniqueParameterSP const& projection = technique->GetParameterByName(GetUniformString(DefinedUniform::ProjectionMatrix));
 					if (projection)
 					{
 						projection->As<floatM44>().SetValue(projectionMatrix);
 					}
-					EffectParameterSP const& position = effect->GetParameterByName(GetUniformString(DefinedUniform::CameraPosition));
+					TechniqueParameterSP const& position = technique->GetParameterByName(GetUniformString(DefinedUniform::CameraPosition));
 					if (position)
 					{
 						position->As<floatV3>().SetValue(cameraPosition);
@@ -141,22 +139,14 @@ namespace XREX
 
 				if (material)
 				{
-					material->BindToEffect(renderablePack->technique->GetEffect());
-					material->SetAllEffectParameterValues();
+					material->BindToTechnique(renderablePack->technique);
+					material->SetAllTechniqueParameterValues();
 				}
 
-				uint32 passCount = technique->GetPassCount();
-				assert(connectors->GetAllConnectors().size() == passCount);
-
-				for (uint32 passIndex = 0; passIndex < passCount; ++passIndex)
-				{
-					RenderingPassSP pass = technique->GetPass(passIndex);
-					pass->Use();
-					connectors->GetAllConnectors()[passIndex]->Bind();
-					drawer.SetRenderingLayout(layout);
-					drawer.Launch();
-					connectors->GetAllConnectors()[passIndex]->Unbind();
-				}
+				drawer.SetTechnique(technique);
+				drawer.SetBufferAndProgramConnector(connector);
+				drawer.SetRenderingLayout(layout);
+				drawer.Launch();
 			}
 		}
 

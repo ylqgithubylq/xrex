@@ -124,19 +124,19 @@ namespace XREX
 	};
 
 	template <uint32 Dimension>
-	class ConcreteTexture
+	class DimensionalTexture
 		: public Texture
 	{
 		static_assert(Dimension >= 0 && Dimension <= 3, "Dimension must >= 0 && <= 3");
 
 	public:
 
-		explicit ConcreteTexture(DataDescription<Dimension> const& description, bool generateMipmap);
+		explicit DimensionalTexture(DataDescription<Dimension> const& description, bool generateMipmap);
 		/*
 		 *	@generateMipmap: true will generate mipmap, ignore data vector except data at index 0.
 		 */
-		ConcreteTexture(DataDescription<Dimension> const& description, std::vector<void const*> const& data, bool generateMipmap);
-		virtual ~ConcreteTexture() override;
+		DimensionalTexture(DataDescription<Dimension> const& description, std::vector<void const*> const& data, bool generateMipmap);
+		virtual ~DimensionalTexture() override;
 
 		virtual TexelFormat GetFormat() const override
 		{
@@ -155,9 +155,9 @@ namespace XREX
 		DataDescription<Dimension> description_;
 	};
 
-	typedef ConcreteTexture<1> Texture1D;
-	typedef ConcreteTexture<2> Texture2D;
-	typedef ConcreteTexture<3> Texture3D;
+	typedef DimensionalTexture<1> Texture1D;
+	typedef DimensionalTexture<2> Texture2D;
+	typedef DimensionalTexture<3> Texture3D;
 
 
 	class XREX_API TextureCube

@@ -30,22 +30,22 @@ namespace XREX
 				std::string sourceString;
 				switch (source)
 				{
-				case gl::GL_DEBUG_SOURCE_API:
+				case gl::GL_DEBUG_SOURCE_API_ARB:
 					sourceString = "DEBUG_SOURCE_API";
 					break;
-				case gl::GL_DEBUG_SOURCE_WINDOW_SYSTEM:
+				case gl::GL_DEBUG_SOURCE_WINDOW_SYSTEM_ARB:
 					sourceString = "DEBUG_SOURCE_WINDOW_SYSTEM";
 					break;
-				case gl::GL_DEBUG_SOURCE_SHADER_COMPILER:
+				case gl::GL_DEBUG_SOURCE_SHADER_COMPILER_ARB:
 					sourceString = "DEBUG_SOURCE_SHADER_COMPILER";
 					break;
-				case gl::GL_DEBUG_SOURCE_THIRD_PARTY:
+				case gl::GL_DEBUG_SOURCE_THIRD_PARTY_ARB:
 					sourceString = "DEBUG_SOURCE_THIRD_PARTY";
 					break;
-				case gl::GL_DEBUG_SOURCE_APPLICATION:
+				case gl::GL_DEBUG_SOURCE_APPLICATION_ARB:
 					sourceString = "DEBUG_SOURCE_APPLICATION";
 					break;
-				case gl::GL_DEBUG_SOURCE_OTHER:
+				case gl::GL_DEBUG_SOURCE_OTHER_ARB:
 					sourceString = "DEBUG_SOURCE_OTHER";
 					break;
 				default:
@@ -56,19 +56,19 @@ namespace XREX
 				std::string typeString;
 				switch (type)
 				{
-				case gl::GL_DEBUG_TYPE_ERROR:
+				case gl::GL_DEBUG_TYPE_ERROR_ARB:
 					typeString = "DEBUG_TYPE_ERROR";
 					break;
-				case gl::GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+				case gl::GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR_ARB:
 					typeString = "DEBUG_TYPE_DEPRECATED_BEHAVIOR";
 					break;
-				case gl::GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+				case gl::GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR_ARB:
 					typeString = "DEBUG_TYPE_UNDEFINED_BEHAVIOR";
 					break;
-				case gl::GL_DEBUG_TYPE_PORTABILITY:
+				case gl::GL_DEBUG_TYPE_PORTABILITY_ARB:
 					typeString = "DEBUG_TYPE_PORTABILITY";
 					break;
-				case gl::GL_DEBUG_TYPE_PERFORMANCE:
+				case gl::GL_DEBUG_TYPE_PERFORMANCE_ARB:
 					typeString = "DEBUG_TYPE_PERFORMANCE";
 					break;
 				case gl::GL_DEBUG_TYPE_MARKER:
@@ -80,7 +80,7 @@ namespace XREX
 				case gl::GL_DEBUG_TYPE_POP_GROUP:
 					typeString = "DEBUG_TYPE_POP_GROUP";
 					break;
-				case gl::GL_DEBUG_TYPE_OTHER:
+				case gl::GL_DEBUG_TYPE_OTHER_ARB:
 					typeString = "DEBUG_TYPE_OTHER";
 					break;
 				default:
@@ -91,13 +91,13 @@ namespace XREX
 				std::string severityString;
 				switch (severity)
 				{
-				case gl::GL_DEBUG_SEVERITY_LOW:
+				case gl::GL_DEBUG_SEVERITY_LOW_ARB:
 					severityString = "DEBUG_SEVERITY_LOW";
 					break;
-				case gl::GL_DEBUG_SEVERITY_MEDIUM:
+				case gl::GL_DEBUG_SEVERITY_MEDIUM_ARB:
 					severityString = "DEBUG_SEVERITY_MEDIUM";
 					break;
-				case gl::GL_DEBUG_SEVERITY_HIGH:
+				case gl::GL_DEBUG_SEVERITY_HIGH_ARB:
 					severityString = "DEBUG_SEVERITY_HIGH";
 					break;
 				case gl::GL_DEBUG_SEVERITY_NOTIFICATION:
@@ -122,7 +122,7 @@ namespace XREX
 		graphicsContext_ = MakeUP<GraphicsContext>(window, settings);
 
 #ifdef XREX_DEBUG
-		gl::DebugMessageCallback(&DebugCallback::Callback, this);
+		gl::DebugMessageCallbackARB(&DebugCallback::Callback, this);
 		gl::Enable(gl::GL_DEBUG_OUTPUT_SYNCHRONOUS);
 #endif // XREX_DEBUG
 

@@ -39,7 +39,7 @@ int main()
 	//return 0;
 	//TestFile t;
 	//t.TestTransformation();
-	{
+	{ // intentionally memory leak
 		struct LeakTest
 		{
 			shared_ptr<LeakTest> p;
@@ -69,18 +69,18 @@ struct DML
 	{
 		_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 	}
-// 	~DML()
-// 	{
-// 		if (_CrtDumpMemoryLeaks())
-// 		{
-// 			std::cout << "memory leaks." << std::endl;
-// 		}
-// 		else
-// 		{
-// 			std::cout << "no memory leaks." << std::endl;
-// 		}
-// 		std::cin.get();
-// 	}
+	~DML()
+	{
+		if (_CrtDumpMemoryLeaks())
+		{
+			std::cout << "memory leaks." << std::endl;
+		}
+		else
+		{
+			std::cout << "no memory leaks." << std::endl;
+		}
+		//std::cin.get();
+	}
 } _dml;
 
 #endif // MEMORY_LEAK_CHECK

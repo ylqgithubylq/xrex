@@ -4,7 +4,7 @@
 
 #include "Base/XREXContext.hpp"
 #include "Rendering/RenderingFactory.hpp"
-#include "Rendering/RenderingEffect.hpp"
+#include "Rendering/RenderingTechnique.hpp"
 #include "Rendering/Material.hpp"
 
 
@@ -94,9 +94,9 @@ namespace XREX
 	Renderable::RenderablePack SubMesh::GetRenderablePack(SceneObjectSP const& camera) const
 	{
 		assert(technique_ != nullptr);
-		assert(connectors_ != nullptr);
+		assert(connector_ != nullptr);
 		assert(layout_ != nullptr);
-		return Renderable::RenderablePack(this->mesh_, layout_, material_, connectors_, technique_, renderingGroup_);
+		return Renderable::RenderablePack(this->mesh_, layout_, material_, connector_, technique_, renderingGroup_);
 	}
 
 	Renderable::SmallRenderablePack SubMesh::GetSmallRenderablePack(SceneObjectSP const& camera) const
@@ -110,17 +110,17 @@ namespace XREX
 		technique_ = technique;
 		if (technique_)
 		{
-			SetConnectorPack();
+			SetConnector();
 		}
 		if (material_)
 		{
 			if (technique_)
 			{
-				material_->BindToEffect(technique_->GetEffect());
+				material_->BindToTechnique(technique_);
 			}
 			else
 			{
-				material_->BindToEffect(nullptr);
+				material_->BindToTechnique(nullptr);
 			}
 		}
 	}
@@ -130,13 +130,13 @@ namespace XREX
 		material_ = material;
 		if (material_ && technique_)
 		{
-			material_->BindToEffect(technique_->GetEffect());
+			material_->BindToTechnique(technique_);
 		}
 	}
 
-	void SubMesh::SetConnectorPack()
+	void SubMesh::SetConnector()
 	{
-		connectors_ = XREXContext::GetInstance().GetRenderingFactory().GetConnectorPack(layout_, technique_);
+		connector_ = XREXContext::GetInstance().GetRenderingFactory().GetConnector(layout_, technique_);
 	}
 
 }

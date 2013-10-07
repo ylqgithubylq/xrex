@@ -3,7 +3,7 @@
 #include "RenderingLayout.hpp"
 
 #include "Rendering/GraphicsBuffer.hpp"
-#include "Rendering/Shader.hpp"
+#include "Rendering/ShaderProgram.hpp"
 #include "Rendering/GL/GLUtil.hpp"
 
 #include <CoreGL.hpp>
