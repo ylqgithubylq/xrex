@@ -7,9 +7,8 @@
 #include "Rendering/DefinedShaderName.hpp"
 #include "Rendering/Mesh.hpp"
 #include "Rendering/RenderingLayout.hpp"
-#include "Rendering/RenderingEffect.hpp"
+#include "Rendering/RenderingTechnique.hpp"
 #include "Rendering/GraphicsBuffer.hpp"
-#include "Base/XREXContext.hpp"
 #include "Rendering/RenderingFactory.hpp"
 #include "Resource/ResourceManager.hpp"
 #include "Rendering/Material.hpp"
@@ -85,15 +84,14 @@ namespace XREX
 						: private XREX::Noncopyable
 					{
 						std::string name;
-						SamplerState samplerState;
 						TextureLoadingResultSP loadingResult;
 
-						TextureData(std::string const& theName, SamplerState const& theSamplerState, TextureLoadingResultSP&& theLoadingResult)
-							: name(theName), samplerState(theSamplerState), loadingResult(std::move(theLoadingResult))
+						TextureData(std::string const& theName, TextureLoadingResultSP&& theLoadingResult)
+							: name(theName), loadingResult(std::move(theLoadingResult))
 						{
 						}
 						TextureData(TextureData&& right)
-							: name(std::move(right.name)), loadingResult(std::move(right.loadingResult)), samplerState(right.samplerState)
+							: name(std::move(right.name)), loadingResult(std::move(right.loadingResult))
 						{
 						}
 					};
@@ -176,9 +174,8 @@ namespace XREX
 					{
 						for (auto& textureToCreate : materialToFinish.textures)
 						{
-							SamplerSP sampler = XREXContext::GetInstance().GetRenderingFactory().CreateSampler(textureToCreate.samplerState);
 							TextureSP texture = textureToCreate.loadingResult->Create();
-							materialToFinish.material->SetParameter(textureToCreate.name, std::make_pair(texture, sampler));
+							materialToFinish.material->SetParameter(textureToCreate.name, texture);
 						}
 						createdMaterials.push_back(std::move(materialToFinish.material));
 					}
@@ -383,7 +380,6 @@ namespace XREX
 
 								assert(textureType.second != ""); // TODO log failure rather than assert
 
-								SamplerState samplerState;
 								std::array<SamplerState::TextureAddressingMode, 3> addressingModes;
 								for (uint32 i = 0; i < 3; ++i)
 								{
@@ -409,13 +405,8 @@ namespace XREX
 										break;
 									}
 								}
-								samplerState.addressingModeS = addressingModes[0];
-								samplerState.addressingModeT = addressingModes[1];
-								samplerState.addressingModeR = addressingModes[2];
-								samplerState.magFilterOperation = SamplerState::TextureFilterOperation::Linear;
-								samplerState.minFilterOperation = SamplerState::TextureFilterOperation::NearestMipmapLinear;
 
-								texturesToLoad.push_back(ModelLoadingResultDetail::DataDetail::MaterialData::TextureData(textureType.second, samplerState, std::move(texureLoadingResult)));
+								texturesToLoad.push_back(ModelLoadingResultDetail::DataDetail::MaterialData::TextureData(textureType.second, std::move(texureLoadingResult)));
 							}
 						}
 					}

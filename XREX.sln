@@ -15,6 +15,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Voxelization", "Voxelizatio
 		{A6418138-949C-4E1A-AD48-36B5BAC8CCAE} = {A6418138-949C-4E1A-AD48-36B5BAC8CCAE}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CPPTest", "CPPTest\CPPTest.vcxproj", "{D4CD4D33-D488-4177-9D07-2AF8BC8E30EB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -47,6 +49,14 @@ Global
 		{D8AC2A74-F164-4C49-A533-C0E75220BF52}.Release|Win32.Build.0 = Release|Win32
 		{D8AC2A74-F164-4C49-A533-C0E75220BF52}.Release-Static|Win32.ActiveCfg = Release|Win32
 		{D8AC2A74-F164-4C49-A533-C0E75220BF52}.Release-Static|Win32.Build.0 = Release|Win32
+		{D4CD4D33-D488-4177-9D07-2AF8BC8E30EB}.Debug|Win32.ActiveCfg = Debug|Win32
+		{D4CD4D33-D488-4177-9D07-2AF8BC8E30EB}.Debug|Win32.Build.0 = Debug|Win32
+		{D4CD4D33-D488-4177-9D07-2AF8BC8E30EB}.Debug-Static|Win32.ActiveCfg = Debug|Win32
+		{D4CD4D33-D488-4177-9D07-2AF8BC8E30EB}.Debug-Static|Win32.Build.0 = Debug|Win32
+		{D4CD4D33-D488-4177-9D07-2AF8BC8E30EB}.Release|Win32.ActiveCfg = Release|Win32
+		{D4CD4D33-D488-4177-9D07-2AF8BC8E30EB}.Release|Win32.Build.0 = Release|Win32
+		{D4CD4D33-D488-4177-9D07-2AF8BC8E30EB}.Release-Static|Win32.ActiveCfg = Release|Win32
+		{D4CD4D33-D488-4177-9D07-2AF8BC8E30EB}.Release-Static|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

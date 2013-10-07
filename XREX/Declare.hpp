@@ -75,14 +75,12 @@ namespace XREX
 	typedef std::shared_ptr<ShaderObject> ShaderObjectSP;
 	class ProgramObject;
 	typedef std::shared_ptr<ProgramObject> ProgramObjectSP;
-	class EffectParameter;
-	typedef std::shared_ptr<EffectParameter> EffectParameterSP;
-	class RenderingEffect;
-	typedef std::shared_ptr<RenderingEffect> RenderingEffectSP;
+	class TechniqueParameter;
+	typedef std::shared_ptr<TechniqueParameter> TechniqueParameterSP;
 	class RenderingTechnique;
 	typedef std::shared_ptr<RenderingTechnique> RenderingTechniqueSP;
-	class RenderingPass;
-	typedef std::shared_ptr<RenderingPass> RenderingPassSP;
+	class TechniqueBuilder;
+	typedef std::shared_ptr<TechniqueBuilder> TechniqueBuilderSP;
 	struct IWorkLauncher;
 	typedef std::shared_ptr<IWorkLauncher> IWorkLauncherSP;
 	class IndexedDrawer;
@@ -90,8 +88,6 @@ namespace XREX
 
 	class BufferAndProgramConnector;
 	typedef std::shared_ptr<BufferAndProgramConnector> BufferAndProgramConnectorSP;
-	class ConnectorPack;
-	typedef std::shared_ptr<ConnectorPack> ConnectorPackSP;
 
 	class Material;
 	typedef std::shared_ptr<Material> MaterialSP;
@@ -113,6 +109,9 @@ namespace XREX
 	typedef std::shared_ptr<Sampler> SamplerSP;
 	class TextureImage;
 	typedef std::shared_ptr<TextureImage> TextureImageSP;
+
+	class FrameBuffer;
+	typedef std::shared_ptr<FrameBuffer> FrameBufferSP;
 
 	class Camera;
 	typedef std::shared_ptr<Camera> CameraSP;

@@ -3,6 +3,19 @@ using regular expressions(Ctrl+Shift+F):
 
 temp note:
 
+XML format:
+	include
+	Pipeline state
+	attribute
+	uniform
+	buffer
+	image output
+	buffer output
+	common code(no tag)
+	stage code(with tag)
+
+
+
 bufferTexture do not use sampler
 add ClearState/ClearStateObject
 

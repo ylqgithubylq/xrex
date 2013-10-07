@@ -5,7 +5,7 @@
 namespace XREX
 {
 
-	Material::EffectPipelineParameterSettings::EffectPipelineParameterSettings()
+	Material::TechniquePipelineParameterSettings::TechniquePipelineParameterSettings()
 		: useDefaultPolygonOffset(true), useDefaultStencilReference(true), useDefaultBlendFactor(true)
 	{
 	}
@@ -22,7 +22,7 @@ namespace XREX
 	}
 
 
-	EffectParameterSP const& Material::GetParameter(std::string const& parameterName)
+	TechniqueParameterSP const& Material::GetParameter(std::string const& parameterName)
 	{
 		auto found = parameters_.find(parameterName);
 		if (found != parameters_.end())
@@ -31,133 +31,79 @@ namespace XREX
 		}
 		else
 		{
-			return EffectParameter::NullEffectParameter;
+			return TechniqueParameter::NullTechniqueParameter;
 		}
 	}
 
-	void Material::SetPolygonOffset(uint32 techniqueIndex, uint32 passIndex, float factor, float units)
+	void Material::SetPolygonOffset(float factor, float units)
 	{
-		ResizePipelineParameterOnRequest(techniqueIndex, passIndex);
-		std::unique_ptr<EffectPipelineParameterSettings>& parameters = pipelineParameters_[techniqueIndex][passIndex];
-		if (!parameters)
-		{
-			parameters = MakeUP<EffectPipelineParameterSettings>();
-		}
-		parameters->parameters.polygonOffsetFactor = factor;
-		parameters->parameters.polygonOffsetUnits = units;
-		parameters->useDefaultPolygonOffset = false;
+		pipelineParameter_.parameters.polygonOffsetFactor = factor;
+		pipelineParameter_.parameters.polygonOffsetUnits = units;
+		pipelineParameter_.useDefaultPolygonOffset = false;
 	}
 
-	std::tuple<bool, float, float> Material::GetPolygonOffset(uint32 techniqueIndex, uint32 passIndex) const
+	std::tuple<bool, float, float> Material::GetPolygonOffset() const
 	{
-		if (HavePipelineParameter(techniqueIndex, passIndex))
-		{
-			float outFactor = pipelineParameters_[techniqueIndex][passIndex]->parameters.polygonOffsetFactor;
-			float outUnits = pipelineParameters_[techniqueIndex][passIndex]->parameters.polygonOffsetUnits;
-			return std::make_tuple(true, outFactor, outUnits);
-		}
-		return std::make_tuple(false, 0.f, 0.f);
+		bool useDefault = pipelineParameter_.useDefaultPolygonOffset;
+		float outFactor = pipelineParameter_.parameters.polygonOffsetFactor;
+		float outUnits = pipelineParameter_.parameters.polygonOffsetUnits;
+		return std::make_tuple(useDefault, outFactor, outUnits);
 	}
 
-	bool Material::RemovePolygonOffset(uint32 techniqueIndex, uint32 passIndex)
+	void Material::RemovePolygonOffset()
 	{
-		if (HavePipelineParameter(techniqueIndex, passIndex) && !pipelineParameters_[techniqueIndex][passIndex]->useDefaultPolygonOffset)
-		{
-			std::unique_ptr<EffectPipelineParameterSettings>& parameters = pipelineParameters_[techniqueIndex][passIndex];
-			parameters->parameters.polygonOffsetFactor = 0;
-			parameters->parameters.polygonOffsetUnits = 0;
-			parameters->useDefaultPolygonOffset = true;
-			ShrinkPipelineParameter(techniqueIndex, passIndex);
-			return true;
-		}
-		return false;
+		pipelineParameter_.useDefaultPolygonOffset = true;
 	}
 
-	void Material::SetStencilReference(uint32 techniqueIndex, uint32 passIndex, uint16 front, uint16 back)
+	void Material::SetStencilReference(uint16 front, uint16 back)
 	{
-		ResizePipelineParameterOnRequest(techniqueIndex, passIndex);
-		std::unique_ptr<EffectPipelineParameterSettings>& parameters = pipelineParameters_[techniqueIndex][passIndex];
-		if (!parameters)
-		{
-			parameters = MakeUP<EffectPipelineParameterSettings>();
-		}
-		parameters->parameters.frontStencilReference = front;
-		parameters->parameters.frontStencilReference = back;
-		parameters->useDefaultStencilReference = false;
-
+		pipelineParameter_.parameters.frontStencilReference = front;
+		pipelineParameter_.parameters.frontStencilReference = back;
+		pipelineParameter_.useDefaultStencilReference = false;
 	}
 
-	std::tuple<bool, uint16, uint16> Material::GetStencilReference(uint32 techniqueIndex, uint32 passIndex) const
+	std::tuple<bool, uint16, uint16> Material::GetStencilReference() const
 	{
-		if (HavePipelineParameter(techniqueIndex, passIndex))
-		{
-			uint16 outFront = pipelineParameters_[techniqueIndex][passIndex]->parameters.frontStencilReference;
-			uint16 outBack = pipelineParameters_[techniqueIndex][passIndex]->parameters.backStencilReference;
-			return std::make_tuple(true, outFront, outBack);
-		}
-		return std::make_tuple(false, 0, 0);
+		bool useDefault = pipelineParameter_.useDefaultStencilReference;
+		uint16 outFront = pipelineParameter_.parameters.frontStencilReference;
+		uint16 outBack = pipelineParameter_.parameters.backStencilReference;
+		return std::make_tuple(useDefault, outFront, outBack);
 	}
 
-	bool Material::RemoveStencilReference(uint32 techniqueIndex, uint32 passIndex)
+	void Material::RemoveStencilReference()
 	{
-		if (HavePipelineParameter(techniqueIndex, passIndex) && !pipelineParameters_[techniqueIndex][passIndex]->useDefaultStencilReference)
-		{
-			std::unique_ptr<EffectPipelineParameterSettings>& parameters = pipelineParameters_[techniqueIndex][passIndex];
-			parameters->parameters.frontStencilReference = 0;
-			parameters->parameters.backStencilReference = 0;
-			parameters->useDefaultStencilReference = true;
-			ShrinkPipelineParameter(techniqueIndex, passIndex);
-			return true;
-		}
-		return false;
+		pipelineParameter_.useDefaultStencilReference = true;
 	}
 
-	void Material::SetBlendFactor(uint32 techniqueIndex, uint32 passIndex, Color value)
+	void Material::SetBlendFactor(Color value)
 	{
-		ResizePipelineParameterOnRequest(techniqueIndex, passIndex);
-		std::unique_ptr<EffectPipelineParameterSettings>& parameters = pipelineParameters_[techniqueIndex][passIndex];
-		if (!parameters)
-		{
-			parameters = MakeUP<EffectPipelineParameterSettings>();
-		}
-		parameters->parameters.blendFactor = value;
-		parameters->useDefaultBlendFactor = false;
-
+		pipelineParameter_.parameters.blendFactor = value;
+		pipelineParameter_.useDefaultBlendFactor = false;
 	}
 
-	std::tuple<bool, Color> Material::GetBlendFactor(uint32 techniqueIndex, uint32 passIndex) const
+	std::tuple<bool, Color> Material::GetBlendFactor() const
 	{
-		if (HavePipelineParameter(techniqueIndex, passIndex))
-		{
-			Color color = pipelineParameters_[techniqueIndex][passIndex]->parameters.blendFactor;
-			return std::make_tuple(true, color);
-		}
-		return std::make_tuple(false, Color());
+		bool useDefault = pipelineParameter_.useDefaultBlendFactor;
+		Color color = pipelineParameter_.parameters.blendFactor;
+		return std::make_tuple(useDefault, color);
 	}
 
-	bool Material::RemoveBlendFactor(uint32 techniqueIndex, uint32 passIndex)
+	void Material::RemoveBlendFactor()
 	{
-		if (HavePipelineParameter(techniqueIndex, passIndex) && !pipelineParameters_[techniqueIndex][passIndex]->useDefaultBlendFactor)
-		{
-			pipelineParameters_[techniqueIndex][passIndex]->parameters.blendFactor = Color(1.f, 1.f, 1.f, 1.f);
-			pipelineParameters_[techniqueIndex][passIndex]->useDefaultBlendFactor = true;
-			ShrinkPipelineParameter(techniqueIndex, passIndex);
-			return true;
-		}
-		return false;
+		pipelineParameter_.useDefaultBlendFactor = true;
 	}
 
-	void Material::BindToEffect(RenderingEffectSP const& effect)
+	void Material::BindToTechnique(RenderingTechniqueSP const& technique)
 	{
-		if (boundEffect_.lock() == effect)
+		if (boundTechnique_.lock() == technique)
 		{
 			return;
 		}
-		boundEffect_ = effect;
+		boundTechnique_ = technique;
 	}
 
 
-	void Material::SetAllEffectParameterValues()
+	void Material::SetAllTechniqueParameterValues()
 	{
 		if (cacheDirty_)
 		{
@@ -170,38 +116,23 @@ namespace XREX
 			parameterPair.second.lock()->GetValueFrom(*parameterPair.first);
 		}
 
-		RenderingEffectSP boundEffect = boundEffect_.lock();
-		assert(boundEffect);
-		for (uint32 i = 0; i < boundEffect->GetTechniqueCount() && i < pipelineParameters_.size(); ++i)
+		RenderingTechniqueSP boundTechnique = boundTechnique_.lock();
+		assert(boundTechnique);
+
+		TechniquePipelineParameters& parameters = boundTechnique->GetPipelineParameters();
+		if (!pipelineParameter_.useDefaultPolygonOffset)
 		{
-			std::vector<std::unique_ptr<EffectPipelineParameterSettings>>& techniqueParameters = pipelineParameters_[i];
-			RenderingTechniqueSP const& technique = boundEffect->GetTechnique(i);
-
-			for (uint32 j = 0; j < technique->GetPassCount() && j < techniqueParameters.size(); ++j)
-			{
-				std::unique_ptr<EffectPipelineParameterSettings>& passParameters = techniqueParameters[j];
-				if (passParameters)
-				{
-					RenderingPassSP const& pass = technique->GetPass(j);
-
-					EffectPipelineParameters& parameters = pass->GetEffectPipelineParameters();
-					if (!passParameters->useDefaultPolygonOffset)
-					{
-						parameters.polygonOffsetFactor = passParameters->parameters.polygonOffsetFactor;
-						parameters.polygonOffsetUnits = passParameters->parameters.polygonOffsetUnits;
-					}
-					if (!passParameters->useDefaultStencilReference)
-					{
-						parameters.frontStencilReference = passParameters->parameters.frontStencilReference;
-						parameters.backStencilReference = passParameters->parameters.backStencilReference;
-					}
-					if (!passParameters->useDefaultBlendFactor)
-					{
-						parameters.blendFactor = passParameters->parameters.blendFactor;
-					}
-				}
-
-			}
+			parameters.polygonOffsetFactor = pipelineParameter_.parameters.polygonOffsetFactor;
+			parameters.polygonOffsetUnits = pipelineParameter_.parameters.polygonOffsetUnits;
+		}
+		if (!pipelineParameter_.useDefaultStencilReference)
+		{
+			parameters.frontStencilReference = pipelineParameter_.parameters.frontStencilReference;
+			parameters.backStencilReference = pipelineParameter_.parameters.backStencilReference;
+		}
+		if (!pipelineParameter_.useDefaultBlendFactor)
+		{
+			parameters.blendFactor = pipelineParameter_.parameters.blendFactor;
 		}
 	}
 
@@ -210,74 +141,19 @@ namespace XREX
 	{
 		cacheDirty_ = false;
 
-		RenderingEffectSP boundEffect = boundEffect_.lock();
+		RenderingTechniqueSP boundTechnique = boundTechnique_.lock();
 		parameterMappingCache_.clear();
-		if (boundEffect != nullptr)
+		if (boundTechnique != nullptr)
 		{
-			for (auto& effectParameter : boundEffect->GetAllParameters())
+			for (auto& techniqueParameter : boundTechnique->GetAllParameters())
 			{
-				EffectParameterSP materialParameter = GetParameter(effectParameter->GetName());
+				TechniqueParameterSP materialParameter = GetParameter(techniqueParameter->GetName());
 				if (materialParameter)
 				{
-					parameterMappingCache_.push_back(std::make_pair(materialParameter, std::weak_ptr<EffectParameter>(effectParameter)));
+					parameterMappingCache_.push_back(std::make_pair(materialParameter, std::weak_ptr<TechniqueParameter>(techniqueParameter)));
 				}
 			}
 		}
 	}
-
-
-	bool Material::HavePipelineParameter(uint32 techniqueIndex, uint32 passIndex) const
-	{
-		return techniqueIndex < pipelineParameters_.size() && passIndex < pipelineParameters_[techniqueIndex].size() && pipelineParameters_[techniqueIndex][passIndex];
-	}
-
-	void Material::ShrinkPipelineParameter(uint32 techniqueIndex, uint32 passIndex)
-	{
-		assert(HavePipelineParameter(techniqueIndex, passIndex));
-		std::unique_ptr<EffectPipelineParameterSettings>& parameters = pipelineParameters_[techniqueIndex][passIndex];
-		assert(parameters);
-		bool needRemove = parameters->useDefaultPolygonOffset
-			&& parameters->useDefaultStencilReference
-			&& parameters->useDefaultBlendFactor;
-		if (needRemove)
-		{
-			parameters.reset();
-			bool canRemovePassParameters = false;
-			canRemovePassParameters = std::all_of(pipelineParameters_[techniqueIndex].begin(), pipelineParameters_[techniqueIndex].end(), [] (std::unique_ptr<EffectPipelineParameterSettings> const& entry)
-			{
-				return entry == nullptr;
-			});
-			if (canRemovePassParameters)
-			{
-				pipelineParameters_[techniqueIndex].clear();
-
-				bool canRemoveTechniqueParameters = false;
-				canRemoveTechniqueParameters = std::all_of(pipelineParameters_.begin(), pipelineParameters_.end(), [] (std::vector<std::unique_ptr<EffectPipelineParameterSettings>> const& entry)
-				{
-					return entry.size() == 0;
-				});
-				if (canRemoveTechniqueParameters)
-				{
-					pipelineParameters_.clear();
-				}
-			}
-
-		}
-	}
-
-
-	void Material::ResizePipelineParameterOnRequest(uint32 techniqueIndex, uint32 passIndex)
-	{
-		if (techniqueIndex >= pipelineParameters_.size())
-		{
-			pipelineParameters_.resize(techniqueIndex + 1);
-			if (passIndex <= pipelineParameters_[techniqueIndex].size())
-			{
-				pipelineParameters_[techniqueIndex].resize(passIndex + 1);
-			}
-		}
-	}
-
-
 
 }

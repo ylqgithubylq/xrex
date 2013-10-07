@@ -152,9 +152,6 @@
     <ClInclude Include="Rendering\Renderable.hpp">
       <Filter>Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="Rendering\RenderingEffect.hpp">
-      <Filter>Rendering</Filter>
-    </ClInclude>
     <ClInclude Include="Rendering\RenderingEngine.hpp">
       <Filter>Rendering</Filter>
     </ClInclude>
@@ -171,9 +168,6 @@
       <Filter>Rendering</Filter>
     </ClInclude>
     <ClInclude Include="Rendering\Sampler.hpp">
-      <Filter>Rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="Rendering\Shader.hpp">
       <Filter>Rendering</Filter>
     </ClInclude>
     <ClInclude Include="Rendering\Texture.hpp">
@@ -207,6 +201,15 @@
       <Filter>Rendering</Filter>
     </ClInclude>
     <ClInclude Include="Rendering\BufferAndProgramConnector.hpp">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\FrameBuffer.hpp">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\RenderingTechnique.hpp">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\ShaderProgram.hpp">
       <Filter>Rendering</Filter>
     </ClInclude>
   </ItemGroup>
@@ -289,16 +292,10 @@
     <ClCompile Include="Rendering\GraphicsContext.cpp">
       <Filter>Rendering</Filter>
     </ClCompile>
-    <ClCompile Include="Rendering\Material.cpp">
-      <Filter>Rendering</Filter>
-    </ClCompile>
     <ClCompile Include="Rendering\Mesh.cpp">
       <Filter>Rendering</Filter>
     </ClCompile>
     <ClCompile Include="Rendering\Renderable.cpp">
-      <Filter>Rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="Rendering\RenderingEffect.cpp">
       <Filter>Rendering</Filter>
     </ClCompile>
     <ClCompile Include="Rendering\RenderingEngine.cpp">
@@ -317,9 +314,6 @@
       <Filter>Rendering</Filter>
     </ClCompile>
     <ClCompile Include="Rendering\Sampler.cpp">
-      <Filter>Rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="Rendering\Shader.cpp">
       <Filter>Rendering</Filter>
     </ClCompile>
     <ClCompile Include="Rendering\Texture.cpp">
@@ -350,6 +344,18 @@
       <Filter>Rendering</Filter>
     </ClCompile>
     <ClCompile Include="Rendering\BufferAndProgramConnector.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\FrameBuffer.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\RenderingTechnique.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\ShaderProgram.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\Material.cpp">
       <Filter>Rendering</Filter>
     </ClCompile>
   </ItemGroup>

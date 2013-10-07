@@ -31,7 +31,7 @@ namespace XREX
 	{
 	}
 
-	bool LocalResourceLoader::LoadString(string const& fileName, string* result)
+	std::shared_ptr<std::string> LocalResourceLoader::LoadString(string const& fileName)
 	{
 		ifstream file(fileName, ios::in | ios::binary);
 
@@ -45,14 +45,12 @@ namespace XREX
 			temp.resize(length + 1);
 			file.read(&temp[0], length);
 
-			*result = move(temp);
-
-			return true;
+			return MakeSP<std::string>(move(temp));
 		}
-		return false;
+		return nullptr;
 	}
 
-	bool LocalResourceLoader::LoadWString(string const& fileName, wstring* result)
+	std::shared_ptr<std::wstring> LocalResourceLoader::LoadWString(string const& fileName)
 	{
 		wifstream file(fileName, ios::in | ios::binary);
 
@@ -66,51 +64,9 @@ namespace XREX
 			temp.resize(length + 1);
 			file.read(&temp[0], length);
 
-			*result = move(temp);
-
-			return true;
+			return MakeSP<std::wstring>(move(temp));
 		}
-		return false;
-	}
-
-	ProgramObjectSP LocalResourceLoader::LoadProgram(std::string const& fileName, std::vector<std::string> const& macros)
-	{
-		ProgramObjectSP program = XREXContext::GetInstance().GetRenderingFactory().CreateProgramObject();
-		string shaderString;
-		string fullPath;
-		if (!XREXContext::GetInstance().GetResourceManager().LocatePath(fileName, &fullPath))
-		{
-			return nullptr;
-		}
-		if (!XREXContext::GetInstance().GetResourceLoader().LoadString(fullPath, &shaderString))
-		{
-			assert(false); // impossible, if happened, find the bug in the LocatePath
-			return nullptr;
-		}
-
-		ShaderObjectSP vs =XREXContext::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::VertexShader);
-		ShaderObjectSP fs = XREXContext::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::FragmentShader);
-
-		std::vector<string const*> shaderStrings(1, &shaderString);
-		vs->Compile(shaderStrings);
-		fs->Compile(shaderStrings);
-
-		if (!vs->IsValidate())
-		{
-			assert(false);
-		}
-		if (!fs->IsValidate())
-		{
-			assert(false);
-		}
-		program->AttachShader(vs);
-		program->AttachShader(fs);
-		program->Link();
-		if (!program->IsValidate())
-		{
-			assert(false);
-		}
-		return program;
+		return nullptr;
 	}
 
 	MeshLoadingResultSP LocalResourceLoader::LoadMesh(std::string const& fileName)

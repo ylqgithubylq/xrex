@@ -114,46 +114,31 @@ namespace
 		return voxelVolume;
 	}
 
-	struct UsedEffects
+	struct UsedTechniques
 	{
-		RenderingEffectSP listBuild;
-		RenderingEffectSP listSort;
-		RenderingEffectSP volumeBuild;
-		RenderingEffectSP anisotropicVolumeBuild;
-		RenderingEffectSP volumeMerge;
+		RenderingTechniqueSP listBuild;
+		RenderingTechniqueSP listSort;
+		RenderingTechniqueSP volumeBuild;
+		RenderingTechniqueSP anisotropicVolumeBuild;
+		RenderingTechniqueSP volumeMerge;
 	};
 
-	UsedEffects MakeVoxelizationEffect()
+	UsedTechniques MakeVoxelizationTechnique()
 	{
 
-		RenderingEffectSP listEffect = [] ()
+		RenderingTechniqueSP listTechnique = [] ()
 		{
-			string shaderString;
 			string shaderFile = "../../Voxelization/Shaders/ListGeneration.glsl";
-			if (!XREXContext::GetInstance().GetResourceLoader().LoadString(shaderFile, &shaderString))
+			shared_ptr<string> shaderString = XREXContext::GetInstance().GetResourceLoader().LoadString(shaderFile);
+			if (!shaderString)
 			{
 				XREXContext::GetInstance().GetLogger().LogLine("file not found. file: " + shaderFile);
 			}
 
-			RenderingEffectSP listEffect = MakeSP<RenderingEffect>("voxelization list effect");
-			listEffect->AddShaderCode(std::move(shaderString));
-
-			ProgramObjectSP listGenerationProgram = XREXContext::GetInstance().GetRenderingFactory().CreateProgramObject();
-
-			std::vector<std::string const*> listGenerationShaderStrings = listEffect->GetFullShaderCode();
-			ShaderObjectSP listGenerationVS = XREXContext::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::VertexShader);
-			ShaderObjectSP listGenerationFS = XREXContext::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::FragmentShader);
-			listGenerationVS->Compile(listGenerationShaderStrings);
-			listGenerationFS->Compile(listGenerationShaderStrings);
-
-			listGenerationProgram->AttachShader(listGenerationVS);
-			listGenerationProgram->AttachShader(listGenerationFS);
-			listGenerationProgram->Link();
-			if (!listGenerationProgram->IsValidate())
-			{
-				listEffect.reset();
-				return listEffect;
-			}
+			TechniqueBuilderSP builder = MakeSP<TechniqueBuilder>("voxelization list technique");
+			builder->AddCommonCode(shaderString);
+			builder->SetStageCode(ShaderObject::ShaderType::VertexShader, MakeSP<string>());
+			builder->SetStageCode(ShaderObject::ShaderType::FragmentShader, MakeSP<string>());
 
 			RasterizerState resterizerState;
 			resterizerState.cullMode = RenderingPipelineState::CullMode::None;
@@ -166,43 +151,27 @@ namespace
 			blendState.greenMask = false;
 			blendState.blueMask = false;
 			blendState.alphaMask = false;
-			RasterizerStateObjectSP rso = XREXContext::GetInstance().GetRenderingFactory().CreateRasterizerStateObject(resterizerState);
-			DepthStencilStateObjectSP dsso = XREXContext::GetInstance().GetRenderingFactory().CreateDepthStencilStateObject(depthStencilState);
-			BlendStateObjectSP bso = XREXContext::GetInstance().GetRenderingFactory().CreateBlendStateObject(blendState);
+			builder->SetRasterizerState(resterizerState);
+			builder->SetDepthStencilState(depthStencilState);
+			builder->SetBlendState(blendState);
 
-			RenderingTechniqueSP listGenerationTechnique = listEffect->CreateTechnique("list generation technique");
-			RenderingPassSP listGenerationCubePass = listGenerationTechnique->CreatePass(listGenerationProgram, rso, dsso, bso);
-			return listEffect;
+			return builder->GetRenderingTechnique();
 		} ();
 
 
-		RenderingEffectSP sortEffect = [] ()
+		RenderingTechniqueSP sortTechnique = [] ()
 		{
-			string shaderString;
+
 			string shaderFile = "../../Voxelization/Shaders/ListSort.glsl";
-			if (!XREXContext::GetInstance().GetResourceLoader().LoadString(shaderFile, &shaderString))
+			shared_ptr<string> shaderString = XREXContext::GetInstance().GetResourceLoader().LoadString(shaderFile);
+			if (!shaderString)
 			{
 				XREXContext::GetInstance().GetLogger().LogLine("file not found. file: " + shaderFile);
 			}
-			RenderingEffectSP effect = MakeSP<RenderingEffect>("list sort effect");
-			effect->AddShaderCode(std::move(shaderString));
-
-			ProgramObjectSP program = XREXContext::GetInstance().GetRenderingFactory().CreateProgramObject();
-
-			std::vector<std::string const*> shaderStrings = effect->GetFullShaderCode();
-			ShaderObjectSP vs = XREXContext::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::VertexShader);
-			ShaderObjectSP fs = XREXContext::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::FragmentShader);
-			vs->Compile(shaderStrings);
-			fs->Compile(shaderStrings);
-
-			program->AttachShader(vs);
-			program->AttachShader(fs);
-			program->Link();
-			if (!program->IsValidate())
-			{
-				effect.reset();
-				return effect;
-			}
+			TechniqueBuilderSP builder = MakeSP<TechniqueBuilder>("list sort technique");
+			builder->AddCommonCode(shaderString);
+			builder->SetStageCode(ShaderObject::ShaderType::VertexShader, MakeSP<string>());
+			builder->SetStageCode(ShaderObject::ShaderType::FragmentShader, MakeSP<string>());
 
 			RasterizerState resterizerState;
 			resterizerState.cullMode = RenderingPipelineState::CullMode::None;
@@ -215,43 +184,26 @@ namespace
 			blendState.greenMask = false;
 			blendState.blueMask = false;
 			blendState.alphaMask = false;
-			RasterizerStateObjectSP rso = XREXContext::GetInstance().GetRenderingFactory().CreateRasterizerStateObject(resterizerState);
-			DepthStencilStateObjectSP dsso = XREXContext::GetInstance().GetRenderingFactory().CreateDepthStencilStateObject(depthStencilState);
-			BlendStateObjectSP bso = XREXContext::GetInstance().GetRenderingFactory().CreateBlendStateObject(blendState);
+			builder->SetRasterizerState(resterizerState);
+			builder->SetDepthStencilState(depthStencilState);
+			builder->SetBlendState(blendState);
 
-			RenderingTechniqueSP voxelGenerationTechnique = effect->CreateTechnique("list sort technique");
-			RenderingPassSP voxelGenerationCubePass = voxelGenerationTechnique->CreatePass(program, rso, dsso, bso);
-			return effect;
+			return builder->GetRenderingTechnique();
 		} ();
 
 
-		RenderingEffectSP generationEffect = [] ()
+		RenderingTechniqueSP generationTechnique = [] ()
 		{
-			string shaderString;
 			string shaderFile = "../../Voxelization/Shaders/VoxelGeneration.glsl";
-			if (!XREXContext::GetInstance().GetResourceLoader().LoadString(shaderFile, &shaderString))
+			shared_ptr<string> shaderString = XREXContext::GetInstance().GetResourceLoader().LoadString(shaderFile);
+			if (!shaderString)
 			{
 				XREXContext::GetInstance().GetLogger().LogLine("file not found. file: " + shaderFile);
 			}
-			RenderingEffectSP effect = MakeSP<RenderingEffect>("voxelization generation effect");
-			effect->AddShaderCode(std::move(shaderString));
-
-			ProgramObjectSP program = XREXContext::GetInstance().GetRenderingFactory().CreateProgramObject();
-
-			std::vector<std::string const*> shaderStrings = effect->GetFullShaderCode();
-			ShaderObjectSP vs = XREXContext::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::VertexShader);
-			ShaderObjectSP fs = XREXContext::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::FragmentShader);
-			vs->Compile(shaderStrings);
-			fs->Compile(shaderStrings);
-
-			program->AttachShader(vs);
-			program->AttachShader(fs);
-			program->Link();
-			if (!program->IsValidate())
-			{
-				effect.reset();
-				return effect;
-			}
+			TechniqueBuilderSP builder = MakeSP<TechniqueBuilder>("voxelization generation technique");
+			builder->AddCommonCode(shaderString);
+			builder->SetStageCode(ShaderObject::ShaderType::VertexShader, MakeSP<string>());
+			builder->SetStageCode(ShaderObject::ShaderType::FragmentShader, MakeSP<string>());
 
 			RasterizerState resterizerState;
 			resterizerState.cullMode = RenderingPipelineState::CullMode::None;
@@ -264,42 +216,25 @@ namespace
 			blendState.greenMask = false;
 			blendState.blueMask = false;
 			blendState.alphaMask = false;
-			RasterizerStateObjectSP rso = XREXContext::GetInstance().GetRenderingFactory().CreateRasterizerStateObject(resterizerState);
-			DepthStencilStateObjectSP dsso = XREXContext::GetInstance().GetRenderingFactory().CreateDepthStencilStateObject(depthStencilState);
-			BlendStateObjectSP bso = XREXContext::GetInstance().GetRenderingFactory().CreateBlendStateObject(blendState);
+			builder->SetRasterizerState(resterizerState);
+			builder->SetDepthStencilState(depthStencilState);
+			builder->SetBlendState(blendState);
 
-			RenderingTechniqueSP voxelGenerationTechnique = effect->CreateTechnique("voxel generation technique");
-			RenderingPassSP voxelGenerationCubePass = voxelGenerationTechnique->CreatePass(program, rso, dsso, bso);
-			return effect;
+			return builder->GetRenderingTechnique();
 		} ();
 
-		RenderingEffectSP anisotropicGenerationEffect = [] ()
+		RenderingTechniqueSP anisotropicGenerationTechnique = [] ()
 		{
-			string shaderString;
 			string shaderFile = "../../Voxelization/Shaders/AnisotropicVoxelGeneration.glsl";
-			if (!XREXContext::GetInstance().GetResourceLoader().LoadString(shaderFile, &shaderString))
+			shared_ptr<string> shaderString = XREXContext::GetInstance().GetResourceLoader().LoadString(shaderFile);
+			if (!shaderString)
 			{
 				XREXContext::GetInstance().GetLogger().LogLine("file not found. file: " + shaderFile);
 			}
-			RenderingEffectSP effect = MakeSP<RenderingEffect>("voxelization anisotropic generation effect");
-			effect->AddShaderCode(std::move(shaderString));
-
-			ProgramObjectSP program = XREXContext::GetInstance().GetRenderingFactory().CreateProgramObject();
-
-			std::vector<std::string const*> shaderStrings = effect->GetFullShaderCode();
-			ShaderObjectSP vs = XREXContext::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::VertexShader);
-			ShaderObjectSP fs = XREXContext::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::FragmentShader);
-			vs->Compile(shaderStrings);
-			fs->Compile(shaderStrings);
-
-			program->AttachShader(vs);
-			program->AttachShader(fs);
-			program->Link();
-			if (!program->IsValidate())
-			{
-				effect.reset();
-				return effect;
-			}
+			TechniqueBuilderSP builder = MakeSP<TechniqueBuilder>("voxelization anisotropic generation technique");
+			builder->AddCommonCode(shaderString);
+			builder->SetStageCode(ShaderObject::ShaderType::VertexShader, MakeSP<string>());
+			builder->SetStageCode(ShaderObject::ShaderType::FragmentShader, MakeSP<string>());
 
 			RasterizerState resterizerState;
 			resterizerState.cullMode = RenderingPipelineState::CullMode::None;
@@ -312,46 +247,27 @@ namespace
 			blendState.greenMask = false;
 			blendState.blueMask = false;
 			blendState.alphaMask = false;
-			RasterizerStateObjectSP rso = XREXContext::GetInstance().GetRenderingFactory().CreateRasterizerStateObject(resterizerState);
-			DepthStencilStateObjectSP dsso = XREXContext::GetInstance().GetRenderingFactory().CreateDepthStencilStateObject(depthStencilState);
-			BlendStateObjectSP bso = XREXContext::GetInstance().GetRenderingFactory().CreateBlendStateObject(blendState);
+			builder->SetRasterizerState(resterizerState);
+			builder->SetDepthStencilState(depthStencilState);
+			builder->SetBlendState(blendState);
 
-			RenderingTechniqueSP voxelGenerationTechnique = effect->CreateTechnique("voxel anisotropic generation technique");
-			RenderingPassSP voxelGenerationCubePass = voxelGenerationTechnique->CreatePass(program, rso, dsso, bso);
-			return effect;
+			return builder->GetRenderingTechnique();
+
 		} ();
 
 
-		RenderingEffectSP mergeEffect = [] ()
+		RenderingTechniqueSP mergeTechnique = [] ()
 		{
-			string shaderString;
 			string shaderFile = "../../Voxelization/Shaders/VoxelMerge.glsl";
-			if (!XREXContext::GetInstance().GetResourceLoader().LoadString(shaderFile, &shaderString))
+			shared_ptr<string> shaderString = XREXContext::GetInstance().GetResourceLoader().LoadString(shaderFile);
+			if (!shaderString)
 			{
 				XREXContext::GetInstance().GetLogger().LogLine("file not found. file: " + shaderFile);
 			}
-			RenderingEffectSP effect = MakeSP<RenderingEffect>("voxelization merge effect");
-			effect->AddShaderCode(std::move(shaderString));
-
-			ProgramObjectSP program = XREXContext::GetInstance().GetRenderingFactory().CreateProgramObject();
-
-			std::vector<std::string const*> shaderStrings = effect->GetFullShaderCode();
-			//ShaderObjectSP vs = XREXContext::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::VertexShader);
-			//ShaderObjectSP fs = XREXContext::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::FragmentShader);
-			ShaderObjectSP cs = XREXContext::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::ComputeShader);
-			//vs->Compile(shaderStrings);
-			//fs->Compile(shaderStrings);
-			cs->Compile(shaderStrings);
-
-			//program->AttachShader(vs);
-			//program->AttachShader(fs);
-			program->AttachShader(cs);
-			program->Link();
-			if (!program->IsValidate())
-			{
-				effect.reset();
-				return effect;
-			}
+			TechniqueBuilderSP builder = MakeSP<TechniqueBuilder>("voxelization merge technique");
+			builder->AddCommonCode(shaderString);
+			builder->SetStageCode(ShaderObject::ShaderType::VertexShader, MakeSP<string>());
+			builder->SetStageCode(ShaderObject::ShaderType::FragmentShader, MakeSP<string>());
 
 			RasterizerState resterizerState;
 			resterizerState.cullMode = RenderingPipelineState::CullMode::None;
@@ -364,16 +280,15 @@ namespace
 			blendState.greenMask = false;
 			blendState.blueMask = false;
 			blendState.alphaMask = false;
-			RasterizerStateObjectSP rso = XREXContext::GetInstance().GetRenderingFactory().CreateRasterizerStateObject(resterizerState);
-			DepthStencilStateObjectSP dsso = XREXContext::GetInstance().GetRenderingFactory().CreateDepthStencilStateObject(depthStencilState);
-			BlendStateObjectSP bso = XREXContext::GetInstance().GetRenderingFactory().CreateBlendStateObject(blendState);
+			builder->SetRasterizerState(resterizerState);
+			builder->SetDepthStencilState(depthStencilState);
+			builder->SetBlendState(blendState);
 
-			RenderingTechniqueSP voxelMergeTechnique = effect->CreateTechnique("voxel merge technique");
-			RenderingPassSP voxelMergeCubePass = voxelMergeTechnique->CreatePass(program, rso, dsso, bso);
-			return effect;
+			return builder->GetRenderingTechnique();
+
 		} ();
 		
-		UsedEffects effects = {listEffect, sortEffect, generationEffect, anisotropicGenerationEffect, mergeEffect};
+		UsedTechniques effects = {listTechnique, sortTechnique, generationTechnique, anisotropicGenerationTechnique, mergeTechnique};
 		return effects;
 	}
 
@@ -449,33 +364,18 @@ namespace
 		return cubeMesh;
 	}
 
-	RenderingEffectSP MakeConeTracingEffect()
+	RenderingTechniqueSP MakeConeTracingTechnique()
 	{
-		string shaderString;
 		string shaderFile = "../../Voxelization/Shaders/ConeTracing.glsl";
-		if (!XREXContext::GetInstance().GetResourceLoader().LoadString(shaderFile, &shaderString))
+		shared_ptr<string> shaderString = XREXContext::GetInstance().GetResourceLoader().LoadString(shaderFile);
+		if (!shaderString)
 		{
 			XREXContext::GetInstance().GetLogger().LogLine("file not found. file: " + shaderFile);
 		}
-
-		RenderingEffectSP coneTracingEffect = MakeSP<RenderingEffect>("cone tracing effect");
-		coneTracingEffect->AddShaderCode(std::move(shaderString));
-
-		ProgramObjectSP coneTracingProgram = XREXContext::GetInstance().GetRenderingFactory().CreateProgramObject();
-
-		std::vector<std::string const*> const& shaderStrings = coneTracingEffect->GetFullShaderCode();
-		ShaderObjectSP vs = XREXContext::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::VertexShader);
-		ShaderObjectSP fs = XREXContext::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::FragmentShader);
-		vs->Compile(shaderStrings);
-		fs->Compile(shaderStrings);
-
-		coneTracingProgram->AttachShader(vs);
-		coneTracingProgram->AttachShader(fs);
-		coneTracingProgram->Link();
-		if (!coneTracingProgram->IsValidate())
-		{
-			return nullptr;
-		}
+		TechniqueBuilderSP builder = MakeSP<TechniqueBuilder>("cone tracing technique");
+		builder->AddCommonCode(shaderString);
+		builder->SetStageCode(ShaderObject::ShaderType::VertexShader, MakeSP<string>());
+		builder->SetStageCode(ShaderObject::ShaderType::FragmentShader, MakeSP<string>());
 
 		RasterizerState resterizerState;
 		resterizerState.cullMode = RenderingPipelineState::CullMode::None;
@@ -488,28 +388,20 @@ namespace
 		blendState.sourceBlendAlpha = RenderingPipelineState::AlphaBlendFactor::SourceAlpha;
 		blendState.destinationBlend = RenderingPipelineState::AlphaBlendFactor::OneMinusSourceAlpha;
 		blendState.destinationBlendAlpha = RenderingPipelineState::AlphaBlendFactor::OneMinusSourceAlpha;
-		RasterizerStateObjectSP rso = XREXContext::GetInstance().GetRenderingFactory().CreateRasterizerStateObject(resterizerState);
-		DepthStencilStateObjectSP dsso = XREXContext::GetInstance().GetRenderingFactory().CreateDepthStencilStateObject(depthStencilState);
-		BlendStateObjectSP bso = XREXContext::GetInstance().GetRenderingFactory().CreateBlendStateObject(blendState);
+		builder->SetRasterizerState(resterizerState);
+		builder->SetDepthStencilState(depthStencilState);
+		builder->SetBlendState(blendState);
+		SamplerState samplerState;
+		samplerState.borderColor = Color(0, 0, 0, 0);
+		samplerState.addressingModeR = SamplerState::TextureAddressingMode::ClampToBorder;
+		samplerState.addressingModeS = SamplerState::TextureAddressingMode::ClampToBorder;
+		samplerState.addressingModeT = SamplerState::TextureAddressingMode::ClampToBorder;
+		samplerState.magFilterOperation = SamplerState::TextureFilterOperation::Linear;
+		samplerState.minFilterOperation = SamplerState::TextureFilterOperation::LinearMipmapLinear;
+		builder->SetSamplerState("cone tracing sampler", samplerState);
+		builder->SetSamplerChannelToSamplerStateMapping("voxels", "cone tracing sampler");
 
-		RenderingTechniqueSP cubeTechnique = coneTracingEffect->CreateTechnique("cone tracing technique");
-		RenderingPassSP cubePass = cubeTechnique->CreatePass(coneTracingProgram, rso, dsso, bso);
-
-		return coneTracingEffect;
-	}
-
-
-	SamplerSP CreateConeTracingSampler()
-	{
-		SamplerState ss;
-		ss.borderColor = Color(0, 0, 0, 0);
-		ss.addressingModeR = SamplerState::TextureAddressingMode::ClampToBorder;
-		ss.addressingModeS = SamplerState::TextureAddressingMode::ClampToBorder;
-		ss.addressingModeT = SamplerState::TextureAddressingMode::ClampToBorder;
-		ss.magFilterOperation = SamplerState::TextureFilterOperation::Linear;
-		ss.minFilterOperation = SamplerState::TextureFilterOperation::LinearMipmapLinear;
-		SamplerSP sampler = XREXContext::GetInstance().GetRenderingFactory().CreateSampler(ss);
-		return sampler;
+		return builder->GetRenderingTechnique();
 	}
 
 	SceneObjectSP MakeConeTracingProxyCube(PerspectiveCameraSP const& camera, floatV3 const& cubePosition, float cubeHalfSize)
@@ -518,8 +410,8 @@ namespace
 		SceneObjectSP cubeObject = MakeSP<SceneObject>("cube object");
 		MeshSP cube = MakeCube(cubeHalfSize);
 
-		RenderingEffectSP coneTracingEffect = MakeConeTracingEffect();
-		MaterialSP material = MakeSP<Material>("tracing effect parameters");
+		RenderingTechniqueSP coneTracingTechnique = MakeConeTracingTechnique();
+		MaterialSP material = MakeSP<Material>("tracing technique parameters");
 		material->SetParameter("voxelVolumeCenter", cubePosition);
 		material->SetParameter("voxelVolumeHalfSize", cubeHalfSize);
 		material->SetParameter("aperture", camera->GetFieldOfView() / XREXContext::GetInstance().GetMainWindow().GetClientRegionSize().y);
@@ -528,7 +420,7 @@ namespace
 
 		for (auto& sub : cube->GetAllSubMeshes())
 		{
-			sub->SetTechnique(coneTracingEffect->GetTechnique(0));
+			sub->SetTechnique(coneTracingTechnique);
 			sub->SetMaterial(material);
 		}
 		cubeObject->SetComponent(cube);
@@ -557,7 +449,7 @@ namespace
 		: RenderingProcess
 	{
 
-		UsedEffects voxelizationEffect;
+		UsedTechniques voxelizationTechnique;
 		MaterialSP voxelizationMaterial;
 		ViewportSP listBuildingViewport;
 		ViewportSP voxelMergeViewport;
@@ -607,7 +499,6 @@ namespace
 
 			viewCameraObject = MakeCamera(cameraSpeedScaler);
 			coneTracingProxyCube = MakeConeTracingProxyCube(CheckedSPCast<PerspectiveCamera>(viewCameraObject->GetComponent<Camera>()), sceneCenter, sceneHalfSize);
-			voxelVolumeToTrace = std::make_pair(nullptr, CreateConeTracingSampler());
 
 			// texture3DToTest = MakeTest3DTexture();
 
@@ -618,7 +509,7 @@ namespace
 		{
 			listBuildingViewport = XREXContext::GetInstance().GetRenderingFactory().CreateViewport(0, 0, 0, intermediateVoxelVolumeResolution, intermediateVoxelVolumeResolution);
 			voxelMergeViewport = XREXContext::GetInstance().GetRenderingFactory().CreateViewport(0, 0, 0, voxelVolumeResolution, voxelVolumeResolution);
-			voxelizationEffect = MakeVoxelizationEffect();
+			voxelizationTechnique = MakeVoxelizationTechnique();
 			voxelizationMaterial = MakeSP<Material>("voxelization material");
 
 			for (uint32 i = 0; i < 3; ++i)
@@ -710,7 +601,7 @@ namespace
 
 		void BuildFragmentLists(std::vector<Renderable::SmallRenderablePack> const& allRenderableNeedToRender)
 		{
-			RenderingEffectSP listEffect = voxelizationEffect.listBuild;
+			RenderingTechniqueSP listTechnique = voxelizationTechnique.listBuild;
 			IndexedDrawer drawer;
 
 			for (uint32 i = 0; i < 3; ++i)
@@ -732,16 +623,16 @@ namespace
 				camera->GetViewport()->Bind(0, 0);
 				floatM44 viewMatrix = camera->GetViewMatrix();
 				floatM44 projectionMatrix = camera->GetProjectionMatrix();
-				EffectParameterSP const& view = listEffect->GetParameterByName(GetUniformString(DefinedUniform::ViewMatrix));
+				TechniqueParameterSP const& view = listTechnique->GetParameterByName(GetUniformString(DefinedUniform::ViewMatrix));
 				view->As<floatM44>().SetValue(viewMatrix);
-				EffectParameterSP const& projection = listEffect->GetParameterByName(GetUniformString(DefinedUniform::ProjectionMatrix));
+				TechniqueParameterSP const& projection = listTechnique->GetParameterByName(GetUniformString(DefinedUniform::ProjectionMatrix));
 				projection->As<floatM44>().SetValue(projectionMatrix);
 
-				EffectParameterSP const& linkedListNodePool = listEffect->GetParameterByName("nodePool");
+				TechniqueParameterSP const& linkedListNodePool = listTechnique->GetParameterByName("nodePool");
 				linkedListNodePool->As<TextureImageSP>().SetValue(nodePools[i]->GetImage_TEMP(0, nodePools[i]->GetFormat()));
-				EffectParameterSP const& headPointer = listEffect->GetParameterByName("heads");
+				TechniqueParameterSP const& headPointer = listTechnique->GetParameterByName("heads");
 				headPointer->As<TextureImageSP>().SetValue(headPointers[i]->GetImage_TEMP(0, headPointers[i]->GetFormat()));
-				EffectParameterSP const& atomicCounter = listEffect->GetParameterByName("0");
+				TechniqueParameterSP const& atomicCounter = listTechnique->GetParameterByName("0");
 				ShaderResourceBufferSP atomicBuffer = atomicCounter->As<ShaderResourceBufferSP>().GetValue();
 				atomicBuffer->SetBuffer(atomicCounterBuffers[i]);
 				atomicCounterBuffers[i]->Clear(1u);
@@ -751,11 +642,11 @@ namespace
 // 					assert(nodeCounterSetter.first);
 // 					nodeCounterSetter.second.SetValue(setter, 1u);
 // 				}
-				EffectParameterSP const& halfSize = listEffect->GetParameterByName("voxelVolumeHalfSize");
+				TechniqueParameterSP const& halfSize = listTechnique->GetParameterByName("voxelVolumeHalfSize");
 				halfSize->As<float>().SetValue(sceneHalfSize);
-				EffectParameterSP const& voxelVolumeCenter = listEffect->GetParameterByName("voxelVolumeCenter");
+				TechniqueParameterSP const& voxelVolumeCenter = listTechnique->GetParameterByName("voxelVolumeCenter");
 				voxelVolumeCenter->As<floatV3>().SetValue(sceneCenter);
-				EffectParameterSP const& axis = listEffect->GetParameterByName("axis");
+				TechniqueParameterSP const& axis = listTechnique->GetParameterByName("axis");
 				if (axis)
 				{
 					axis->As<int32>().SetValue(i);
@@ -763,10 +654,7 @@ namespace
 
 				int objectID = 0;
 
-				RenderingTechniqueSP const& rasterizeTechnique = listEffect->GetTechnique(0);
-				RenderingPassSP rasterizePass = rasterizeTechnique->GetPass(0);
-
-				rasterizePass->Use();
+				listTechnique->Use();
 
 				for (auto& renderablePack : allRenderableNeedToRender)
 				{
@@ -774,17 +662,17 @@ namespace
 					RenderingLayoutSP const& layout = renderablePack.layout;
 
 					floatM44 const& modelMatrix = ownerRenderable.GetOwnerSceneObject()->GetComponent<Transformation>()->GetWorldMatrix();
-					EffectParameterSP const& model = listEffect->GetParameterByName(GetUniformString(DefinedUniform::ModelMatrix));
+					TechniqueParameterSP const& model = listTechnique->GetParameterByName(GetUniformString(DefinedUniform::ModelMatrix));
 					model->As<floatM44>().SetValue(modelMatrix);
-					EffectParameterSP const& object = listEffect->GetParameterByName("objectID");
+					TechniqueParameterSP const& object = listTechnique->GetParameterByName("objectID");
 					object->As<int32>().SetValue(objectID);
 
-					rasterizePass->GetProgram()->SetAllUniforms();
-					ConnectorPackSP connectors = XREXContext::GetInstance().GetRenderingFactory().GetConnectorPack(layout, rasterizeTechnique);
-					connectors->GetAllConnectors()[0]->Bind();
+					listTechnique->SetupAllResources();
+					BufferAndProgramConnectorSP connector = XREXContext::GetInstance().GetRenderingFactory().GetConnector(layout, listTechnique);
+					connector->Bind();
 					drawer.SetRenderingLayout(layout);
-					drawer.Launch();
-					connectors->GetAllConnectors()[0]->Unbind();
+					drawer.CoreLaunch();
+					connector->Unbind();
 
 				}
 			}
@@ -795,35 +683,31 @@ namespace
 		{
 			listBuildingViewport->Bind(0, 0);
 
-			RenderingEffectSP sortEffect = voxelizationEffect.listSort;
+			RenderingTechniqueSP sortTechnique = voxelizationTechnique.listSort;
 
 			gl::MemoryBarrier(gl::GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
 			IndexedDrawer drawer;
 			for (uint32 i = 0; i < 3; ++i)
 			{
-				EffectParameterSP const& linkedListNodePool = sortEffect->GetParameterByName("nodePool");
+				TechniqueParameterSP const& linkedListNodePool = sortTechnique->GetParameterByName("nodePool");
 				if (linkedListNodePool)
 				{
 					linkedListNodePool->As<TextureImageSP>().SetValue(nodePools[i]->GetImage_TEMP(0, nodePools[i]->GetFormat()));
 				}
-				EffectParameterSP const& headPointer = sortEffect->GetParameterByName("heads");
+				TechniqueParameterSP const& headPointer = sortTechnique->GetParameterByName("heads");
 				if (headPointer)
 				{
 					headPointer->As<TextureImageSP>().SetValue(headPointers[i]->GetImage_TEMP(0, headPointers[i]->GetFormat()));
 				}
 
-				RenderingTechniqueSP const& technique = sortEffect->GetTechnique(0);
-				RenderingPassSP pass = technique->GetPass(0);
-
 				RenderingLayoutSP const& layout = screenQuad;
 
-				pass->Use();
-				ConnectorPackSP connectors = XREXContext::GetInstance().GetRenderingFactory().GetConnectorPack(layout, technique);
-				connectors->GetAllConnectors()[0]->Bind();
+				BufferAndProgramConnectorSP connector = XREXContext::GetInstance().GetRenderingFactory().GetConnector(layout, sortTechnique);
+				drawer.SetTechnique(sortTechnique);
+				drawer.SetBufferAndProgramConnector(connector);
 				drawer.SetRenderingLayout(layout);
 				drawer.Launch();
-				connectors->GetAllConnectors()[0]->Unbind();
 			}
 		}
 
@@ -833,7 +717,7 @@ namespace
 			voxelMergeViewport->Bind(0, 0);
 
 
-			RenderingEffectSP voxelizeEffect = voxelizationEffect.volumeBuild;
+			RenderingTechniqueSP voxelizeTechnique = voxelizationTechnique.volumeBuild;
 
 			{ // clear voxelVolume texture
 				uint32 glClearVoxelVolume = clearVoxelVolume->GetID();
@@ -865,29 +749,26 @@ namespace
 					dsso->Bind(0, 0);
 				}
 
-				EffectParameterSP const& linkedListNodePool = voxelizeEffect->GetParameterByName("nodePool");
+				TechniqueParameterSP const& linkedListNodePool = voxelizeTechnique->GetParameterByName("nodePool");
 				linkedListNodePool->As<TextureImageSP>().SetValue(nodePools[i]->GetImage_TEMP(0, nodePools[i]->GetFormat()));
-				EffectParameterSP const& headPointer = voxelizeEffect->GetParameterByName("heads");
+				TechniqueParameterSP const& headPointer = voxelizeTechnique->GetParameterByName("heads");
 				headPointer->As<TextureImageSP>().SetValue(headPointers[i]->GetImage_TEMP(0, headPointers[i]->GetFormat()));
-				EffectParameterSP const& volume = voxelizeEffect->GetParameterByName("volume");
+				TechniqueParameterSP const& volume = voxelizeTechnique->GetParameterByName("volume");
 				if (voxelVolume)
 				{
 					volume->As<TextureImageSP>().SetValue(voxelVolume->GetImage_TEMP(0, voxelVolume->GetFormat()));
 				}
-				EffectParameterSP const& axis = voxelizeEffect->GetParameterByName("axis");
+				TechniqueParameterSP const& axis = voxelizeTechnique->GetParameterByName("axis");
 				axis->As<int32>().SetValue(i);
 
-				RenderingTechniqueSP const& technique = voxelizeEffect->GetTechnique(0);
-				RenderingPassSP pass = technique->GetPass(0);
 
 				RenderingLayoutSP const& layout = screenQuad;
 
-				pass->Use();
-				ConnectorPackSP connectors = XREXContext::GetInstance().GetRenderingFactory().GetConnectorPack(layout, technique);
-				connectors->GetAllConnectors()[0]->Bind();
+				BufferAndProgramConnectorSP connector = XREXContext::GetInstance().GetRenderingFactory().GetConnector(layout, voxelizeTechnique);
+				drawer.SetTechnique(voxelizeTechnique);
+				drawer.SetBufferAndProgramConnector(connector);
 				drawer.SetRenderingLayout(layout);
 				drawer.Launch();
-				connectors->GetAllConnectors()[0]->Unbind();
 			}
 		}
 
@@ -897,7 +778,7 @@ namespace
 			voxelMergeViewport->Bind(0, 0);
 
 
-			RenderingEffectSP voxelizeEffect = voxelizationEffect.anisotropicVolumeBuild;
+			RenderingTechniqueSP voxelizeTechnique = voxelizationTechnique.anisotropicVolumeBuild;
 
 			{ // clear voxelVolume texture
 				uint32 glClearVoxelVolume = clearVoxelVolume->GetID();
@@ -925,30 +806,26 @@ namespace
 					dsso->Bind(0, 0);
 				}
 
-				EffectParameterSP const& linkedListNodePool = voxelizeEffect->GetParameterByName("nodePool");
+				TechniqueParameterSP const& linkedListNodePool = voxelizeTechnique->GetParameterByName("nodePool");
 				linkedListNodePool->As<TextureImageSP>().SetValue(nodePools[i]->GetImage_TEMP(0, nodePools[i]->GetFormat()));
-				EffectParameterSP const& headPointer = voxelizeEffect->GetParameterByName("heads");
+				TechniqueParameterSP const& headPointer = voxelizeTechnique->GetParameterByName("heads");
 				headPointer->As<TextureImageSP>().SetValue(headPointers[i]->GetImage_TEMP(0, headPointers[i]->GetFormat()));
 
-				EffectParameterSP const& volume = voxelizeEffect->GetParameterByName("volume");
+				TechniqueParameterSP const& volume = voxelizeTechnique->GetParameterByName("volume");
 				if (voxelVolume)
 				{
 					volume->As<TextureImageSP>().SetValue(voxelVolume->GetImage_TEMP(0, TexelFormat::R32UI));
 				}
-				EffectParameterSP const& axis = voxelizeEffect->GetParameterByName("axis");
+				TechniqueParameterSP const& axis = voxelizeTechnique->GetParameterByName("axis");
 				axis->As<int32>().SetValue(i);
-
-				RenderingTechniqueSP const& technique = voxelizeEffect->GetTechnique(0);
-				RenderingPassSP pass = technique->GetPass(0);
 
 				RenderingLayoutSP const& layout = screenQuad;
 
-				pass->Use();
-				ConnectorPackSP connectors = XREXContext::GetInstance().GetRenderingFactory().GetConnectorPack(layout, technique);
-				connectors->GetAllConnectors()[0]->Bind();
+				BufferAndProgramConnectorSP connector = XREXContext::GetInstance().GetRenderingFactory().GetConnector(layout, voxelizeTechnique);
+				drawer.SetTechnique(voxelizeTechnique);
+				drawer.SetBufferAndProgramConnector(connector);
 				drawer.SetRenderingLayout(layout);
 				drawer.Launch();
-				connectors->GetAllConnectors()[0]->Unbind();
 			}
 		}
 
@@ -967,22 +844,18 @@ namespace
 					glFormat.glSourceFormat, glFormat.glTextureElementType, nullptr);
 				gl::BindBuffer(gl::GL_PIXEL_UNPACK_BUFFER, 0);
 			}
-			RenderingEffectSP voxelMergeEffect = voxelizationEffect.volumeMerge;
+			RenderingTechniqueSP voxelMergeTechnique = voxelizationTechnique.volumeMerge;
 
 			gl::MemoryBarrier(gl::GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
-			EffectParameterSP const& intermediateVolume = voxelMergeEffect->GetParameterByName("intermediateVolume");
+			TechniqueParameterSP const& intermediateVolume = voxelMergeTechnique->GetParameterByName("intermediateVolume");
 			intermediateVolume->As<TextureImageSP>().SetValue(intermediateVoxelVolume->GetImage_TEMP(0, intermediateVoxelVolume->GetFormat()));
-			EffectParameterSP const& volume = voxelMergeEffect->GetParameterByName("volume");
+			TechniqueParameterSP const& volume = voxelMergeTechnique->GetParameterByName("volume");
 			volume->As<TextureImageSP>().SetValue(voxelVolume->GetImage_TEMP(0, voxelVolume->GetFormat()));
-
-			RenderingTechniqueSP const& technique = voxelMergeEffect->GetTechnique(0);
-			RenderingPassSP pass = technique->GetPass(0);
 
 			RenderingLayoutSP const& layout = screenQuad;
 
-
-			pass->Use();
+			voxelMergeTechnique->Use();
 			//layout->BindToProgram(pass->GetProgram());
 			//layout->Draw();
 			gl::DispatchCompute(voxelVolumeResolution, voxelVolumeResolution, 1);
@@ -1032,30 +905,25 @@ namespace
 				RenderingLayoutSP const& layout = renderable.layout;
 				MaterialSP const& material = renderable.material;
 
-				RenderingEffectSP coneTracingEffect = technique->GetEffect();
-
-				EffectParameterSP const& cameraPosition = coneTracingEffect->GetParameterByName(GetUniformString(DefinedUniform::CameraPosition));
+				TechniqueParameterSP const& cameraPosition = technique->GetParameterByName(GetUniformString(DefinedUniform::CameraPosition));
 				cameraPosition->As<floatV3>().SetValue(viewCameraObject->GetComponent<Transformation>()->GetWorldPosition());
-				EffectParameterSP const& view = coneTracingEffect->GetParameterByName(GetUniformString(DefinedUniform::ViewMatrix));
+				TechniqueParameterSP const& view = technique->GetParameterByName(GetUniformString(DefinedUniform::ViewMatrix));
 				view->As<floatM44>().SetValue(viewMatrix);
-				EffectParameterSP const& projection = coneTracingEffect->GetParameterByName(GetUniformString(DefinedUniform::ProjectionMatrix));
+				TechniqueParameterSP const& projection = technique->GetParameterByName(GetUniformString(DefinedUniform::ProjectionMatrix));
 				projection->As<floatM44>().SetValue(projectionMatrix);
 				floatM44 const& modelMatrix = transformation->GetWorldMatrix();
-				EffectParameterSP const& model = coneTracingEffect->GetParameterByName(GetUniformString(DefinedUniform::ModelMatrix));
+				TechniqueParameterSP const& model = technique->GetParameterByName(GetUniformString(DefinedUniform::ModelMatrix));
 				model->As<floatM44>().SetValue(modelMatrix);
 
 				material->SetParameter("voxels", voxelVolumeToTrace);
-				material->BindToEffect(coneTracingEffect);
-				material->SetAllEffectParameterValues();
+				material->BindToTechnique(technique);
+				material->SetAllTechniqueParameterValues();
 
-				RenderingPassSP pass = technique->GetPass(0);
-				
-				pass->Use();
-				ConnectorPackSP connectors = XREXContext::GetInstance().GetRenderingFactory().GetConnectorPack(layout, technique);
-				connectors->GetAllConnectors()[0]->Bind();
+				BufferAndProgramConnectorSP connector = XREXContext::GetInstance().GetRenderingFactory().GetConnector(layout, technique);
+				drawer.SetTechnique(technique);
+				drawer.SetBufferAndProgramConnector(connector);
 				drawer.SetRenderingLayout(layout);
 				drawer.Launch();
-				connectors->GetAllConnectors()[0]->Unbind();
 			}
 
 		}

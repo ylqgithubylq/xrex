@@ -71,7 +71,7 @@ namespace XREX
 
 
 	template <>
-	void ConcreteTexture<1>::DoFillTexture(DataDescription<1> const& description, uint32 mipmapLevel, void const* data)
+	void DimensionalTexture<1>::DoFillTexture(DataDescription<1> const& description, uint32 mipmapLevel, void const* data)
 	{
 		GLTextureFormat const& glFormat = GLTextureFormatFromTexelFormat(description.GetFormat());
 // 		gl::TexStorage1D(glBindingTarget_, mipmapLevel, glFormat.glInternalFormat, description.GetSizes()[0]);
@@ -79,7 +79,7 @@ namespace XREX
 		gl::TexImage1D(glBindingTarget_, mipmapLevel, glFormat.glInternalFormat, description.GetSizes()[0], 0, glFormat.glSourceFormat, glFormat.glTextureElementType, data);
 	}
 	template <>
-	void ConcreteTexture<2>::DoFillTexture(DataDescription<2> const& description, uint32 mipmapLevel, void const* data)
+	void DimensionalTexture<2>::DoFillTexture(DataDescription<2> const& description, uint32 mipmapLevel, void const* data)
 	{
 		GLTextureFormat const& glFormat = GLTextureFormatFromTexelFormat(description.GetFormat());
 // 		gl::TexStorage2D(glBindingTarget_, mipmapLevel, glFormat.glInternalFormat, description.GetSizes()[0], description.GetSizes()[1]);
@@ -87,7 +87,7 @@ namespace XREX
 		gl::TexImage2D(glBindingTarget_, mipmapLevel, glFormat.glInternalFormat, description.GetSizes()[0], description.GetSizes()[1], 0, glFormat.glSourceFormat, glFormat.glTextureElementType, data);
 	}
 	template <>
-	void ConcreteTexture<3>::DoFillTexture(DataDescription<3> const& description, uint32 mipmapLevel, void const* data)
+	void DimensionalTexture<3>::DoFillTexture(DataDescription<3> const& description, uint32 mipmapLevel, void const* data)
 	{
 		GLTextureFormat const& glFormat = GLTextureFormatFromTexelFormat(description.GetFormat());
 // 		gl::TexStorage3D(glBindingTarget_, mipmapLevel, glFormat.glInternalFormat, description.GetSizes()[0], description.GetSizes()[1], description.GetSizes()[2]);
@@ -97,7 +97,7 @@ namespace XREX
 
 
 	template <uint32 Dimension>
-	XREX::ConcreteTexture<Dimension>::ConcreteTexture(DataDescription<Dimension> const& description, bool generateMipmap)
+	XREX::DimensionalTexture<Dimension>::DimensionalTexture(DataDescription<Dimension> const& description, bool generateMipmap)
 		: Texture(TextureDimensionToTextureType<Dimension>::TextureType), description_(description)
 	{
 		Bind(0);
@@ -121,7 +121,7 @@ namespace XREX
 	}
 
 	template <uint32 Dimension>
-	ConcreteTexture<Dimension>::ConcreteTexture(DataDescription<Dimension> const& description, std::vector<void const*> const& data, bool generateMipmap)
+	DimensionalTexture<Dimension>::DimensionalTexture(DataDescription<Dimension> const& description, std::vector<void const*> const& data, bool generateMipmap)
 		: Texture(TextureDimensionToTextureType<Dimension>::TextureType), description_(description)
 	{
 		assert(data.size() > 0);
@@ -168,16 +168,16 @@ namespace XREX
 	}
 
 	template <uint32 Dimension>
-	ConcreteTexture<Dimension>::~ConcreteTexture()
+	DimensionalTexture<Dimension>::~DimensionalTexture()
 	{
 	}
 
 
 
 	// instantiate 1, 2, 3 Dimensional Texture specialization
-	template class XREX_API ConcreteTexture<1>;
-	template class XREX_API ConcreteTexture<2>;
-	template class XREX_API ConcreteTexture<3>;
+	template class XREX_API DimensionalTexture<1>;
+	template class XREX_API DimensionalTexture<2>;
+	template class XREX_API DimensionalTexture<3>;
 
 
 

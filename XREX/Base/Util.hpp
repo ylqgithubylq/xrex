@@ -62,14 +62,40 @@ namespace XREX
 		}
 	};
 
-	template <typename To, typename From>
-	inline To CheckedCast(From p)
+	namespace Detail
 	{
-		static_assert(std::is_pointer<To>::value, "type To must be a pointer.");
-		static_assert(std::is_pointer<From>::value, "type From must be a pointer.");
-		assert(dynamic_cast<To>(p) == static_cast<To>(p));
+		template <typename T, typename F>
+		struct CastChecker
+		{
+		};
+		template <typename T, typename F>
+		struct CastChecker<T*, F>
+		{
+			static bool Check(F p)
+			{
+				return dynamic_cast<T*>(p) == static_cast<T*>(p);
+			}
+		};
+		template <typename T, typename F>
+		struct CastChecker<T&, F>
+		{
+			static bool Check(F& p)
+			{
+				return dynamic_cast<T*>(&p) == static_cast<T*>(&p);
+			}
+		};
+	}
+
+	template <typename To, typename From>
+	inline To CheckedCast(From& p)
+	{
+#ifdef XREX_DEBUG
+		bool canCast = Detail::CastChecker<To, From>::Check(p); // this line cannot be used in a macro due to ,
+		assert(canCast);
+#endif // XREX_DEBUG
 		return static_cast<To>(p);
 	}
+
 
 	template <typename To, typename From>
 	inline std::shared_ptr<To> CheckedSPCast(std::shared_ptr<From> const& p)
@@ -121,7 +147,11 @@ namespace XREX
 	{
 		return std::unique_ptr<T>(new T(std::forward<A0>(a0), std::forward<A1>(a1), std::forward<A2>(a2), std::forward<A3>(a3), std::forward<A4>(a4)));
 	}
-
+	template <typename T, typename A0, typename A1, typename A2, typename A3, typename A4, typename A5>
+	inline std::unique_ptr<T> MakeUP(A0&& a0, A1&& a1, A2&& a2, A3&& a3, A4&& a4, A5&& a5)
+	{
+		return std::unique_ptr<T>(new T(std::forward<A0>(a0), std::forward<A1>(a1), std::forward<A2>(a2), std::forward<A3>(a3), std::forward<A4>(a4), std::forward<A5>(a5)));
+	}
 
 	template <typename T>
 	inline std::shared_ptr<T> MakeSP()
@@ -152,6 +182,11 @@ namespace XREX
 	inline std::shared_ptr<T> MakeSP(A0&& a0, A1&& a1, A2&& a2, A3&& a3, A4&& a4)
 	{
 		return std::make_shared<T>(std::forward<A0>(a0), std::forward<A1>(a1), std::forward<A2>(a2), std::forward<A3>(a3), std::forward<A4>(a4));
+	}
+	template <typename T, typename A0, typename A1, typename A2, typename A3, typename A4, typename A5>
+	inline std::shared_ptr<T> MakeSP(A0&& a0, A1&& a1, A2&& a2, A3&& a3, A4&& a4, A5&& a5)
+	{ // std::make_shared only have 5 parameters
+		return std::shared_ptr<T>(new T(std::forward<A0>(a0), std::forward<A1>(a1), std::forward<A2>(a2), std::forward<A3>(a3), std::forward<A4>(a4), std::forward<A5>(a5)));
 	}
 
 
@@ -191,7 +226,7 @@ namespace XREX
 		DoubleV4,
 		DoubleM44,
 
-		Sampler, // for EffectParameter use
+		Sampler, // for TechniqueParameter use
 
 		Sampler1D,
 		IntSampler1D,
@@ -209,7 +244,7 @@ namespace XREX
 		IntSamplerBuffer,
 		UintSamplerBuffer,
 
-		Image, // for EffectParameter use
+		Image, // for TechniqueParameter use
 
 		Image1D,
 		IntImage1D,
@@ -228,6 +263,7 @@ namespace XREX
 		UintImageBuffer,
 
 		Buffer,
+		ShaderResourceBuffer,
 
 		AtomicUint32Counter,
 
@@ -339,7 +375,7 @@ namespace XREX
 	};
 
 	template <>
-	struct TypeToElementType<std::pair<TextureSP, SamplerSP>>
+	struct TypeToElementType<TextureSP>
 	{
 		static ElementType const Type = ElementType::Sampler;
 	};
@@ -349,11 +385,10 @@ namespace XREX
 		static ElementType const Type = ElementType::Image;
 	};
 	template <>
-	struct TypeToElementType<GraphicsBufferSP>
+	struct TypeToElementType<ShaderResourceBufferSP>
 	{
-		static ElementType const Type = ElementType::Buffer;
+		static ElementType const Type = ElementType::ShaderResourceBuffer;
 	};
-
 
 	enum class TexelFormat
 	{

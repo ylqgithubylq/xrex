@@ -96,40 +96,17 @@ namespace
 		return cubeMesh;
 	}
 
-	RenderingEffectSP MakeEffect()
+	RenderingTechniqueSP MakeEffect()
 	{
 		TextureTestShaderCodes codes;
 
-		RenderingEffectSP commonEffect = MakeSP<RenderingEffect>("common effect");
-		commonEffect->AddShaderCode(std::move(codes.GetShaderCodes()[0]));
-		RenderingEffectSP cubeEffect = MakeSP<RenderingEffect>("test cube effect");
-		cubeEffect->AddShaderCode(std::move(codes.GetShaderCodes()[1]));
-		cubeEffect->AddInclude(commonEffect);
-
-		ProgramObjectSP cubeProgram = XREXContext::GetInstance().GetRenderingFactory().CreateProgramObject();
-
-		std::vector<std::string const*> const& shaderStrings = cubeEffect->GetFullShaderCode();
-		ShaderObjectSP vs = XREXContext::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::VertexShader);
-		ShaderObjectSP fs = XREXContext::GetInstance().GetRenderingFactory().CreateShaderObject(ShaderObject::ShaderType::FragmentShader);
-		vs->Compile(shaderStrings);
-		fs->Compile(shaderStrings);
-
-		if (!vs->IsValidate())
-		{
-			cerr << vs->GetCompileError() << endl;
-		}
-		if (!fs->IsValidate())
-		{
-			cerr << fs->GetCompileError() << endl;
-		}
-		cubeProgram->AttachShader(vs);
-		cubeProgram->AttachShader(fs);
-		cubeProgram->Link();
-		if (!cubeProgram->IsValidate())
-		{
-			cerr << cubeProgram->GetLinkError() << endl;
-			return nullptr;
-		}
+		TechniqueBuilderSP tbc = MakeSP<TechniqueBuilder>("common technique");
+		TechniqueBuilderSP tbtc = MakeSP<TechniqueBuilder>("test cube technique");
+		tbc->AddCommonCode(MakeSP<string>(std::move(codes.GetShaderCodes()[0])));
+		tbtc->AddCommonCode(MakeSP<string>(std::move(codes.GetShaderCodes()[1])));
+		tbtc->SetStageCode(ShaderObject::ShaderType::VertexShader, MakeSP<string>());
+		tbtc->SetStageCode(ShaderObject::ShaderType::FragmentShader, MakeSP<string>());
+		tbtc->AddInclude(tbc);
 
 		RasterizerState resterizerState;
 		DepthStencilState depthStencilState;
@@ -141,18 +118,38 @@ namespace
 		blendState.sourceBlendAlpha = RenderingPipelineState::AlphaBlendFactor::SourceAlpha;
 		blendState.destinationBlend = RenderingPipelineState::AlphaBlendFactor::OneMinusSourceAlpha;
 		blendState.destinationBlendAlpha = RenderingPipelineState::AlphaBlendFactor::OneMinusSourceAlpha;
-		RasterizerStateObjectSP rso = XREXContext::GetInstance().GetRenderingFactory().CreateRasterizerStateObject(resterizerState);
-		DepthStencilStateObjectSP dsso = XREXContext::GetInstance().GetRenderingFactory().CreateDepthStencilStateObject(depthStencilState);
-		BlendStateObjectSP bso = XREXContext::GetInstance().GetRenderingFactory().CreateBlendStateObject(blendState);
 
-		RenderingTechniqueSP cubeTechnique = cubeEffect->CreateTechnique("test cube technique");
-		RenderingPassSP cubePass = cubeTechnique->CreatePass(cubeProgram, rso, dsso, bso);
+		tbtc->SetRasterizerState(resterizerState);
+		tbtc->SetDepthStencilState(depthStencilState);
+		tbtc->SetBlendState(blendState);
 
-		return cubeEffect;
+		SamplerState bumpSampler;
+		bumpSampler.addressingModeR = SamplerState::TextureAddressingMode::MirroredRepeat;
+		bumpSampler.addressingModeS = SamplerState::TextureAddressingMode::MirroredRepeat;
+		bumpSampler.addressingModeT = SamplerState::TextureAddressingMode::MirroredRepeat;
+		tbtc->SetSamplerState("bump", bumpSampler);
+		tbtc->SetSamplerChannelToSamplerStateMapping("notUsedTexture0", "bump");
+		tbtc->SetSamplerChannelToSamplerStateMapping("notUsedTexture1", "bump");
+
+		SamplerState texture3DSampler;
+		texture3DSampler.addressingModeR = SamplerState::TextureAddressingMode::MirroredRepeat;
+		texture3DSampler.addressingModeS = SamplerState::TextureAddressingMode::MirroredRepeat;
+		texture3DSampler.addressingModeT = SamplerState::TextureAddressingMode::MirroredRepeat;
+		texture3DSampler.magFilterOperation = SamplerState::TextureFilterOperation::Linear;
+		texture3DSampler.minFilterOperation = SamplerState::TextureFilterOperation::LinearMipmapLinear;
+		tbtc->SetSamplerState("sampler3D", bumpSampler);
+		tbtc->SetSamplerChannelToSamplerStateMapping("test3DTexture", "sampler3D");
+
+		tbtc->SpecifyFragmentOutput("finalColor");
+		tbtc->SpecifyImageFormat("testImage0", TexelFormat::RGBA32F, AccessType::ReadWrite);
+		tbtc->SpecifyImageFormat("testImage1", TexelFormat::RGBA32F, AccessType::ReadWrite);
+
+		return tbtc->GetRenderingTechnique();
+
 	}
 
 
-	pair<TextureSP, SamplerSP> MakeBumpTexture()
+	TextureSP MakeBumpTexture()
 	{
 		array<uint32, 2> dim = {2, 2};
 		Texture2D::DataDescription<2> desc(TexelFormat::R32F, dim);
@@ -164,12 +161,7 @@ namespace
 		vector<vector<float>> data(1);
 		data[0] = move(dataLevel0);
 		TextureSP texture = XREXContext::GetInstance().GetRenderingFactory().CreateTexture2D(desc, data, false);
-		SamplerState ss;
-		ss.addressingModeR = SamplerState::TextureAddressingMode::MirroredRepeat;
-		ss.addressingModeS = SamplerState::TextureAddressingMode::MirroredRepeat;
-		ss.addressingModeT = SamplerState::TextureAddressingMode::MirroredRepeat;
-		SamplerSP sampler = XREXContext::GetInstance().GetRenderingFactory().CreateSampler(ss);
-		return pair<TextureSP, SamplerSP>(texture, sampler);
+		return texture;
 	}
 
 	TextureSP MakeTestImageTexture0()
@@ -215,7 +207,7 @@ namespace
 		return texture;
 	}
 
-	pair<TextureSP, SamplerSP> Make3DTexture()
+	TextureSP Make3DTexture()
 	{
 		array<uint32, 3> dim = {2, 2, 2};
 		Texture2D::DataDescription<3> desc(TexelFormat::RGBA32F, dim);
@@ -231,14 +223,7 @@ namespace
 		vector<vector<floatV4>> data(1);
 		data[0] = move(dataLevel0);
 		TextureSP texture = XREXContext::GetInstance().GetRenderingFactory().CreateTexture3D(desc, data, true);
-		SamplerState ss;
-		ss.addressingModeR = SamplerState::TextureAddressingMode::MirroredRepeat;
-		ss.addressingModeS = SamplerState::TextureAddressingMode::MirroredRepeat;
-		ss.addressingModeT = SamplerState::TextureAddressingMode::MirroredRepeat;
-		ss.magFilterOperation = SamplerState::TextureFilterOperation::Linear;
-		ss.minFilterOperation = SamplerState::TextureFilterOperation::LinearMipmapLinear;
-		SamplerSP sampler = XREXContext::GetInstance().GetRenderingFactory().CreateSampler(ss);
-		return pair<TextureSP, SamplerSP>(texture, sampler);
+		return texture;
 	}
 
 }
@@ -278,22 +263,22 @@ void InitializeScene()
 			}
 		}
 	}
-	RenderingEffectSP cubeEffect = MakeEffect();
-	MaterialSP material = MakeSP<Material>("cube effect parameters");
+	RenderingTechniqueSP cubeEffect = MakeEffect();
+	MaterialSP material = MakeSP<Material>("cube technique parameters");
 	auto image0 = MakeTestImageTexture0()->GetImage_TEMP(0, TexelFormat::RGBA32F);
 	auto image1 = MakeTestImageTexture1()->GetImage_TEMP(0, TexelFormat::RGBA32F);
 	material->SetParameter("testImage0", image0);
 	material->SetParameter("testImage1", image1);
 	auto bump = MakeBumpTexture();
-	material->SetParameter("notUsedTexture0", std::make_pair(/*bump.first*/image0->GetTexture(), bump.second));
-	material->SetParameter("notUsedTexture1", std::make_pair(/*bump.first*/image1->GetTexture(), bump.second));
+	material->SetParameter("notUsedTexture0", image0->GetTexture());
+	material->SetParameter("notUsedTexture1", image1->GetTexture());
 	auto texture3D = Make3DTexture();
 	material->SetParameter("test3DTexture", texture3D);
 
 
 	for (auto& sub : cube->GetAllSubMeshes())
 	{
-		sub->SetTechnique(cubeEffect->GetTechnique(0));
+		sub->SetTechnique(cubeEffect);
 		sub->SetMaterial(material);
 	}
 	cubeObject->SetComponent(cube);

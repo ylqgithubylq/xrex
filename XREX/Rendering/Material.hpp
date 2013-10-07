@@ -2,7 +2,7 @@
 
 #include "Declare.hpp"
 
-#include "Rendering/RenderingEffect.hpp"
+#include "Rendering/RenderingTechnique.hpp"
 
 #include <string>
 #include <vector>
@@ -30,7 +30,7 @@ namespace XREX
 			auto found = parameters_.find(parameterName);
 			if (found == parameters_.end())
 			{
-				EffectParameterSP parameter = MakeSP<ConcreteEffectParameter<T>>(parameterName);
+				TechniqueParameterSP parameter = MakeSP<ConcreteTechniqueParameter<T>>(parameterName);
 				parameter->As<T>().SetValue(value);
 				parameters_[parameterName] = std::move(parameter);
 				cacheDirty_ = true;
@@ -41,69 +41,56 @@ namespace XREX
 			}
 		}
 
-		EffectParameterSP const& GetParameter(std::string const& parameterName);
+		TechniqueParameterSP const& GetParameter(std::string const& parameterName);
 
-		uint32 GetPipelineParameterTechniqueCount() const
-		{
-			return pipelineParameters_.size();
-		}
-		uint32 GetPipelineParameterPassCount(uint32 techniqueIndex) const
-		{
-			assert(techniqueIndex < pipelineParameters_.size());
-			return pipelineParameters_[techniqueIndex].size();
-		}
 
-		void SetPolygonOffset(uint32 techniqueIndex, uint32 passIndex, float factor, float units);
+		void SetPolygonOffset(float factor, float units);
 		/*
-		 *	@return: tuple<(success), (factor), (units)>
+		 *	@return: tuple<(use default), (factor), (units)>
 		 */
-		std::tuple<bool, float, float> GetPolygonOffset(uint32 techniqueIndex, uint32 passIndex) const;
-		bool RemovePolygonOffset(uint32 techniqueIndex, uint32 passIndex);
+		std::tuple<bool, float, float> GetPolygonOffset() const;
+		void RemovePolygonOffset();
 
-		void SetStencilReference(uint32 techniqueIndex, uint32 passIndex, uint16 front, uint16 back);
+		void SetStencilReference(uint16 front, uint16 back);
 		/*
-		 *	@return: tuple<(success), (front), (back)>
+		 *	@return: tuple<(use default), (front), (back)>
 		 */
-		std::tuple<bool, uint16, uint16> GetStencilReference(uint32 techniqueIndex, uint32 passIndex) const;
-		bool RemoveStencilReference(uint32 techniqueIndex, uint32 passIndex);
+		std::tuple<bool, uint16, uint16> GetStencilReference() const;
+		void RemoveStencilReference();
 
-		void SetBlendFactor(uint32 techniqueIndex, uint32 passIndex, Color value);
+		void SetBlendFactor(Color value);
 		/*
 		 *	@return: tuple<(success), (factor)>
 		 */
-		std::tuple<bool, Color> GetBlendFactor(uint32 techniqueIndex, uint32 passIndex) const;
-		bool RemoveBlendFactor(uint32 techniqueIndex, uint32 passIndex);
+		std::tuple<bool, Color> GetBlendFactor() const;
+		void RemoveBlendFactor();
 
 
-		void BindToEffect(RenderingEffectSP const& effect);
+		void BindToTechnique(RenderingTechniqueSP const& technique);
 
-		void SetAllEffectParameterValues();
+		void SetAllTechniqueParameterValues();
 
 	private:
 		void UpdateBindingMapping();
 
-		bool HavePipelineParameter(uint32 techniqueIndex, uint32 passIndex) const;
-		void ShrinkPipelineParameter(uint32 techniqueIndex, uint32 passIndex);
-		void ResizePipelineParameterOnRequest(uint32 techniqueIndex, uint32 passIndex);
 	private:
 		// when use default values, material will not set corresponding parameters.
-		struct EffectPipelineParameterSettings
+		struct TechniquePipelineParameterSettings
 		{
-			EffectPipelineParameters parameters;
+			TechniquePipelineParameters parameters;
 			bool useDefaultPolygonOffset;
 			bool useDefaultStencilReference;
 			bool useDefaultBlendFactor;
-			EffectPipelineParameterSettings();
+			TechniquePipelineParameterSettings();
 		};
 	private:
 		std::string name_;
 
-		std::unordered_map<std::string, EffectParameterSP> parameters_;
-		// vector<(technique index) vector<(pass index) EffectPipelineParameterSettings>>
-		std::vector<std::vector<std::unique_ptr<EffectPipelineParameterSettings>>> pipelineParameters_;
+		std::unordered_map<std::string, TechniqueParameterSP> parameters_;
+		TechniquePipelineParameterSettings pipelineParameter_;
 
-		std::weak_ptr<RenderingEffect> boundEffect_;
-		std::vector<std::pair<EffectParameterSP, std::weak_ptr<EffectParameter>>> parameterMappingCache_;
+		std::weak_ptr<RenderingTechnique> boundTechnique_;
+		std::vector<std::pair<TechniqueParameterSP, std::weak_ptr<TechniqueParameter>>> parameterMappingCache_;
 		
 		bool cacheDirty_;
 	};

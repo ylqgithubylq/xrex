@@ -20,11 +20,26 @@ namespace XREX
 		{
 			layout_ = layout;
 		}
+		void SetBufferAndProgramConnector(BufferAndProgramConnectorSP const& connector)
+		{
+			connector_ = connector;
+		}
+		void SetTechnique(RenderingTechniqueSP const& technique)
+		{
+			technique_ = technique;
+		}
 
 		virtual void Launch() override;
 
+		/*
+		 *	Only RenderingLayout need to be set.
+		 */
+		void CoreLaunch();
+
 	private:
 		RenderingLayoutSP layout_;
+		BufferAndProgramConnectorSP connector_;
+		RenderingTechniqueSP technique_;
 	};
 
 }

@@ -4,7 +4,7 @@
 
 #include "Rendering/RenderingPipelineState.hpp"
 #include "Rendering/Sampler.hpp"
-#include "Rendering/Shader.hpp"
+#include "Rendering/ShaderProgram.hpp"
 #include "Rendering/BufferView.hpp"
 #include "Rendering/GraphicsBuffer.hpp"
 #include "Rendering/Texture.hpp"

@@ -33,13 +33,13 @@ namespace XREX
 		virtual void GetSmallRenderablePack(RenderablePackCollector& collector, SceneObjectSP const& camera) override;
 
 		/*
-		 *	Only mesh and sub meshes are cloned. Material, layout, effect are shared.
+		 *	Only mesh and sub meshes are cloned. Material, layout, technique are shared.
 		 */
 		virtual RenderableSP ShallowClone() const override;
 
 		/*
 		 *	Short cut for ShallowClone() because shared_ptr<Mesh> are not a covariance of shared_ptr<Renderable>.
-		 *	Only mesh and sub meshes are cloned. Material, layout, effect are shared.
+		 *	Only mesh and sub meshes are cloned. Material, layout, technique are shared.
 		 */
 		MeshSP GetShallowClone() const
 		{
@@ -97,14 +97,14 @@ namespace XREX
 	private:
 		SubMesh(Mesh& mesh, std::string const& name, RenderingLayoutSP const& layout, MaterialSP const& material, RenderingTechniqueSP const& technique, int32 renderingGroup);
 
-		void SetConnectorPack();
+		void SetConnector();
 
 	private:
 		Mesh& mesh_;
 		std::string name_;
 		MaterialSP material_;
 		RenderingLayoutSP layout_;
-		ConnectorPackSP connectors_;
+		BufferAndProgramConnectorSP connector_;
 		RenderingTechniqueSP technique_;
 		int32 renderingGroup_;
 	};

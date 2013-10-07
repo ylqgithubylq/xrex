@@ -29,6 +29,8 @@ namespace XREX
 		case ElementType::IntSamplerBuffer:
 		case ElementType::UintSamplerBuffer:
 			return true;
+		case ElementType::Sampler: // special case
+			return true;
 		case ElementType::ParameterTypeCount:
 			assert(false);
 			return false;
@@ -56,7 +58,8 @@ namespace XREX
 		case ElementType::ImageBuffer:
 		case ElementType::IntImageBuffer:
 		case ElementType::UintImageBuffer:
-
+			return true;
+		case ElementType::Image: // special case
 			return true;
 		case ElementType::ParameterTypeCount:
 			assert(false);
