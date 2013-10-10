@@ -629,9 +629,9 @@ namespace
 				projection->As<floatM44>().SetValue(projectionMatrix);
 
 				TechniqueParameterSP const& linkedListNodePool = listTechnique->GetParameterByName("nodePool");
-				linkedListNodePool->As<TextureImageSP>().SetValue(nodePools[i]->GetImage_TEMP(0, nodePools[i]->GetFormat()));
+				linkedListNodePool->As<TextureImageSP>().SetValue(nodePools[i]->GetImage(0));
 				TechniqueParameterSP const& headPointer = listTechnique->GetParameterByName("heads");
-				headPointer->As<TextureImageSP>().SetValue(headPointers[i]->GetImage_TEMP(0, headPointers[i]->GetFormat()));
+				headPointer->As<TextureImageSP>().SetValue(headPointers[i]->GetImage(0));
 				TechniqueParameterSP const& atomicCounter = listTechnique->GetParameterByName("0");
 				ShaderResourceBufferSP atomicBuffer = atomicCounter->As<ShaderResourceBufferSP>().GetValue();
 				atomicBuffer->SetBuffer(atomicCounterBuffers[i]);
@@ -693,12 +693,12 @@ namespace
 				TechniqueParameterSP const& linkedListNodePool = sortTechnique->GetParameterByName("nodePool");
 				if (linkedListNodePool)
 				{
-					linkedListNodePool->As<TextureImageSP>().SetValue(nodePools[i]->GetImage_TEMP(0, nodePools[i]->GetFormat()));
+					linkedListNodePool->As<TextureImageSP>().SetValue(nodePools[i]->GetImage(0));
 				}
 				TechniqueParameterSP const& headPointer = sortTechnique->GetParameterByName("heads");
 				if (headPointer)
 				{
-					headPointer->As<TextureImageSP>().SetValue(headPointers[i]->GetImage_TEMP(0, headPointers[i]->GetFormat()));
+					headPointer->As<TextureImageSP>().SetValue(headPointers[i]->GetImage(0));
 				}
 
 				RenderingLayoutSP const& layout = screenQuad;
@@ -750,13 +750,13 @@ namespace
 				}
 
 				TechniqueParameterSP const& linkedListNodePool = voxelizeTechnique->GetParameterByName("nodePool");
-				linkedListNodePool->As<TextureImageSP>().SetValue(nodePools[i]->GetImage_TEMP(0, nodePools[i]->GetFormat()));
+				linkedListNodePool->As<TextureImageSP>().SetValue(nodePools[i]->GetImage(0));
 				TechniqueParameterSP const& headPointer = voxelizeTechnique->GetParameterByName("heads");
-				headPointer->As<TextureImageSP>().SetValue(headPointers[i]->GetImage_TEMP(0, headPointers[i]->GetFormat()));
+				headPointer->As<TextureImageSP>().SetValue(headPointers[i]->GetImage(0));
 				TechniqueParameterSP const& volume = voxelizeTechnique->GetParameterByName("volume");
 				if (voxelVolume)
 				{
-					volume->As<TextureImageSP>().SetValue(voxelVolume->GetImage_TEMP(0, voxelVolume->GetFormat()));
+					volume->As<TextureImageSP>().SetValue(voxelVolume->GetImage(0));
 				}
 				TechniqueParameterSP const& axis = voxelizeTechnique->GetParameterByName("axis");
 				axis->As<int32>().SetValue(i);
@@ -807,14 +807,14 @@ namespace
 				}
 
 				TechniqueParameterSP const& linkedListNodePool = voxelizeTechnique->GetParameterByName("nodePool");
-				linkedListNodePool->As<TextureImageSP>().SetValue(nodePools[i]->GetImage_TEMP(0, nodePools[i]->GetFormat()));
+				linkedListNodePool->As<TextureImageSP>().SetValue(nodePools[i]->GetImage(0));
 				TechniqueParameterSP const& headPointer = voxelizeTechnique->GetParameterByName("heads");
-				headPointer->As<TextureImageSP>().SetValue(headPointers[i]->GetImage_TEMP(0, headPointers[i]->GetFormat()));
+				headPointer->As<TextureImageSP>().SetValue(headPointers[i]->GetImage(0));
 
 				TechniqueParameterSP const& volume = voxelizeTechnique->GetParameterByName("volume");
 				if (voxelVolume)
 				{
-					volume->As<TextureImageSP>().SetValue(voxelVolume->GetImage_TEMP(0, TexelFormat::R32UI));
+					volume->As<TextureImageSP>().SetValue(voxelVolume->GetImage(0));
 				}
 				TechniqueParameterSP const& axis = voxelizeTechnique->GetParameterByName("axis");
 				axis->As<int32>().SetValue(i);
@@ -849,9 +849,9 @@ namespace
 			gl::MemoryBarrier(gl::GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
 			TechniqueParameterSP const& intermediateVolume = voxelMergeTechnique->GetParameterByName("intermediateVolume");
-			intermediateVolume->As<TextureImageSP>().SetValue(intermediateVoxelVolume->GetImage_TEMP(0, intermediateVoxelVolume->GetFormat()));
+			intermediateVolume->As<TextureImageSP>().SetValue(intermediateVoxelVolume->GetImage(0));
 			TechniqueParameterSP const& volume = voxelMergeTechnique->GetParameterByName("volume");
-			volume->As<TextureImageSP>().SetValue(voxelVolume->GetImage_TEMP(0, voxelVolume->GetFormat()));
+			volume->As<TextureImageSP>().SetValue(voxelVolume->GetImage(0));
 
 			RenderingLayoutSP const& layout = screenQuad;
 
@@ -1054,7 +1054,7 @@ namespace
 				SceneObjectSP clonedSceneObject = MakeSP<SceneObject>("so " + to_string(i));
 				clonedSceneObject->SetComponent(cloned);
 				TransformationSP transformation = clonedSceneObject->GetComponent<Transformation>();
-				const int positionScaler = 32;
+				const float positionScaler = 32;
 				floatV3 position((i & 1) * 2 * positionScaler - positionScaler, ((i & 2) >> 1) * 2 * positionScaler - positionScaler, ((i & 4) >> 2) * 2 * positionScaler - positionScaler);
 				transformation->Translate(position + floatV3(0, positionScaler, 0));
 				transformation->Rotate(0.2f * PI, position);
