@@ -11,11 +11,6 @@
 namespace XREX
 {
 
-	TextureImage::TextureImage(TextureSP const& texture, uint32 level, TexelFormat bindingFormat)
-		: texture_(texture), level_(level), lastBindingIndex_(0), bindingFormat_TEMP_(bindingFormat)
-	{
-	}
-
 	TextureImage::TextureImage(TextureSP const& texture, uint32 level)
 		: texture_(texture), level_(level), lastBindingIndex_(0)
 	{

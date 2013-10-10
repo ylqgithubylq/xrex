@@ -53,12 +53,6 @@ namespace XREX
 		return MakeSP<TextureImage>(shared_from_this(), level);
 	}
 
-	XREX::TextureImageSP Texture::GetImage_TEMP(uint32 level, TexelFormat format)
-	{
-		assert(level < mipmapCount_);
-		return MakeSP<TextureImage>(shared_from_this(), level, format);
-	}
-
 	void Texture::RecreateMipmap()
 	{
 		Bind(lastBindingIndex_);

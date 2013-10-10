@@ -265,8 +265,8 @@ void InitializeScene()
 	}
 	RenderingTechniqueSP cubeEffect = MakeEffect();
 	MaterialSP material = MakeSP<Material>("cube technique parameters");
-	auto image0 = MakeTestImageTexture0()->GetImage_TEMP(0, TexelFormat::RGBA32F);
-	auto image1 = MakeTestImageTexture1()->GetImage_TEMP(0, TexelFormat::RGBA32F);
+	auto image0 = MakeTestImageTexture0()->GetImage(0);
+	auto image1 = MakeTestImageTexture1()->GetImage(0);
 	material->SetParameter("testImage0", image0);
 	material->SetParameter("testImage1", image1);
 	auto bump = MakeBumpTexture();

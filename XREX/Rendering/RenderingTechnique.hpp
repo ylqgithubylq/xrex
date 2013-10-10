@@ -269,18 +269,11 @@ namespace XREX
 		 */
 		void SetSamplerChannelToSamplerStateMapping(std::string const& channel, std::string samplerName);
 
-		RenderingTechniqueSP GetRenderingTechnique()
-		{
-			if (technique_.expired())
-			{
-				Create();
-			}
-			return technique_.lock();
-		}
+		RenderingTechniqueSP GetRenderingTechnique();
 
 
 	private:
-		void Create();
+		RenderingTechniqueSP Create();
 
 		void BuildMacroStrings();
 

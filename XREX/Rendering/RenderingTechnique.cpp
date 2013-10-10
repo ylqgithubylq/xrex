@@ -311,7 +311,16 @@ namespace XREX
 		samplerChannelToSamplerStateMappings_[channel] = samplerName;
 	}
 	
-	void TechniqueBuilder::Create()
+	XREX::RenderingTechniqueSP TechniqueBuilder::GetRenderingTechnique()
+	{
+		if (technique_.expired())
+		{
+			return Create();
+		}
+		return technique_.lock();
+	}
+
+	RenderingTechniqueSP TechniqueBuilder::Create()
 	{
 		bool succeed = true;
 		BuildMacroStrings();
@@ -345,7 +354,12 @@ namespace XREX
 		{
 			program->SpecifyImageFormat(std::get<0>(image), std::get<1>(image), std::get<2>(image));
 		}
-		program->Link();
+		bool linkResult = program->Link();
+		if (!linkResult)
+		{
+			XREXContext::GetInstance().GetLogger().LogLine("shader link failed:").LogLine(program->GetLinkError());
+			succeed = false;
+		}
 
 		RasterizerStateObjectSP rasterizer = XREXContext::GetInstance().GetRenderingFactory().CreateRasterizerStateObject(rasterizerState_);
 		DepthStencilStateObjectSP depthStencil = XREXContext::GetInstance().GetRenderingFactory().CreateDepthStencilStateObject(depthStencilState_);
@@ -373,11 +387,13 @@ namespace XREX
 			}
 		}
 
+		RenderingTechniqueSP renderingTechnique;
 		if (succeed)
 		{
-			RenderingTechniqueSP renderingTechnique = MakeSP<RenderingTechnique>(name_, program, rasterizer, depthStencil, blend, std::move(samplers));
+			renderingTechnique = MakeSP<RenderingTechnique>(name_, program, rasterizer, depthStencil, blend, std::move(samplers));
 			technique_ = renderingTechnique;
 		}
+		return renderingTechnique;
 	}
 
 

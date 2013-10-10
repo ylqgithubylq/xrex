@@ -86,7 +86,6 @@ namespace XREX
 
 		void RecreateMipmap();
 
-		TextureImageSP GetImage_TEMP(uint32 level, TexelFormat format); // shader should provide interface to get image format
 		TextureImageSP GetImage(uint32 level);
 
 	protected:
