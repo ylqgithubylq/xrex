@@ -2,6 +2,8 @@
 
 #include "Declare.hpp"
 
+#include "Rendering/TextureImage.hpp"
+
 #include <vector>
 #include <array>
 
@@ -22,25 +24,13 @@ namespace XREX
 
 			TextureTypeCount
 		};
-		enum class CubeFace
-		{
-			PositiveX,
-			NegativeX,
-			PositiveY,
-			NegativeY,
-			PositiveZ,
-			NegativeZ,
-
-			CubeFaceElementCount,
-		};
-
 
 
 		template <uint32 Dimension>
 		class DataDescription
 		{
 		public:
-			DataDescription(TexelFormat format, std::array<uint32, Dimension> const& sizes)
+			DataDescription(TexelFormat format, Size<uint32, Dimension> const& sizes)
 				: format_(format), sizes_(sizes)
 			{
 			}
@@ -53,7 +43,7 @@ namespace XREX
 			{
 				return format_;
 			}
-			std::array<uint32, Dimension> const& GetSizes() const
+			Size<uint32, Dimension> const& GetSizes() const
 			{
 				return sizes_;
 			}
@@ -61,7 +51,7 @@ namespace XREX
 		private:
 			static_assert(Dimension <= 3, "Dimension must <= 3");
 			TexelFormat format_;
-			std::array<uint32, Dimension> sizes_;
+			Size<uint32, Dimension> sizes_;
 		};
 
 	protected:
@@ -81,12 +71,15 @@ namespace XREX
 
 		virtual TexelFormat GetFormat() const = 0;
 
+		uint32 GetMipmapCount() const
+		{
+			return mipmapCount_;
+		}
+
 		void Bind(uint32 index);
 		void Unbind();
 
 		void RecreateMipmap();
-
-		TextureImageSP GetImage(uint32 level);
 
 	protected:
 		TextureType type_;
@@ -130,7 +123,7 @@ namespace XREX
 
 	public:
 
-		explicit DimensionalTexture(DataDescription<Dimension> const& description, bool generateMipmap);
+		DimensionalTexture(DataDescription<Dimension> const& description, bool generateMipmap);
 		/*
 		 *	@generateMipmap: true will generate mipmap, ignore data vector except data at index 0.
 		 */
@@ -147,6 +140,14 @@ namespace XREX
 			return description_;
 		}
 
+		Size<uint32, Dimension> const& GetSize() const
+		{
+			return description_.GetSizes();
+		}
+
+		std::shared_ptr<DimensionalTextureImage<Dimension>> GetImage(uint32 level);
+
+
 	private:
 		void DoFillTexture(DataDescription<Dimension> const& description, uint32 mipmapLevel, void const* data);
 
@@ -154,10 +155,35 @@ namespace XREX
 		DataDescription<Dimension> description_;
 	};
 
+	class XREX_API Texture3D
+		: public DimensionalTexture<3>
+	{
+	public:
+		Texture3D(DataDescription<3> const& description, bool generateMipmap);
+		/*
+		 *	@generateMipmap: true will generate mipmap, ignore data vector except data at index 0.
+		 */
+		Texture3D(DataDescription<3> const& description, std::vector<void const*> const& data, bool generateMipmap);
+
+		std::shared_ptr<Texture2DImage> GetLayerImage(uint32 layer, uint32 level);
+	};
+
 	typedef DimensionalTexture<1> Texture1D;
 	typedef DimensionalTexture<2> Texture2D;
-	typedef DimensionalTexture<3> Texture3D;
 
+
+
+	enum class CubeFace
+	{
+		PositiveX,
+		NegativeX,
+		PositiveY,
+		NegativeY,
+		PositiveZ,
+		NegativeZ,
+
+		CubeFaceElementCount,
+	};
 
 	class XREX_API TextureCube
 		: public Texture
@@ -166,6 +192,20 @@ namespace XREX
 		TextureCube();
 		virtual ~TextureCube() override;
 		// TODO not finished
+
+		
+
+		Size<uint32, 2> const& GetSize() const
+		{
+			return description_[0].GetSizes();
+		}
+
+		virtual TexelFormat GetFormat() const override
+		{
+			return description_[0].GetFormat();
+		}
+
+		std::shared_ptr<TextureCubeImage> GetImage(CubeFace face, uint32 level);
 
 	private:
 		std::array<DataDescription<2>, static_cast<uint32>(CubeFace::CubeFaceElementCount)> description_;
@@ -183,6 +223,10 @@ namespace XREX
 		{
 			return format_;
 		}
+
+		Size<uint32, 1> GetSize() const;
+
+		std::shared_ptr<TextureBufferImage> GetImage();
 	private:
 		GraphicsBufferSP buffer_;
 		TexelFormat format_;

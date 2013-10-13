@@ -54,7 +54,7 @@ TextureTestShaderCodes::TextureTestShaderCodes()
 	in vec3 eNormal;\n\
 	in vec2 pixelTextureCoordinate;\n\
 	\n\
-	layout(location = 0) out vec4 finalColor;\n\
+	layout(location = 0) out vec4 xrex_FinalColor;\n\
 	\n\
 	void main()\n\
 	{\n\
@@ -69,15 +69,15 @@ TextureTestShaderCodes::TextureTestShaderCodes()
 		vec4 textureResult1 = vec4(ReturnSelf(textureLod(notUsedTexture1, pixelTextureCoordinate, 0).rgb), 1);\n\
 		vec4 texture3DResult = texture(test3DTexture, 0.2 * mPosition);\n\
 		float dotResult = dot(eNormal, vec3(0, 0, -1));\n\
-		finalColor = vec4(0)\n\
+		xrex_FinalColor = vec4(0)\n\
 		//+ loadResult0 * 0.4 + loadResult1 * 0.4\n\
 		//+ textureResult0 * 0.1 + textureResult1 * 0.1\n\
 		+ texture3DResult\n\
 		//+ vec4(eNormal, 1)\n\
 		;\n\
-		//finalColor = finalColor + texture(notUsedTexture, pixelTextureCoordinate) * 0.01;\n\
-		//finalColor = vec4(textureLod(bumpTexture, vec2(1, 1), 0).rgb, 1);\n\
-		//finalColor = vec4(size, 0, 1);\n\
+		//xrex_FinalColor = finalColor + texture(notUsedTexture, pixelTextureCoordinate) * 0.01;\n\
+		//xrex_FinalColor = vec4(textureLod(bumpTexture, vec2(1, 1), 0).rgb, 1);\n\
+		//xrex_FinalColor = vec4(size, 0, 1);\n\
 	}\n\
 	\n\
 	#endif\n\

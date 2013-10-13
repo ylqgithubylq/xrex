@@ -28,7 +28,7 @@ void main()
 
 #ifdef FS
 
-layout(location = 0) out vec4 finalColor;
+layout(location = 0) out vec4 xrex_FinalColor;
 
 in vec4 color;
 in vec3 textureCoordinate;
@@ -41,7 +41,7 @@ void main()
 	vec3 texturePosition = fract(textureCoordinate * 8);
 	vec3 useColorA = step(texturePosition, colorASize);
 	vec4 mixedColor = mix(colorA, colorB, useColorA.x * useColorA.y * useColorA.z);
-	finalColor = color + mixedColor;
+	xrex_FinalColor = color + mixedColor;
 }
 
 #endif

@@ -25,7 +25,7 @@ namespace
 	TextureSP MakeTest3DTexture()
 	{
 		uint32 size = 128;
-		array<uint32, 3> dim = {size, size, size};
+		Size<uint32, 3> dim = Size<uint32, 3>(size, size, size);
 		Texture::DataDescription<3> desc(TexelFormat::RGBA32F, dim);
 		vector<floatV4> dataLevel0(size * size * size);
 		for (uint32 i = 0; i < size; ++i)
@@ -85,7 +85,7 @@ namespace
 
 	TextureSP MakeIntermediateVoxelVolume(uint32 size)
 	{
-		array<uint32, 3> dim = {size, size, size};
+		Size<uint32, 3> dim(size, size, size);
 		Texture2D::DataDescription<3> desc(TexelFormat::R32UI, dim);
 
 		TextureSP voxelVolume = XREXContext::GetInstance().GetRenderingFactory().CreateTexture3D(desc, false);
@@ -100,7 +100,7 @@ namespace
 
 	TextureSP MakeVoxelVolume(uint32 size)
 	{
-		array<uint32, 3> dim = {size, size, size};
+		Size<uint32, 3> dim(size, size, size);
 		Texture2D::DataDescription<3> desc(TexelFormat::RGBA8, dim);
 
 		TextureSP voxelVolume = XREXContext::GetInstance().GetRenderingFactory().CreateTexture3D(desc, true);
@@ -414,7 +414,7 @@ namespace
 		MaterialSP material = MakeSP<Material>("tracing technique parameters");
 		material->SetParameter("voxelVolumeCenter", cubePosition);
 		material->SetParameter("voxelVolumeHalfSize", cubeHalfSize);
-		material->SetParameter("aperture", camera->GetFieldOfView() / XREXContext::GetInstance().GetMainWindow().GetClientRegionSize().y);
+		material->SetParameter("aperture", camera->GetFieldOfView() / XREXContext::GetInstance().GetMainWindow().GetClientRegionSize().Y());
 
 
 
@@ -445,7 +445,7 @@ namespace
 	}
 
 
-	struct VoxelizationAndRenderProcess
+	struct RenderToTextureProcess
 		: RenderingProcess
 	{
 
@@ -486,7 +486,7 @@ namespace
 		bool anisotropic;
 		
 
-		VoxelizationAndRenderProcess(floatV3 const& sceneCenter, float sceneHalfSize, uint32 voxelVolumeResolution, bool anisotropic, float cameraSpeedScaler)
+		RenderToTextureProcess(floatV3 const& sceneCenter, float sceneHalfSize, uint32 voxelVolumeResolution, bool anisotropic, float cameraSpeedScaler)
 			: frame(0), anisotropic(anisotropic)
 		{
 			this->sceneCenter = sceneCenter;
@@ -542,7 +542,7 @@ namespace
 
 			for (uint32 i = 0; i < 3; ++i)
 			{
-				std::array<uint32, 2> dim = {intermediateVoxelVolumeResolution, intermediateVoxelVolumeResolution};
+				Size<uint32, 2> dim(intermediateVoxelVolumeResolution, intermediateVoxelVolumeResolution);
 				Texture::DataDescription<2> desc(TexelFormat::R32UI, dim);
 
 				TextureSP headPointer = XREXContext::GetInstance().GetRenderingFactory().CreateTexture2D(desc, false);
@@ -629,9 +629,9 @@ namespace
 				projection->As<floatM44>().SetValue(projectionMatrix);
 
 				TechniqueParameterSP const& linkedListNodePool = listTechnique->GetParameterByName("nodePool");
-				linkedListNodePool->As<TextureImageSP>().SetValue(nodePools[i]->GetImage(0));
+				linkedListNodePool->As<TextureImageSP>().SetValue(CheckedSPCast<TextureBuffer>(nodePools[i])->GetImage());
 				TechniqueParameterSP const& headPointer = listTechnique->GetParameterByName("heads");
-				headPointer->As<TextureImageSP>().SetValue(headPointers[i]->GetImage(0));
+				headPointer->As<TextureImageSP>().SetValue(CheckedSPCast<Texture2D>(headPointers[i])->GetImage(0));
 				TechniqueParameterSP const& atomicCounter = listTechnique->GetParameterByName("0");
 				ShaderResourceBufferSP atomicBuffer = atomicCounter->As<ShaderResourceBufferSP>().GetValue();
 				atomicBuffer->SetBuffer(atomicCounterBuffers[i]);
@@ -668,7 +668,7 @@ namespace
 					object->As<int32>().SetValue(objectID);
 
 					listTechnique->SetupAllResources();
-					BufferAndProgramConnectorSP connector = XREXContext::GetInstance().GetRenderingFactory().GetConnector(layout, listTechnique);
+					LayoutAndProgramConnectorSP connector = XREXContext::GetInstance().GetRenderingFactory().GetConnector(layout, listTechnique);
 					connector->Bind();
 					drawer.SetRenderingLayout(layout);
 					drawer.CoreLaunch();
@@ -693,19 +693,19 @@ namespace
 				TechniqueParameterSP const& linkedListNodePool = sortTechnique->GetParameterByName("nodePool");
 				if (linkedListNodePool)
 				{
-					linkedListNodePool->As<TextureImageSP>().SetValue(nodePools[i]->GetImage(0));
+					linkedListNodePool->As<TextureImageSP>().SetValue(CheckedSPCast<TextureBuffer>(nodePools[i])->GetImage());
 				}
 				TechniqueParameterSP const& headPointer = sortTechnique->GetParameterByName("heads");
 				if (headPointer)
 				{
-					headPointer->As<TextureImageSP>().SetValue(headPointers[i]->GetImage(0));
+					headPointer->As<TextureImageSP>().SetValue(CheckedSPCast<Texture2D>(headPointers[i])->GetImage(0));
 				}
 
 				RenderingLayoutSP const& layout = screenQuad;
 
-				BufferAndProgramConnectorSP connector = XREXContext::GetInstance().GetRenderingFactory().GetConnector(layout, sortTechnique);
+				LayoutAndProgramConnectorSP connector = XREXContext::GetInstance().GetRenderingFactory().GetConnector(layout, sortTechnique);
 				drawer.SetTechnique(sortTechnique);
-				drawer.SetBufferAndProgramConnector(connector);
+				drawer.SetLayoutAndProgramConnector(connector);
 				drawer.SetRenderingLayout(layout);
 				drawer.Launch();
 			}
@@ -750,13 +750,13 @@ namespace
 				}
 
 				TechniqueParameterSP const& linkedListNodePool = voxelizeTechnique->GetParameterByName("nodePool");
-				linkedListNodePool->As<TextureImageSP>().SetValue(nodePools[i]->GetImage(0));
+				linkedListNodePool->As<TextureImageSP>().SetValue(CheckedSPCast<TextureBuffer>(nodePools[i])->GetImage());
 				TechniqueParameterSP const& headPointer = voxelizeTechnique->GetParameterByName("heads");
-				headPointer->As<TextureImageSP>().SetValue(headPointers[i]->GetImage(0));
+				headPointer->As<TextureImageSP>().SetValue(CheckedSPCast<Texture2D>(headPointers[i])->GetImage(0));
 				TechniqueParameterSP const& volume = voxelizeTechnique->GetParameterByName("volume");
 				if (voxelVolume)
 				{
-					volume->As<TextureImageSP>().SetValue(voxelVolume->GetImage(0));
+					volume->As<TextureImageSP>().SetValue(CheckedSPCast<Texture3D>(voxelVolume)->GetImage(0));
 				}
 				TechniqueParameterSP const& axis = voxelizeTechnique->GetParameterByName("axis");
 				axis->As<int32>().SetValue(i);
@@ -764,9 +764,9 @@ namespace
 
 				RenderingLayoutSP const& layout = screenQuad;
 
-				BufferAndProgramConnectorSP connector = XREXContext::GetInstance().GetRenderingFactory().GetConnector(layout, voxelizeTechnique);
+				LayoutAndProgramConnectorSP connector = XREXContext::GetInstance().GetRenderingFactory().GetConnector(layout, voxelizeTechnique);
 				drawer.SetTechnique(voxelizeTechnique);
-				drawer.SetBufferAndProgramConnector(connector);
+				drawer.SetLayoutAndProgramConnector(connector);
 				drawer.SetRenderingLayout(layout);
 				drawer.Launch();
 			}
@@ -807,23 +807,23 @@ namespace
 				}
 
 				TechniqueParameterSP const& linkedListNodePool = voxelizeTechnique->GetParameterByName("nodePool");
-				linkedListNodePool->As<TextureImageSP>().SetValue(nodePools[i]->GetImage(0));
+				linkedListNodePool->As<TextureImageSP>().SetValue(CheckedSPCast<TextureBuffer>(nodePools[i])->GetImage());
 				TechniqueParameterSP const& headPointer = voxelizeTechnique->GetParameterByName("heads");
-				headPointer->As<TextureImageSP>().SetValue(headPointers[i]->GetImage(0));
+				headPointer->As<TextureImageSP>().SetValue(CheckedSPCast<Texture2D>(headPointers[i])->GetImage(0));
 
 				TechniqueParameterSP const& volume = voxelizeTechnique->GetParameterByName("volume");
 				if (voxelVolume)
 				{
-					volume->As<TextureImageSP>().SetValue(voxelVolume->GetImage(0));
+					volume->As<TextureImageSP>().SetValue(CheckedSPCast<Texture3D>(voxelVolume)->GetImage(0));
 				}
 				TechniqueParameterSP const& axis = voxelizeTechnique->GetParameterByName("axis");
 				axis->As<int32>().SetValue(i);
 
 				RenderingLayoutSP const& layout = screenQuad;
 
-				BufferAndProgramConnectorSP connector = XREXContext::GetInstance().GetRenderingFactory().GetConnector(layout, voxelizeTechnique);
+				LayoutAndProgramConnectorSP connector = XREXContext::GetInstance().GetRenderingFactory().GetConnector(layout, voxelizeTechnique);
 				drawer.SetTechnique(voxelizeTechnique);
-				drawer.SetBufferAndProgramConnector(connector);
+				drawer.SetLayoutAndProgramConnector(connector);
 				drawer.SetRenderingLayout(layout);
 				drawer.Launch();
 			}
@@ -849,9 +849,9 @@ namespace
 			gl::MemoryBarrier(gl::GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
 			TechniqueParameterSP const& intermediateVolume = voxelMergeTechnique->GetParameterByName("intermediateVolume");
-			intermediateVolume->As<TextureImageSP>().SetValue(intermediateVoxelVolume->GetImage(0));
+			intermediateVolume->As<TextureImageSP>().SetValue(CheckedSPCast<Texture3D>(intermediateVoxelVolume)->GetImage(0));
 			TechniqueParameterSP const& volume = voxelMergeTechnique->GetParameterByName("volume");
-			volume->As<TextureImageSP>().SetValue(voxelVolume->GetImage(0));
+			volume->As<TextureImageSP>().SetValue(CheckedSPCast<Texture3D>(voxelVolume)->GetImage(0));
 
 			RenderingLayoutSP const& layout = screenQuad;
 
@@ -871,8 +871,8 @@ namespace
 			
 
 			CameraSP camera = viewCameraObject->GetComponent<Camera>();
-			Size<uint32> windowSize = XREXContext::GetInstance().GetMainWindow().GetClientRegionSize();
-			camera->GetViewport()->Bind(windowSize.x, windowSize.y);
+			Size<uint32, 2> windowSize = XREXContext::GetInstance().GetMainWindow().GetClientRegionSize();
+			camera->GetViewport()->Bind(windowSize.X(), windowSize.Y());
 
 			// reset all masks, TODO ClearState
 			BlendState blendState;
@@ -919,9 +919,9 @@ namespace
 				material->BindToTechnique(technique);
 				material->SetAllTechniqueParameterValues();
 
-				BufferAndProgramConnectorSP connector = XREXContext::GetInstance().GetRenderingFactory().GetConnector(layout, technique);
+				LayoutAndProgramConnectorSP connector = XREXContext::GetInstance().GetRenderingFactory().GetConnector(layout, technique);
 				drawer.SetTechnique(technique);
-				drawer.SetBufferAndProgramConnector(connector);
+				drawer.SetLayoutAndProgramConnector(connector);
 				drawer.SetRenderingLayout(layout);
 				drawer.Launch();
 			}
@@ -1021,7 +1021,7 @@ namespace
 			break;
 		}
 
-		std::shared_ptr<VoxelizationAndRenderProcess> renderingProcess = MakeSP<VoxelizationAndRenderProcess>(center, halfSize, 512, false, halfSize / 50);
+		std::shared_ptr<RenderToTextureProcess> renderingProcess = MakeSP<RenderToTextureProcess>(center, halfSize, 512, false, halfSize / 50);
 		XREXContext::GetInstance().GetRenderingEngine().SetRenderingProcess(renderingProcess);
 		function<bool(double current, double delta)> l = [renderingProcess] (double current, double delta)
 		{
@@ -1134,11 +1134,6 @@ VoxelTest::VoxelTest()
 {
 	Settings settings("../../");
 	settings.windowTitle = L"GL4 voxelization";
-
-	settings.renderingSettings.colorBits = 32;
-	settings.renderingSettings.depthBits = 24;
-	settings.renderingSettings.stencilBits = 8;
-	settings.renderingSettings.sampleCount = 4;
 
 	settings.renderingSettings.left = 300;
 	settings.renderingSettings.top = 200;

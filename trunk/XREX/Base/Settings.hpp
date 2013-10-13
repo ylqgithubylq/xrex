@@ -17,9 +17,8 @@ namespace XREX
 		int32 width;
 		int32 height;
 
-		uint32 colorBits;
-		uint32 depthBits;
-		uint32 stencilBits;
+		TexelFormat colorFormat;
+		TexelFormat depthStencilFormat;
 
 		uint32 sampleCount;
 

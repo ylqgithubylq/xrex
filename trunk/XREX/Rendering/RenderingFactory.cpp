@@ -7,12 +7,10 @@
 #include "Rendering/RenderingEngine.hpp"
 #include "Rendering/GraphicsContext.hpp"
 #include "Rendering/RenderingTechnique.hpp"
-
 #include "Rendering/Viewport.hpp"
 
 namespace XREX
 {
-
 	RenderingFactory::RenderingFactory(Window& window, Settings const& settings)
 	{
 		renderingEngine_ = MakeUP<RenderingEngine>(window, settings);
@@ -27,25 +25,19 @@ namespace XREX
 		glslVersionString_ += version + "\n\n";
 
 		auto depthOrder = std::numeric_limits<decltype(std::declval<Viewport>().GetDepthOrder())>::max();
-		defaultViewport_ = CreateViewport(depthOrder, 0, 0, window.GetClientRegionSize().x, window.GetClientRegionSize().y);
+		defaultViewport_ = CreateViewport(depthOrder, 0, 0, window.GetClientRegionSize().X(), window.GetClientRegionSize().Y());
 
-		std::array<uint32, 1> size1;
-		size1[0] = 1;
+		Size<uint32, 1> size1(1);
 		Texture::DataDescription<1> description1(TexelFormat::RGBA8, size1);
 		std::vector<std::vector<uint32>> data1(1, std::vector<uint32>(1, std::numeric_limits<uint8>::max() << 24)); // ARGB
 		blackTexture1D_ = CreateTexture1D(description1, data1, true);
 
-		std::array<uint32, 2> size2;
-		size2[0] = 1;
-		size2[1] = 1;
+		Size<uint32, 2> size2(1, 1);
 		Texture::DataDescription<2> description2(TexelFormat::RGBA8, size2);
 		std::vector<std::vector<uint32>> data2(1, std::vector<uint32>(1, std::numeric_limits<uint8>::max() << 24)); // ARGB
 		blackTexture2D_ = CreateTexture2D(description2, data2, true);
 
-		std::array<uint32, 3> size3;
-		size3[0] = 1;
-		size3[1] = 1;
-		size3[2] = 1;
+		Size<uint32, 3> size3(1, 1, 1);
 		Texture::DataDescription<3> description3(TexelFormat::RGBA8, size3);
 		std::vector<std::vector<uint32>> data3(1, std::vector<uint32>(1, std::numeric_limits<uint8>::max() << 24)); // ARGB
 		blackTexture3D_ = CreateTexture3D(description3, data3, true);
@@ -62,7 +54,7 @@ namespace XREX
 	{
 	}
 
-	BufferAndProgramConnectorSP RenderingFactory::GetConnector(RenderingLayoutSP const& layout, RenderingTechniqueSP const& technique)
+	LayoutAndProgramConnectorSP RenderingFactory::GetConnector(RenderingLayoutSP const& layout, RenderingTechniqueSP const& technique)
 	{
 		// TODO use weak_ptr, but weak_ptr cannot be hashed
 		assert(layout);
@@ -74,7 +66,7 @@ namespace XREX
 			return found->second;
 		}
 
-		BufferAndProgramConnectorSP connector = CreateBufferAndProgramConnector(layout, technique->GetProgram());
+		LayoutAndProgramConnectorSP connector = CreateLayoutAndProgramConnector(layout, technique->GetProgram());
 		connectors_[toFind] = connector;
 		return connector;
 	}

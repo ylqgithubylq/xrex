@@ -12,7 +12,6 @@ namespace XREX
 	class XREX_API RenderingEngine
 		: Noncopyable
 	{
-
 	public:
 		RenderingEngine(Window& window, Settings const& settings);
 		~RenderingEngine();
@@ -22,6 +21,11 @@ namespace XREX
 		GraphicsContext& GetGraphicsContext() const
 		{
 			return *graphicsContext_;
+		}
+
+		FrameBufferSP const& GetDefaultFrameBuffer() const
+		{
+			return defaultFrameBuffer_;
 		}
 
 		void SetRenderingProcess(RenderingProcessSP const& process)
@@ -66,6 +70,7 @@ namespace XREX
 		DepthStencilStateObjectSP defaultDepthStencilState_;
 		BlendStateObjectSP defaultBlendState_;
 		Color defaultBlendColor_;
+		FrameBufferSP defaultFrameBuffer_;
 	};
 
 }

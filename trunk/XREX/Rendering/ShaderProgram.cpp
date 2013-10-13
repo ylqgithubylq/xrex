@@ -169,9 +169,9 @@ namespace XREX
 	}
 
 
-	void ProgramObject::SpecifyFragmentOutput(std::string const& channel)
+	void ProgramObject::SpecifyFragmentOutputs(FrameBufferLayoutDescription const& description)
 	{
-		fragmentOutputChannels_.push_back(channel);
+		framebufferDescription_ = description;
 	}
 
 	void ProgramObject::SpecifyImageFormat(std::string const& channel, TexelFormat format, AccessType accessType)
@@ -188,6 +188,8 @@ namespace XREX
 			errorString_ = "Program creation failed.";
 			return false;
 		}
+
+		SpecifyAllInterfaceBindings();
 
 		gl::LinkProgram(glProgramID_);
 
@@ -503,11 +505,6 @@ namespace XREX
 		}
 	}
 
-	void ProgramObject::ClearAllParameterConnections()
-	{
-		//uniformBinders_.swap(decltype(uniformBinders_)());
-	}
-
 	// Only can be called after InitializeAllInterfaceInformations. Do not store the return value.
 	ProgramObject::UniformBinder& ProgramObject::CreateUniformBinder(std::string const& channel)
 	{
@@ -521,6 +518,14 @@ namespace XREX
 		return uniformBinders_.back();
 	}
 
+	void ProgramObject::SpecifyAllInterfaceBindings()
+	{
+		for (uint32 i = 0; i < framebufferDescription_.GetColorChannelCount(); ++i)
+		{
+			FrameBufferLayoutDescription::ColorChannelDescription const& channelDesciption = framebufferDescription_.GetAllColorChannels()[i];
+			gl::BindFragDataLocation(glProgramID_, i, channelDesciption.GetChannel().c_str());
+		}
+	}
 
 	void ProgramObject::InitializeAllInterfaceInformations()
 	{
@@ -685,13 +690,14 @@ namespace XREX
 		}
 
 		{ // fragment output
-			for (uint32 i = 0; i < fragmentOutputChannels_.size(); ++i)
+			for (uint32 i = 0; i < framebufferDescription_.GetColorChannelCount(); ++i)
 			{
 				int32 location;
 				int32 index;
-				location = gl::GetFragDataLocation(glProgramID_, fragmentOutputChannels_[i].c_str());
-				index = gl::GetFragDataIndex(glProgramID_, fragmentOutputChannels_[i].c_str());
-				fragmentOutputInformations_.emplace_back(fragmentOutputChannels_[i], location, index);
+				std::string const& channel = framebufferDescription_.GetAllColorChannels()[i].GetChannel();
+				location = gl::GetFragDataLocation(glProgramID_, channel.c_str());
+				index = gl::GetFragDataIndex(glProgramID_, channel.c_str());
+				fragmentOutputInformations_.emplace_back(channel, location, index);
 			}
 		}
 		{ // TODO transform feedback
@@ -699,6 +705,7 @@ namespace XREX
 		}
 		gl::UseProgram(0);
 	}
+
 
 	namespace
 	{

@@ -21,7 +21,7 @@ namespace XREX
 			Renderable* renderable;
 			RenderingLayoutSP layout;
 			MaterialSP material;
-			BufferAndProgramConnectorSP connector;
+			LayoutAndProgramConnectorSP connector;
 			RenderingTechniqueSP technique;
 			int32 renderingGroup;
 
@@ -38,7 +38,7 @@ namespace XREX
 			 *	@renderingGroup: smaller value will be rendered before any RenderablePack with larger value.
 			 */
 			RenderablePack(Renderable& ownerRenderable, RenderingLayoutSP const& renderingLayout, MaterialSP const& material,
-				BufferAndProgramConnectorSP const& connector, RenderingTechniqueSP const& renderingTechnique, int32 renderingGroup = DefaultRenderingGroup);
+				LayoutAndProgramConnectorSP const& connector, RenderingTechniqueSP const& renderingTechnique, int32 renderingGroup = DefaultRenderingGroup);
 			
 			RenderablePack& operator =(RenderablePack&& right)
 			{

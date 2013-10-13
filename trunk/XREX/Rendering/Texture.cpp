@@ -47,12 +47,6 @@ namespace XREX
 		gl::BindTexture(glBindingTarget_, 0);
 	}
 
-	XREX::TextureImageSP Texture::GetImage(uint32 level)
-	{
-		assert(level < mipmapCount_);
-		return MakeSP<TextureImage>(shared_from_this(), level);
-	}
-
 	void Texture::RecreateMipmap()
 	{
 		Bind(lastBindingIndex_);
@@ -70,7 +64,7 @@ namespace XREX
 		GLTextureFormat const& glFormat = GLTextureFormatFromTexelFormat(description.GetFormat());
 // 		gl::TexStorage1D(glBindingTarget_, mipmapLevel, glFormat.glInternalFormat, description.GetSizes()[0]);
 // 		gl::TexSubImage1D(glBindingTarget_, mipmapLevel, 0, description.GetSizes()[0], glFormat.glSourceFormat, glFormat.glTextureElementType, data);
-		gl::TexImage1D(glBindingTarget_, mipmapLevel, glFormat.glInternalFormat, description.GetSizes()[0], 0, glFormat.glSourceFormat, glFormat.glTextureElementType, data);
+		gl::TexImage1D(glBindingTarget_, mipmapLevel, glFormat.glInternalFormat, description.GetSizes().X(), 0, glFormat.glSourceFormat, glFormat.glTextureElementType, data);
 	}
 	template <>
 	void DimensionalTexture<2>::DoFillTexture(DataDescription<2> const& description, uint32 mipmapLevel, void const* data)
@@ -78,7 +72,7 @@ namespace XREX
 		GLTextureFormat const& glFormat = GLTextureFormatFromTexelFormat(description.GetFormat());
 // 		gl::TexStorage2D(glBindingTarget_, mipmapLevel, glFormat.glInternalFormat, description.GetSizes()[0], description.GetSizes()[1]);
 // 		gl::TexSubImage2D(glBindingTarget_, mipmapLevel, 0, 0, description.GetSizes()[0], description.GetSizes()[1], glFormat.glSourceFormat, glFormat.glTextureElementType, data);
-		gl::TexImage2D(glBindingTarget_, mipmapLevel, glFormat.glInternalFormat, description.GetSizes()[0], description.GetSizes()[1], 0, glFormat.glSourceFormat, glFormat.glTextureElementType, data);
+		gl::TexImage2D(glBindingTarget_, mipmapLevel, glFormat.glInternalFormat, description.GetSizes().X(), description.GetSizes().Y(), 0, glFormat.glSourceFormat, glFormat.glTextureElementType, data);
 	}
 	template <>
 	void DimensionalTexture<3>::DoFillTexture(DataDescription<3> const& description, uint32 mipmapLevel, void const* data)
@@ -86,12 +80,12 @@ namespace XREX
 		GLTextureFormat const& glFormat = GLTextureFormatFromTexelFormat(description.GetFormat());
 // 		gl::TexStorage3D(glBindingTarget_, mipmapLevel, glFormat.glInternalFormat, description.GetSizes()[0], description.GetSizes()[1], description.GetSizes()[2]);
 // 		gl::TexSubImage3D(glBindingTarget_, mipmapLevel, 0, 0, 0, description.GetSizes()[0], description.GetSizes()[1], description.GetSizes()[2], glFormat.glSourceFormat, glFormat.glTextureElementType, data);
-		gl::TexImage3D(glBindingTarget_, mipmapLevel, glFormat.glInternalFormat, description.GetSizes()[0], description.GetSizes()[1], description.GetSizes()[2], 0, glFormat.glSourceFormat, glFormat.glTextureElementType, data);
+		gl::TexImage3D(glBindingTarget_, mipmapLevel, glFormat.glInternalFormat, description.GetSizes().X(), description.GetSizes().Y(), description.GetSizes().Z(), 0, glFormat.glSourceFormat, glFormat.glTextureElementType, data);
 	}
 
 
 	template <uint32 Dimension>
-	XREX::DimensionalTexture<Dimension>::DimensionalTexture(DataDescription<Dimension> const& description, bool generateMipmap)
+	DimensionalTexture<Dimension>::DimensionalTexture(DataDescription<Dimension> const& description, bool generateMipmap)
 		: Texture(TextureDimensionToTextureType<Dimension>::TextureType), description_(description)
 	{
 		Bind(0);
@@ -100,9 +94,9 @@ namespace XREX
 
 		if (generateMipmap)
 		{
-			std::array<uint32, Dimension> sizes = description.GetSizes();
+			Size<uint32, Dimension> sizes = description.GetSizes();
 			mipmapCount_ = 1;
-			while (*std::max_element(sizes.begin(), sizes.end()) > 1)
+			while (*std::max_element(sizes.data.begin(), sizes.data.end()) > 1)
 			{
 				for (uint32 i = 0; i < Dimension; ++i)
 				{
@@ -124,7 +118,7 @@ namespace XREX
 		if (!generateMipmap)
 		{
 			DataDescription<Dimension> descriptionOfALevel = description;
-			std::array<uint32, Dimension> sizes = description.GetSizes();
+			Size<uint32, Dimension> sizes = description.GetSizes();
 			for (uint32 mipmapLevel = 0; mipmapLevel < data.size(); ++mipmapLevel)
 			{
 				void const* dataOfALevel = data[mipmapLevel];
@@ -143,9 +137,9 @@ namespace XREX
 
 		if (generateMipmap)
 		{
-			std::array<uint32, Dimension> sizes = description.GetSizes();
+			Size<uint32, Dimension> sizes = description.GetSizes();
 			mipmapCount_ = 1;
-			while (*std::max_element(sizes.begin(), sizes.end()) > 1)
+			while (*std::max_element(sizes.data.begin(), sizes.data.end()) > 1)
 			{
 				for (uint32 i = 0; i < Dimension; ++i)
 				{
@@ -166,12 +160,45 @@ namespace XREX
 	{
 	}
 
+	template <uint32 Dimension>
+	std::shared_ptr<DimensionalTextureImage<Dimension>> DimensionalTexture<Dimension>::GetImage(uint32 level)
+	{
+		assert(level < mipmapCount_);
+		return MakeSP<DimensionalTextureImage<Dimension>>(shared_from_this(), level);
+	}
 
+
+
+	Texture3D::Texture3D(DataDescription<3> const& description, bool generateMipmap)
+		: DimensionalTexture<3>(description, generateMipmap)
+	{
+	}
+
+	Texture3D::Texture3D(DataDescription<3> const& description, std::vector<void const*> const& data, bool generateMipmap)
+		: DimensionalTexture<3>(description, data, generateMipmap)
+	{
+	}
+
+	std::shared_ptr<Texture2DImage> Texture3D::GetLayerImage(uint32 layer, uint32 level)
+	{
+		assert(layer < GetDescription().GetSizes().Z());
+		assert(level < GetMipmapCount());
+		return MakeSP<Texture3DLayerImage>(shared_from_this(), layer, level);
+	}
 
 	// instantiate 1, 2, 3 Dimensional Texture specialization
 	template class XREX_API DimensionalTexture<1>;
 	template class XREX_API DimensionalTexture<2>;
 	template class XREX_API DimensionalTexture<3>;
+
+
+
+	std::shared_ptr<TextureCubeImage> TextureCube::GetImage(CubeFace face, uint32 level)
+	{
+		assert(level < mipmapCount_);
+		return MakeSP<TextureCubeImage>(shared_from_this(), face, level);
+	}
+
 
 
 
@@ -187,5 +214,16 @@ namespace XREX
 	TextureBuffer::~TextureBuffer()
 	{
 	}
+
+	Size<uint32, 1> TextureBuffer::GetSize() const
+	{
+		return Size<uint32, 1>(buffer_->GetSize() / GetTexelSizeInBytes(format_));
+	}
+	
+	std::shared_ptr<TextureBufferImage> TextureBuffer::GetImage()
+	{
+		return MakeSP<TextureBufferImage>(shared_from_this());
+	}
+
 
 }

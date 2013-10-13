@@ -258,7 +258,7 @@ namespace XREX
 
 			DEVMODE devMode;
 			devMode.dmSize = sizeof(devMode);
-			devMode.dmBitsPerPel = settings.renderingSettings.colorBits;
+			devMode.dmBitsPerPel = 8 * GetTexelSizeInBytes(settings.renderingSettings.colorFormat);
 			devMode.dmPelsWidth = width_;
 			devMode.dmPelsHeight = height_;
 			devMode.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;

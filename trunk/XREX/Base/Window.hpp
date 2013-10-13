@@ -51,17 +51,17 @@ namespace XREX
 		/*
 		 *	Client region size, not the window size.
 		 */
-		Size<uint32> GetClientRegionSize() const
+		Size<uint32, 2> GetClientRegionSize() const
 		{
-			return Size<uint32>(width_, height_);
+			return Size<uint32, 2>(width_, height_);
 		}
 
 		/*
 		 *	Upper left corner of the window.
 		 */
-		Size<int32> GetWindowPosition() const
+		Size<int32, 2> GetWindowPosition() const
 		{
-			return Size<int32>(windowLeft_, windowTop_);
+			return Size<int32, 2>(windowLeft_, windowTop_);
 		}
 
 		std::wstring GetTitleText() const;

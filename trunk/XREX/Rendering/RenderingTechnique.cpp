@@ -45,6 +45,36 @@ namespace XREX
 	{
 	}
 
+
+	void RenderingTechnique::SetFrameBuffer(FrameBufferSP const& framebuffer)
+	{
+#ifdef XREX_DEBUG
+		FrameBufferLayoutDescription const& outputLayout = program_->GetFragmentOutputLayout();
+		FrameBufferLayoutDescription const& framebufferLayout = framebuffer->GetLayoutDescription();
+		if (outputLayout.GetColorChannelCount() == framebufferLayout.GetColorChannelCount())
+		{
+			for (uint32 i = 0; i < outputLayout.GetAllColorChannels().size(); ++i)
+			{
+				if (outputLayout.GetAllColorChannels()[i].GetChannel() != framebufferLayout.GetAllColorChannels()[i].GetChannel())
+				{
+					assert(false);
+				}
+			}
+		}
+		if (outputLayout.GetDepthEnabled())
+		{
+			assert(framebufferLayout.GetDepthEnabled());
+		}
+		if (outputLayout.GetStencilEnabled())
+		{
+			assert(framebufferLayout.GetStencilEnabled());
+		}
+#endif // XREX_DEBUG
+		framebuffer_ = framebuffer;
+
+	}
+
+
 	TechniqueParameterSP const& RenderingTechnique::GetParameterByName(string const& name)
 	{
 		auto i = find_if(parameters_.begin(), parameters_.end(), [&name] (TechniqueParameterSP const& parameter)
@@ -70,6 +100,8 @@ namespace XREX
 		rasterizerState_->Bind(pipelineParameters_.polygonOffsetFactor, pipelineParameters_.polygonOffsetUnits);
 		depthStencilState_->Bind(pipelineParameters_.frontStencilReference, pipelineParameters_.backStencilReference);
 		blendState_->Bind(pipelineParameters_.blendFactor);
+
+		framebuffer_->BindWrite();
 
 		for (auto& resourceSetter : parameterSetters_)
 		{
@@ -293,9 +325,9 @@ namespace XREX
 	{
 	}
 
-	void TechniqueBuilder::SpecifyFragmentOutput(std::string const& channel)
+	void TechniqueBuilder::SpecifyFragmentOutput(FrameBufferLayoutDescription const& description)
 	{
-		fragmentOutputChannels_.push_back(channel);
+		framebufferDescription_ = description;
 	}
 
 	void TechniqueBuilder::SpecifyImageFormat(std::string const& channel, TexelFormat format, AccessType accessType)
@@ -346,10 +378,7 @@ namespace XREX
 			}
 		}
 
-		for (auto& fragmentOutput : fragmentOutputChannels_)
-		{
-			program->SpecifyFragmentOutput(fragmentOutput);
-		}
+		program->SpecifyFragmentOutputs(framebufferDescription_);
 		for (auto& image : imageChannelInformations_)
 		{
 			program->SpecifyImageFormat(std::get<0>(image), std::get<1>(image), std::get<2>(image));
@@ -359,6 +388,23 @@ namespace XREX
 		{
 			XREXContext::GetInstance().GetLogger().LogLine("shader link failed:").LogLine(program->GetLinkError());
 			succeed = false;
+		}
+
+		if (depthStencilState_.depthEnable)
+		{
+			if (!framebufferDescription_.GetDepthEnabled())
+			{
+				XREXContext::GetInstance().GetLogger().LogLine("depth state error: depth in technique is enabled but frame buffer is not.");
+				succeed = false;
+			}
+		}
+		if (depthStencilState_.stencilEnable)
+		{
+			if (!framebufferDescription_.GetStencilEnabled())
+			{
+				XREXContext::GetInstance().GetLogger().LogLine("depth state error: stencil in technique is enabled but frame buffer is not.");
+				succeed = false;
+			}
 		}
 
 		RasterizerStateObjectSP rasterizer = XREXContext::GetInstance().GetRenderingFactory().CreateRasterizerStateObject(rasterizerState_);

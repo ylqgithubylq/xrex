@@ -48,6 +48,41 @@ namespace XREX
 		HGLRC hRC_;
 	};
 
+	namespace
+	{
+		uint32 DepthBitsFromDepthStencilFormat(TexelFormat depthStencilFormat)
+		{
+			switch (depthStencilFormat)
+			{
+			case TexelFormat::Depth16:
+				return 16;
+			case TexelFormat::Depth24:
+				return 24;
+			case TexelFormat::Depth32:
+				return 32;
+			case TexelFormat::Depth32F:
+				return 32;
+			case TexelFormat::Depth24Stencil8:
+				return 24;
+			default:
+				assert(false);
+				return 0;
+			}
+		}
+		uint32 StencilBitsFromDepthStencilFormat(TexelFormat depthStencilFormat)
+		{
+			switch (depthStencilFormat)
+			{
+			case TexelFormat::Depth24Stencil8:
+				return 8;
+			case TexelFormat::Stencil8:
+				return 8;
+			default:
+				assert(false);
+				return 0;
+			}
+		}
+	}
 
 	GraphicsContext::GraphicsContext(Window& window, Settings const& settings)
 		: correctlyCreated_(false)
@@ -57,9 +92,9 @@ namespace XREX
 
 		RenderingSettings const& renderingSettings = settings.renderingSettings;
 
-		colorBits_ = renderingSettings.colorBits;
-		depthBits_ = renderingSettings.depthBits;
-		stencilBits_ = renderingSettings.stencilBits;
+		uint32 colorBits = 8 * GetTexelSizeInBytes(renderingSettings.colorFormat);
+		uint32 depthBits = DepthBitsFromDepthStencilFormat(renderingSettings.depthStencilFormat);
+		uint32 stencilBits = StencilBitsFromDepthStencilFormat(renderingSettings.depthStencilFormat);
 		sampleCount_ = renderingSettings.sampleCount;
 
 		glHideWindows_->hDC_ = ::GetDC(glHideWindows_->GetHWND());
@@ -70,9 +105,9 @@ namespace XREX
 		pixelFormatDescriptor.nVersion		= 1;
 		pixelFormatDescriptor.dwFlags		= PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
 		pixelFormatDescriptor.iPixelType	= PFD_TYPE_RGBA;
-		pixelFormatDescriptor.cColorBits	= static_cast<BYTE>(colorBits_);
-		pixelFormatDescriptor.cDepthBits	= static_cast<BYTE>(depthBits_);
-		pixelFormatDescriptor.cStencilBits	= static_cast<BYTE>(stencilBits_);
+		pixelFormatDescriptor.cColorBits	= static_cast<BYTE>(colorBits);
+		pixelFormatDescriptor.cDepthBits	= static_cast<BYTE>(depthBits);
+		pixelFormatDescriptor.cStencilBits	= static_cast<BYTE>(stencilBits);
 		pixelFormatDescriptor.iLayerType	= PFD_MAIN_PLANE;
 
 		int32 pixelFormat = ::ChoosePixelFormat(glHideWindows_->hDC_, &pixelFormatDescriptor);
@@ -105,9 +140,9 @@ namespace XREX
 					WGL_DRAW_TO_WINDOW_ARB, gl::GL_TRUE,
 					WGL_SUPPORT_OPENGL_ARB, gl::GL_TRUE,
 					WGL_ACCELERATION_ARB, WGL_FULL_ACCELERATION_ARB,
-					WGL_COLOR_BITS_ARB, colorBits_,
-					WGL_DEPTH_BITS_ARB, depthBits_,
-					WGL_STENCIL_BITS_ARB, stencilBits_,
+					WGL_COLOR_BITS_ARB, colorBits,
+					WGL_DEPTH_BITS_ARB, depthBits,
+					WGL_STENCIL_BITS_ARB, stencilBits,
 					WGL_DOUBLE_BUFFER_ARB, gl::GL_TRUE,
 					WGL_SAMPLE_BUFFERS_ARB, gl::GL_TRUE,
 					WGL_SAMPLES_ARB, sampleCount_,

@@ -73,7 +73,7 @@ namespace XREX
 		return mapping[static_cast<uint32>(definedUniform)];
 	}
 
-	enum class DefinedAttribute
+	enum class DefinedInputAttribute
 	{
 		Position,
 		Normal,
@@ -102,35 +102,52 @@ namespace XREX
 		DefinedColorCount = Color7 - Color0 + 1,
 	};
 
-	XREX_API inline std::string const& GetAttributeString(DefinedAttribute definedAttribute)
+	XREX_API inline std::string const& GetInputAttributeString(DefinedInputAttribute definedAttribute)
 	{
-		static std::array<std::string, static_cast<uint32>(DefinedAttribute::DefinedAttributeCount)> const mapping = [] ()
+		static std::array<std::string, static_cast<uint32>(DefinedInputAttribute::DefinedAttributeCount)> const mapping = [] ()
 		{
-			std::array<std::string, static_cast<uint32>(DefinedAttribute::DefinedAttributeCount)> temp;
-			temp[static_cast<uint32>(DefinedAttribute::Position)] = "position";
-			temp[static_cast<uint32>(DefinedAttribute::Normal)] = "normal";
+			std::array<std::string, static_cast<uint32>(DefinedInputAttribute::DefinedAttributeCount)> temp;
+			temp[static_cast<uint32>(DefinedInputAttribute::Position)] = "position";
+			temp[static_cast<uint32>(DefinedInputAttribute::Normal)] = "normal";
 			
-			temp[static_cast<uint32>(DefinedAttribute::TextureCoordinate0)] = "textureCoordinate0";
-			temp[static_cast<uint32>(DefinedAttribute::TextureCoordinate1)] = "textureCoordinate1";
-			temp[static_cast<uint32>(DefinedAttribute::TextureCoordinate2)] = "textureCoordinate2";
-			temp[static_cast<uint32>(DefinedAttribute::TextureCoordinate3)] = "textureCoordinate3";
-			temp[static_cast<uint32>(DefinedAttribute::TextureCoordinate4)] = "textureCoordinate4";
-			temp[static_cast<uint32>(DefinedAttribute::TextureCoordinate5)] = "textureCoordinate5";
-			temp[static_cast<uint32>(DefinedAttribute::TextureCoordinate6)] = "textureCoordinate6";
-			temp[static_cast<uint32>(DefinedAttribute::TextureCoordinate7)] = "textureCoordinate7";
+			temp[static_cast<uint32>(DefinedInputAttribute::TextureCoordinate0)] = "textureCoordinate0";
+			temp[static_cast<uint32>(DefinedInputAttribute::TextureCoordinate1)] = "textureCoordinate1";
+			temp[static_cast<uint32>(DefinedInputAttribute::TextureCoordinate2)] = "textureCoordinate2";
+			temp[static_cast<uint32>(DefinedInputAttribute::TextureCoordinate3)] = "textureCoordinate3";
+			temp[static_cast<uint32>(DefinedInputAttribute::TextureCoordinate4)] = "textureCoordinate4";
+			temp[static_cast<uint32>(DefinedInputAttribute::TextureCoordinate5)] = "textureCoordinate5";
+			temp[static_cast<uint32>(DefinedInputAttribute::TextureCoordinate6)] = "textureCoordinate6";
+			temp[static_cast<uint32>(DefinedInputAttribute::TextureCoordinate7)] = "textureCoordinate7";
 
-			temp[static_cast<uint32>(DefinedAttribute::Color0)] = "color0";
-			temp[static_cast<uint32>(DefinedAttribute::Color1)] = "color1";
-			temp[static_cast<uint32>(DefinedAttribute::Color2)] = "color2";
-			temp[static_cast<uint32>(DefinedAttribute::Color3)] = "color3";
-			temp[static_cast<uint32>(DefinedAttribute::Color4)] = "color4";
-			temp[static_cast<uint32>(DefinedAttribute::Color5)] = "color5";
-			temp[static_cast<uint32>(DefinedAttribute::Color6)] = "color6";
-			temp[static_cast<uint32>(DefinedAttribute::Color7)] = "color7";
+			temp[static_cast<uint32>(DefinedInputAttribute::Color0)] = "color0";
+			temp[static_cast<uint32>(DefinedInputAttribute::Color1)] = "color1";
+			temp[static_cast<uint32>(DefinedInputAttribute::Color2)] = "color2";
+			temp[static_cast<uint32>(DefinedInputAttribute::Color3)] = "color3";
+			temp[static_cast<uint32>(DefinedInputAttribute::Color4)] = "color4";
+			temp[static_cast<uint32>(DefinedInputAttribute::Color5)] = "color5";
+			temp[static_cast<uint32>(DefinedInputAttribute::Color6)] = "color6";
+			temp[static_cast<uint32>(DefinedInputAttribute::Color7)] = "color7";
 
 			return temp;
 		} ();
 		return mapping[static_cast<uint32>(definedAttribute)];
 	}
 
+	enum class DefinedOutputAttribute
+	{
+		DefaultFrameBufferOutput,
+
+		DefinedAttributeCount,
+	};
+
+	XREX_API inline std::string const& GetOutputAttributeString(DefinedOutputAttribute definedAttribute)
+	{
+		static std::array<std::string, static_cast<uint32>(DefinedOutputAttribute::DefinedAttributeCount)> const mapping = [] ()
+		{
+			std::array<std::string, static_cast<uint32>(DefinedOutputAttribute::DefinedAttributeCount)> temp;
+			temp[static_cast<uint32>(DefinedOutputAttribute::DefaultFrameBufferOutput)] = "xrex_FinalColor";
+			return temp;
+		} ();
+		return mapping[static_cast<uint32>(definedAttribute)];
+	}
 }

@@ -30,6 +30,9 @@
     <ClInclude Include="TextureTestShaderCodes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="RenderToTextureTest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -50,12 +53,21 @@
     <ClCompile Include="TextureTestShaderCodes.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="RenderToTextureTest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\Effects\Test.glsl">
+    <None Include="Effects\TestRenderToTexture.glsl">
       <Filter>Effect Files</Filter>
     </None>
-    <None Include="..\Effects\TestCube.glsl">
+    <None Include="Effects\Test.glsl">
+      <Filter>Effect Files</Filter>
+    </None>
+    <None Include="Effects\TestCube.glsl">
+      <Filter>Effect Files</Filter>
+    </None>
+    <None Include="Effects\TestCopyTextures.glsl">
       <Filter>Effect Files</Filter>
     </None>
   </ItemGroup>

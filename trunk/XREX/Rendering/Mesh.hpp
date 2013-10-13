@@ -104,7 +104,7 @@ namespace XREX
 		std::string name_;
 		MaterialSP material_;
 		RenderingLayoutSP layout_;
-		BufferAndProgramConnectorSP connector_;
+		LayoutAndProgramConnectorSP connector_;
 		RenderingTechniqueSP technique_;
 		int32 renderingGroup_;
 	};

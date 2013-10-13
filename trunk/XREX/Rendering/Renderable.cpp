@@ -17,7 +17,7 @@ namespace XREX
 
 
 	Renderable::RenderablePack::RenderablePack(Renderable& ownerRenderable, RenderingLayoutSP const& renderingLayout, MaterialSP const& material,
-		BufferAndProgramConnectorSP const& connector, RenderingTechniqueSP const& renderingTechnique, int32 renderingGroup /*= DefaultRenderingGroup*/)
+		LayoutAndProgramConnectorSP const& connector, RenderingTechniqueSP const& renderingTechnique, int32 renderingGroup /*= DefaultRenderingGroup*/)
 		: renderable(&ownerRenderable), layout(renderingLayout), material(material), connector(connector),
 		technique(renderingTechnique), renderingGroup(renderingGroup)
 	{

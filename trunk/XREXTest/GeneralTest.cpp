@@ -108,7 +108,7 @@ struct TempScene
 
 
 		
-		string shaderFile = "../../Effects/Test.glsl";
+		string shaderFile = "../../XREXTest/Effects/Test.glsl";
 		shared_ptr<string> shaderString = XREXContext::GetInstance().GetResourceLoader().LoadString(shaderFile);
 		if (!shaderString)
 		{
@@ -122,7 +122,7 @@ struct TempScene
 		testBuilder->SetStageCode(ShaderObject::ShaderType::FragmentShader, MakeSP<string>());
 
 
-		shaderFile = "../../Effects/TestCube.glsl";
+		shaderFile = "../../XREXTest/Effects/TestCube.glsl";
 		shaderString = XREXContext::GetInstance().GetResourceLoader().LoadString(shaderFile);
 		if (!shaderString)
 		{
@@ -162,11 +162,13 @@ struct TempScene
 		testCubeBuilder->SetDepthStencilState(depthStencilState);
 		testCubeBuilder->SetBlendState(blendState);
 
-		testBuilder->SpecifyFragmentOutput("finalColor");
-		testCubeBuilder->SpecifyFragmentOutput("finalColor");
+		testBuilder->SpecifyFragmentOutput(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer()->GetLayoutDescription());
+		testCubeBuilder->SpecifyFragmentOutput(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer()->GetLayoutDescription());
 
 		RenderingTechniqueSP effect = testBuilder->GetRenderingTechnique();
 		RenderingTechniqueSP cubeEffect = testCubeBuilder->GetRenderingTechnique();
+		effect->SetFrameBuffer(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer());
+		cubeEffect->SetFrameBuffer(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer());
 
 		VertexBufferSP vertices = XREXContext::GetInstance().GetRenderingFactory().CreateVertexBuffer(GraphicsBuffer::Usage::StaticDraw, vertexData, "position");
 		IndexBufferSP indices = XREXContext::GetInstance().GetRenderingFactory().CreateIndexBuffer(GraphicsBuffer::Usage::StaticDraw, indexData, IndexBuffer::TopologicalType::Triangles);
@@ -177,7 +179,6 @@ struct TempScene
 
 		SubMeshSP const& subMesh = cubeMesh->CreateSubMesh("cube sub mesh", layout, nullptr, cubeEffect);
 		centerPosition_ = floatV3(0, 0, 0000);
-
 
 		TechniqueParameterSP const& lightColor = effect->GetParameterByName("lightColor");
 		if (lightColor)
@@ -359,9 +360,6 @@ GeneralTest::GeneralTest()
 	Settings settings("../../");
 	settings.windowTitle = L"GL4 window";
 
-	settings.renderingSettings.colorBits = 32;
-	settings.renderingSettings.depthBits = 24;
-	settings.renderingSettings.stencilBits = 8;
 	settings.renderingSettings.sampleCount = 4;
 
 	settings.renderingSettings.left = 300;

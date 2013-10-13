@@ -43,9 +43,6 @@ namespace XREX
 		int32 majorVersion_;
 		int32 minorVersion_;
 
-		uint32 colorBits_;
-		uint32 depthBits_;
-		uint32 stencilBits_;
 		uint32 sampleCount_;
 
 		std::string description_;

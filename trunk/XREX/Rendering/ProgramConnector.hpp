@@ -4,12 +4,12 @@
 
 namespace XREX
 {
-	class XREX_API BufferAndProgramConnector
+	class XREX_API LayoutAndProgramConnector
 		: Noncopyable
 	{
 	public:
-		BufferAndProgramConnector(RenderingLayoutSP const& layout, ProgramObjectSP const& program);
-		~BufferAndProgramConnector();
+		LayoutAndProgramConnector(RenderingLayoutSP const& layout, ProgramObjectSP const& program);
+		~LayoutAndProgramConnector();
 
 		RenderingLayoutSP const& GetRenderingLayout() const
 		{

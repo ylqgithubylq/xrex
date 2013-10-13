@@ -5,6 +5,7 @@
 #include "Rendering/ShaderProgram.hpp"
 #include "Rendering/RenderingPipelineState.hpp"
 #include "Rendering/Sampler.hpp"
+#include "Rendering/FrameBuffer.hpp"
 
 #include <string>
 #include <vector>
@@ -167,6 +168,13 @@ namespace XREX
 			pipelineParameters_ = pipelineParameters;
 		}
 
+		void SetFrameBuffer(FrameBufferSP const& framebuffer);
+
+		FrameBufferSP const& GetFrameBuffer() const
+		{
+			return framebuffer_;
+		}
+
 		std::vector<TechniqueParameterSP> const& GetAllParameters() const
 		{
 			return parameters_;
@@ -202,6 +210,8 @@ namespace XREX
 		std::unordered_map<std::string, SamplerSP> samplers_;
 
 		TechniquePipelineParameters pipelineParameters_;
+
+		FrameBufferSP framebuffer_;
 	};
 
 
@@ -210,7 +220,7 @@ namespace XREX
 	public:
 		TechniqueBuilder(std::string const& name);
 
-		void SpecifyFragmentOutput(std::string const& channel); // TEMP or should be systematic added
+		void SpecifyFragmentOutput(FrameBufferLayoutDescription const& description);
 		void SpecifyImageFormat(std::string const& channel, TexelFormat format, AccessType accessType); // TEMP or should be systematic added
 
 
@@ -285,7 +295,7 @@ namespace XREX
 	private:
 		std::string name_;
 
-		std::vector<std::string> fragmentOutputChannels_; // TEMP
+		FrameBufferLayoutDescription framebufferDescription_;
 		std::vector<std::tuple<std::string, TexelFormat, AccessType>> imageChannelInformations_; // TEMP
 
 		std::vector<TechniqueBuilderSP> includes_;

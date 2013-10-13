@@ -447,24 +447,24 @@ namespace XREX
 					VertexBuffer::DataLayoutDescription dataDescription = VertexBuffer::DataLayoutDescription(mesh->mNumVertices);
 					if (mesh->HasPositions())
 					{
-						dataDescription.AddChannelLayout(VertexBuffer::DataLayoutDescription::ElementLayoutDescription(startLocation, totalLengthPerElement, ElementType::FloatV3, GetAttributeString(DefinedAttribute::Position)));
+						dataDescription.AddChannelLayout(VertexBuffer::DataLayoutDescription::ElementLayoutDescription(startLocation, totalLengthPerElement, ElementType::FloatV3, GetInputAttributeString(DefinedInputAttribute::Position)));
 						startLocation += sizeof(*mesh->mVertices);
 					}
 					if (mesh->HasNormals())
 					{
-						dataDescription.AddChannelLayout(VertexBuffer::DataLayoutDescription::ElementLayoutDescription(startLocation, totalLengthPerElement, ElementType::FloatV3, GetAttributeString(DefinedAttribute::Normal)));
+						dataDescription.AddChannelLayout(VertexBuffer::DataLayoutDescription::ElementLayoutDescription(startLocation, totalLengthPerElement, ElementType::FloatV3, GetInputAttributeString(DefinedInputAttribute::Normal)));
 						startLocation += sizeof(*mesh->mNormals);
 					}
 					for (uint32 j = 0; j < textureCoordinateCount; ++j)
 					{
 						dataDescription.AddChannelLayout(VertexBuffer::DataLayoutDescription::ElementLayoutDescription(startLocation, totalLengthPerElement, ElementType::FloatV3,
-							GetAttributeString(static_cast<DefinedAttribute>(static_cast<uint32>(DefinedAttribute::TextureCoordinate0) + j))));
+							GetInputAttributeString(static_cast<DefinedInputAttribute>(static_cast<uint32>(DefinedInputAttribute::TextureCoordinate0) + j))));
 						startLocation += sizeof(*mesh->mTextureCoords[0]);
 					}
 					for (uint32 j = 0; j < vertexColorCount; ++j)
 					{
 						dataDescription.AddChannelLayout(VertexBuffer::DataLayoutDescription::ElementLayoutDescription(startLocation, totalLengthPerElement, ElementType::FloatV4,
-							GetAttributeString(static_cast<DefinedAttribute>(static_cast<uint32>(DefinedAttribute::Color0) + j))));
+							GetInputAttributeString(static_cast<DefinedInputAttribute>(static_cast<uint32>(DefinedInputAttribute::Color0) + j))));
 						startLocation += sizeof(*mesh->mColors[0]);
 					}
 

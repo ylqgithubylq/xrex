@@ -6,6 +6,7 @@
 #include "Base/Window.hpp"
 #include "Scene/Scene.hpp"
 #include "Scene/SceneObject.hpp"
+#include "Rendering/RenderingEngine.hpp"
 #include "Rendering/Camera.hpp"
 #include "Rendering/Viewport.hpp"
 #include "Rendering/Renderable.hpp"
@@ -13,8 +14,9 @@
 #include "Rendering/DefinedShaderName.hpp"
 #include "Rendering/Material.hpp"
 #include "Rendering/RenderingLayout.hpp"
-#include "Rendering/BufferAndProgramConnector.hpp"
+#include "Rendering/ProgramConnector.hpp"
 #include "Rendering/WorkLauncher.hpp"
+#include "Rendering/FrameBuffer.hpp"
 
 #include <CoreGL.hpp>
 
@@ -60,12 +62,11 @@ namespace XREX
 	void DefaultRenderingProcess::RenderACamera(SceneSP const& scene, SceneObjectSP const& cameraObject)
 	{
 		CameraSP camera = cameraObject->GetComponent<Camera>();
-		Size<uint32> windowSize = XREXContext::GetInstance().GetMainWindow().GetClientRegionSize();
-		camera->GetViewport()->Bind(windowSize.x, windowSize.y);
+		Size<uint32, 2> windowSize = XREXContext::GetInstance().GetMainWindow().GetClientRegionSize();
+		camera->GetViewport()->Bind(windowSize.X(), windowSize.Y());
 
 		Color const& backgroundColor = camera->GetBackgroundColor();
-		gl::ClearColor(backgroundColor.R(), backgroundColor.G(), backgroundColor.B(), backgroundColor.A());
-		gl::Clear(gl::GL_COLOR_BUFFER_BIT | gl::GL_DEPTH_BUFFER_BIT | gl::GL_STENCIL_BUFFER_BIT);
+		XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer()->Clear(FrameBuffer::ClearMask::All, backgroundColor,1, 0);
 
 		floatM44 const& viewMatrix = camera->GetViewMatrix();
 		floatM44 const& projectionMatrix = camera->GetProjectionMatrix();
@@ -101,7 +102,7 @@ namespace XREX
 			{
 				Renderable& ownerRenderable = *renderablePack->renderable;
 				RenderingTechniqueSP const& technique = renderablePack->technique;
-				BufferAndProgramConnectorSP const& connector = renderablePack->connector;
+				LayoutAndProgramConnectorSP const& connector = renderablePack->connector;
 				RenderingLayoutSP const& layout = renderablePack->layout;
 				MaterialSP const& material = renderablePack->material;
 
@@ -144,7 +145,7 @@ namespace XREX
 				}
 
 				drawer.SetTechnique(technique);
-				drawer.SetBufferAndProgramConnector(connector);
+				drawer.SetLayoutAndProgramConnector(connector);
 				drawer.SetRenderingLayout(layout);
 				drawer.Launch();
 			}

@@ -6,7 +6,7 @@
 #include "Rendering/GraphicsBuffer.hpp"
 #include "Rendering/BufferView.hpp"
 #include "Rendering/RenderingLayout.hpp"
-#include "Rendering/BufferAndProgramConnector.hpp"
+#include "Rendering/ProgramConnector.hpp"
 #include "Rendering/Texture.hpp"
 #include "Rendering/RenderingPipelineState.hpp"
 #include "Rendering/Sampler.hpp"
@@ -31,6 +31,7 @@ namespace XREX
 		{
 			return defaultViewport_;
 		}
+
 
 		TextureSP const& GetBlackTexture1D() const
 		{
@@ -163,9 +164,9 @@ namespace XREX
 		{
 			return MakeSP<RenderingLayout>(buffers, indexBuffer);
 		}
-		BufferAndProgramConnectorSP CreateBufferAndProgramConnector(RenderingLayoutSP const& layout, ProgramObjectSP const& program)
+		LayoutAndProgramConnectorSP CreateLayoutAndProgramConnector(RenderingLayoutSP const& layout, ProgramObjectSP const& program)
 		{
-			return MakeSP<BufferAndProgramConnector>(layout, program);
+			return MakeSP<LayoutAndProgramConnector>(layout, program);
 		}
 
 		SamplerSP CreateSampler(SamplerState const& samplerState)
@@ -225,6 +226,10 @@ namespace XREX
 			return MakeSP<TextureBuffer>(textureBuffer, format);
 		}
 
+		FrameBufferSP CreateFrameBuffer(FrameBufferLayoutDescription const& description, std::unordered_map<std::string, TextureImageSP>&& colorTextures, FrameBuffer::DepthStencilBinding const& depthStencil)
+		{
+			return MakeSP<FrameBuffer>(description, std::move(colorTextures), depthStencil);
+		}
 
 		ViewportSP CreateViewport(int32 depthOrder, int32 left, int32 bottom, uint32 width, uint32 height)
 		{
@@ -235,7 +240,7 @@ namespace XREX
 			return MakeSP<Viewport>(depthOrder, left, bottom, width, height);
 		}
 
-		BufferAndProgramConnectorSP GetConnector(RenderingLayoutSP const& layout, RenderingTechniqueSP const& technique);
+		LayoutAndProgramConnectorSP GetConnector(RenderingLayoutSP const& layout, RenderingTechniqueSP const& technique);
 
 	private:
 		std::string glslVersionString_;
@@ -247,7 +252,7 @@ namespace XREX
 		SamplerSP defaultSampler_;
 		std::unique_ptr<RenderingEngine> renderingEngine_;
 
-		std::unordered_map<std::pair<RenderingLayoutSP, RenderingTechniqueSP>, BufferAndProgramConnectorSP, STLPairHasher<RenderingLayoutSP, RenderingTechniqueSP>> connectors_;
+		std::unordered_map<std::pair<RenderingLayoutSP, RenderingTechniqueSP>, LayoutAndProgramConnectorSP, STLPairHasher<RenderingLayoutSP, RenderingTechniqueSP>> connectors_;
 	};
 
 }
