@@ -5,11 +5,13 @@
 #include <assert.h>
 #include <iostream>
 
+using namespace XREX;
+using namespace std;
 
 namespace
 {
 
-	MeshSP LoadTeapot()
+	MeshSP LoadModel()
 	{
 		MeshSP model;
 		model = XREXContext::GetInstance().GetResourceManager().LoadModel("Data/teapot/teapot.obj")->Create();
@@ -140,7 +142,7 @@ namespace
 		tbtc->SetSamplerState("sampler3D", bumpSampler);
 		tbtc->SetSamplerChannelToSamplerStateMapping("test3DTexture", "sampler3D");
 
-		tbtc->SpecifyFragmentOutput("finalColor");
+		tbtc->SpecifyFragmentOutput(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer()->GetLayoutDescription());
 		tbtc->SpecifyImageFormat("testImage0", TexelFormat::RGBA32F, AccessType::ReadWrite);
 		tbtc->SpecifyImageFormat("testImage1", TexelFormat::RGBA32F, AccessType::ReadWrite);
 
@@ -151,7 +153,7 @@ namespace
 
 	TextureSP MakeBumpTexture()
 	{
-		array<uint32, 2> dim = {2, 2};
+		Size<uint32, 2> dim(2, 2);
 		Texture2D::DataDescription<2> desc(TexelFormat::R32F, dim);
 		vector<float> dataLevel0(4);
 		dataLevel0[0] = floatV4(1.0f, 0, 0, 1).X();
@@ -166,7 +168,7 @@ namespace
 
 	TextureSP MakeTestImageTexture0()
 	{
-		array<uint32, 2> dim = {2, 2};
+		Size<uint32, 2> dim (2, 2);
 		Texture2D::DataDescription<2> desc(TexelFormat::RGBA32F, dim);
 		vector<floatV4> dataLevel0(4);
 		dataLevel0[0] = floatV4(0, 1.0f, 0, 1);
@@ -187,7 +189,7 @@ namespace
 	}
 	TextureSP MakeTestImageTexture1()
 	{
-		array<uint32, 2> dim = {2, 2};
+		Size<uint32, 2> dim(2, 2);
 		Texture2D::DataDescription<2> desc(TexelFormat::RGBA32F, dim);
 		vector<floatV4> dataLevel0(4);
 		dataLevel0[0] = floatV4(0, 0, 0.1f, 1);
@@ -209,7 +211,7 @@ namespace
 
 	TextureSP Make3DTexture()
 	{
-		array<uint32, 3> dim = {2, 2, 2};
+		Size<uint32, 3> dim(2, 2, 2);
 		Texture2D::DataDescription<3> desc(TexelFormat::RGBA32F, dim);
 		vector<floatV4> dataLevel0(8);
 		dataLevel0[0] = floatV4(1.0f, 0, 0, 1);
@@ -226,69 +228,69 @@ namespace
 		return texture;
 	}
 
-}
+	SceneObjectSP theCameraObject_;
 
-SceneObjectSP theCameraObject_;
-
-void InitializeScene()
-{
-	SceneSP scene;
-	scene = XREXContext::GetInstance().GetScene();
-
-	SceneObjectSP cameraObject = MakeSP<SceneObject>("camera");
-	Settings const& settings = XREXContext::GetInstance().GetSettings();
-	float aspectRatio = static_cast<float>(settings.renderingSettings.width) / settings.renderingSettings.height;
-	CameraSP camera = MakeSP<PerspectiveCamera>(PI / 4, aspectRatio, 1.f, 100.0f);
-	//CameraSP camera = MakeSP<OrthogonalCamera>(100.f * aspectRatio, 100.f, 100.f);
-	cameraObject->SetComponent(camera);
-	scene = XREXContext::GetInstance().GetScene();
-	scene->AddObject(cameraObject);
-
-	auto cc = MakeSP<FirstPersonCameraController>();
-	cc->AttachToCamera(cameraObject);
-	XREXContext::GetInstance().GetInputCenter().AddInputHandler(cc);
-
-	SceneObjectSP cubeObject = MakeSP<SceneObject>("cube object");
-	//MeshSP cube = MakeCube();
-	MeshSP cube = LoadTeapot();
-	std::vector<std::string> allChannels;
-	for (auto& sub : cube->GetAllSubMeshes())
+	void InitializeScene()
 	{
-		for (auto& vb : sub->GetLayout()->GetVertexBuffers())
+		SceneSP scene;
+		scene = XREXContext::GetInstance().GetScene();
+
+		SceneObjectSP cameraObject = MakeSP<SceneObject>("camera");
+		Settings const& settings = XREXContext::GetInstance().GetSettings();
+		float aspectRatio = static_cast<float>(settings.renderingSettings.width) / settings.renderingSettings.height;
+		CameraSP camera = MakeSP<PerspectiveCamera>(PI / 4, aspectRatio, 1.f, 100.0f);
+		//CameraSP camera = MakeSP<OrthogonalCamera>(100.f * aspectRatio, 100.f, 100.f);
+		cameraObject->SetComponent(camera);
+		scene = XREXContext::GetInstance().GetScene();
+		scene->AddObject(cameraObject);
+
+		auto cc = MakeSP<FirstPersonCameraController>();
+		cc->AttachToCamera(cameraObject);
+		XREXContext::GetInstance().GetInputCenter().AddInputHandler(cc);
+
+		SceneObjectSP cubeObject = MakeSP<SceneObject>("cube object");
+		//MeshSP cube = MakeCube();
+		MeshSP cube = LoadModel();
+		std::vector<std::string> allChannels;
+		for (auto& sub : cube->GetAllSubMeshes())
 		{
-			auto& desc = vb->GetDataLayoutDescription();
-			for (auto& layouts : desc.GetAllLayouts())
+			for (auto& vb : sub->GetLayout()->GetVertexBuffers())
 			{
-				allChannels.push_back(layouts.channel);
+				auto& desc = vb->GetDataLayoutDescription();
+				for (auto& layouts : desc.GetAllLayouts())
+				{
+					allChannels.push_back(layouts.channel);
+				}
 			}
 		}
+		RenderingTechniqueSP cubeEffect = MakeEffect();
+		cubeEffect->SetFrameBuffer(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer());
+
+		MaterialSP material = MakeSP<Material>("cube technique parameters");
+		auto image0 = CheckedSPCast<Texture2D>(MakeTestImageTexture0())->GetImage(0);
+		auto image1 = CheckedSPCast<Texture2D>(MakeTestImageTexture1())->GetImage(0);
+		material->SetParameter("testImage0", image0);
+		material->SetParameter("testImage1", image1);
+		auto bump = MakeBumpTexture();
+		material->SetParameter("notUsedTexture0", image0->GetTexture());
+		material->SetParameter("notUsedTexture1", image1->GetTexture());
+		auto texture3D = Make3DTexture();
+		material->SetParameter("test3DTexture", texture3D);
+
+
+		for (auto& sub : cube->GetAllSubMeshes())
+		{
+			sub->SetTechnique(cubeEffect);
+			sub->SetMaterial(material);
+		}
+		cubeObject->SetComponent(cube);
+		TransformationSP trans = cubeObject->GetComponent<Transformation>();
+		trans->SetPosition(0, 0, 50);
+		scene->AddObject(cubeObject);
+
+		theCameraObject_ = cameraObject;
 	}
-	RenderingTechniqueSP cubeEffect = MakeEffect();
-	MaterialSP material = MakeSP<Material>("cube technique parameters");
-	auto image0 = MakeTestImageTexture0()->GetImage(0);
-	auto image1 = MakeTestImageTexture1()->GetImage(0);
-	material->SetParameter("testImage0", image0);
-	material->SetParameter("testImage1", image1);
-	auto bump = MakeBumpTexture();
-	material->SetParameter("notUsedTexture0", image0->GetTexture());
-	material->SetParameter("notUsedTexture1", image1->GetTexture());
-	auto texture3D = Make3DTexture();
-	material->SetParameter("test3DTexture", texture3D);
-
-
-	for (auto& sub : cube->GetAllSubMeshes())
-	{
-		sub->SetTechnique(cubeEffect);
-		sub->SetMaterial(material);
-	}
-	cubeObject->SetComponent(cube);
-	TransformationSP trans = cubeObject->GetComponent<Transformation>();
-	trans->SetPosition(0, 0, 50);
-	scene->AddObject(cubeObject);
-
-	theCameraObject_ = cameraObject;
 }
-
 #include <sstream>
 
 TextureTest::TextureTest(void)
@@ -296,9 +298,6 @@ TextureTest::TextureTest(void)
 	Settings settings("../../");
 	settings.windowTitle = L"GL4 window";
 
-	settings.renderingSettings.colorBits = 32;
-	settings.renderingSettings.depthBits = 24;
-	settings.renderingSettings.stencilBits = 8;
 	settings.renderingSettings.sampleCount = 4;
 
 	settings.renderingSettings.left = 300;

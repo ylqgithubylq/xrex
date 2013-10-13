@@ -4,7 +4,7 @@
 
 #include "Rendering/RenderingLayout.hpp"
 #include "Rendering/ShaderProgram.hpp"
-#include "Rendering/BufferAndProgramConnector.hpp"
+#include "Rendering/ProgramConnector.hpp"
 #include "Rendering/RenderingTechnique.hpp"
 #include "Rendering/GL/GLUtil.hpp"
 
@@ -20,12 +20,12 @@ namespace XREX
 	void IndexedDrawer::Launch()
 	{
 		assert(layout_->GetIndexBuffer() != nullptr);
-		assert(connector_ != nullptr);
+		assert(layoutConnector_ != nullptr);
 		assert(technique_ != nullptr);
 		technique_->Use();
-		connector_->Bind();
+		layoutConnector_->Bind();
 		CoreLaunch();
-		connector_->Unbind();
+		layoutConnector_->Unbind();
 	}
 
 	void IndexedDrawer::CoreLaunch()

@@ -240,8 +240,7 @@ namespace XREX
 		template <>
 		void TextureHandler<Texture1D>::BuildResult(uint32 width, uint32 height, uint32 size, TexelFormat format, uint8 const* data)
 		{
-			std::array<uint32, 1> sizes;
-			sizes[0] = width;
+			Size<uint32, 1> sizes(width);
 			Texture::DataDescription<1> description(format, sizes);
 			std::vector<std::vector<uint8>> dataContainer;
 			std::vector<uint8> topLevelData(size);
@@ -252,9 +251,7 @@ namespace XREX
 		template <>
 		void TextureHandler<Texture2D>::BuildResult(uint32 width, uint32 height, uint32 size, TexelFormat format, uint8 const* data)
 		{
-			std::array<uint32, 2> sizes;
-			sizes[0] = width;
-			sizes[1] = height;
+			Size<uint32, 2> sizes(width, height);
 			Texture::DataDescription<2> description(format, sizes);
 			std::vector<std::vector<uint8>> dataContainer;
 			std::vector<uint8> topLevelData(size);
@@ -266,10 +263,7 @@ namespace XREX
 		void TextureHandler<Texture3D>::BuildResult(uint32 width, uint32 height, uint32 size, TexelFormat format, uint8 const* data)
 		{
 			assert(false); // TODO not finished, how to load 3D texture?
-			std::array<uint32, 3> sizes;
-			sizes[0] = width;
-			sizes[1] = width;
-			sizes[3] = height / width;
+			Size<uint32, 3> sizes(width, width, height / width);
 			Texture::DataDescription<3> description(format, sizes);
 			std::vector<std::vector<uint8>> dataContainer;
 			std::vector<uint8> topLevelData(size);
@@ -281,10 +275,7 @@ namespace XREX
 		void TextureHandler<TextureCube>::BuildResult(uint32 width, uint32 height, uint32 size, TexelFormat format, uint8 const* data)
 		{
 			assert(false); // TODO not finished, how to load cube texture?
-			std::array<uint32, 2> sizes;
-			sizes[0] = width;
-			sizes[1] = width;
-			sizes[3] = height / width;
+			Size<uint32, 2> sizes(width, height / width);
 			Texture::DataDescription<2> description(format, sizes);
 			std::vector<std::vector<uint8>> dataContainer;
 			std::vector<uint8> topLevelData(size);

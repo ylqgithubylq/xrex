@@ -658,6 +658,36 @@ namespace XREX
 				return Format;
 			}
 
+		case TexelFormat::Depth16:
+			{
+				static GLTextureFormat const Format(gl::GL_DEPTH_COMPONENT16, gl::GL_DEPTH_COMPONENT, gl::GL_FLOAT);
+				return Format;
+			}
+		case TexelFormat::Depth24:
+			{
+				static GLTextureFormat const Format(gl::GL_DEPTH_COMPONENT24, gl::GL_DEPTH_COMPONENT, gl::GL_FLOAT);
+				return Format;
+			}
+		case TexelFormat::Depth32:
+			{
+				static GLTextureFormat const Format(gl::GL_DEPTH_COMPONENT32, gl::GL_DEPTH_COMPONENT, gl::GL_FLOAT);
+				return Format;
+			}
+		case TexelFormat::Depth32F:
+			{
+				static GLTextureFormat const Format(gl::GL_DEPTH_COMPONENT32F, gl::GL_DEPTH_COMPONENT, gl::GL_FLOAT);
+				return Format;
+			}
+		case TexelFormat::Depth24Stencil8:
+			{
+				static GLTextureFormat const Format(gl::GL_DEPTH24_STENCIL8, gl::GL_DEPTH_STENCIL, gl::GL_FLOAT);
+				return Format;
+			}
+		case TexelFormat::Stencil8:
+			{
+				static GLTextureFormat const Format(gl::GL_STENCIL_INDEX8, gl::GL_STENCIL_INDEX, gl::GL_FLOAT);
+				return Format;
+			}
 		default:
 			{
 				static GLTextureFormat const Format;

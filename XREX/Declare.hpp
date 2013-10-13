@@ -86,8 +86,8 @@ namespace XREX
 	class IndexedDrawer;
 	typedef std::shared_ptr<IndexedDrawer> IndexedDrawerSP;
 
-	class BufferAndProgramConnector;
-	typedef std::shared_ptr<BufferAndProgramConnector> BufferAndProgramConnectorSP;
+	class LayoutAndProgramConnector;
+	typedef std::shared_ptr<LayoutAndProgramConnector> LayoutAndProgramConnectorSP;
 
 	class Material;
 	typedef std::shared_ptr<Material> MaterialSP;

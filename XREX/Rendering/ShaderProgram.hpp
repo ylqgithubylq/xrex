@@ -4,6 +4,7 @@
 #include "Rendering/BufferView.hpp"
 #include "Rendering/Texture.hpp"
 #include "Rendering/GraphicsBuffer.hpp"
+#include "Rendering/FrameBuffer.hpp"
 
 
 #include <string>
@@ -345,7 +346,13 @@ namespace XREX
 
 		void AttachShader(ShaderObjectSP& shader);
 
-		void SpecifyFragmentOutput(std::string const& channel); // TEMP or should be systematic added
+		void SpecifyFragmentOutputs(FrameBufferLayoutDescription const& description);
+
+		FrameBufferLayoutDescription const& GetFragmentOutputLayout() const
+		{
+			return framebufferDescription_;
+		}
+
 		void SpecifyImageFormat(std::string const& channel, TexelFormat format, AccessType accessType); // TEMP or should be systematic added
 
 		bool Link();
@@ -425,7 +432,6 @@ namespace XREX
 		}
 
 		void ConnectUniformParameter(std::string const& channel, TechniqueParameterSP const& parameter);
-		void ClearAllParameterConnections();
 
 	private:
 
@@ -440,15 +446,15 @@ namespace XREX
 		};
 		UniformBinder& CreateUniformBinder(std::string const& channel);
 
+		void SpecifyAllInterfaceBindings();
 		void InitializeAllInterfaceInformations();
-
 	private:
 		std::vector<ShaderObjectSP> shaders_;
 		bool validate_;
 		std::string errorString_;
 		uint32 glProgramID_;
 
-		std::vector<std::string> fragmentOutputChannels_; // TEMP
+		FrameBufferLayoutDescription framebufferDescription_;
 		std::vector<std::tuple<std::string, TexelFormat, AccessType>> imageChannelInformations_; // TEMP
 	
 		std::vector<UniformInformation> uniformInformations_;

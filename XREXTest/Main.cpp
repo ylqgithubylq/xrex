@@ -8,26 +8,30 @@
 #include "TestFile.hpp"
 #include "TextureTest.h"
 #include "GeneralTest.h"
+#include "RenderToTextureTest.h"
 
-
+using namespace std;
 
 
 int main()
 {
 
-	switch (2)
+	switch (3)
 	{
 	case 1:
-		{
-			TextureTest texturetest;
-		}
-		break;
-	case 2:
 		{
 			GeneralTest generaltest;
 		}
 		break;
-
+	case 2:
+		{
+			TextureTest texturetest;
+		}
+		break;
+	case 3:
+		{
+			RenderToTextureTest renderToTextureTest;
+		}
 	default:
 		break;
 	}
@@ -39,19 +43,6 @@ int main()
 	//return 0;
 	//TestFile t;
 	//t.TestTransformation();
-	{ // intentionally memory leak
-		struct LeakTest
-		{
-			shared_ptr<LeakTest> p;
-		};
-		shared_ptr<LeakTest> ltp0 = MakeSP<LeakTest>();
-		shared_ptr<LeakTest> ltp1 = MakeSP<LeakTest>();
-		ltp0->p = ltp1;
-		ltp1->p = ltp0;
-	}
-
-
-
 
 	return 0;
 }

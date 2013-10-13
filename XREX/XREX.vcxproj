@@ -42,7 +42,7 @@
     <ClInclude Include="HelperFacility\OrbitCameraController.hpp" />
     <ClInclude Include="Input\InputCenter.hpp" />
     <ClInclude Include="Input\InputHandler.hpp" />
-    <ClInclude Include="Rendering\BufferAndProgramConnector.hpp" />
+    <ClInclude Include="Rendering\ProgramConnector.hpp" />
     <ClInclude Include="Rendering\BufferView.hpp" />
     <ClInclude Include="Rendering\Camera.hpp" />
     <ClInclude Include="Rendering\DefinedShaderName.hpp" />
@@ -95,7 +95,7 @@
     <ClCompile Include="HelperFacility\OrbitCameraController.cpp" />
     <ClCompile Include="Input\InputCenter.cpp" />
     <ClCompile Include="Input\InputHandler.cpp" />
-    <ClCompile Include="Rendering\BufferAndProgramConnector.cpp" />
+    <ClCompile Include="Rendering\ProgramConnector.cpp" />
     <ClCompile Include="Rendering\BufferView.cpp" />
     <ClCompile Include="Rendering\Camera.cpp" />
     <ClCompile Include="Rendering\FrameBuffer.cpp" />

@@ -10,7 +10,7 @@ XML format:
 	uniform
 	buffer
 	image output
-	buffer output
+	buffer output (bind to framebuffer structure directly?)
 	common code(no tag)
 	stage code(with tag)
 

@@ -200,9 +200,6 @@
     <ClInclude Include="Rendering\WorkLauncher.hpp">
       <Filter>Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="Rendering\BufferAndProgramConnector.hpp">
-      <Filter>Rendering</Filter>
-    </ClInclude>
     <ClInclude Include="Rendering\FrameBuffer.hpp">
       <Filter>Rendering</Filter>
     </ClInclude>
@@ -210,6 +207,9 @@
       <Filter>Rendering</Filter>
     </ClInclude>
     <ClInclude Include="Rendering\ShaderProgram.hpp">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\ProgramConnector.hpp">
       <Filter>Rendering</Filter>
     </ClInclude>
   </ItemGroup>
@@ -343,9 +343,6 @@
     <ClCompile Include="Rendering\WorkLauncher.cpp">
       <Filter>Rendering</Filter>
     </ClCompile>
-    <ClCompile Include="Rendering\BufferAndProgramConnector.cpp">
-      <Filter>Rendering</Filter>
-    </ClCompile>
     <ClCompile Include="Rendering\FrameBuffer.cpp">
       <Filter>Rendering</Filter>
     </ClCompile>
@@ -356,6 +353,9 @@
       <Filter>Rendering</Filter>
     </ClCompile>
     <ClCompile Include="Rendering\Material.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\ProgramConnector.cpp">
       <Filter>Rendering</Filter>
     </ClCompile>
   </ItemGroup>

@@ -362,6 +362,18 @@ namespace XREX
 			return 12;
 		case TexelFormat::BGRA32F:
 			return 16;
+		case TexelFormat::Depth16:
+			return 2;
+		case TexelFormat::Depth24:
+			return 3;
+		case TexelFormat::Depth32:
+			return 4;
+		case TexelFormat::Depth32F:
+			return 4;
+		case TexelFormat::Depth24Stencil8:
+			return 4;
+		case TexelFormat::Stencil8:
+			return 1;
 		case TexelFormat::TexelFormatCount:
 			assert(false);
 			return 0;

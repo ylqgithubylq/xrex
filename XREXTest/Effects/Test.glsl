@@ -55,7 +55,7 @@ in vec3 wNormal;
 in vec2 pixelTextureCoordinate;
 in vec3 wPositionToLight;
 
-layout(location = 0) out vec4 finalColor;
+layout(location = 0) out vec4 xrex_FinalColor;
 
 void main()
 {
@@ -71,12 +71,12 @@ void main()
 
 	vec3 diffuseColor = lightColor * lightIntensity * max(lDotN, 0) * texture(diffuseMap, pixelTextureCoordinate).rgb;
 
-	float specularLevelFetched = texture(specularMap, pixelTextureCoordinate);
-	float specularColor = lightColor * lightIntensity * specularLevelFetched * pow(lDotHV, specularLevelFetched);
+	float specularLevelFetched = texture(specularMap, pixelTextureCoordinate).x;
+	vec3 specularColor = lightColor * lightIntensity * specularLevelFetched * pow(lDotHV, specularLevelFetched);
 
 	// TODO assimp do not load specularMap correctly, so default black texture used here.
 	// the problem is caused by the sponza.mtl, which do not have the specular map in it at all.
-	finalColor = //vec4(texture(specularMap, pixelTextureCoordinate).rgb, 1);
+	xrex_FinalColor = //vec4(texture(specularMap, pixelTextureCoordinate).rgb, 1);
 		//vec4(normalToShow, 1.0) * 0.1 +
 		//texture(diffuseMap, pixelTextureCoordinate) + texture(specularMap, pixelTextureCoordinate);
 		vec4(diffuseColor + specularColor, 1);

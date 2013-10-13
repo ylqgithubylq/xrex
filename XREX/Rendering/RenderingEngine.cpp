@@ -3,12 +3,15 @@
 #include "RenderingEngine.hpp"
 
 #include "Base/XREXContext.hpp"
+#include "Base/Window.hpp"
 #include "Base/Logger.hpp"
 #include "Rendering/RenderingFactory.hpp"
 #include "Rendering/RenderingPipelineState.hpp"
 #include "Rendering/GL/GLUtil.hpp"
 #include "Rendering/GraphicsContext.hpp"
 #include "Rendering/RenderingProcess.hpp"
+#include "Rendering/FrameBuffer.hpp"
+#include "Rendering/DefinedShaderName.hpp"
 
 #include <CoreGL.hpp>
 
@@ -113,13 +116,39 @@ namespace XREX
 				assert(false);
 			}
 		};
+
+		FrameBufferLayoutDescription MakeDescription(Size<uint32, 2> const& sizes, TexelFormat colorFormat, TexelFormat depthStencilFormat)
+		{
+			FrameBufferLayoutDescription description(sizes, true, true);
+			description.AddColorChannel(FrameBufferLayoutDescription::ColorChannelDescription(GetOutputAttributeString(DefinedOutputAttribute::DefaultFrameBufferOutput), TexelFormat::RGBA8));
+			return description;
+		}
+
+		class DefaultFrameBuffer
+			: public FrameBuffer
+		{
+		public:
+			DefaultFrameBuffer(Size<uint32, 2> const& sizes, TexelFormat colorFormat, TexelFormat depthStencilFormat)
+				: FrameBuffer(MakeDescription(sizes, colorFormat, depthStencilFormat))
+			{
+			}
+			virtual ~DefaultFrameBuffer() override
+			{
+			}
+		};
+
 	}
+
+
 
 	RenderingEngine::RenderingEngine(Window& window, Settings const& settings)
 		: defaultBlendColor_(0, 0, 0, 1)
 	{
 		// initialize the graphics context first
 		graphicsContext_ = MakeUP<GraphicsContext>(window, settings);
+
+		// window may not have the size specified in settings, so use window.GetClientRegionSize() here to get the actual size.
+		defaultFrameBuffer_ = MakeSP<DefaultFrameBuffer>(window.GetClientRegionSize(), settings.renderingSettings.colorFormat, settings.renderingSettings.depthStencilFormat);
 
 #ifdef XREX_DEBUG
 		gl::DebugMessageCallbackARB(&DebugCallback::Callback, this);

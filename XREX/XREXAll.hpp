@@ -51,5 +51,7 @@
 #include "Rendering/Texture.hpp"
 #include "Rendering/Sampler.hpp"
 #include "Rendering/TextureImage.hpp"
+#include "Rendering/WorkLauncher.hpp"
+#include "Rendering/FrameBuffer.hpp"
 
 #include "Rendering/Viewport.hpp"

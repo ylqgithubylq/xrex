@@ -65,12 +65,12 @@ namespace XREX
 	{
 		mainWindow_ = MakeUP<Window>(settings_);
 		// window size and position will change while creating window, set those values after creating window.
-		Size<uint32> clientRegionSize = mainWindow_->GetClientRegionSize();
-		settings_.renderingSettings.width = clientRegionSize.x;
-		settings_.renderingSettings.height = clientRegionSize.y;
-		Size<int32> windowPosition = mainWindow_->GetWindowPosition();
-		settings_.renderingSettings.left = windowPosition.x;
-		settings_.renderingSettings.top = windowPosition.y;
+		Size<uint32, 2> clientRegionSize = mainWindow_->GetClientRegionSize();
+		settings_.renderingSettings.width = clientRegionSize.X();
+		settings_.renderingSettings.height = clientRegionSize.Y();
+		Size<int32, 2> windowPosition = mainWindow_->GetWindowPosition();
+		settings_.renderingSettings.left = windowPosition.X();
+		settings_.renderingSettings.top = windowPosition.Y();
 	}
 
 

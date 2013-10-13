@@ -20,9 +20,17 @@ namespace XREX
 		{
 			layout_ = layout;
 		}
-		void SetBufferAndProgramConnector(BufferAndProgramConnectorSP const& connector)
+		void SetLayoutAndProgramConnector(LayoutAndProgramConnectorSP const& connector)
 		{
-			connector_ = connector;
+			layoutConnector_ = connector;
+		}
+		void SetFrameBuffer(FrameBufferSP const& frameBuffer)
+		{
+			frameBuffer_ = frameBuffer;
+		}
+		void SetFrameBufferAndProgramConnector()
+		{
+
 		}
 		void SetTechnique(RenderingTechniqueSP const& technique)
 		{
@@ -38,7 +46,8 @@ namespace XREX
 
 	private:
 		RenderingLayoutSP layout_;
-		BufferAndProgramConnectorSP connector_;
+		LayoutAndProgramConnectorSP layoutConnector_;
+		FrameBufferSP frameBuffer_;
 		RenderingTechniqueSP technique_;
 	};
 

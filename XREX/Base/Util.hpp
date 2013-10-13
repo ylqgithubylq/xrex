@@ -10,16 +10,63 @@
 
 namespace XREX
 {
-	template <typename T>
+	template <typename T, uint32 Dimension>
 	struct Size
 	{
-		T x;
-		T y;
-		Size(T const& x, T const& y)
-			: x(x), y(y)
+		std::array<T, Dimension> data;
+		explicit Size(std::array<T, Dimension> const& data)
+			: data(data)
 		{
 		}
+		explicit Size(T const& x)
+		{
+			static_assert(Dimension == 1, "");
+			data[0] = x;
+		}
+		explicit Size(T const& x, T const& y)
+		{
+			static_assert(Dimension == 2, "");
+			data[0] = x;
+			data[1] = y;
+		}
+		explicit Size(T const& x, T const& y, T const& z)
+		{
+			static_assert(Dimension == 3, "");
+			data[0] = x;
+			data[1] = y;
+			data[2] = z;
+		}
+
+		T const& X() const
+		{
+			static_assert(Dimension >= 1, "");
+			return data[0];
+		}
+		T const& Y() const
+		{
+			static_assert(Dimension >= 2, "");
+			return data[1];
+		}
+		T const& Z() const
+		{
+			static_assert(Dimension >= 3, "");
+
+			return data[2];
+		}
+
+		T& operator [](uint32 index)
+		{
+			assert(index < Dimension);
+			return data[index];
+		}
+		T const& operator [](uint32 index) const
+		{
+			assert(index < Dimension);
+			return data[index];
+		}
 	};
+
+
 
 	template <typename T>
 	struct Rectangle
@@ -444,7 +491,13 @@ namespace XREX
 		BGR32F,
 		BGRA32F,
 
-		// TODO
+		Depth16,
+		Depth24,
+		Depth32,
+		Depth32F,
+		Depth24Stencil8,
+		Stencil8,
+
 		TexelFormatCount
 	};
 

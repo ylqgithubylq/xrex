@@ -1,6 +1,6 @@
 #include "XREX.hpp"
 
-#include "BufferAndProgramConnector.hpp"
+#include "ProgramConnector.hpp"
 
 #include "Rendering/RenderingLayout.hpp"
 #include "Rendering/BufferView.hpp"
@@ -13,7 +13,7 @@ namespace XREX
 {
 
 
-	BufferAndProgramConnector::BufferAndProgramConnector(RenderingLayoutSP const& layout, ProgramObjectSP const& program)
+	LayoutAndProgramConnector::LayoutAndProgramConnector(RenderingLayoutSP const& layout, ProgramObjectSP const& program)
 		: layout_(layout), program_(program), glVAO_(0)
 	{
 		gl::GenVertexArrays(1, &glVAO_);
@@ -106,7 +106,7 @@ namespace XREX
 		layout_->GetIndexBuffer()->Unbind();
 	}
 
-	BufferAndProgramConnector::~BufferAndProgramConnector()
+	LayoutAndProgramConnector::~LayoutAndProgramConnector()
 	{
 		if (glVAO_ != 0)
 		{
@@ -115,12 +115,12 @@ namespace XREX
 		}
 	}
 
-	void BufferAndProgramConnector::Bind()
+	void LayoutAndProgramConnector::Bind()
 	{
 		gl::BindVertexArray(glVAO_);
 	}
 
-	void BufferAndProgramConnector::Unbind()
+	void LayoutAndProgramConnector::Unbind()
 	{
 		gl::BindVertexArray(0);
 	}
