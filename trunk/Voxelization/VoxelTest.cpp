@@ -155,9 +155,14 @@ namespace
 			builder->SetDepthStencilState(depthStencilState);
 			builder->SetBlendState(blendState);
 
+			builder->SpecifyFragmentOutput(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer()->GetLayoutDescription());
+
+			builder->SpecifyImageFormat("heads", TexelFormat::R32UI, AccessType::ReadWrite);
+			builder->SpecifyImageFormat("nodePool", TexelFormat::RGBA32UI, AccessType::WriteOnly);
+
 			return builder->GetRenderingTechnique();
 		} ();
-
+		listTechnique->SetFrameBuffer(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer());
 
 		RenderingTechniqueSP sortTechnique = [] ()
 		{
@@ -188,8 +193,10 @@ namespace
 			builder->SetDepthStencilState(depthStencilState);
 			builder->SetBlendState(blendState);
 
+			builder->SpecifyFragmentOutput(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer()->GetLayoutDescription());
 			return builder->GetRenderingTechnique();
 		} ();
+		sortTechnique->SetFrameBuffer(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer());
 
 
 		RenderingTechniqueSP generationTechnique = [] ()
@@ -220,8 +227,15 @@ namespace
 			builder->SetDepthStencilState(depthStencilState);
 			builder->SetBlendState(blendState);
 
+			builder->SpecifyFragmentOutput(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer()->GetLayoutDescription());
+
+			builder->SpecifyImageFormat("heads", TexelFormat::R32UI, AccessType::ReadOnly);
+			builder->SpecifyImageFormat("nodePool", TexelFormat::RGBA32UI, AccessType::ReadOnly);
+			builder->SpecifyImageFormat("volume", TexelFormat::RGBA8, AccessType::WriteOnly);
+
 			return builder->GetRenderingTechnique();
 		} ();
+		generationTechnique->SetFrameBuffer(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer());
 
 		RenderingTechniqueSP anisotropicGenerationTechnique = [] ()
 		{
@@ -251,9 +265,16 @@ namespace
 			builder->SetDepthStencilState(depthStencilState);
 			builder->SetBlendState(blendState);
 
+			builder->SpecifyFragmentOutput(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer()->GetLayoutDescription());
+
+			builder->SpecifyImageFormat("heads", TexelFormat::R32UI, AccessType::ReadOnly);
+			builder->SpecifyImageFormat("nodePool", TexelFormat::RGBA32UI, AccessType::ReadOnly);
+			builder->SpecifyImageFormat("volume", TexelFormat::RGBA8, AccessType::WriteOnly);
+
 			return builder->GetRenderingTechnique();
 
 		} ();
+		anisotropicGenerationTechnique->SetFrameBuffer(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer());
 
 
 		RenderingTechniqueSP mergeTechnique = [] ()
@@ -284,9 +305,15 @@ namespace
 			builder->SetDepthStencilState(depthStencilState);
 			builder->SetBlendState(blendState);
 
+			builder->SpecifyFragmentOutput(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer()->GetLayoutDescription());
+
+			builder->SpecifyImageFormat("intermediateVolume", TexelFormat::R32UI, AccessType::ReadOnly);
+			builder->SpecifyImageFormat("volume", TexelFormat::RGBA32F, AccessType::WriteOnly);
+
 			return builder->GetRenderingTechnique();
 
 		} ();
+		mergeTechnique->SetFrameBuffer(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer());
 		
 		UsedTechniques effects = {listTechnique, sortTechnique, generationTechnique, anisotropicGenerationTechnique, mergeTechnique};
 		return effects;
@@ -401,6 +428,8 @@ namespace
 		builder->SetSamplerState("cone tracing sampler", samplerState);
 		builder->SetSamplerChannelToSamplerStateMapping("voxels", "cone tracing sampler");
 
+		builder->SpecifyFragmentOutput(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer()->GetLayoutDescription());
+
 		return builder->GetRenderingTechnique();
 	}
 
@@ -411,6 +440,7 @@ namespace
 		MeshSP cube = MakeCube(cubeHalfSize);
 
 		RenderingTechniqueSP coneTracingTechnique = MakeConeTracingTechnique();
+		coneTracingTechnique->SetFrameBuffer(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer());
 		MaterialSP material = MakeSP<Material>("tracing technique parameters");
 		material->SetParameter("voxelVolumeCenter", cubePosition);
 		material->SetParameter("voxelVolumeHalfSize", cubeHalfSize);
@@ -477,7 +507,7 @@ namespace
 		SceneObjectSP coneTracingProxyCube;
 		SceneObjectSP viewCameraObject;
 
-		std::pair<TextureSP, SamplerSP> voxelVolumeToTrace;
+		TextureSP voxelVolumeToTrace;
 
 		TextureSP texture3DToTest;
 
@@ -867,7 +897,7 @@ namespace
 		void ConeTracing()
 		{
 			//voxelVolumeToTrace.first = texture3DToTest;
-			voxelVolumeToTrace.first = voxelVolume;
+			voxelVolumeToTrace = voxelVolume;
 			
 
 			CameraSP camera = viewCameraObject->GetComponent<Camera>();

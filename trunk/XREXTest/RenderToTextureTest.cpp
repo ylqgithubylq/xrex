@@ -32,7 +32,7 @@ struct RenderToTextureProcess
 
 	void InitializeTextureAndFrameBuffer()
 	{
-		Size<uint32, 2> size(512, 512);
+		Size<uint32, 2> size = XREXContext::GetInstance().GetMainWindow().GetClientRegionSize();
 		Texture::DataDescription<2> depthDescription(TexelFormat::Depth32, size);
 		depth_ = XREXContext::GetInstance().GetRenderingFactory().CreateTexture2D(depthDescription, false);
 		Texture::DataDescription<2> colorDescription(TexelFormat::RGBA8, size);
@@ -317,8 +317,8 @@ namespace
 		SceneSP scene = XREXContext::GetInstance().GetScene();
 
 		SceneObjectSP cameraObject = MakeSP<SceneObject>("camera");
-		Settings const& settings = XREXContext::GetInstance().GetSettings();
-		float aspectRatio = static_cast<float>(settings.renderingSettings.width) / settings.renderingSettings.height;
+		Size<uint32, 2> windowSize = XREXContext::GetInstance().GetMainWindow().GetClientRegionSize();
+		float aspectRatio = static_cast<float>(windowSize.X()) / windowSize.Y();
 		CameraSP camera = MakeSP<PerspectiveCamera>(PI / 4, aspectRatio, 1.f, 10000.0f);
 		//CameraSP camera = MakeSP<OrthogonalCamera>(100.f * aspectRatio, 100.f, 100.f);
 		cameraObject->SetComponent(camera);

@@ -60,7 +60,7 @@ in float vDepth;
 
 out vec4 colorOutput;
 out vec4 normalOutput;
-out float depthInColorOutput;
+out vec4 depthInColorOutput;
 
 void main()
 {
@@ -81,7 +81,7 @@ void main()
 
 	colorOutput = vec4(diffuseColor + specularColor, 1);
 	normalOutput = vec4(eNormal, 1);
-	depthInColorOutput = vDepth;
+	depthInColorOutput = vec4(vDepth, 0, 0, 1);
 }
 
 #endif
