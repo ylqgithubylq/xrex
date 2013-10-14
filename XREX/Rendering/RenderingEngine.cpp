@@ -113,7 +113,7 @@ namespace XREX
 				XREXContext::GetInstance().GetLogger().Log("from: " + sourceString + ", ").Log("type: " + typeString + ", ")
 					.Log("id: ").Log(id).Log(", ").Log("severity: " + severityString + ", ").EndLine()
 					.Log("message: ").Log(message).EndLine();
-				assert(false);
+				assert(severity != gl::GL_DEBUG_SEVERITY_HIGH_ARB);
 			}
 		};
 

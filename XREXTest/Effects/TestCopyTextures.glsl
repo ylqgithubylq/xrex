@@ -8,7 +8,7 @@ out vec2 textureCoordinate;
 
 void main()
 {
-	textureCoordinate = (position.xy + vec2(1, 1)) / 2;
+	textureCoordinate = (position + vec2(1, 1)) / 2;
 	gl_Position = vec4(position, 0, 1);
 }
 
@@ -45,11 +45,11 @@ void main()
 	{
 		if (textureCoordinate.y < 0.5)
 		{
-			outputColor.xyz = (vec3(1, 1, 1) - texture(depthInColor, (textureCoordinate - vec2(0.5, 0)) * 2).xxx) * gl_FragCoord.w;
+			outputColor.xyz = (texture(depthInColor, (textureCoordinate - vec2(0.5, 0)) * 2).xxx) * gl_FragCoord.w;
 		}
 		else
 		{
-			outputColor.xyz = (vec3(1, 1, 1) - texture(depth, (textureCoordinate - vec2(0.5, 0.5)) * 2).xyz) * gl_FragCoord.w * 20;
+			outputColor.xyz = (vec3(1, 1, 1) - texture(depth, (textureCoordinate - vec2(0.5, 0.5)) * 2).xxx) * gl_FragCoord.w * 20;
 		}
 	}
 #else
