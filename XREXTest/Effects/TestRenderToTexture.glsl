@@ -1,17 +1,14 @@
 
 
 const vec3 lightColor = vec3(150, 150, 160);
-uniform vec3 centerPosition;
 
-uniform mat4 modelMatrix;
-uniform mat4 normalMatrix;
-uniform mat4 viewMatrix;
-uniform mat4 projectionMatrix;
-uniform vec3 cameraPosition;
+uniform Material
+{
+	float opacity;
+	float specularLevel;
+	float shininess;
+} material;
 
-uniform float opacity;
-uniform float specularLevel;
-uniform float shininess;
 // specularLevel * pow(LdotHV, shininess)
 
 uniform sampler2D diffuseMap;
@@ -20,31 +17,41 @@ uniform sampler2D specularMap;
 uniform sampler2D shininessMap;
 uniform sampler2D opacityMap;
 
+struct VSToFS
+{
+	vec3 wNormal;
+	vec3 vNormal;
+	vec2 pixelTextureCoordinate;
+	vec3 wPositionToLight;
+	float vDepth;
+};
+
 #ifdef VS
 
 in vec3 position;
 in vec3 normal;
 in vec3 textureCoordinate0;
-out vec3 wNormal;
-out vec3 eNormal;
-out vec2 pixelTextureCoordinate;
-out vec3 wPositionToLight;
-out float vDepth;
+
+out	vec3 wNormal;
+out	vec3 vNormal;
+out	vec2 pixelTextureCoordinate;
+out	vec3 wPositionToLight;
+out	float vDepth;
+//out VSToFS vsOut;
 
 void main()
 {
-	vec3 temp = (modelMatrix * vec4(position, 1.0)).xyz - centerPosition;
-	wNormal = mat3(normalMatrix) * normal;
-	eNormal = mat3(viewMatrix) * wNormal;
-	vec4 wPosition4 = modelMatrix * vec4(position, 1.0);
-	vec3 lightPosition = cameraPosition; // assume light on camera
-	wPositionToLight = lightPosition - wPosition4.xyz;
+	/*vsOut.*/wNormal = XREX_TransformNormal(XREX_ModelTransformation.WorldFromModelNormal, normal);
+	/*vsOut.*/vNormal = XREX_TransformNormal(XREX_CameraTransformation.ViewFromWorld, /*vsOut.*/wNormal);
+	vec3 wPosition = XREX_Transform(XREX_ModelTransformation.WorldFromModel, position);
+	vec3 lightPosition = XREX_CameraTransformation.CameraPositionInWorld; // assume light on camera
+	/*vsOut.*/wPositionToLight = lightPosition - wPosition;
 
-	vec4 vPosition4 = viewMatrix * wPosition4;
-	gl_Position = projectionMatrix * vPosition4;
-	vDepth = vPosition4.z / 10000;
+	vec4 vPosition4 = XREX_TransformToClip(XREX_ModelTransformation.ClipFromModel, position);
+	gl_Position = vPosition4;
+	/*vsOut.*/vDepth = vPosition4.z / 10000;
 
-	pixelTextureCoordinate = textureCoordinate0.st;
+	/*vsOut.*/pixelTextureCoordinate = textureCoordinate0.st;
 }
 
 #endif
@@ -52,36 +59,37 @@ void main()
 
 #ifdef FS
 
-in vec3 wNormal;
-in vec3 eNormal;
-in vec2 pixelTextureCoordinate;
-in vec3 wPositionToLight;
-in float vDepth;
+in	vec3 wNormal;
+in	vec3 vNormal;
+in	vec2 pixelTextureCoordinate;
+in	vec3 wPositionToLight;
+in	float vDepth;
+//in VSToFS fsIn;
 
 out vec4 colorOutput;
 out vec4 normalOutput;
-out vec4 depthInColorOutput;
+out float depthInColorOutput;
 
 void main()
 {
-	vec3 normalToShow = normalize(wNormal) * 0.5 + 0.5;
+	vec3 normalToShow = normalize(/*fsIn.*/wNormal) * 0.5 + 0.5;
 
-	float distanceToLight = length(wPositionToLight);
-	vec3 lightDirection = wPositionToLight / distanceToLight;
+	float distanceToLight = length(/*fsIn.*/wPositionToLight);
+	vec3 lightDirection = /*fsIn.*/wPositionToLight / distanceToLight;
 
-	vec3 halfVector = normalize(lightDirection + wNormal);
-	float lDotN = dot(lightDirection, wNormal);
+	vec3 halfVector = normalize(lightDirection + /*fsIn.*/wNormal);
+	float lDotN = dot(lightDirection, /*fsIn.*/wNormal);
 	float lDotHV = dot(halfVector, lightDirection);
 	float lightIntensity = 1 / ((distanceToLight + 10)/* * (distanceToLight + 10)*/);
 
-	vec3 diffuseColor = lightColor * lightIntensity * max(lDotN, 0) * texture(diffuseMap, pixelTextureCoordinate).rgb;
+	vec3 diffuseColor = lightColor * lightIntensity * max(lDotN, 0) * texture(diffuseMap, /*fsIn.*/pixelTextureCoordinate).rgb;
 
-	float specularLevelFetched = texture(specularMap, pixelTextureCoordinate).x;
+	float specularLevelFetched = texture(specularMap, /*fsIn.*/pixelTextureCoordinate).x;
 	vec3 specularColor = lightColor * lightIntensity * specularLevelFetched * pow(lDotHV, specularLevelFetched);
 
 	colorOutput = vec4(diffuseColor + specularColor, 1);
-	normalOutput = vec4(eNormal, 1);
-	depthInColorOutput = vec4(vDepth, 0, 0, 1);
+	normalOutput = vec4(/*fsIn.*/vNormal, 1);
+	depthInColorOutput = /*fsIn.*/vDepth;
 }
 
 #endif

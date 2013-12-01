@@ -21,13 +21,7 @@
     <ClInclude Include="TestFile.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TextureTest.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="GeneralTest.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TextureTestShaderCodes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="RenderToTextureTest.h">
@@ -44,13 +38,7 @@
     <ClCompile Include="PrecompiledHeaderHost.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TextureTest.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="GeneralTest.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="TextureTestShaderCodes.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="RenderToTextureTest.cpp">

@@ -33,7 +33,7 @@ namespace XREX
 			for (uint32 i = 0; i < dataLayout.GetChannelLayoutCount(); ++i)
 			{
 				VertexBuffer::DataLayoutDescription::ElementLayoutDescription const& channelLayout = dataLayout.GetChannelLayoutAtIndex(i);
-				std::pair<bool, AttributeInformation const&> attributeInformation = program->GetAttributeInformation(channelLayout.channel);
+				std::pair<bool, AttributeInputBindingInformation const&> attributeInformation = program->GetAttributeInformation(channelLayout.channel);
 				if (attributeInformation.first)
 				{
 					lastAttributeLocations[bufferIndex][i] = attributeInformation.second.GetLocation();
@@ -57,7 +57,7 @@ namespace XREX
 					case ElementType::FloatV2:
 					case ElementType::FloatV3:
 					case ElementType::FloatV4:
-					case ElementType::FloatM44:
+					case ElementType::FloatM44: // TODO matrix should set 4 times, each per column
 						gl::VertexAttribPointer(lastAttributeLocations[bufferIndex][i], GetElementPrimitiveCount(channelLayout.elementType), GLTypeFromElementType(GetElementPrimitiveType(channelLayout.elementType)),
 							channelLayout.needNormalize, channelLayout.strip, reinterpret_cast<void const*>(channelLayout.start));
 						break;
@@ -65,7 +65,7 @@ namespace XREX
 					case ElementType::DoubleV2:
 					case ElementType::DoubleV3:
 					case ElementType::DoubleV4:
-					case ElementType::DoubleM44:
+					case ElementType::DoubleM44: // TODO matrix should set 4 times, each per column
 						gl::VertexAttribLPointer(lastAttributeLocations[bufferIndex][i], GetElementPrimitiveCount(channelLayout.elementType), GLTypeFromElementType(GetElementPrimitiveType(channelLayout.elementType)),
 							channelLayout.strip, reinterpret_cast<void const*>(channelLayout.start));
 						break;
@@ -77,7 +77,7 @@ namespace XREX
 					case ElementType::Int16:
 						assert(false); // impossible
 						break;
-					case ElementType::ParameterTypeCount:
+					case ElementType::ElementTypeCount:
 						assert(false); // impossible
 						break;
 					default:

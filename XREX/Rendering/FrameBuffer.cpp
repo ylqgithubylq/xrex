@@ -85,7 +85,7 @@ namespace XREX
 		}
 		gl::DrawBuffers(glDrawBuffers.size(), glDrawBuffers.data());
 
-#ifdef XREX_API
+#ifdef XREX_DEBUG
 		uint32 glCheckResult = gl::CheckFramebufferStatus(gl::GL_DRAW_FRAMEBUFFER);
 		switch (glCheckResult)
 		{
@@ -119,7 +119,7 @@ namespace XREX
 			assert(false);
 			break;
 		}
-#endif // XREX_API
+#endif // XREX_DEBUG
 		gl::BindFramebuffer(gl::GL_DRAW_FRAMEBUFFER, 0);
 	}
 

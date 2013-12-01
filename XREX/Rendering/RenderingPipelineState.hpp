@@ -86,11 +86,11 @@ namespace XREX
 	struct XREX_API DepthStencilState
 		: public RenderingPipelineState
 	{
-		bool depthEnable;
+		bool depthTestEnable;
 		bool depthWriteMask;
 		CompareFunction depthFunction;
 
-		bool stencilEnable;
+		bool stencilTestEnable;
 
 		CompareFunction frontStencilFunction;
 		uint16 frontStencilReadMask;

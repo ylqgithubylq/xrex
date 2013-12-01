@@ -41,8 +41,12 @@ namespace XREX
 		};
 
 	public:
-		Component();
-		virtual ~Component();
+		Component()
+		{
+		}
+		virtual ~Component() = 0
+		{
+		}
 
 		virtual ComponentType GetComponentType() const = 0;
 
@@ -68,6 +72,11 @@ namespace XREX
 	class TemplateComponent
 		: public Component
 	{
+	public:
+		virtual ~TemplateComponent() override = 0
+		{
+		}
+	private:
 		virtual ComponentType GetComponentType() const override
 		{
 			static_assert(TypeToComponentType<T>::Type != ComponentType::ComponentTypeCount, "");

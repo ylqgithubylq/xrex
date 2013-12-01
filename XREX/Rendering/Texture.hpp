@@ -25,7 +25,6 @@ namespace XREX
 			TextureTypeCount
 		};
 
-
 		template <uint32 Dimension>
 		class DataDescription
 		{
@@ -59,7 +58,7 @@ namespace XREX
 	public:
 		virtual ~Texture();
 
-		TextureType GetType() const
+		TextureType GetType() const // TODO make this virtual, and remove TextureType type_;
 		{
 			return type_;
 		}
@@ -70,6 +69,11 @@ namespace XREX
 		}
 
 		virtual TexelFormat GetFormat() const = 0;
+
+		ElementType GetTexelElementType() const
+		{
+			return GetCorrespondingElementType(GetFormat());
+		}
 
 		uint32 GetMipmapCount() const
 		{
@@ -91,29 +95,6 @@ namespace XREX
 	};
 
 
-
-
-	template <uint32 N>
-	struct TextureDimensionToTextureType
-	{
-		static_assert(N >= 1 && N <= 3, "Texture only have 1, 2, 3 dimensions.");
-		static Texture::TextureType const TextureType = Texture::TextureType::TextureCube;
-	};
-	template <>
-	struct TextureDimensionToTextureType<1>
-	{
-		static Texture::TextureType const TextureType = Texture::TextureType::Texture1D;
-	};
-	template <>
-	struct TextureDimensionToTextureType<2>
-	{
-		static Texture::TextureType const TextureType = Texture::TextureType::Texture2D;
-	};
-	template <>
-	struct TextureDimensionToTextureType<3>
-	{
-		static Texture::TextureType const TextureType = Texture::TextureType::Texture3D;
-	};
 
 	template <uint32 Dimension>
 	class DimensionalTexture

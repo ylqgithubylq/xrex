@@ -21,7 +21,9 @@ namespace XREX
 	protected:
 		Camera();
 	public:
-		virtual ~Camera() override;
+		virtual ~Camera() override = 0
+		{
+		}
 
 
 		bool IsActive() const
@@ -83,7 +85,6 @@ namespace XREX
 
 	private:
 		void Update() const;
-
 
 	protected:
 

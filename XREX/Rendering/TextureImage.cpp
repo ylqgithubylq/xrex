@@ -11,8 +11,8 @@
 namespace XREX
 {
 
-	TextureImage::TextureImage(TextureSP const& texture, uint32 level)
-		: texture_(texture), level_(level), lastBindingIndex_(0)
+	TextureImage::TextureImage(ImageType type, TextureSP const& texture, uint32 level)
+		: type_(type), texture_(texture), level_(level), lastBindingIndex_(0)
 	{
 	}
 
@@ -50,9 +50,31 @@ namespace XREX
 		return Size<uint32, Dimension>(data);
 	}
 
+	template <uint32 N>
+	struct ImageDimensionToImageType
+	{
+		static_assert(N >= 1 && N <= 3, "Image only have 1, 2, 3 dimensions.");
+		static TextureImage::ImageType const ImageType = TextureImage::ImageType::ImageTypeCount;
+	};
+	template <>
+	struct ImageDimensionToImageType<1>
+	{
+		static TextureImage::ImageType const TextureType = TextureImage::ImageType::Image1D;
+	};
+	template <>
+	struct ImageDimensionToImageType<2>
+	{
+		static TextureImage::ImageType const TextureType = TextureImage::ImageType::Image2D;
+	};
+	template <>
+	struct ImageDimensionToImageType<3>
+	{
+		static TextureImage::ImageType const TextureType = TextureImage::ImageType::Image3D;
+	};
+
 	template <uint32 Dimension>
 	DimensionalTextureImage<Dimension>::DimensionalTextureImage(TextureSP const& texture, uint32 level)
-		: TextureImage(texture, level), size_(CalculateImageSize(CheckedSPCast<DimensionalTexture<Dimension>>(texture)->GetSize(), level))
+		: TextureImage(ImageDimensionToImageType<Dimension>::TextureType, texture, level), size_(CalculateImageSize(CheckedSPCast<DimensionalTexture<Dimension>>(texture)->GetSize(), level))
 	{
 	}
 
@@ -77,7 +99,7 @@ namespace XREX
 
 
 	TextureBufferImage::TextureBufferImage(TextureSP const& texture)
-		: TextureImage(texture, 0)
+		: TextureImage(ImageType::ImageBuffer, texture, 0)
 	{
 	}
 

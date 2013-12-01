@@ -91,7 +91,7 @@ namespace XREX
 			scaling_ = scaling;
 			dirty_ = true;
 		}
-		floatV3 GetScaling() const
+		floatV3 const& GetScaling() const
 		{
 			return scaling_;
 		}
@@ -142,7 +142,7 @@ namespace XREX
 			orientation_ = RotationQuaternion(angle, axis) * orientation_;
 			dirty_ = true;
 		}
-		void Rotate(floatQ const rotation)
+		void Rotate(floatQ const& rotation)
 		{
 			orientation_ = rotation * orientation_;
 			dirty_ = true;
@@ -195,8 +195,6 @@ namespace XREX
 			orientation_ = FaceToQuaternion(to - position_, up, front_, up_);
 			dirty_ = true;
 		}
-
-	protected:
 
 	private:
 		void Update() const;

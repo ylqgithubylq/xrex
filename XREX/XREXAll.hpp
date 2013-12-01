@@ -41,6 +41,9 @@
 #include "Rendering/RenderingEngine.hpp"
 #include "Rendering/RenderingProcess.hpp"
 #include "Rendering/DefinedShaderName.hpp"
+#include "Rendering/SystemTechnique.hpp"
+#include "Rendering/TechniqueBuilder.hpp"
+#include "Rendering/ShaderProgramInterface.hpp"
 #include "Rendering/ShaderProgram.hpp"
 #include "Rendering/RenderingLayout.hpp"
 #include "Rendering/GraphicsBuffer.hpp"
@@ -52,6 +55,7 @@
 #include "Rendering/Sampler.hpp"
 #include "Rendering/TextureImage.hpp"
 #include "Rendering/WorkLauncher.hpp"
+#include "Rendering/ProgramConnector.hpp"
 #include "Rendering/FrameBuffer.hpp"
 
 #include "Rendering/Viewport.hpp"

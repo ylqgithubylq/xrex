@@ -31,7 +31,7 @@ namespace XREX
 			return true;
 		case ElementType::Sampler: // special case
 			return true;
-		case ElementType::ParameterTypeCount:
+		case ElementType::ElementTypeCount:
 			assert(false);
 			return false;
 		default:
@@ -61,7 +61,7 @@ namespace XREX
 			return true;
 		case ElementType::Image: // special case
 			return true;
-		case ElementType::ParameterTypeCount:
+		case ElementType::ElementTypeCount:
 			assert(false);
 			return false;
 		default:
@@ -76,7 +76,7 @@ namespace XREX
 		case ElementType::AtomicUint32Counter:
 			return true;
 			break;
-		case ElementType::ParameterTypeCount:
+		case ElementType::ElementTypeCount:
 			assert(false);
 			return false;
 			break;
@@ -140,7 +140,7 @@ namespace XREX
 		case ElementType::DoubleM44:
 			return 16;
 
-		case ElementType::ParameterTypeCount:
+		case ElementType::ElementTypeCount:
 			assert(false);
 			return 0;
 		default:
@@ -203,7 +203,7 @@ namespace XREX
 		case ElementType::DoubleM44:
 			return sizeof(doubleM44);
 
-		case ElementType::ParameterTypeCount:
+		case ElementType::ElementTypeCount:
 			assert(false);
 			return 0;
 		default:
@@ -265,12 +265,122 @@ namespace XREX
 		case ElementType::DoubleM44:
 			return ElementType::Double;
 
-		case ElementType::ParameterTypeCount:
+		case ElementType::ElementTypeCount:
 			assert(false);
 			return ElementType::Void;
 		default:
 			assert(false);
 			return ElementType::Void;
+		}
+	}
+
+	ElementType GetCorrespondingElementType(TexelFormat format)
+	{
+		switch (format)
+		{
+		case TexelFormat::R8:
+			return ElementType::Float;
+		case TexelFormat::RG8:
+			return ElementType::FloatV2;
+		case TexelFormat::RGB8:
+			return ElementType::FloatV3;
+		case TexelFormat::RGBA8:
+			return ElementType::FloatV4;
+		case TexelFormat::R8I:
+			return ElementType::Int32;
+		case TexelFormat::RG8I:
+			return ElementType::IntV2;
+		case TexelFormat::RGB8I:
+			return ElementType::IntV3;
+		case TexelFormat::RGBA8I:
+			return ElementType::IntV4;
+		case TexelFormat::R8UI:
+			return ElementType::Uint32;
+		case TexelFormat::RG8UI:
+			return ElementType::UintV2;
+		case TexelFormat::RGB8UI:
+			return ElementType::UintV3;
+		case TexelFormat::RGBA8UI:
+			return ElementType::UintV4;
+		case TexelFormat::R16I:
+			return ElementType::Int32;
+		case TexelFormat::RG16I:
+			return ElementType::IntV2;
+		case TexelFormat::RGB16I:
+			return ElementType::IntV3;
+		case TexelFormat::RGBA16I:
+			return ElementType::IntV4;
+		case TexelFormat::R16UI:
+			return ElementType::Uint32;
+		case TexelFormat::RG16UI:
+			return ElementType::UintV2;
+		case TexelFormat::RGB16UI:
+			return ElementType::UintV3;
+		case TexelFormat::RGBA16UI:
+			return ElementType::UintV4;
+		case TexelFormat::R16F:
+			return ElementType::Float;
+		case TexelFormat::RG16F:
+			return ElementType::FloatV2;
+		case TexelFormat::RGB16F:
+			return ElementType::FloatV3;
+		case TexelFormat::RGBA16F:
+			return ElementType::FloatV4;
+		case TexelFormat::R32I:
+			return ElementType::Int32;
+		case TexelFormat::RG32I:
+			return ElementType::IntV2;
+		case TexelFormat::RGB32I:
+			return ElementType::IntV3;
+		case TexelFormat::RGBA32I:
+			return ElementType::IntV4;
+		case TexelFormat::R32UI:
+			return ElementType::Uint32;
+		case TexelFormat::RG32UI:
+			return ElementType::UintV2;
+		case TexelFormat::RGB32UI:
+			return ElementType::UintV3;
+		case TexelFormat::RGBA32UI:
+			return ElementType::UintV4;
+		case TexelFormat::R32F:
+			return ElementType::Float;
+		case TexelFormat::RG32F:
+			return ElementType::FloatV2;
+		case TexelFormat::RGB32F:
+			return ElementType::FloatV3;
+		case TexelFormat::RGBA32F:
+			return ElementType::FloatV4;
+		case TexelFormat::BGR8:
+			return ElementType::FloatV3;
+		case TexelFormat::BGRA8:
+			return ElementType::FloatV4;
+		case TexelFormat::BGR16F:
+			return ElementType::FloatV3;
+		case TexelFormat::BGRA16F:
+			return ElementType::FloatV4;
+		case TexelFormat::BGR32F:
+			return ElementType::FloatV3;
+		case TexelFormat::BGRA32F:
+			return ElementType::FloatV4;
+		case TexelFormat::Depth16:
+			return ElementType::Shadow;
+		case TexelFormat::Depth24:
+			return ElementType::Shadow;
+		case TexelFormat::Depth32:
+			return ElementType::Shadow;
+		case TexelFormat::Depth32F:
+			return ElementType::Shadow;
+		case TexelFormat::Depth24Stencil8:
+			return ElementType::Shadow;
+		case TexelFormat::Stencil8:
+			assert(false);
+			return ElementType::ElementTypeCount;
+		case TexelFormat::TexelFormatCount:
+			assert(false);
+			return ElementType::ElementTypeCount;
+		default:
+			assert(false);
+			return ElementType::ElementTypeCount;
 		}
 	}
 
@@ -421,7 +531,7 @@ namespace XREX
 			return TexelFormat::RGBA32F;
 
 
-		case ElementType::ParameterTypeCount:
+		case ElementType::ElementTypeCount:
 			assert(false);
 			return TexelFormat::TexelFormatCount;
 		default:

@@ -147,12 +147,7 @@ struct TempScene
 		blendState.destinationBlendAlpha = RenderingPipelineState::AlphaBlendFactor::OneMinusSourceAlpha;
 
 		SamplerState defaultSampler;
-		testBuilder->SetSamplerState("defaultSampler", defaultSampler);
-		testBuilder->SetSamplerChannelToSamplerStateMapping("diffuseMap", "defaultSampler");
-		testBuilder->SetSamplerChannelToSamplerStateMapping("specularMap", "defaultSampler");
-		testBuilder->SetSamplerChannelToSamplerStateMapping("normalMap", "defaultSampler");
-		testBuilder->SetSamplerChannelToSamplerStateMapping("shininessMap", "defaultSampler");
-		testBuilder->SetSamplerChannelToSamplerStateMapping("opacityMap", "defaultSampler");
+		testBuilder->AddSamplerState("defaultSampler", defaultSampler);
 
 		testBuilder->SetRasterizerState(resterizerState);
 		testBuilder->SetDepthStencilState(depthStencilState);
@@ -162,8 +157,6 @@ struct TempScene
 		testCubeBuilder->SetDepthStencilState(depthStencilState);
 		testCubeBuilder->SetBlendState(blendState);
 
-		testBuilder->SpecifyFragmentOutput(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer()->GetLayoutDescription());
-		testCubeBuilder->SpecifyFragmentOutput(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer()->GetLayoutDescription());
 
 		RenderingTechniqueSP effect = testBuilder->GetRenderingTechnique();
 		RenderingTechniqueSP cubeEffect = testCubeBuilder->GetRenderingTechnique();

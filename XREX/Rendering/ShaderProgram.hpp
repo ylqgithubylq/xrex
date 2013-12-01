@@ -3,27 +3,27 @@
 #include "Declare.hpp"
 #include "Rendering/BufferView.hpp"
 #include "Rendering/Texture.hpp"
+#include "Rendering/TextureImage.hpp"
 #include "Rendering/GraphicsBuffer.hpp"
 #include "Rendering/FrameBuffer.hpp"
-
+#include "Rendering/ShaderProgramInterface.hpp"
 
 #include <string>
 #include <vector>
 #include <string>
 #include <functional>
 
-using namespace XREX;
 
 namespace XREX
 {
-	class XREX_API AttributeInformation
+	class XREX_API AttributeInputBindingInformation
 	{
 	public:
-		AttributeInformation()
+		AttributeInputBindingInformation()
 			: elementType_(ElementType::Void), elementCount_(0), location_(-1)
 		{
 		}
-		AttributeInformation(std::string const& channel, ElementType type, int32 elementCount, int32 location)
+		AttributeInputBindingInformation(std::string const& channel, ElementType type, int32 elementCount, int32 location)
 			: channel_(channel), elementType_(type), elementCount_(elementCount), location_(location)
 		{
 		}
@@ -51,14 +51,45 @@ namespace XREX
 		int32 location_;
 	};
 
-	class XREX_API UniformInformation
+	class XREX_API FragmentOutputBindingInformation
 	{
 	public:
-		UniformInformation()
+		FragmentOutputBindingInformation()
+			: location_(-1), index_(0)
+		{
+		}
+		FragmentOutputBindingInformation(std::string const& channel, int32 location, int32 index)
+			: channel_(channel), location_(location), index_(index)
+		{
+		}
+
+		std::string const& GetChannel() const
+		{
+			return channel_;
+		}
+		int32 GetLocation() const
+		{
+			return location_;
+		}
+		int32 GetIndex() const
+		{
+			return index_;
+		}
+	private:
+		std::string channel_;
+		int32 location_;
+		int32 index_;
+	};
+
+
+	class XREX_API UniformBindingInformation
+	{
+	public:
+		UniformBindingInformation()
 			: elementType_(ElementType::Void), elementCount_(0), location_(-1)
 		{
 		}
-		UniformInformation(std::string const& channel, ElementType type, int32 elementCount, int32 location)
+		UniformBindingInformation(std::string const& channel, ElementType type, int32 elementCount, int32 location)
 			: channel_(channel), elementType_(type), elementCount_(elementCount), location_(location)
 		{
 		}
@@ -87,15 +118,15 @@ namespace XREX
 		int32 location_;
 	};
 
-	class XREX_API TextureInformation
+	class XREX_API TextureBindingInformation
 	{
 	public:
-		TextureInformation()
-			: type_(ElementType::Sampler), bindingIndex_(-1)
+		TextureBindingInformation()
+			: textureType_(Texture::TextureType::TextureTypeCount), texelType_(ElementType::ElementTypeCount), bindingIndex_(-1)
 		{
 		}
-		TextureInformation(std::string const& channel, ElementType type, int32 bindingIndex)
-			: channel_(channel), type_(type), bindingIndex_(bindingIndex)
+		TextureBindingInformation(std::string const& channel, Texture::TextureType textureType, ElementType texelType, int32 bindingIndex)
+			: channel_(channel), textureType_(textureType), texelType_(texelType), bindingIndex_(bindingIndex)
 		{
 		}
 
@@ -103,9 +134,13 @@ namespace XREX
 		{
 			return channel_;
 		}
-		ElementType GetElementType() const
+		Texture::TextureType GetTextureType() const
 		{
-			return type_;
+			return textureType_;
+		}
+		ElementType GetTexelType() const
+		{
+			return texelType_;
 		}
 		int32 GetBindingIndex() const
 		{
@@ -113,19 +148,20 @@ namespace XREX
 		}
 	private:
 		std::string channel_;
-		ElementType type_;
+		Texture::TextureType textureType_;
+		ElementType texelType_;
 		int32 bindingIndex_;
 	};
 
-	class XREX_API ImageInformation
+	class XREX_API ImageBindingInformation
 	{
 	public:
-		ImageInformation()
-			: type_(ElementType::Image), format_(TexelFormat::TexelFormatCount), accessType_(AccessType::ReadWrite), bindingIndex_(-1)
+		ImageBindingInformation()
+			: imageType_(TextureImage::ImageType::ImageTypeCount), format_(TexelFormat::TexelFormatCount), accessType_(AccessType::ReadWrite), bindingIndex_(-1)
 		{
 		}
-		ImageInformation(std::string const& channel, ElementType type, TexelFormat format, AccessType accessType, int32 bindingIndex)
-			: channel_(channel), type_(type), format_(format), accessType_(accessType), bindingIndex_(bindingIndex)
+		ImageBindingInformation(std::string const& channel, TextureImage::ImageType imageType, TexelFormat format, AccessType accessType, int32 bindingIndex)
+			: channel_(channel), imageType_(imageType), format_(format), accessType_(accessType), bindingIndex_(bindingIndex)
 		{
 		}
 
@@ -133,9 +169,9 @@ namespace XREX
 		{
 			return channel_;
 		}
-		ElementType GetElementType() const
+		TextureImage::ImageType GetImageType() const
 		{
-			return type_;
+			return imageType_;
 		}
 		TexelFormat GetTexelFormat() const
 		{
@@ -151,13 +187,13 @@ namespace XREX
 		}
 	private:
 		std::string channel_;
-		ElementType type_;
+		TextureImage::ImageType imageType_;
 		TexelFormat format_;
 		AccessType accessType_;
 		int32 bindingIndex_;
 	};
 
-	class XREX_API BufferInformation
+	class XREX_API BufferBindingInformation
 	{
 	public:
 
@@ -165,7 +201,7 @@ namespace XREX
 		{
 		public:
 			BufferVariableInformation()
-				: elementType_(ElementType::Void), elementCount_(-1), offset_(0), arrayStride_(-1), matrixStride_(-1)
+				: elementType_(ElementType::ElementTypeCount), elementCount_(-1), offset_(0), arrayStride_(-1), matrixStride_(-1)
 			{
 			}
 			BufferVariableInformation(std::string const& name, ElementType elementType, int32 elementCount, int32 offset, int32 arrayStride, int32 matrixStride)
@@ -209,11 +245,11 @@ namespace XREX
 		static BufferVariableInformation const NullBufferVariableInformation;
 
 	public:
-		BufferInformation()
+		BufferBindingInformation()
 			: bindingIndex_(-1), dataSize_(0), type_(BufferView::BufferType::TypeCount)
 		{
 		}
-		BufferInformation(std::string const& channel, BufferView::BufferType type, int32 bindingIndex, uint32 dataSize, std::vector<BufferVariableInformation>&& bufferVariableInformations)
+		BufferBindingInformation(std::string const& channel, BufferView::BufferType type, int32 bindingIndex, uint32 dataSize, std::vector<BufferVariableInformation>&& bufferVariableInformations)
 			: channel_(channel), type_(type), bindingIndex_(bindingIndex), dataSize_(dataSize), bufferVariableInformations_(std::move(bufferVariableInformations))
 		{
 		}
@@ -224,7 +260,7 @@ namespace XREX
 		}
 		ElementType GetElementType() const
 		{
-			return ElementType::ShaderResourceBuffer;
+			return ElementType::Buffer;
 		}
 		BufferView::BufferType GetBufferType() const
 		{
@@ -255,41 +291,9 @@ namespace XREX
 		std::vector<BufferVariableInformation> bufferVariableInformations_;
 	};
 
-	class XREX_API FragmentOutputInformation
-	{
-	public:
-		FragmentOutputInformation()
-			: location_(-1), index_(0)
-		{
-		}
-		FragmentOutputInformation(std::string const& channel, int32 location, int32 index)
-			: channel_(channel), location_(location), index_(index)
-		{
-		}
-
-		std::string const& GetChannel() const
-		{
-			return channel_;
-		}
-		int32 GetLocation() const
-		{
-			return location_;
-		}
-		int32 GetIndex() const
-		{
-			return index_;
-		}
-	private:
-		std::string channel_;
-		int32 location_;
-		int32 index_;
-	};
-
-
 	class XREX_API ShaderObject
 		: Noncopyable
 	{
-		friend class ProgramObject;
 	public:
 		enum class ShaderType
 		{
@@ -300,7 +304,7 @@ namespace XREX
 			TessellationEvaluationShader,
 			ComputeShader,
 
-			CountOfShaderTypes
+			ShaderTypeCount
 		};
 
 	public:
@@ -346,16 +350,33 @@ namespace XREX
 
 		void AttachShader(ShaderObjectSP& shader);
 
-		void SpecifyFragmentOutputs(FrameBufferLayoutDescription const& description);
-
-		FrameBufferLayoutDescription const& GetFragmentOutputLayout() const
+		struct XREX_API InformationPack
 		{
-			return framebufferDescription_;
-		}
+			std::vector<AttributeInputInformation const> const& attributeInputs;
+			std::vector<FragmentOutputInformation const> const& fragmentOutputs;
+			std::vector<BufferInformation const> const& uniformBuffers;
+			std::vector<BufferInformation const> const& shaderStorageBuffers;
+			std::vector<BufferInformation const> const& atomicCounterBuffers;
+			std::vector<TextureInformation const> const& textures;
+			std::vector<ImageInformation const> const& images;
 
-		void SpecifyImageFormat(std::string const& channel, TexelFormat format, AccessType accessType); // TEMP or should be systematic added
-
-		bool Link();
+			/*
+			 *	The index of all Informations will be used by program as binding index.
+			 */
+			InformationPack(std::vector<AttributeInputInformation const> const& attributeInputs,
+				std::vector<FragmentOutputInformation const> const& fragmentOutputs,
+				std::vector<BufferInformation const> const& uniformBuffers,
+				std::vector<BufferInformation const> const& shaderStorageBuffers,
+				std::vector<BufferInformation const> const& atomicCounterBuffers,
+				std::vector<TextureInformation const> const& textures,
+				std::vector<ImageInformation const> const& images)
+				: attributeInputs(attributeInputs), fragmentOutputs(fragmentOutputs),
+				uniformBuffers(uniformBuffers), shaderStorageBuffers(shaderStorageBuffers), atomicCounterBuffers(atomicCounterBuffers),
+				textures(textures), images(images)
+			{
+			}
+		};
+		bool Link(InformationPack const& pack);
 
 		bool IsValidate() const
 		{
@@ -373,9 +394,9 @@ namespace XREX
 		/*
 		 *	@return: return.first indicates whether the channel is found.
 		 */
-		std::pair<bool, AttributeInformation const&> GetAttributeInformation(std::string const& channel) const;
+		std::pair<bool, AttributeInputBindingInformation const&> GetAttributeInformation(std::string const& channel) const;
 
-		std::vector<AttributeInformation> const& GetAllAttributeInformations() const
+		std::vector<AttributeInputBindingInformation> const& GetAllAttributeInformations() const
 		{
 			return attributeInformations_;
 		}
@@ -383,9 +404,9 @@ namespace XREX
 		/*
 		 *	@return: return.first indicates whether the channel is found.
 		 */
-		std::pair<bool, UniformInformation const&> GetUniformInformation(std::string const& channel) const;
+		std::pair<bool, UniformBindingInformation const&> GetUniformInformation(std::string const& channel) const;
 
-		std::vector<UniformInformation> const& GetAllUniformInformations() const
+		std::vector<UniformBindingInformation> const& GetAllUniformInformations() const
 		{
 			return uniformInformations_;
 		}
@@ -393,9 +414,9 @@ namespace XREX
 		/*
 		 *	@return: return.first indicates whether the channel is found.
 		 */
-		std::pair<bool, TextureInformation const&> GetTextureInformation(std::string const& channel) const;
+		std::pair<bool, TextureBindingInformation const&> GetTextureInformation(std::string const& channel) const;
 
-		std::vector<TextureInformation> const& GetAllTextureInformations() const
+		std::vector<TextureBindingInformation> const& GetAllTextureInformations() const
 		{
 			return textureInformations_;
 		}
@@ -403,9 +424,9 @@ namespace XREX
 		/*
 		 *	@return: return.first indicates whether the channel is found.
 		 */
-		std::pair<bool, ImageInformation const&> GetImageInformation(std::string const& channel) const;
+		std::pair<bool, ImageBindingInformation const&> GetImageInformation(std::string const& channel) const;
 
-		std::vector<ImageInformation> const& GetAllImageInformations() const
+		std::vector<ImageBindingInformation> const& GetAllImageInformations() const
 		{
 			return imageInformations_;
 		}
@@ -414,9 +435,9 @@ namespace XREX
 		 *	@channel: if BufferType is AtomicCounterBuffer, channel is just numerical buffer binding index to string.
 		 *	@return: return.first indicates whether the channel is found.
 		 */
-		std::pair<bool, BufferInformation const&> GetBufferInformation(std::string const& channel) const;
+		std::pair<bool, BufferBindingInformation const&> GetBufferInformation(std::string const& channel) const;
 
-		std::vector<BufferInformation> const& GetAllBufferInformations() const
+		std::vector<BufferBindingInformation> const& GetAllBufferInformations() const
 		{
 			return bufferInformations_;
 		}
@@ -424,9 +445,9 @@ namespace XREX
 		/*
 		 *	@return: return.first indicates whether the channel is found.
 		 */
-		std::pair<bool, FragmentOutputInformation const&> GetFragmentOutputInformation(std::string const& channel) const;
+		std::pair<bool, FragmentOutputBindingInformation const&> GetFragmentOutputInformation(std::string const& channel) const;
 
-		std::vector<FragmentOutputInformation> const& GetAllFragmentOutputInformations() const
+		std::vector<FragmentOutputBindingInformation> const& GetAllFragmentOutputInformations() const
 		{
 			return fragmentOutputInformations_;
 		}
@@ -437,33 +458,33 @@ namespace XREX
 
 		struct UniformBinder
 		{
-			UniformInformation const& uniformInformation;
-			std::function<void(UniformInformation const& uniformInformation)> setter;
-			explicit UniformBinder(UniformInformation const& uniformInformation)
+			UniformBindingInformation const& uniformInformation;
+			std::function<void(UniformBindingInformation const& uniformInformation)> setter;
+			explicit UniformBinder(UniformBindingInformation const& uniformInformation)
 				: uniformInformation(uniformInformation)
 			{
 			}
 		};
 		UniformBinder& CreateUniformBinder(std::string const& channel);
 
-		void SpecifyAllInterfaceBindings();
-		void InitializeAllInterfaceInformations();
+		void SpecifyAllInterfaceBindingsBeforeLink(InformationPack const& pack);
+
+		void SpecifyAllInterfaceBindingsAfterLink(InformationPack const& pack);
+
+		void InitializeBindingInformations(InformationPack const& pack);
 	private:
 		std::vector<ShaderObjectSP> shaders_;
 		bool validate_;
 		std::string errorString_;
 		uint32 glProgramID_;
 
-		FrameBufferLayoutDescription framebufferDescription_;
-		std::vector<std::tuple<std::string, TexelFormat, AccessType>> imageChannelInformations_; // TEMP
 	
-		std::vector<UniformInformation> uniformInformations_;
-		std::vector<TextureInformation> textureInformations_;
-		std::vector<ImageInformation> imageInformations_;
-		std::vector<BufferInformation> bufferInformations_;
-		std::vector<AttributeInformation> attributeInformations_;
-
-		std::vector<FragmentOutputInformation> fragmentOutputInformations_;
+		std::vector<UniformBindingInformation> uniformInformations_;
+		std::vector<TextureBindingInformation> textureInformations_;
+		std::vector<ImageBindingInformation> imageInformations_;
+		std::vector<BufferBindingInformation> bufferInformations_;
+		std::vector<AttributeInputBindingInformation> attributeInformations_;
+		std::vector<FragmentOutputBindingInformation> fragmentOutputInformations_;
 
 		std::vector<UniformBinder> uniformBinders_;
 
@@ -474,113 +495,113 @@ namespace XREX
 	class XREX_API ShaderResourceBuffer
 		: public BufferView
 	{
-		friend class BufferVariableSetter;
+		friend class BufferMapper;
 
 	public:
-		class XREX_API BufferVariableSetter
+		class XREX_API BufferMapper
 			: XREX::Noncopyable
 		{
 			friend class ShaderResourceBuffer;
 		private:
-			explicit BufferVariableSetter(ShaderResourceBuffer& buffer);
+			explicit BufferMapper(ShaderResourceBuffer& buffer);
 
 		public:
-			class XREX_API Setter
+			BufferMapper(BufferMapper&& right);
+
+			void Finish()
 			{
-				friend class BufferVariableSetter;
-			private:
-
-#ifdef XREX_DEBUG
-				Setter(BufferInformation::BufferVariableInformation const& variableInformation, ShaderResourceBuffer const& buffer)
-					: variableInformation_(variableInformation), buffer_(buffer)
-				{
-				}
-#else
-				explicit Setter(BufferInformation::BufferVariableInformation const& variableInformation)
-					: variableInformation_(variableInformation)
-				{
-				}
-#endif
-
-			public:
-				template <typename T>
-				void SetValue(BufferVariableSetter& setter, T const& value)
-				{
-					assert(&setter.buffer_ == &buffer_);
-					uint8* pointer = setter.mapper_.GetPointer<uint8>();
-					*reinterpret_cast<T*>(pointer + variableInformation_.GetOffset()) = value;
-				}
-
-
-				template <typename T>
-				void SetArrayValue(BufferVariableSetter& setter, std::vector<T> const& value)
-				{
-					assert(variableInformation_.GetElementCount() == value.size());
-					assert(&setter.buffer_ == &buffer_);
-					uint8* pointer = mapper_.GetPointer<uint8>();
-					uint8* start = pointer + variableInformation_.GetOffset();
-					if (variableInformation_.GetArrayStride() == 0) // tightly packed data
-					{
-						for (uint32 i = 0; i < variableInformation_.GetElementCount(); ++i)
-						{
-							*reinterpret_cast<T*>(start)[i] = value[i];
-						}
-					}
-					else
-					{
-						for (uint32 i = 0; i < variableInformation_.GetElementCount(); ++i)
-						{
-							*static_cast<T*>(start + variableInformation_.GetArrayStride() * i) = value[i];
-						}
-					}
-				}
-			private:
-				BufferInformation::BufferVariableInformation variableInformation_;
-#ifdef XREX_DEBUG
-				ShaderResourceBuffer const& buffer_;
-#endif
-			};
-
-		public:
-			BufferVariableSetter(BufferVariableSetter&& right);
-
-			std::pair<bool, Setter> GetSetter(std::string const& name)
-			{
-				std::pair<bool, BufferInformation::BufferVariableInformation const&> result = buffer_.GetBufferInformation().GetBufferVariableInformation(name);
-#ifdef XREX_DEBUG
-				return std::make_pair(result.first, Setter(result.second, buffer_));
-#else
-				return std::make_pair(result.first, Setter(result.second));
-#endif
+				mapper_.Finish();
 			}
-		
-			void Finish();
 
 		private:
 			ShaderResourceBuffer& buffer_;
 			GraphicsBuffer::BufferMapper mapper_;
 		};
 
+		class XREX_API VariableSetter
+		{
+			friend class ShaderResourceBuffer;
+		private:
+			
+#ifdef XREX_DEBUG
+			VariableSetter(BufferBindingInformation::BufferVariableInformation const& variableInformation, ShaderResourceBuffer const& buffer)
+				: variableInformation_(variableInformation), buffer_(&buffer)
+			{
+			}
+#else
+			explicit VariableSetter(BufferBindingInformation::BufferVariableInformation const& variableInformation)
+				: variableInformation_(variableInformation)
+			{
+			}
+#endif
+
+		public:
+			/*
+			 *	Default constructed object cannot work.
+			 */
+			VariableSetter();
+
+			template <typename T>
+			void SetValue(BufferMapper& mapper, T const& value)
+			{
+				assert(variableInformation_.GetElementType() == TypeToElementType<T>::Type);
+				assert(&mapper.buffer_ == buffer_);
+				uint8* pointer = mapper.mapper_.GetPointer<uint8>();
+				*reinterpret_cast<T*>(pointer + variableInformation_.GetOffset()) = value;
+			}
+
+
+			template <typename T>
+			void SetArrayValue(BufferMapper& mapper, std::vector<T> const& value)
+			{
+				assert(variableInformation_.GetElementType() == TypeToElementType<T>::Type);
+				assert(variableInformation_.GetElementCount() == value.size());
+				assert(&mapper.buffer_ == buffer_);
+				uint8* pointer = mapper_.GetPointer<uint8>();
+				uint8* start = pointer + variableInformation_.GetOffset();
+				if (variableInformation_.GetArrayStride() == 0) // tightly packed data
+				{
+					for (uint32 i = 0; i < variableInformation_.GetElementCount(); ++i)
+					{
+						*reinterpret_cast<T*>(start)[i] = value[i];
+					}
+				}
+				else
+				{
+					for (uint32 i = 0; i < variableInformation_.GetElementCount(); ++i)
+					{
+						*static_cast<T*>(start + variableInformation_.GetArrayStride() * i) = value[i];
+					}
+				}
+			}
+		private:
+			BufferBindingInformation::BufferVariableInformation variableInformation_;
+#ifdef XREX_DEBUG
+			ShaderResourceBuffer const* buffer_;
+#endif
+		};
 	public:
-		explicit ShaderResourceBuffer(BufferInformation const& information);
-		ShaderResourceBuffer(BufferInformation const& information, GraphicsBufferSP const& buffer);
+		explicit ShaderResourceBuffer(BufferBindingInformation const& information);
+		ShaderResourceBuffer(BufferBindingInformation const& information, GraphicsBufferSP const& buffer);
 		virtual ~ShaderResourceBuffer() override;
 
-		BufferInformation const& GetBufferInformation() const
+		BufferBindingInformation const& GetBufferInformation() const
 		{
 			return information_;
 		}
 
-		BufferVariableSetter GetVariableSetter()
+		BufferMapper GetMapper()
 		{
 			assert(HaveBuffer());
-			return BufferVariableSetter(*this);
+			return BufferMapper(*this);
 		}
+
+		std::pair<bool, VariableSetter> GetSetter(std::string const& name);
 
 	private:
 		virtual bool SetBufferCheck(GraphicsBufferSP const& newBuffer) override;
 
 	private:
-		BufferInformation const& information_;
+		BufferBindingInformation const& information_;
 	};
 }

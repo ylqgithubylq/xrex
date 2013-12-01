@@ -143,7 +143,7 @@ namespace
 			RasterizerState resterizerState;
 			resterizerState.cullMode = RenderingPipelineState::CullMode::None;
 			DepthStencilState depthStencilState;
-			depthStencilState.depthEnable = false;
+			depthStencilState.depthTestEnable = false;
 			depthStencilState.depthWriteMask = false;
 			BlendState blendState;
 			blendState.blendEnable = false;
@@ -155,10 +155,6 @@ namespace
 			builder->SetDepthStencilState(depthStencilState);
 			builder->SetBlendState(blendState);
 
-			builder->SpecifyFragmentOutput(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer()->GetLayoutDescription());
-
-			builder->SpecifyImageFormat("heads", TexelFormat::R32UI, AccessType::ReadWrite);
-			builder->SpecifyImageFormat("nodePool", TexelFormat::RGBA32UI, AccessType::WriteOnly);
 
 			return builder->GetRenderingTechnique();
 		} ();
@@ -181,7 +177,7 @@ namespace
 			RasterizerState resterizerState;
 			resterizerState.cullMode = RenderingPipelineState::CullMode::None;
 			DepthStencilState depthStencilState;
-			depthStencilState.depthEnable = false;
+			depthStencilState.depthTestEnable = false;
 			depthStencilState.depthWriteMask = false;
 			BlendState blendState;
 			blendState.blendEnable = false;
@@ -193,7 +189,6 @@ namespace
 			builder->SetDepthStencilState(depthStencilState);
 			builder->SetBlendState(blendState);
 
-			builder->SpecifyFragmentOutput(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer()->GetLayoutDescription());
 			return builder->GetRenderingTechnique();
 		} ();
 		sortTechnique->SetFrameBuffer(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer());
@@ -215,7 +210,7 @@ namespace
 			RasterizerState resterizerState;
 			resterizerState.cullMode = RenderingPipelineState::CullMode::None;
 			DepthStencilState depthStencilState;
-			depthStencilState.depthEnable = false;
+			depthStencilState.depthTestEnable = false;
 			depthStencilState.depthWriteMask = false;
 			BlendState blendState;
 			blendState.blendEnable = false;
@@ -227,11 +222,6 @@ namespace
 			builder->SetDepthStencilState(depthStencilState);
 			builder->SetBlendState(blendState);
 
-			builder->SpecifyFragmentOutput(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer()->GetLayoutDescription());
-
-			builder->SpecifyImageFormat("heads", TexelFormat::R32UI, AccessType::ReadOnly);
-			builder->SpecifyImageFormat("nodePool", TexelFormat::RGBA32UI, AccessType::ReadOnly);
-			builder->SpecifyImageFormat("volume", TexelFormat::RGBA8, AccessType::WriteOnly);
 
 			return builder->GetRenderingTechnique();
 		} ();
@@ -253,7 +243,7 @@ namespace
 			RasterizerState resterizerState;
 			resterizerState.cullMode = RenderingPipelineState::CullMode::None;
 			DepthStencilState depthStencilState;
-			depthStencilState.depthEnable = false;
+			depthStencilState.depthTestEnable = false;
 			depthStencilState.depthWriteMask = false;
 			BlendState blendState;
 			blendState.blendEnable = false;
@@ -264,12 +254,6 @@ namespace
 			builder->SetRasterizerState(resterizerState);
 			builder->SetDepthStencilState(depthStencilState);
 			builder->SetBlendState(blendState);
-
-			builder->SpecifyFragmentOutput(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer()->GetLayoutDescription());
-
-			builder->SpecifyImageFormat("heads", TexelFormat::R32UI, AccessType::ReadOnly);
-			builder->SpecifyImageFormat("nodePool", TexelFormat::RGBA32UI, AccessType::ReadOnly);
-			builder->SpecifyImageFormat("volume", TexelFormat::RGBA8, AccessType::WriteOnly);
 
 			return builder->GetRenderingTechnique();
 
@@ -293,7 +277,7 @@ namespace
 			RasterizerState resterizerState;
 			resterizerState.cullMode = RenderingPipelineState::CullMode::None;
 			DepthStencilState depthStencilState;
-			depthStencilState.depthEnable = false;
+			depthStencilState.depthTestEnable = false;
 			depthStencilState.depthWriteMask = false;
 			BlendState blendState;
 			blendState.blendEnable = false;
@@ -305,10 +289,6 @@ namespace
 			builder->SetDepthStencilState(depthStencilState);
 			builder->SetBlendState(blendState);
 
-			builder->SpecifyFragmentOutput(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer()->GetLayoutDescription());
-
-			builder->SpecifyImageFormat("intermediateVolume", TexelFormat::R32UI, AccessType::ReadOnly);
-			builder->SpecifyImageFormat("volume", TexelFormat::RGBA32F, AccessType::WriteOnly);
 
 			return builder->GetRenderingTechnique();
 
@@ -425,10 +405,8 @@ namespace
 		samplerState.addressingModeT = SamplerState::TextureAddressingMode::ClampToBorder;
 		samplerState.magFilterOperation = SamplerState::TextureFilterOperation::Linear;
 		samplerState.minFilterOperation = SamplerState::TextureFilterOperation::LinearMipmapLinear;
-		builder->SetSamplerState("cone tracing sampler", samplerState);
-		builder->SetSamplerChannelToSamplerStateMapping("voxels", "cone tracing sampler");
+		builder->AddSamplerState("cone tracing sampler", samplerState);
 
-		builder->SpecifyFragmentOutput(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer()->GetLayoutDescription());
 
 		return builder->GetRenderingTechnique();
 	}

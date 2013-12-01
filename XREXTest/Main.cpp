@@ -6,7 +6,6 @@
 
 
 #include "TestFile.hpp"
-#include "TextureTest.h"
 #include "GeneralTest.h"
 #include "RenderToTextureTest.h"
 
@@ -16,7 +15,7 @@ using namespace std;
 int main()
 {
 
-	switch (3)
+	switch (2)
 	{
 	case 1:
 		{
@@ -24,11 +23,6 @@ int main()
 		}
 		break;
 	case 2:
-		{
-			TextureTest texturetest;
-		}
-		break;
-	case 3:
 		{
 			RenderToTextureTest renderToTextureTest;
 		}

@@ -61,6 +61,9 @@
     <ClInclude Include="Rendering\RenderingTechnique.hpp" />
     <ClInclude Include="Rendering\Sampler.hpp" />
     <ClInclude Include="Rendering\ShaderProgram.hpp" />
+    <ClInclude Include="Rendering\ShaderProgramInterface.hpp" />
+    <ClInclude Include="Rendering\SystemTechnique.hpp" />
+    <ClInclude Include="Rendering\TechniqueBuilder.hpp" />
     <ClInclude Include="Rendering\Texture.hpp" />
     <ClInclude Include="Rendering\TextureImage.hpp" />
     <ClInclude Include="Rendering\Viewport.hpp" />
@@ -113,6 +116,9 @@
     <ClCompile Include="Rendering\RenderingTechnique.cpp" />
     <ClCompile Include="Rendering\Sampler.cpp" />
     <ClCompile Include="Rendering\ShaderProgram.cpp" />
+    <ClCompile Include="Rendering\ShaderProgramInterface.cpp" />
+    <ClCompile Include="Rendering\SystemTechnique.cpp" />
+    <ClCompile Include="Rendering\TechniqueBuilder.cpp" />
     <ClCompile Include="Rendering\Texture.cpp" />
     <ClCompile Include="Rendering\TextureImage.cpp" />
     <ClCompile Include="Rendering\Viewport.cpp" />

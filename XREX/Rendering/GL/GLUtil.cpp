@@ -86,38 +86,8 @@ namespace XREX
 			return gl::GL_FLOAT_VEC4;
 		case ElementType::FloatM44:
 			return gl::GL_FLOAT_MAT4;
-// 		case ElementType::Sampler1D:
-// 			return gl::GL_SAMPLER_1D;
-// 		case ElementType::IntSampler1D:
-// 			return gl::GL_INT_SAMPLER_1D;
-// 		case ElementType::UintSampler1D:
-// 			return gl::GL_UNSIGNED_INT_SAMPLER_1D;
-// 		case ElementType::Sampler2D:
-// 			return gl::GL_SAMPLER_2D;
-// 		case ElementType::IntSampler2D:
-// 			return gl::GL_INT_SAMPLER_2D;
-// 		case ElementType::UintSampler2D:
-// 			return gl::GL_UNSIGNED_INT_SAMPLER_2D;
-// 		case ElementType::Sampler3D:
-// 			return gl::GL_SAMPLER_3D;
-// 		case ElementType::IntSampler3D:
-// 			return gl::GL_INT_SAMPLER_3D;
-// 		case ElementType::UintSampler3D:
-// 			return gl::GL_UNSIGNED_INT_SAMPLER_3D;
-// 		case ElementType::SamplerCube:
-// 			return gl::GL_SAMPLER_CUBE;
-// 		case ElementType::IntSamplerCube:
-// 			return gl::GL_INT_SAMPLER_CUBE;
-// 		case ElementType::UintSamplerCube:
-// 			return gl::GL_UNSIGNED_INT_SAMPLER_CUBE;
-// 		case ElementType::SamplerBuffer:
-// 			return gl::GL_SAMPLER_BUFFER;
-// 		case ElementType::IntSamplerBuffer:
-// 			return gl::GL_INT_SAMPLER_BUFFER;
-// 		case ElementType::UintSamplerBuffer:
-// 			return gl::GL_UNSIGNED_INT_SAMPLER_BUFFER;
 
-		case ElementType::ParameterTypeCount:
+		case ElementType::ElementTypeCount:
 			assert(false);
 			return 0;
 		default:
@@ -306,7 +276,7 @@ namespace XREX
 			return gl::GL_TESS_EVALUATION_SHADER;
 		case ShaderObject::ShaderType::ComputeShader:
 			return gl::GL_COMPUTE_SHADER;
-		case ShaderObject::ShaderType::CountOfShaderTypes:
+		case ShaderObject::ShaderType::ShaderTypeCount:
 			assert(false);
 			return 0;
 		default:

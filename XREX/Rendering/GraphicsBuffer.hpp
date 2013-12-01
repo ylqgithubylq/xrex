@@ -98,7 +98,7 @@ namespace XREX
 		void Clear(T const& data)
 		{
 			ElementType type = TypeToElementType<T>::Type;
-			assert(type != ElementType::ParameterTypeCount);
+			assert(type != ElementType::ElementTypeCount);
 			Clear(type, &data);
 		}
 		void Clear(ElementType dataType, void const* data);

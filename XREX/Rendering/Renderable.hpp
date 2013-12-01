@@ -25,11 +25,8 @@ namespace XREX
 			RenderingTechniqueSP technique;
 			int32 renderingGroup;
 
-			RenderablePack(RenderablePack&& right)
-				: renderable(right.renderable), layout(std::move(right.layout)), material(std::move(right.material)),
-				connector(std::move(right.connector)), technique(std::move(right.technique)), renderingGroup(right.renderingGroup)
-			{
-			}
+			RenderablePack(RenderablePack&& right);
+
 			explicit RenderablePack(Renderable& ownerRenderable)
 				: renderable(&ownerRenderable), renderingGroup(DefaultRenderingGroup)
 			{
@@ -40,19 +37,7 @@ namespace XREX
 			RenderablePack(Renderable& ownerRenderable, RenderingLayoutSP const& renderingLayout, MaterialSP const& material,
 				LayoutAndProgramConnectorSP const& connector, RenderingTechniqueSP const& renderingTechnique, int32 renderingGroup = DefaultRenderingGroup);
 			
-			RenderablePack& operator =(RenderablePack&& right)
-			{
-				if (this != &right)
-				{
-					renderable = right.renderable;
-					layout = std::move(right.layout);
-					material = std::move(right.material);
-					connector = std::move(right.connector);
-					technique = std::move(right.technique);
-					renderingGroup = right.renderingGroup;
-				}
-				return *this;
-			}
+			RenderablePack& operator =(RenderablePack&& right);
 		};
 
 		struct SmallRenderablePack
@@ -64,10 +49,8 @@ namespace XREX
 			MaterialSP material;
 			int32 renderingGroup;
 
-			SmallRenderablePack(SmallRenderablePack&& right)
-				: renderable(right.renderable), layout(std::move(right.layout)), material(std::move(right.material)), renderingGroup(right.renderingGroup)
-			{
-			}
+			SmallRenderablePack(SmallRenderablePack&& right);
+
 			explicit SmallRenderablePack(Renderable& ownerRenderable)
 				: renderable(&ownerRenderable), renderingGroup(DefaultRenderingGroup)
 			{
@@ -77,17 +60,7 @@ namespace XREX
 			 */
 			SmallRenderablePack(Renderable& ownerRenderable, RenderingLayoutSP const& renderingLayout, MaterialSP const& material, int32 renderingGroup = DefaultRenderingGroup);
 			
-			SmallRenderablePack& operator =(SmallRenderablePack&& right)
-			{
-				if (this != &right)
-				{
-					renderable = right.renderable;
-					layout = std::move(right.layout);
-					material = std::move(right.material);
-					renderingGroup = right.renderingGroup;
-				}
-				return *this;
-			}
+			SmallRenderablePack& operator =(SmallRenderablePack&& right);
 		};
 
 
@@ -162,6 +135,7 @@ namespace XREX
 		std::vector<Renderable::RenderablePack> packs_;
 		std::vector<Renderable::SmallRenderablePack> smallPacks_;
 	};
+
 
 }
 
