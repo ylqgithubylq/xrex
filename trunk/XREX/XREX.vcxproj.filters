@@ -212,6 +212,15 @@
     <ClInclude Include="Rendering\ProgramConnector.hpp">
       <Filter>Rendering</Filter>
     </ClInclude>
+    <ClInclude Include="Rendering\TechniqueBuilder.hpp">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\SystemTechnique.hpp">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\ShaderProgramInterface.hpp">
+      <Filter>Rendering</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Base\Math.cpp">
@@ -356,6 +365,15 @@
       <Filter>Rendering</Filter>
     </ClCompile>
     <ClCompile Include="Rendering\ProgramConnector.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\TechniqueBuilder.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\SystemTechnique.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\ShaderProgramInterface.cpp">
       <Filter>Rendering</Filter>
     </ClCompile>
   </ItemGroup>

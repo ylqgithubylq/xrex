@@ -1,8 +1,9 @@
 #include "XREX.hpp"
 
-#include "Component.hpp"
+#include "ShaderProgramInterface.hpp"
 
 namespace XREX
 {
 
 }
+

@@ -25,6 +25,8 @@ struct RenderToTextureProcess
 	FrameBufferSP frameBuffer_;
 	
 	RenderingTechniqueSP technique_;
+	std::shared_ptr<TransformationSetter> techniqueTransformationSetter_;
+	std::shared_ptr<CameraSetter> techniqueCameraSetter_;
 	RenderingTechniqueSP copyTechnique_;
 
 	RenderingLayoutSP quad_;
@@ -68,17 +70,34 @@ struct RenderToTextureProcess
 
 		TechniqueBuilderSP builder = MakeSP<TechniqueBuilder>("render technique");
 
+		builder->AddInclude(TransformationTechnique().GetTechniqueToInclude());
+		builder->AddInclude(CameraTechnique().GetTechniqueToInclude());
+
 		builder->AddCommonCode(shaderString);
 		builder->SetStageCode(ShaderObject::ShaderType::VertexShader, MakeSP<string>());
 		builder->SetStageCode(ShaderObject::ShaderType::FragmentShader, MakeSP<string>());
 
+
+		vector<VariableInformation const> variables;
+		builder->AddUniformBufferInformation(BufferInformation("Material", BufferView::BufferType::Uniform, move(variables)));
+
+		string defaultSamplerName = "defaultSampler";
+		builder->AddTextureInformation(TextureInformation("diffuseMap", Texture::TextureType::Texture2D, ElementType::FloatV4, defaultSamplerName));
+		builder->AddTextureInformation(TextureInformation("specularMap", Texture::TextureType::Texture2D, ElementType::FloatV4, defaultSamplerName));
+		builder->AddTextureInformation(TextureInformation("normalMap", Texture::TextureType::Texture2D, ElementType::FloatV4, defaultSamplerName));
+		builder->AddTextureInformation(TextureInformation("shininessMap", Texture::TextureType::Texture2D, ElementType::FloatV4, defaultSamplerName));
+		builder->AddTextureInformation(TextureInformation("opacityMap", Texture::TextureType::Texture2D, ElementType::FloatV4, defaultSamplerName));
+
 		SamplerState defaultSampler;
-		builder->SetSamplerState("defaultSampler", defaultSampler);
-		builder->SetSamplerChannelToSamplerStateMapping("diffuseMap", "defaultSampler");
-		builder->SetSamplerChannelToSamplerStateMapping("specularMap", "defaultSampler");
-		builder->SetSamplerChannelToSamplerStateMapping("normalMap", "defaultSampler");
-		builder->SetSamplerChannelToSamplerStateMapping("shininessMap", "defaultSampler");
-		builder->SetSamplerChannelToSamplerStateMapping("opacityMap", "defaultSampler");
+		builder->AddSamplerState(defaultSamplerName, defaultSampler);
+
+		builder->AddAttributeInputInformation(AttributeInputInformation(VariableInformation("position", ElementType::FloatV3, 0)));
+		builder->AddAttributeInputInformation(AttributeInputInformation(VariableInformation("normal", ElementType::FloatV3, 0)));
+		builder->AddAttributeInputInformation(AttributeInputInformation(VariableInformation("textureCoordinate0", ElementType::FloatV3, 0)));
+
+		builder->AddFragmentOutputInformation(FragmentOutputInformation(VariableInformation("colorOutput", ElementType::FloatV4, 0)));
+		builder->AddFragmentOutputInformation(FragmentOutputInformation(VariableInformation("normalOutput", ElementType::FloatV4, 0)));
+		builder->AddFragmentOutputInformation(FragmentOutputInformation(VariableInformation("depthInColorOutput", ElementType::Float, 0)));
 
 		RasterizerState resterizerState;
 		DepthStencilState depthStencilState;
@@ -95,10 +114,11 @@ struct RenderToTextureProcess
 		builder->SetDepthStencilState(depthStencilState);
 		builder->SetBlendState(blendState);
 
-		builder->SpecifyFragmentOutput(frameBuffer_->GetLayoutDescription());
-
 		technique_ = builder->GetRenderingTechnique();
 		technique_->SetFrameBuffer(frameBuffer_);
+
+		techniqueTransformationSetter_ = MakeSP<TransformationSetter>(technique_);
+		techniqueCameraSetter_ = MakeSP<CameraSetter>(technique_);
 	}
 
 	void InitializeTextureShowTechnique()
@@ -116,12 +136,19 @@ struct RenderToTextureProcess
 		builder->SetStageCode(ShaderObject::ShaderType::VertexShader, MakeSP<string>());
 		builder->SetStageCode(ShaderObject::ShaderType::FragmentShader, MakeSP<string>());
 
+
+		string defaultSamplerName = "defaultSampler";
+		builder->AddTextureInformation(TextureInformation("color", Texture::TextureType::Texture2D, ElementType::FloatV4, defaultSamplerName));
+		builder->AddTextureInformation(TextureInformation("normal", Texture::TextureType::Texture2D, ElementType::FloatV4, defaultSamplerName));
+		builder->AddTextureInformation(TextureInformation("depthInColor", Texture::TextureType::Texture2D, ElementType::FloatV4, defaultSamplerName));
+		builder->AddTextureInformation(TextureInformation("depth", Texture::TextureType::Texture2D, ElementType::FloatV4, defaultSamplerName));
+
 		SamplerState defaultSampler;
-		builder->SetSamplerState("defaultSampler", defaultSampler);
-		builder->SetSamplerChannelToSamplerStateMapping("color", "defaultSampler");
-		builder->SetSamplerChannelToSamplerStateMapping("normal", "defaultSampler");
-		builder->SetSamplerChannelToSamplerStateMapping("depthInColor", "defaultSampler");
-		builder->SetSamplerChannelToSamplerStateMapping("depth", "defaultSampler");
+		builder->AddSamplerState(defaultSamplerName, defaultSampler);
+
+		builder->AddAttributeInputInformation(AttributeInputInformation(VariableInformation("position", ElementType::FloatV2, 0)));
+
+		builder->AddFragmentOutputInformation(FragmentOutputInformation(VariableInformation("xrex_FinalColor", ElementType::FloatV4, 0)));
 
 		RasterizerState resterizerState;
 		DepthStencilState depthStencilState;
@@ -130,8 +157,6 @@ struct RenderToTextureProcess
 		builder->SetRasterizerState(resterizerState);
 		builder->SetDepthStencilState(depthStencilState);
 		builder->SetBlendState(blendState);
-
-		builder->SpecifyFragmentOutput(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer()->GetLayoutDescription());
 
 		copyTechnique_ = builder->GetRenderingTechnique();
 
@@ -216,11 +241,6 @@ struct RenderToTextureProcess
 		Color const& backgroundColor = camera->GetBackgroundColor();
 		frameBuffer_->Clear(FrameBuffer::ClearMask::All, backgroundColor, 1, 0);
 
-		floatM44 const& viewMatrix = camera->GetViewMatrix();
-		floatM44 const& projectionMatrix = camera->GetProjectionMatrix();
-		floatV3 const& cameraPosition = cameraObject->GetComponent<Transformation>()->GetWorldPosition();
-
-
 		std::vector<SceneObjectSP> sceneObjects = scene->GetRenderableQueue(nullptr);
 
 
@@ -235,6 +255,9 @@ struct RenderToTextureProcess
 		}
 		std::vector<Renderable::SmallRenderablePack> allRenderableNeedToRender = collector.ExtractSmallRenderablePack();
 
+		techniqueCameraSetter_->SetParameter(camera);
+		techniqueTransformationSetter_->Connect(camera);
+
 		IndexedDrawer drawer;
 
 		for (auto& renderablePack : allRenderableNeedToRender)
@@ -243,43 +266,13 @@ struct RenderToTextureProcess
 			RenderingLayoutSP const& layout = renderablePack.layout;
 			MaterialSP const& material = renderablePack.material;
 
-			floatM44 const& modelMatrix = ownerRenderable.GetOwnerSceneObject()->GetComponent<Transformation>()->GetWorldMatrix();
-			floatM44 normalMatrix = modelMatrix; // TODO do inverse transpose to the upper floatV3 of modelMatrix
-
-			// are these too hard coded?
-			{
-				TechniqueParameterSP const& model = technique_->GetParameterByName(GetUniformString(DefinedUniform::ModelMatrix));
-				if (model)
-				{
-					model->As<floatM44>().SetValue(modelMatrix);
-				}
-				TechniqueParameterSP const& normal = technique_->GetParameterByName(GetUniformString(DefinedUniform::NormalMatrix));
-				if (normal)
-				{
-					normal->As<floatM44>().SetValue(normalMatrix);
-				}
-				TechniqueParameterSP const& view = technique_->GetParameterByName(GetUniformString(DefinedUniform::ViewMatrix));
-				if (view)
-				{
-					view->As<floatM44>().SetValue(viewMatrix);
-				}
-				TechniqueParameterSP const& projection = technique_->GetParameterByName(GetUniformString(DefinedUniform::ProjectionMatrix));
-				if (projection)
-				{
-					projection->As<floatM44>().SetValue(projectionMatrix);
-				}
-				TechniqueParameterSP const& position = technique_->GetParameterByName(GetUniformString(DefinedUniform::CameraPosition));
-				if (position)
-				{
-					position->As<floatV3>().SetValue(cameraPosition);
-				}
-			}
-
 			if (material)
 			{
 				material->BindToTechnique(technique_);
 				material->SetAllTechniqueParameterValues();
 			}
+
+			techniqueTransformationSetter_->SetParameter(ownerRenderable.GetOwnerSceneObject()->GetComponent<Transformation>());
 
 			LayoutAndProgramConnectorSP connector = XREXContext::GetInstance().GetRenderingFactory().GetConnector(layout, technique_);
 			drawer.SetTechnique(technique_);
@@ -352,7 +345,7 @@ RenderToTextureTest::RenderToTextureTest()
 	Settings settings("../../");
 	settings.windowTitle = L"GL4 window";
 
-	settings.renderingSettings.sampleCount = 4;
+	settings.renderingSettings.sampleCount = 1;
 
 	settings.renderingSettings.left = 100;
 	settings.renderingSettings.top = 100;

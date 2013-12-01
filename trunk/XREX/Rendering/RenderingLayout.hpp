@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Declare.hpp"
-#include "Rendering/GraphicsBuffer.hpp"
+#include "Rendering/BufferView.hpp"
 
 #include <vector>
 #include <unordered_map>

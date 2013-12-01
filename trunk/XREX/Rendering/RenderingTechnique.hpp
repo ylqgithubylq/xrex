@@ -2,16 +2,12 @@
 
 #include "Declare.hpp"
 
-#include "Rendering/ShaderProgram.hpp"
-#include "Rendering/RenderingPipelineState.hpp"
-#include "Rendering/Sampler.hpp"
-#include "Rendering/FrameBuffer.hpp"
+#include "ShaderProgram.hpp"
 
 #include <string>
 #include <vector>
 #include <functional>
 
-using namespace XREX;
 
 namespace XREX
 {
@@ -29,7 +25,6 @@ namespace XREX
 			: name_(name)
 		{
 		}
-
 
 		virtual ~TechniqueParameter()
 		{
@@ -82,7 +77,11 @@ namespace XREX
 
 		virtual void GetValueFrom(TechniqueParameter const& right) override
 		{
+#ifdef XREX_DEBUG
+			auto type = GetType();
+			auto rightType = right.GetType();
 			assert(GetType() == right.GetType());
+#endif // XREX_DEBUG
 			value_ = CheckedCast<ConcreteTechniqueParameter const&>(right).value_;
 		}
 
@@ -90,31 +89,95 @@ namespace XREX
 		T value_;
 	};
 
-	template <typename T, typename Information>
+	/*
+	 *	Used for Material to store texture parameters.
+	 */
+	class XREX_API SimpleTextureParameter
+		: public ConcreteTechniqueParameter<TextureSP>
+	{
+	public:
+		explicit SimpleTextureParameter(std::string const& name)
+			: ConcreteTechniqueParameter(name)
+		{
+		}
+
+		virtual ElementType GetType() const override;
+	};
+	/*
+	 *	Used for Material to store image parameters.
+	 */
+	class XREX_API SimpleImageParameter
+		: public ConcreteTechniqueParameter<TextureImageSP>
+	{
+	public:
+		explicit SimpleImageParameter(std::string const& name)
+			: ConcreteTechniqueParameter(name)
+		{
+		}
+
+		virtual ElementType GetType() const override;
+	};
+
+	/*
+	 *	Technique created parameter type base.
+	 */
+	template <typename T, typename BindingInformation>
 	class ResourceParameter
 		: public ConcreteTechniqueParameter<T>
 	{
 	public:
-		ResourceParameter(std::string const& name, Information const& information)
+		ResourceParameter(std::string const& name, BindingInformation const& information)
 			: ConcreteTechniqueParameter<T>(name), information_(information)
 		{
 		}
-		Information const& GetInformation() const
+		BindingInformation const& GetBindingInformation() const
 		{
 			return information_;
 		}
 	private:
-		Information const& information_;
+		BindingInformation const& information_;
 	};
 
-	typedef ResourceParameter<ShaderResourceBufferSP, BufferInformation> BufferParameter;
-	typedef ResourceParameter<TextureImageSP, ImageInformation> ImageParameter;
-
-	class TextureParameter
-		: public ResourceParameter<TextureSP, TextureInformation>
+	/*
+	 *	Technique created parameter type for Buffer.
+	 */
+	class XREX_API BufferParameter
+		: public ResourceParameter<ShaderResourceBufferSP, BufferBindingInformation>
 	{
 	public:
-		TextureParameter(std::string const& name, TextureInformation const& information, SamplerSP const& sampler)
+		BufferParameter(std::string const& name, BufferBindingInformation const& information)
+			: ResourceParameter(name, information)
+		{
+		}
+
+		virtual ElementType GetType() const override
+		{
+			return ElementType::Buffer;
+		}
+	};
+
+	/*
+	 *	Technique created parameter type for TextureImage.
+	 */
+	class XREX_API ImageParameter
+		: public ResourceParameter<TextureImageSP, ImageBindingInformation>
+	{
+	public:
+		ImageParameter(std::string const& name, ImageBindingInformation const& information)
+			: ResourceParameter(name, information)
+		{
+		}
+
+		virtual ElementType GetType() const override;
+	};
+	/*
+	 *	Technique created parameter type for Texture.
+	 */
+	class XREX_API TextureParameter
+		: public ResourceParameter<TextureSP, TextureBindingInformation>
+	{
+	public:
+		TextureParameter(std::string const& name, TextureBindingInformation const& information, SamplerSP const& sampler)
 			: ResourceParameter(name, information), sampler_(sampler)
 		{
 		}
@@ -122,6 +185,8 @@ namespace XREX
 		{
 			return sampler_;
 		}
+
+		virtual ElementType GetType() const override;
 	private:
 		SamplerSP sampler_;
 	};
@@ -143,9 +208,18 @@ namespace XREX
 		: Noncopyable
 	{
 	public:
+		struct ConstructerParameterPack
+		{
+			ProgramObjectSP program;
+			RasterizerStateObjectSP rasterizerState;
+			DepthStencilStateObjectSP depthStencilState;
+			BlendStateObjectSP blendState;
+			std::unordered_map<std::string, SamplerSP> samplers;
+		};
+	public:
 		explicit RenderingTechnique(std::string const& name, ProgramObjectSP const& program,
 			RasterizerStateObjectSP const& rasterizerState, DepthStencilStateObjectSP const& depthStencilState, BlendStateObjectSP const& blendState,
-			std::unordered_map<std::string, SamplerSP>&& samplers);
+			std::unordered_map<std::string, SamplerSP>&& samplers); // TODO ConstructerParameterPack
 		~RenderingTechnique();
 
 
@@ -215,103 +289,5 @@ namespace XREX
 	};
 
 
-	class XREX_API TechniqueBuilder
-	{
-	public:
-		TechniqueBuilder(std::string const& name);
 
-		void SpecifyFragmentOutput(FrameBufferLayoutDescription const& description);
-		void SpecifyImageFormat(std::string const& channel, TexelFormat format, AccessType accessType); // TEMP or should be systematic added
-
-
-		void AddInclude(TechniqueBuilderSP const& technique)
-		{
-			includes_.push_back(technique);
-		}
-		std::vector<TechniqueBuilderSP> const& GetAllIncludes() const
-		{
-			return includes_;
-		}
-		void AddMacros(std::pair<std::string, std::string> const& macro)
-		{
-			macros_.push_back(macro);
-		}
-
-		void AddCommonCode(std::shared_ptr<std::string> const& code)
-		{
-			commonCodes_.push_back(code);
-		}
-		void SetStageCode(ShaderObject::ShaderType stage, std::shared_ptr<std::string> const& code)
-		{
-			stageCodes_[static_cast<uint32>(stage)] = code;
-		}
-
-		std::vector<std::shared_ptr<std::string>> const& GetAllCommonCodes() const
-		{
-			return commonCodes_;
-		}
-		std::shared_ptr<std::string> const& GetStageCode(ShaderObject::ShaderType stage) const
-		{
-			return stageCodes_[static_cast<uint32>(stage)];
-		}
-
-		void SetRasterizerState(RasterizerState const& rasterizerState)
-		{
-			rasterizerState_ = rasterizerState;
-		}
-		void SetDepthStencilState(DepthStencilState const& depthStencilState)
-		{
-			depthStencilState_ = depthStencilState;
-		}
-		void SetBlendState(BlendState const& blendState)
-		{
-			blendState_ = blendState;
-		}
-		/*
-		 *	Set this before SetSamplerChannelToSamplerStateMapping.
-		 */
-		void SetSamplerState(std::string const& samplerName, SamplerState const& samplerState)
-		{
-			samplerStates_[samplerName] = samplerState;
-		}
-		/*
-		 *	Set this after SetSamplerState.
-		 */
-		void SetSamplerChannelToSamplerStateMapping(std::string const& channel, std::string samplerName);
-
-		RenderingTechniqueSP GetRenderingTechnique();
-
-
-	private:
-		RenderingTechniqueSP Create();
-
-		void BuildMacroStrings();
-
-		/*
-		 *	Get shader codes for compile, include all included technique codes.
-		 */
-		std::vector<std::string const*> GetFullShaderCode(ShaderObject::ShaderType stage) const;
-
-	private:
-		std::string name_;
-
-		FrameBufferLayoutDescription framebufferDescription_;
-		std::vector<std::tuple<std::string, TexelFormat, AccessType>> imageChannelInformations_; // TEMP
-
-		std::vector<TechniqueBuilderSP> includes_;
-		std::vector<std::shared_ptr<std::string>> commonCodes_;
-		std::vector<std::shared_ptr<std::string>> stageCodes_;
-		std::vector<std::pair<std::string, std::string>> macros_;
-
-		std::vector<std::string> generatedMacros_;
-
-		RasterizerState rasterizerState_;
-		DepthStencilState depthStencilState_;
-		BlendState blendState_;
-		std::unordered_map<std::string, SamplerState> samplerStates_;
-		std::unordered_map<std::string, std::string> samplerChannelToSamplerStateMappings_;
-
-		std::weak_ptr<RenderingTechnique> technique_;
-
-	};
 }

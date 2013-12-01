@@ -8,9 +8,25 @@ namespace XREX
 		: Noncopyable
 	{
 	public:
+		enum class ImageType
+		{
+			Image1D,
+			Image2D,
+			Image3D,
+			ImageCube,
+			ImageBuffer,
 
-		TextureImage(TextureSP const& texture, uint32 level);
+			ImageTypeCount
+		};
+	protected:
+		TextureImage(ImageType type, TextureSP const& texture, uint32 level);
+	public:
 		virtual ~TextureImage();
+
+		ImageType GetType() const
+		{
+			return type_;
+		}
 
 		TextureSP const& GetTexture() const
 		{
@@ -28,6 +44,7 @@ namespace XREX
 		void Unbind();
 
 	private:
+		ImageType type_;
 		TextureSP texture_;
 		uint32 level_;
 

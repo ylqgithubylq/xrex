@@ -3,21 +3,38 @@ using regular expressions(Ctrl+Shift+F):
 
 temp note:
 
+
+util -> util & graphics type
+
+rework type checking mechanisms for TechniqueParameter in Material & Technique
+
+shader interface struct:
+	variable(common base for attribute, uniform buffer, shader rsource buffer)
+	attribute
+	texture uniform
+	image uniform
+	uniform buffer
+	shader resource buffer
+	atomic buffer
+	output
+framebuffer desc contain a output
+shader interface information structs contain corresponding information struct
+
 XML format:
 	include
 	Pipeline state
 	attribute
-	uniform
-	buffer
-	image output
-	buffer output (bind to framebuffer structure directly?)
+	uniform(texture, image)
+	uniform buffer
+	shader resource buffer
+	atomic buffer
+	output
 	common code(no tag)
 	stage code(with tag)
 
 
 
 bufferTexture do not use sampler
-add ClearState/ClearStateObject
 
 multi-thread?
 framebuffer / how to set channels from shader?

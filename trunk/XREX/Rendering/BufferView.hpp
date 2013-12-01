@@ -31,7 +31,7 @@ namespace XREX
 	public:
 		virtual ~BufferView();
 
-		BufferType GetType() const
+		BufferType GetType() const // TODO make this virtual, and remove BufferType type_;
 		{
 			return type_;
 		}
@@ -62,7 +62,7 @@ namespace XREX
 		BufferType type_;
 	};
 
-
+	// TODO move these two into RenderingLayout?
 	class XREX_API VertexBuffer
 		: public BufferView
 	{

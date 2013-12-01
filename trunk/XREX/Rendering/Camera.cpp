@@ -18,10 +18,6 @@ namespace XREX
 	}
 
 
-	Camera::~Camera()
-	{
-	}
-
 	void Camera::Update() const
 	{
 		static floatV3 const LocalTo = floatV3(0, 0, 1);

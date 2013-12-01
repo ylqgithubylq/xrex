@@ -82,7 +82,7 @@ uint32 NextAddress(Iterator current)
 
 struct LinkedListMergeSortter
 {
-	static const uint32 InsertionSortThresholdCount = 4;
+	static uint32 const InsertionSortThresholdCount = 4;
 
 	LinkedListMergeSortter(std::vector<uint32>& heads, std::vector<floatV4>& nodePool, floatV2 coordinate)
 	{

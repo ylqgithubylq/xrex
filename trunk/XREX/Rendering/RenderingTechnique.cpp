@@ -4,13 +4,12 @@
 
 
 #include "Base/XREXContext.hpp"
-#include "Base/Logger.hpp"
+#include "Rendering/RenderingFactory.hpp"
 #include "Rendering/ShaderProgram.hpp"
 #include "Rendering/Texture.hpp"
 #include "Rendering/Sampler.hpp"
 #include "Rendering/TextureImage.hpp"
-#include "Rendering/RenderingPipelineState.hpp"
-#include "Rendering/RenderingFactory.hpp"
+#include "Rendering/FrameBuffer.hpp"
 
 #include <algorithm>
 #include <sstream>
@@ -20,9 +19,94 @@ using std::vector;
 
 namespace XREX
 {
+	std::string const XREXPrefix = "XREX_";
 
 	TechniqueParameterSP const TechniqueParameter::NullTechniqueParameter = nullptr;
 
+
+
+
+	XREX::ElementType SimpleTextureParameter::GetType() const 
+	{
+		switch (GetValue()->GetType())
+		{
+		case Texture::TextureType::Texture1D:
+			return ElementType::Sampler1D;
+		case Texture::TextureType::Texture2D:
+			return ElementType::Sampler2D;
+		case Texture::TextureType::Texture3D:
+			return ElementType::Sampler3D;
+		case Texture::TextureType::TextureCube:
+			return ElementType::SamplerCube;
+		case Texture::TextureType::TextureBuffer:
+			return ElementType::SamplerBuffer;
+		default:
+			assert(false);
+			return ElementType::ElementTypeCount;
+		}
+	}
+
+
+	XREX::ElementType SimpleImageParameter::GetType() const 
+	{
+		switch (GetValue()->GetType())
+		{
+		case TextureImage::ImageType::Image1D:
+			return ElementType::Image1D;
+		case TextureImage::ImageType::Image2D:
+			return ElementType::Image2D;
+		case TextureImage::ImageType::Image3D:
+			return ElementType::Image3D;
+		case TextureImage::ImageType::ImageCube:
+			return ElementType::ImageCube;
+		case TextureImage::ImageType::ImageBuffer:
+			return ElementType::ImageBuffer;
+		default:
+			assert(false);
+			return ElementType::ElementTypeCount;
+		}
+	}
+
+	XREX::ElementType ImageParameter::GetType() const 
+	{
+		switch (GetBindingInformation().GetImageType())
+		{
+		case TextureImage::ImageType::Image1D:
+			return ElementType::Image1D;
+		case TextureImage::ImageType::Image2D:
+			return ElementType::Image2D;
+		case TextureImage::ImageType::Image3D:
+			return ElementType::Image3D;
+		case TextureImage::ImageType::ImageCube:
+			return ElementType::ImageCube;
+		case TextureImage::ImageType::ImageBuffer:
+			return ElementType::ImageBuffer;
+		default:
+			assert(false);
+			return ElementType::ElementTypeCount;
+		}
+	}
+
+
+	XREX::ElementType TextureParameter::GetType() const 
+	{
+		switch (GetBindingInformation().GetTextureType())
+		{
+		case Texture::TextureType::Texture1D:
+			return ElementType::Sampler1D;
+		case Texture::TextureType::Texture2D:
+			return ElementType::Sampler2D;
+		case Texture::TextureType::Texture3D:
+			return ElementType::Sampler3D;
+		case Texture::TextureType::TextureCube:
+			return ElementType::SamplerCube;
+		case Texture::TextureType::TextureBuffer:
+			return ElementType::SamplerBuffer;
+		default:
+			assert(false);
+			return ElementType::ElementTypeCount;
+		}
+	}
 
 
 
@@ -49,23 +133,23 @@ namespace XREX
 	void RenderingTechnique::SetFrameBuffer(FrameBufferSP const& framebuffer)
 	{
 #ifdef XREX_DEBUG
-		FrameBufferLayoutDescription const& outputLayout = program_->GetFragmentOutputLayout();
+		std::vector<FragmentOutputBindingInformation> const& outputLayout = program_->GetAllFragmentOutputInformations();
 		FrameBufferLayoutDescription const& framebufferLayout = framebuffer->GetLayoutDescription();
-		if (outputLayout.GetColorChannelCount() == framebufferLayout.GetColorChannelCount())
+		if (outputLayout.size() == framebufferLayout.GetColorChannelCount())
 		{
-			for (uint32 i = 0; i < outputLayout.GetAllColorChannels().size(); ++i)
+			for (uint32 i = 0; i < outputLayout.size(); ++i)
 			{
-				if (outputLayout.GetAllColorChannels()[i].GetChannel() != framebufferLayout.GetAllColorChannels()[i].GetChannel())
+				if (outputLayout[i].GetChannel() != framebufferLayout.GetAllColorChannels()[i].GetChannel())
 				{
 					assert(false);
 				}
 			}
 		}
-		if (outputLayout.GetDepthEnabled())
+		if (depthStencilState_->GetState().depthTestEnable)
 		{
 			assert(framebufferLayout.GetDepthEnabled());
 		}
-		if (outputLayout.GetStencilEnabled())
+		if (depthStencilState_->GetState().stencilTestEnable)
 		{
 			assert(framebufferLayout.GetStencilEnabled());
 		}
@@ -118,17 +202,23 @@ namespace XREX
 			std::string const& channel = bufferInformation.GetChannel();
 
 			std::shared_ptr<BufferParameter> bufferParameter = MakeSP<BufferParameter>(channel, bufferInformation);
-			ShaderResourceBufferSP buffer = XREXContext::GetInstance().GetRenderingFactory().CreateShaderResourceBuffer(bufferInformation, true);
+			// TODO using attribute in technique BufferInformation to specify whether to create buffer.
+			bool createBuffer = true;
+			if (channel.size() > XREXPrefix.size() && std::equal(XREXPrefix.begin(), XREXPrefix.end(), channel.begin()))
+			{ // channel start with XREXPrefix string, it is a XREX defined buffer, so do not create GraphicsBuffer for it.
+				createBuffer = false;
+			}
+			ShaderResourceBufferSP buffer = XREXContext::GetInstance().GetRenderingFactory().CreateShaderResourceBuffer(bufferInformation, createBuffer);
 			bufferParameter->SetValue(buffer);
 			AddParameter(bufferParameter);
 
 			auto bufferBinder = [bufferParameter] ()
 			{
 				ConcreteTechniqueParameter<ShaderResourceBufferSP> const& parameter = bufferParameter->As<ShaderResourceBufferSP>();
-				assert(parameter.GetType() == ElementType::ShaderResourceBuffer);
+				assert(parameter.GetType() == ElementType::Buffer);
 				BufferParameter const& resourceBufferParameter = CheckedCast<BufferParameter const&>(parameter);
 				assert(parameter.GetValue() != nullptr);
-				resourceBufferParameter.GetValue()->BindIndex(resourceBufferParameter.GetInformation().GetBindingIndex());
+				resourceBufferParameter.GetValue()->BindIndex(resourceBufferParameter.GetBindingInformation().GetBindingIndex());
 			};
 			parameterSetters_.push_back(std::move(bufferBinder));
 		}
@@ -150,29 +240,29 @@ namespace XREX
 				if (theTextureParameter.GetValue() == nullptr)
 				{
 					TextureSP defaultTexture;
-					switch (theTextureParameter.GetInformation().GetElementType())
+					switch (theTextureParameter.GetBindingInformation().GetTextureType())
 					{
-					case ElementType::Sampler1D:
+					case Texture::TextureType::Texture1D:
 						defaultTexture = XREXContext::GetInstance().GetRenderingFactory().GetBlackTexture1D();
 						break;
-					case ElementType::Sampler2D:
+					case Texture::TextureType::Texture2D:
 						defaultTexture = XREXContext::GetInstance().GetRenderingFactory().GetBlackTexture2D();
 						break;
-					case ElementType::Sampler3D:
+					case Texture::TextureType::Texture3D:
 						defaultTexture = XREXContext::GetInstance().GetRenderingFactory().GetBlackTexture3D();
 						break;
 					default:
 						assert(false); // not hacked
 						break;
 					}
-					defaultTexture->Bind(theTextureParameter.GetInformation().GetBindingIndex());
+					defaultTexture->Bind(theTextureParameter.GetBindingInformation().GetBindingIndex());
 				}
 				else
 				{
-					theTextureParameter.GetValue()->Bind(theTextureParameter.GetInformation().GetBindingIndex());
+					theTextureParameter.GetValue()->Bind(theTextureParameter.GetBindingInformation().GetBindingIndex());
 				}
 				assert(theTextureParameter.GetSampler() != nullptr);
-				theTextureParameter.GetSampler()->Bind(theTextureParameter.GetInformation().GetBindingIndex());
+				theTextureParameter.GetSampler()->Bind(theTextureParameter.GetBindingInformation().GetBindingIndex());
 			};
 			parameterSetters_.push_back(std::move(textureBinder));
 		}
@@ -189,7 +279,7 @@ namespace XREX
 				assert(IsImageType(parameter.GetType()));
 				ImageParameter const& theImageParameter = CheckedCast<ImageParameter const&>(parameter);
 				assert(theImageParameter.GetValue() != nullptr);
-				ImageInformation const& imageInformation = theImageParameter.GetInformation();
+				ImageBindingInformation const& imageInformation = theImageParameter.GetBindingInformation();
 				theImageParameter.GetValue()->Bind(imageInformation.GetBindingIndex(), imageInformation.GetTexelFormat(), imageInformation.GetAccessType());
 			};
 			parameterSetters_.push_back(std::move(imageBinder));
@@ -315,187 +405,5 @@ namespace XREX
 		parameters_.push_back(parameter);
 	}
 
-
-
-
-
-
-	TechniqueBuilder::TechniqueBuilder(std::string const& name)
-		: name_(name), stageCodes_(static_cast<uint32>(ShaderObject::ShaderType::CountOfShaderTypes))
-	{
-	}
-
-	void TechniqueBuilder::SpecifyFragmentOutput(FrameBufferLayoutDescription const& description)
-	{
-		framebufferDescription_ = description;
-	}
-
-	void TechniqueBuilder::SpecifyImageFormat(std::string const& channel, TexelFormat format, AccessType accessType)
-	{
-		imageChannelInformations_.push_back(std::make_tuple(channel, format, accessType));
-	}
-
-
-	void TechniqueBuilder::SetSamplerChannelToSamplerStateMapping(std::string const& channel, std::string samplerName)
-	{
-		auto found = samplerStates_.find(samplerName);
-		assert(found != samplerStates_.end());
-		samplerChannelToSamplerStateMappings_[channel] = samplerName;
-	}
-	
-	XREX::RenderingTechniqueSP TechniqueBuilder::GetRenderingTechnique()
-	{
-		if (technique_.expired())
-		{
-			return Create();
-		}
-		return technique_.lock();
-	}
-
-	RenderingTechniqueSP TechniqueBuilder::Create()
-	{
-		bool succeed = true;
-		BuildMacroStrings();
-
-		ProgramObjectSP program = XREXContext::GetInstance().GetRenderingFactory().CreateProgramObject();
-		for (uint32 stageIndex = 0; stageIndex < static_cast<uint32>(ShaderObject::ShaderType::CountOfShaderTypes); ++stageIndex)
-		{
-			ShaderObject::ShaderType stage = static_cast<ShaderObject::ShaderType>(stageIndex);
-			if (GetStageCode(stage) != nullptr)
-			{
-				std::vector<std::string const*> codes = GetFullShaderCode(stage);
-				ShaderObjectSP shader = XREXContext::GetInstance().GetRenderingFactory().CreateShaderObject(stage);
-				bool compileResult = shader->Compile(codes);
-				if (!compileResult)
-				{
-					XREXContext::GetInstance().GetLogger().LogLine("shader compile failed:").LogLine(shader->GetCompileError());
-					succeed = false;
-				}
-				else
-				{
-					program->AttachShader(shader);
-				}
-			}
-		}
-
-		program->SpecifyFragmentOutputs(framebufferDescription_);
-		for (auto& image : imageChannelInformations_)
-		{
-			program->SpecifyImageFormat(std::get<0>(image), std::get<1>(image), std::get<2>(image));
-		}
-		bool linkResult = program->Link();
-		if (!linkResult)
-		{
-			XREXContext::GetInstance().GetLogger().LogLine("shader link failed:").LogLine(program->GetLinkError());
-			succeed = false;
-		}
-
-		if (depthStencilState_.depthEnable)
-		{
-			if (!framebufferDescription_.GetDepthEnabled())
-			{
-				XREXContext::GetInstance().GetLogger().LogLine("depth state error: depth in technique is enabled but frame buffer is not.");
-				succeed = false;
-			}
-		}
-		if (depthStencilState_.stencilEnable)
-		{
-			if (!framebufferDescription_.GetStencilEnabled())
-			{
-				XREXContext::GetInstance().GetLogger().LogLine("depth state error: stencil in technique is enabled but frame buffer is not.");
-				succeed = false;
-			}
-		}
-
-		RasterizerStateObjectSP rasterizer = XREXContext::GetInstance().GetRenderingFactory().CreateRasterizerStateObject(rasterizerState_);
-		DepthStencilStateObjectSP depthStencil = XREXContext::GetInstance().GetRenderingFactory().CreateDepthStencilStateObject(depthStencilState_);
-		BlendStateObjectSP blend = XREXContext::GetInstance().GetRenderingFactory().CreateBlendStateObject(blendState_);
-
-		std::unordered_map<std::string, SamplerSP> samplers;
-		std::unordered_map<std::string, SamplerSP> createdSamplers;
-		for (auto& samplerState : samplerStates_)
-		{
-			SamplerSP sampler = XREXContext::GetInstance().GetRenderingFactory().CreateSampler(samplerState.second);
-			createdSamplers[samplerState.first] = sampler;
-		}
-		for (auto& samplerChannel : samplerChannelToSamplerStateMappings_)
-		{
-			auto found = createdSamplers.find(samplerChannel.second);
-			if (found != createdSamplers.end())
-			{
-				samplers[samplerChannel.first] = found->second;
-			}
-			else
-			{
-				XREXContext::GetInstance().GetLogger().BeginLine().Log("sampler channel: ").Log(samplerChannel.first)
-					.Log(" mapped sampler name: ").Log(samplerChannel.second).Log(" not found.").EndLine();
-				succeed = false;
-			}
-		}
-
-		RenderingTechniqueSP renderingTechnique;
-		if (succeed)
-		{
-			renderingTechnique = MakeSP<RenderingTechnique>(name_, program, rasterizer, depthStencil, blend, std::move(samplers));
-			technique_ = renderingTechnique;
-		}
-		return renderingTechnique;
-	}
-
-
-	void TechniqueBuilder::BuildMacroStrings()
-	{
-		for (auto& macro : macros_)
-		{
-			std::stringstream ss;
-			ss << "#define " << macro.first << " " << macro.second << std::endl;
-			std::string s = ss.str();
-			generatedMacros_.push_back(std::move(s));
-		}
-	}
-
-	std::vector<std::string const*> TechniqueBuilder::GetFullShaderCode(ShaderObject::ShaderType stage) const
-	{
-		if (GetStageCode(stage) == nullptr)
-		{
-			assert(false);
-		}
-		std::unordered_set<TechniqueBuilder const*> included;
-		std::vector<TechniqueBuilder const*> includeList;
-
-		// recursively add included effects in order.
-		std::function<void(TechniqueBuilder const& technique)> makeIncludeLists = [&makeIncludeLists, &includeList, &included] (TechniqueBuilder const& technique)
-		{
-			// process includes first
-			for (auto& include : technique.GetAllIncludes())
-			{
-				makeIncludeLists(*include);
-			}
-			// then add technique itself
-			if (included.find(&technique) == included.end()) // only technique not included will be added.
-			{
-				included.insert(&technique);
-				includeList.push_back(&technique);
-			};
-		};
-
-		makeIncludeLists(*this);
-
-		std::vector<std::string const*> result;
-		for (auto& generatedMacro : generatedMacros_)
-		{
-			result.push_back(&generatedMacro);
-		}
-		for (auto include : includeList)
-		{
-			for (auto code : include->GetAllCommonCodes())
-			{
-				result.push_back(code.get());
-			}
-		}
-		result.push_back(GetStageCode(stage).get());
-
-		return result;
-	}
 
 }

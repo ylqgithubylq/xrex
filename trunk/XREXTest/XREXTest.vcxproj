@@ -172,8 +172,6 @@
     <ClInclude Include="GeneralTest.h" />
     <ClInclude Include="RenderToTextureTest.h" />
     <ClInclude Include="TestFile.hpp" />
-    <ClInclude Include="TextureTest.h" />
-    <ClInclude Include="TextureTestShaderCodes.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GeneralTest.cpp" />
@@ -186,8 +184,6 @@
     </ClCompile>
     <ClCompile Include="RenderToTextureTest.cpp" />
     <ClCompile Include="TestFile.cpp" />
-    <ClCompile Include="TextureTest.cpp" />
-    <ClCompile Include="TextureTestShaderCodes.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\XREX\XREX.vcxproj">

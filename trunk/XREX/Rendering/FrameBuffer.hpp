@@ -5,7 +5,6 @@
 
 namespace XREX
 {
-	struct BlendState;
 
 	class XREX_API FrameBufferLayoutDescription
 	{

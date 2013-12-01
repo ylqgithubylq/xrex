@@ -14,7 +14,7 @@ namespace XREX
 	}
 
 	DepthStencilState::DepthStencilState()
-		: depthEnable(true), depthWriteMask(true), depthFunction(CompareFunction::Less), stencilEnable(false),
+		: depthTestEnable(true), depthWriteMask(true), depthFunction(CompareFunction::Less), stencilTestEnable(false),
 		frontStencilFunction(CompareFunction::AlwaysPass),
 		frontStencilReadMask(std::numeric_limits<decltype(frontStencilReadMask)>::max()),
 		frontStencilWriteMask(std::numeric_limits<decltype(frontStencilReadMask)>::max()),
@@ -92,8 +92,8 @@ namespace XREX
 
 	void DepthStencilStateObject::Bind(uint16 frontStencilReference, uint16 backStencilReference)
 	{
-		SetGLState(gl::GL_DEPTH_TEST, state_.depthEnable);
-		SetGLState(gl::GL_STENCIL_TEST, state_.stencilEnable);
+		SetGLState(gl::GL_DEPTH_TEST, state_.depthTestEnable);
+		SetGLState(gl::GL_STENCIL_TEST, state_.stencilTestEnable);
 		gl::DepthMask(state_.depthWriteMask);
 		gl::DepthFunc(glDepthFunction_);
 		gl::StencilFuncSeparate(gl::GL_FRONT, glFrontStencilFunction_, frontStencilReference, state_.frontStencilReadMask);

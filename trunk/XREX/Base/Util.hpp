@@ -237,6 +237,39 @@ namespace XREX
 	}
 
 
+	template<typename T>
+	struct ExtractTemplateType
+	{
+		typedef T FullType;
+		typedef void Type0;
+		typedef void Type1;
+		typedef void Type2;
+	};
+	template<template<typename> class X, typename T0>
+	struct ExtractTemplateType<X<T0>>
+	{
+		typedef X<T0> FullType;
+		typedef T0 Type0;
+		typedef void Type1;
+		typedef void Type2;
+	};
+	template<template<typename, typename> class X, typename T0, typename T1>
+	struct ExtractTemplateType<X<T0, T1>>
+	{
+		typedef X<T0, T1> FullType;
+		typedef T0 Type0;
+		typedef T1 Type1;
+		typedef void Type2;
+	};
+	template<template<typename, typename, typename> class X, typename T0, typename T1, typename T2>
+	struct ExtractTemplateType<X<T0, T1, T2>>
+	{
+		typedef X<T0, T1, T2> FullType;
+		typedef T0 Type0;
+		typedef T1 Type1;
+		typedef T2 Type2;
+	};
+
 
 	enum class ElementType
 	{
@@ -272,6 +305,8 @@ namespace XREX
 		DoubleV3,
 		DoubleV4,
 		DoubleM44,
+
+		Shadow, // Shadow texture sampler
 
 		Sampler, // for TechniqueParameter use
 
@@ -309,12 +344,11 @@ namespace XREX
 		IntImageBuffer,
 		UintImageBuffer,
 
-		Buffer,
-		ShaderResourceBuffer,
+		Buffer, // for TechniqueParameter use
 
 		AtomicUint32Counter,
 
-		ParameterTypeCount,
+		ElementTypeCount,
 	};
 
 	XREX_API bool IsSamplerType(ElementType type);
@@ -333,7 +367,7 @@ namespace XREX
 	template <typename T>
 	struct TypeToElementType
 	{
-		static ElementType const Type = ElementType::ParameterTypeCount;
+		static ElementType const Type = ElementType::ElementTypeCount;
 	};
 	template <>
 	struct TypeToElementType<bool>
@@ -421,21 +455,7 @@ namespace XREX
 		static ElementType const Type = ElementType::DoubleM44;
 	};
 
-	template <>
-	struct TypeToElementType<TextureSP>
-	{
-		static ElementType const Type = ElementType::Sampler;
-	};
-	template <>
-	struct TypeToElementType<TextureImageSP>
-	{
-		static ElementType const Type = ElementType::Image;
-	};
-	template <>
-	struct TypeToElementType<ShaderResourceBufferSP>
-	{
-		static ElementType const Type = ElementType::ShaderResourceBuffer;
-	};
+
 
 	enum class TexelFormat
 	{
@@ -500,6 +520,8 @@ namespace XREX
 
 		TexelFormatCount
 	};
+
+	XREX_API ElementType GetCorrespondingElementType(TexelFormat format);
 
 	XREX_API uint32 GetTexelSizeInBytes(TexelFormat format);
 

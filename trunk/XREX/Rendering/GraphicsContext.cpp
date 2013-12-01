@@ -28,7 +28,7 @@ namespace XREX
 	namespace
 	{
 		int32 const MinMajorVersion = 4;
-		int32 const MinMinorVersion = 4;
+		int32 const MinMinorVersion = 3;
 	}
 
 	struct GraphicsContext::GLHideWindows_
@@ -123,7 +123,7 @@ namespace XREX
 		if (glload::LoadWinFunctions(glHideWindows_->hDC_) == glload::LS_LOAD_FAILED)
 		{
 			XREXContext::GetInstance().GetLogger().LogLine("wgl initialize failed.");
-			return;
+			assert(false);
 		}
 
 
@@ -249,7 +249,7 @@ namespace XREX
 		if (majorVersion_ < MinMajorVersion && minorVersion_ < MinMinorVersion)
 		{
 			XREXContext::GetInstance().GetLogger().Log("OpenGL version too low to run XREX, ").Log(majorVersion_).Log(".").Log(MinMinorVersion).Log(" required.");
-			return;
+			assert(false);
 		}
 
 		uint32 glError = gl::GetError();
