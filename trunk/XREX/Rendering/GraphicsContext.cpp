@@ -189,6 +189,7 @@ namespace XREX
 
 		int32 versions[][2] =
 		{
+			{ 4, 4 },
 			{ 4, 3 },
 			{ 4, 2 },
 			{ 4, 1 },

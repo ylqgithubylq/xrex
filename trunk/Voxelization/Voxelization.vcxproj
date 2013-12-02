@@ -30,6 +30,7 @@
     <None Include="Shaders\ConeTracing.glsl" />
     <None Include="Shaders\ListGeneration.glsl" />
     <None Include="Shaders\ListSort.glsl" />
+    <None Include="Shaders\SimpleVoxelGeneration.glsl" />
     <None Include="Shaders\VoxelGeneration.glsl" />
     <None Include="Shaders\VoxelMerge.glsl" />
   </ItemGroup>
