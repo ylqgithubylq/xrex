@@ -56,5 +56,8 @@
       <Filter>Effect Files</Filter>
     </None>
     <None Include="..\GLActivity.nvact" />
+    <None Include="Shaders\SimpleVoxelGeneration.glsl">
+      <Filter>Effect Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

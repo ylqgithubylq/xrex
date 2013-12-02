@@ -550,9 +550,9 @@ namespace XREX
 			}
 			if (elementCount == 0) // non-array element
 			{
-				elementCount = 1; assert(false); // TODO temp, remove assert
+				elementCount = 1;
 			}
-			for (uint32 offset = 0; offset < elementCount; ++offset)
+			for (uint32 offset = 0; offset < elementCount; ++offset) // TODO array attribute location can be bound like this?
 			{
 				gl::BindAttribLocation(glProgramID_, location, attributeInput.GetChannel().c_str());
 				location += matrixElement ? 4 : 1;
@@ -804,7 +804,7 @@ namespace XREX
 		{ // TODO transform feedback
 
 		}
-		gl::UseProgram(0);
+		
 	}
 
 	namespace
