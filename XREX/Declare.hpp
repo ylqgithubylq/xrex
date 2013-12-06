@@ -103,13 +103,30 @@ namespace XREX
 	typedef std::shared_ptr<IndexBuffer> IndexBufferSP;
 	class ShaderResourceBuffer;
 	typedef std::shared_ptr<ShaderResourceBuffer> ShaderResourceBufferSP;
-	class Texture;
-	typedef std::shared_ptr<Texture> TextureSP;
 	class Sampler;
 	typedef std::shared_ptr<Sampler> SamplerSP;
+	class Texture;
+	typedef std::shared_ptr<Texture> TextureSP;
+	class Texture1D;
+	typedef std::shared_ptr<Texture1D> Texture1DSP;
+	class Texture2D;
+	typedef std::shared_ptr<Texture2D> Texture2DSP;
+	class Texture3D;
+	typedef std::shared_ptr<Texture3D> Texture3DSP;
+	class TextureCube;
+	typedef std::shared_ptr<TextureCube> TextureCubeSP;
+	class TextureBuffer;
+	typedef std::shared_ptr<TextureBuffer> TextureBufferSP;
 	class TextureImage;
 	typedef std::shared_ptr<TextureImage> TextureImageSP;
-
+	class Texture1DImage;
+	typedef std::shared_ptr<Texture1DImage> Texture1DImageSP;
+	class Texture2DImage;
+	typedef std::shared_ptr<Texture2DImage> Texture2DImageSP;
+	class Texture3DImage;
+	typedef std::shared_ptr<Texture3DImage> Texture3DImageSP;
+	class TextureBufferImage;
+	typedef std::shared_ptr<TextureBufferImage> TextureBufferImageSP;
 	class FrameBuffer;
 	typedef std::shared_ptr<FrameBuffer> FrameBufferSP;
 

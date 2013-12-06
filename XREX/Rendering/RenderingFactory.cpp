@@ -177,48 +177,48 @@ namespace XREX
 		return MakeSP<Sampler>(samplerState);
 	}
 
-	std::shared_ptr<Texture1D> RenderingFactory::CreateTexture1D(Texture::DataDescription<1> const& description, bool generateMipmap)
+	Texture1DSP RenderingFactory::CreateTexture1D(Texture::DataDescription<1> const& description, bool generateMipmap)
 	{
 		return MakeSP<Texture1D>(description, generateMipmap);
 	}
 
-	std::shared_ptr<Texture1D> RenderingFactory::CreateTexture1D(Texture::DataDescription<1> const& description, std::vector<void const*> const& data, bool generateMipmap)
+	Texture1DSP RenderingFactory::CreateTexture1D(Texture::DataDescription<1> const& description, std::vector<void const*> const& data, bool generateMipmap)
 	{
 		return MakeSP<Texture1D>(description, data, generateMipmap);
 	}
 
-	std::shared_ptr<Texture2D> RenderingFactory::CreateTexture2D(Texture::DataDescription<2> const& description, bool generateMipmap)
+	Texture2DSP RenderingFactory::CreateTexture2D(Texture::DataDescription<2> const& description, bool generateMipmap)
 	{
 		return MakeSP<Texture2D>(description, generateMipmap);
 	}
 
-	std::shared_ptr<Texture2D> RenderingFactory::CreateTexture2D(Texture::DataDescription<2> const& description, std::vector<void const*> const& data, bool generateMipmap)
+	Texture2DSP RenderingFactory::CreateTexture2D(Texture::DataDescription<2> const& description, std::vector<void const*> const& data, bool generateMipmap)
 	{
 		return MakeSP<Texture2D>(description, data, generateMipmap);
 	}
 
-	std::shared_ptr<Texture3D> RenderingFactory::CreateTexture3D(Texture::DataDescription<3> const& description, bool generateMipmap)
+	Texture3DSP RenderingFactory::CreateTexture3D(Texture::DataDescription<3> const& description, bool generateMipmap)
 	{
 		return MakeSP<Texture3D>(description, generateMipmap);
 	}
 
-	std::shared_ptr<Texture3D> RenderingFactory::CreateTexture3D(Texture::DataDescription<3> const& description, std::vector<void const*> const& data, bool generateMipmap)
+	Texture3DSP RenderingFactory::CreateTexture3D(Texture::DataDescription<3> const& description, std::vector<void const*> const& data, bool generateMipmap)
 	{
 		return MakeSP<Texture3D>(description, data, generateMipmap);
 	}
 
-	std::shared_ptr<TextureCube> RenderingFactory::CreateTextureCube(Texture::DataDescription<2> const& description, bool generateMipmap)
+	TextureCubeSP RenderingFactory::CreateTextureCube(Texture::DataDescription<2> const& description, bool generateMipmap)
 	{
 		assert(false);
 		return nullptr;
 	}
-	std::shared_ptr<TextureCube> RenderingFactory::CreateTextureCube(Texture::DataDescription<2> const& description, std::array<std::vector<void const*>, 6> const& data, bool generateMipmap)
+	TextureCubeSP RenderingFactory::CreateTextureCube(Texture::DataDescription<2> const& description, std::array<std::vector<void const*>, 6> const& data, bool generateMipmap)
 	{
 		assert(false);
 		return nullptr;
 	}
 
-	std::shared_ptr<TextureBuffer> RenderingFactory::CreateTextureBuffer(GraphicsBufferSP const& textureBuffer, TexelFormat format)
+	TextureBufferSP RenderingFactory::CreateTextureBuffer(GraphicsBufferSP const& textureBuffer, TexelFormat format)
 	{
 		return MakeSP<TextureBuffer>(textureBuffer, format);
 	}

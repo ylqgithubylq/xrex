@@ -3,7 +3,6 @@
 #include "ProgramConnector.hpp"
 
 #include "Rendering/RenderingLayout.hpp"
-#include "Rendering/BufferView.hpp"
 #include "Rendering/ShaderProgram.hpp"
 #include "Rendering/GL/GLUtil.hpp"
 
@@ -57,17 +56,21 @@ namespace XREX
 					case ElementType::FloatV2:
 					case ElementType::FloatV3:
 					case ElementType::FloatV4:
-					case ElementType::FloatM44: // TODO matrix should set 4 times, each per column
 						gl::VertexAttribPointer(lastAttributeLocations[bufferIndex][i], GetElementPrimitiveCount(channelLayout.elementType), GLTypeFromElementType(GetElementPrimitiveType(channelLayout.elementType)),
 							channelLayout.needNormalize, channelLayout.strip, reinterpret_cast<void const*>(channelLayout.start));
+						break;
+					case ElementType::FloatM44: // TODO matrix should set 4 times, each per column
+						assert(false);
 						break;
 					case ElementType::Double:
 					case ElementType::DoubleV2:
 					case ElementType::DoubleV3:
 					case ElementType::DoubleV4:
-					case ElementType::DoubleM44: // TODO matrix should set 4 times, each per column
 						gl::VertexAttribLPointer(lastAttributeLocations[bufferIndex][i], GetElementPrimitiveCount(channelLayout.elementType), GLTypeFromElementType(GetElementPrimitiveType(channelLayout.elementType)),
 							channelLayout.strip, reinterpret_cast<void const*>(channelLayout.start));
+						break;
+					case ElementType::DoubleM44: // TODO matrix should set 4 times, each per column
+						assert(false);
 						break;
 					case ElementType::Void:
 					case ElementType::Bool:

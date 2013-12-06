@@ -89,7 +89,7 @@ namespace XREX
 		{
 			for (uint32 i = 0; i < Dimension; ++i)
 			{
-				vectors_[i] = VectorT<T, Dimension>(&right[i * 4]);
+				vectors_[i] = VectorT<T, Dimension>(&right[i * Dimension]);
 			}
 		}
 		/*

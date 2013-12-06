@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Declare.hpp"
+
+#include "Rendering/GraphicsType.hpp"
 #include "Rendering/BufferView.hpp"
 #include "Rendering/Texture.hpp"
 #include "Rendering/TextureImage.hpp"
@@ -55,17 +57,21 @@ namespace XREX
 	{
 	public:
 		FragmentOutputBindingInformation()
-			: location_(-1), index_(0)
+			: texelType_(ElementType::ElementTypeCount), location_(-1), index_(0)
 		{
 		}
-		FragmentOutputBindingInformation(std::string const& channel, int32 location, int32 index)
-			: channel_(channel), location_(location), index_(index)
+		FragmentOutputBindingInformation(std::string const& channel, ElementType texelType, int32 location, int32 index)
+			: channel_(channel), texelType_(texelType), location_(location), index_(index)
 		{
 		}
 
 		std::string const& GetChannel() const
 		{
 			return channel_;
+		}
+		ElementType GetTexelType() const
+		{
+			return texelType_;
 		}
 		int32 GetLocation() const
 		{
@@ -77,6 +83,7 @@ namespace XREX
 		}
 	private:
 		std::string channel_;
+		ElementType texelType_;
 		int32 location_;
 		int32 index_;
 	};

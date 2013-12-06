@@ -67,35 +67,4 @@ namespace XREX
 		return true;
 	}
 
-
-
-	VertexBuffer::VertexBuffer(DataLayoutDescription&& layoutDescription)
-		: BufferView(BufferType::Vertex), layoutDescription_(std::move(layoutDescription))
-	{
-	}
-
-	VertexBuffer::VertexBuffer(DataLayoutDescription&& layoutDescription, GraphicsBufferSP const& buffer)
-		: BufferView(BufferType::Vertex, buffer), layoutDescription_(std::move(layoutDescription))
-	{
-	}
-
-
-
-	IndexBuffer::IndexBuffer(TopologicalType topologicalType, ElementType elementType, uint32 elementCount)
-		: BufferView(BufferType::Index), topologicalType_(topologicalType), elementType_(elementType), elementCount_(elementCount)
-	{
-	}
-
-	IndexBuffer::IndexBuffer(TopologicalType topologicalType, ElementType elementType, uint32 elementCount, GraphicsBufferSP const& buffer)
-		: BufferView(BufferType::Index, buffer), topologicalType_(topologicalType), elementType_(elementType), elementCount_(elementCount)
-	{
-		assert(SetBufferCheck(buffer));
-	}
-
-	bool IndexBuffer::SetBufferCheck(GraphicsBufferSP const& newBuffer)
-	{
-		return GetElementSizeInBytes(elementType_) * elementCount_ == newBuffer->GetSize();
-	}
-
-
 }
