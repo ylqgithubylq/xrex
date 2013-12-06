@@ -83,14 +83,33 @@ namespace XREX
 	template class XREX_API DimensionalTextureImage<3>;
 
 
-	Texture3DLayerImage::Texture3DLayerImage(TextureSP const& texture, uint32 layer, uint32 level)
+	Texture1DImage::Texture1DImage(Texture1DSP const& texture, uint32 level)
+		: DimensionalTextureImage(texture, level)
+	{
+	}
+
+	Texture2DImage::Texture2DImage(TextureSP const& texture, uint32 level)
+		: DimensionalTextureImage(texture, level)
+	{
+	}
+	Texture2DImage::Texture2DImage(Texture2DSP const& texture, uint32 level)
+		: DimensionalTextureImage(texture, level)
+	{
+	}
+
+	Texture3DImage::Texture3DImage(Texture3DSP const& texture, uint32 level)
+		: DimensionalTextureImage(texture, level)
+	{
+	}
+
+	Texture3DLayerImage::Texture3DLayerImage(Texture3DSP const& texture, uint32 layer, uint32 level)
 		: Texture2DImage(texture, level), layer_(layer)
 	{
 	}
 
 
 
-	TextureCubeImage::TextureCubeImage(TextureSP const& texture, CubeFace face, uint32 level)
+	TextureCubeFaceImage::TextureCubeFaceImage(TextureCubeSP const& texture, CubeFace face, uint32 level)
 		: Texture2DImage(texture, level), face_(face)
 	{
 	}
@@ -107,6 +126,7 @@ namespace XREX
 	{
 		return CheckedSPCast<TextureBuffer>(GetTexture())->GetSize();
 	}
+
 
 
 

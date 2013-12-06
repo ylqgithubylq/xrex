@@ -2,6 +2,7 @@
 
 #include "Declare.hpp"
 
+#include "Rendering/GraphicsType.hpp"
 
 namespace XREX
 {
@@ -23,6 +24,10 @@ namespace XREX
 			std::string const& GetChannel() const
 			{
 				return channel_;
+			}
+			ElementType GetTexelType() const
+			{
+				return XREX::GetTexelType(format_);
 			}
 			TexelFormat GetFormat() const
 			{

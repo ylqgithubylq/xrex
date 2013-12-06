@@ -2,7 +2,7 @@
 
 #include "Declare.hpp"
 #include "Rendering/GraphicsBuffer.hpp"
-#include "Rendering/BufferView.hpp"
+#include "Rendering/RenderingLayout.hpp"
 #include "Rendering/Texture.hpp"
 #include "Rendering/Sampler.hpp"
 #include "Rendering/RenderingPipelineState.hpp"
@@ -124,10 +124,10 @@ namespace XREX
 
 		SamplerSP CreateSampler(SamplerState const& samplerState);
 
-		std::shared_ptr<Texture1D> CreateTexture1D(Texture::DataDescription<1> const& description, bool generateMipmap);
-		std::shared_ptr<Texture1D> CreateTexture1D(Texture::DataDescription<1> const& description, std::vector<void const*> const& data, bool generateMipmap);
+		Texture1DSP CreateTexture1D(Texture::DataDescription<1> const& description, bool generateMipmap);
+		Texture1DSP CreateTexture1D(Texture::DataDescription<1> const& description, std::vector<void const*> const& data, bool generateMipmap);
 		template <typename T>
-		std::shared_ptr<Texture1D> CreateTexture1D(Texture::DataDescription<1> const& description, std::vector<std::vector<T>> const& data, bool generateMipmap)
+		Texture1DSP CreateTexture1D(Texture::DataDescription<1> const& description, std::vector<std::vector<T>> const& data, bool generateMipmap)
 		{
 			std::vector<void const*> rawData(data.size());
 			for (uint32 i = 0; i < data.size(); ++i)
@@ -136,10 +136,10 @@ namespace XREX
 			}
 			return CreateTexture1D(description, rawData, generateMipmap);
 		}
-		std::shared_ptr<Texture2D> CreateTexture2D(Texture::DataDescription<2> const& description, bool generateMipmap);
-		std::shared_ptr<Texture2D> CreateTexture2D(Texture::DataDescription<2> const& description, std::vector<void const*> const& data, bool generateMipmap);
+		Texture2DSP CreateTexture2D(Texture::DataDescription<2> const& description, bool generateMipmap);
+		Texture2DSP CreateTexture2D(Texture::DataDescription<2> const& description, std::vector<void const*> const& data, bool generateMipmap);
 		template <typename T>
-		std::shared_ptr<Texture2D> CreateTexture2D(Texture::DataDescription<2> const& description, std::vector<std::vector<T>> const& data, bool generateMipmap)
+		Texture2DSP CreateTexture2D(Texture::DataDescription<2> const& description, std::vector<std::vector<T>> const& data, bool generateMipmap)
 		{
 			std::vector<void const*> rawData(data.size());
 			for (uint32 i = 0; i < data.size(); ++i)
@@ -148,10 +148,10 @@ namespace XREX
 			}
 			return CreateTexture2D(description, rawData, generateMipmap);
 		}
-		std::shared_ptr<Texture3D> CreateTexture3D(Texture::DataDescription<3> const& description, bool generateMipmap);
-		std::shared_ptr<Texture3D> CreateTexture3D(Texture::DataDescription<3> const& description, std::vector<void const*> const& data, bool generateMipmap);
+		Texture3DSP CreateTexture3D(Texture::DataDescription<3> const& description, bool generateMipmap);
+		Texture3DSP CreateTexture3D(Texture::DataDescription<3> const& description, std::vector<void const*> const& data, bool generateMipmap);
 		template <typename T>
-		std::shared_ptr<Texture3D> CreateTexture3D(Texture::DataDescription<3> const& description, std::vector<std::vector<T>> const& data, bool generateMipmap)
+		Texture3DSP CreateTexture3D(Texture::DataDescription<3> const& description, std::vector<std::vector<T>> const& data, bool generateMipmap)
 		{
 			std::vector<void const*> rawData(data.size());
 			for (uint32 i = 0; i < data.size(); ++i)
@@ -160,14 +160,14 @@ namespace XREX
 			}
 			return CreateTexture3D(description, rawData, generateMipmap);
 		}
-		std::shared_ptr<TextureCube> CreateTextureCube(Texture::DataDescription<2> const& description, bool generateMipmap);
-		std::shared_ptr<TextureCube> CreateTextureCube(Texture::DataDescription<2> const& description, std::array<std::vector<void const*>, 6> const& data, bool generateMipmap);
+		TextureCubeSP CreateTextureCube(Texture::DataDescription<2> const& description, bool generateMipmap);
+		TextureCubeSP CreateTextureCube(Texture::DataDescription<2> const& description, std::array<std::vector<void const*>, 6> const& data, bool generateMipmap);
 		template <typename T>
-		std::shared_ptr<TextureCube> CreateTextureCube(Texture::DataDescription<2> const& description, std::array<std::vector<std::vector<T>>, 6> const& data, bool generateMipmap)
+		TextureCubeSP CreateTextureCube(Texture::DataDescription<2> const& description, std::array<std::vector<std::vector<T>>, 6> const& data, bool generateMipmap)
 		{
 			return CreateTextureCube(description, data, generateMipmap);
 		}
-		std::shared_ptr<TextureBuffer> CreateTextureBuffer(GraphicsBufferSP const& textureBuffer, TexelFormat format);
+		TextureBufferSP CreateTextureBuffer(GraphicsBufferSP const& textureBuffer, TexelFormat format);
 
 		FrameBufferSP CreateFrameBuffer(FrameBufferLayoutDescription const& description, std::unordered_map<std::string, TextureImageSP>&& colorTextures, FrameBuffer::DepthStencilBinding const& depthStencil);
 

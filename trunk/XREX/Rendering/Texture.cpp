@@ -188,37 +188,55 @@ namespace XREX
 		assert(level < mipmapCount_);
 		return MakeSP<DimensionalTextureImage<Dimension>>(shared_from_this(), level);
 	}
-
-
-
-	Texture3D::Texture3D(DataDescription<3> const& description, bool generateMipmap)
-		: DimensionalTexture<3>(description, generateMipmap)
-	{
-	}
-
-	Texture3D::Texture3D(DataDescription<3> const& description, std::vector<void const*> const& data, bool generateMipmap)
-		: DimensionalTexture<3>(description, data, generateMipmap)
-	{
-	}
-
-	std::shared_ptr<Texture2DImage> Texture3D::GetLayerImage(uint32 layer, uint32 level)
-	{
-		assert(layer < GetDescription().GetSizes().Z());
-		assert(level < GetMipmapCount());
-		return MakeSP<Texture3DLayerImage>(shared_from_this(), layer, level);
-	}
-
 	// instantiate 1, 2, 3 Dimensional Texture specialization
 	template class XREX_API DimensionalTexture<1>;
 	template class XREX_API DimensionalTexture<2>;
 	template class XREX_API DimensionalTexture<3>;
 
+	Texture1D::Texture1D(DataDescription<1> const& description, bool generateMipmap)
+		: DimensionalTexture(description, generateMipmap)
+	{
+	}
+
+	Texture1D::Texture1D(DataDescription<1> const& description, std::vector<void const*> const& data, bool generateMipmap)
+		: DimensionalTexture(description, data, generateMipmap)
+	{
+	}
+
+	Texture2D::Texture2D(DataDescription<2> const& description, bool generateMipmap)
+		: DimensionalTexture(description, generateMipmap)
+	{
+	}
+
+	Texture2D::Texture2D(DataDescription<2> const& description, std::vector<void const*> const& data, bool generateMipmap)
+		: DimensionalTexture(description, data, generateMipmap)
+	{
+	}
+
+	Texture3D::Texture3D(DataDescription<3> const& description, bool generateMipmap)
+		: DimensionalTexture(description, generateMipmap)
+	{
+	}
+
+	Texture3D::Texture3D(DataDescription<3> const& description, std::vector<void const*> const& data, bool generateMipmap)
+		: DimensionalTexture(description, data, generateMipmap)
+	{
+	}
+
+	Texture2DImageSP Texture3D::GetLayerImage(uint32 layer, uint32 level)
+	{
+		assert(layer < GetDescription().GetSizes().Z());
+		assert(level < GetMipmapCount());
+		return MakeSP<Texture3DLayerImage>(std::static_pointer_cast<Texture3D>(shared_from_this()), layer, level);
+	}
 
 
-	std::shared_ptr<TextureCubeImage> TextureCube::GetImage(CubeFace face, uint32 level)
+
+
+	Texture2DImageSP TextureCube::GetFaceImage(CubeFace face, uint32 level)
 	{
 		assert(level < mipmapCount_);
-		return MakeSP<TextureCubeImage>(shared_from_this(), face, level);
+		return MakeSP<TextureCubeFaceImage>(std::static_pointer_cast<TextureCube>(shared_from_this()), face, level);
 	}
 
 

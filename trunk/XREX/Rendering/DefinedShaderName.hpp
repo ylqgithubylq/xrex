@@ -145,7 +145,7 @@ namespace XREX
 		static std::array<std::string, static_cast<uint32>(DefinedOutputAttribute::DefinedAttributeCount)> const mapping = [] ()
 		{
 			std::array<std::string, static_cast<uint32>(DefinedOutputAttribute::DefinedAttributeCount)> temp;
-			temp[static_cast<uint32>(DefinedOutputAttribute::DefaultFrameBufferOutput)] = "xrex_FinalColor";
+			temp[static_cast<uint32>(DefinedOutputAttribute::DefaultFrameBufferOutput)] = "XREX_DefaultFrameBufferOutput";
 			return temp;
 		} ();
 		return mapping[static_cast<uint32>(definedAttribute)];

@@ -221,6 +221,9 @@
     <ClInclude Include="Rendering\ShaderProgramInterface.hpp">
       <Filter>Rendering</Filter>
     </ClInclude>
+    <ClInclude Include="Rendering\GraphicsType.hpp">
+      <Filter>Rendering</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Base\Math.cpp">
@@ -374,6 +377,9 @@
       <Filter>Rendering</Filter>
     </ClCompile>
     <ClCompile Include="Rendering\ShaderProgramInterface.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\GraphicsType.cpp">
       <Filter>Rendering</Filter>
     </ClCompile>
   </ItemGroup>

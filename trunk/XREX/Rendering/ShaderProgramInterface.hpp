@@ -2,6 +2,7 @@
 
 #include "Declare.hpp"
 
+#include "Rendering/GraphicsType.hpp"
 #include "Rendering/BufferView.hpp"
 #include "Rendering/Texture.hpp"
 #include "Rendering/TextureImage.hpp"
@@ -84,7 +85,7 @@ namespace XREX
 		{
 			return information_.GetName();
 		}
-		ElementType GetElementType() const
+		ElementType GetTexelType() const
 		{
 			return information_.GetElementType();
 		}
@@ -154,7 +155,7 @@ namespace XREX
 		}
 		ElementType GetTexelType() const
 		{
-			return ElementType::ElementTypeCount; // TODO get from TexelFormat
+			return XREX::GetTexelType(format_);
 		}
 		TexelFormat GetTexelFormat() const
 		{

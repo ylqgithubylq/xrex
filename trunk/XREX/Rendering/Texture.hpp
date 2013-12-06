@@ -2,6 +2,7 @@
 
 #include "Declare.hpp"
 
+#include "Rendering/GraphicsType.hpp"
 #include "Rendering/TextureImage.hpp"
 
 #include <vector>
@@ -136,6 +137,28 @@ namespace XREX
 		DataDescription<Dimension> description_;
 	};
 
+	class XREX_API Texture1D
+		: public DimensionalTexture<1>
+	{
+	public:
+		Texture1D(DataDescription<1> const& description, bool generateMipmap);
+		/*
+		 *	@generateMipmap: true will generate mipmap, ignore data vector except data at index 0.
+		 */
+		Texture1D(DataDescription<1> const& description, std::vector<void const*> const& data, bool generateMipmap);
+
+	};
+	class XREX_API Texture2D
+		: public DimensionalTexture<2>
+	{
+	public:
+		Texture2D(DataDescription<2> const& description, bool generateMipmap);
+		/*
+		 *	@generateMipmap: true will generate mipmap, ignore data vector except data at index 0.
+		 */
+		Texture2D(DataDescription<2> const& description, std::vector<void const*> const& data, bool generateMipmap);
+	};
+
 	class XREX_API Texture3D
 		: public DimensionalTexture<3>
 	{
@@ -146,11 +169,8 @@ namespace XREX
 		 */
 		Texture3D(DataDescription<3> const& description, std::vector<void const*> const& data, bool generateMipmap);
 
-		std::shared_ptr<Texture2DImage> GetLayerImage(uint32 layer, uint32 level);
+		Texture2DImageSP GetLayerImage(uint32 layer, uint32 level);
 	};
-
-	typedef DimensionalTexture<1> Texture1D;
-	typedef DimensionalTexture<2> Texture2D;
 
 
 
@@ -186,7 +206,7 @@ namespace XREX
 			return description_[0].GetFormat();
 		}
 
-		std::shared_ptr<TextureCubeImage> GetImage(CubeFace face, uint32 level);
+		Texture2DImageSP GetFaceImage(CubeFace face, uint32 level);
 
 	private:
 		std::array<DataDescription<2>, static_cast<uint32>(CubeFace::CubeFaceElementCount)> description_;

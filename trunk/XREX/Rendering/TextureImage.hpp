@@ -2,6 +2,8 @@
 
 #include "Declare.hpp"
 
+#include "Rendering/GraphicsType.hpp"
+
 namespace XREX
 {
 	class XREX_API TextureImage
@@ -66,16 +68,34 @@ namespace XREX
 		Size<uint32, Dimension> size_;
 	};
 
-	typedef DimensionalTextureImage<1> Texture1DImage;
-	typedef DimensionalTextureImage<2> Texture2DImage;
-	typedef DimensionalTextureImage<3> Texture3DImage;
+	class XREX_API Texture1DImage
+		: public DimensionalTextureImage<1>
+	{
+	public:
+		Texture1DImage(Texture1DSP const& texture, uint32 level);
+	};
 
+	class XREX_API Texture2DImage
+		: public DimensionalTextureImage<2>
+	{
+	protected:
+		Texture2DImage(TextureSP const& texture, uint32 level); // for Texture3DLayerImage and TextureCubeImage
+	public:
+		Texture2DImage(Texture2DSP const& texture, uint32 level);
+	};
+
+	class XREX_API Texture3DImage
+		: public DimensionalTextureImage<3>
+	{
+	public:
+		Texture3DImage(Texture3DSP const& texture, uint32 level);
+	};
 
 	class XREX_API Texture3DLayerImage
 		: public Texture2DImage
 	{
 	public:
-		Texture3DLayerImage(TextureSP const& texture, uint32 layer, uint32 level);
+		Texture3DLayerImage(Texture3DSP const& texture, uint32 layer, uint32 level);
 
 		uint32 GetLayer() const
 		{
@@ -88,11 +108,11 @@ namespace XREX
 
 	enum class CubeFace;
 
-	class XREX_API TextureCubeImage
+	class XREX_API TextureCubeFaceImage
 		: public Texture2DImage
 	{
 	public:
-		TextureCubeImage(TextureSP const& texture, CubeFace face, uint32 level);
+		TextureCubeFaceImage(TextureCubeSP const& texture, CubeFace face, uint32 level);
 
 		CubeFace GetFace() const
 		{

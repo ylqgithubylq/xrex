@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Declare.hpp"
+#include "Rendering/GraphicsType.hpp"
 #include "Rendering/BufferView.hpp"
 
 #include <string>

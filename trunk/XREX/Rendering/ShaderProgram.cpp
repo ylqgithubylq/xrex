@@ -654,7 +654,7 @@ namespace XREX
 			{
 				int32 location = gl::GetFragDataLocation(glProgramID_, fragmentOutput.GetChannel().c_str());
 				int32 index = gl::GetFragDataIndex(glProgramID_, fragmentOutput.GetChannel().c_str());
-				fragmentOutputInformations_.push_back(FragmentOutputBindingInformation(fragmentOutput.GetChannel(), location, index));
+				fragmentOutputInformations_.push_back(FragmentOutputBindingInformation(fragmentOutput.GetChannel(), fragmentOutput.GetTexelType(), location, index));
 			}
 		}
 		{ // textures

@@ -139,7 +139,8 @@ namespace XREX
 		{
 			for (uint32 i = 0; i < outputLayout.size(); ++i)
 			{
-				if (outputLayout[i].GetChannel() != framebufferLayout.GetAllColorChannels()[i].GetChannel())
+				if (outputLayout[i].GetTexelType() != framebufferLayout.GetAllColorChannels()[i].GetTexelType()
+					|| outputLayout[i].GetChannel() != framebufferLayout.GetAllColorChannels()[i].GetChannel())
 				{
 					assert(false);
 				}
