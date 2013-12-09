@@ -26,6 +26,33 @@ namespace XREX
 	{
 	}
 
+	bool DepthStencilState::IsDepthReadEnabled() const
+	{
+		return depthTestEnable;
+	}
+
+	bool DepthStencilState::IsDepthWriteEnabled() const
+	{
+		return depthWriteMask && depthFunction != RenderingPipelineState::CompareFunction::AlwaysFail;
+	}
+
+	bool DepthStencilState::IsStencilReadEnabled() const
+	{
+		return stencilTestEnable;
+	}
+
+	bool DepthStencilState::IsStencilWriteEnabled() const
+	{
+		return frontStencilReadMask
+			&& (frontStencilWriteMask != 0 || backStencilWriteMask != 0)
+			&& (frontStencilFail != RenderingPipelineState::StencilOperation::Keep
+				|| frontStencilDepthFail != RenderingPipelineState::StencilOperation::Keep
+				|| frontStencilPass != RenderingPipelineState::StencilOperation::Keep
+				|| backStencilFail != RenderingPipelineState::StencilOperation::Keep
+				|| backStencilDepthFail != RenderingPipelineState::StencilOperation::Keep
+				|| backStencilPass != RenderingPipelineState::StencilOperation::Keep);
+	}
+
 	BlendState::BlendState()
 		: alphaToCoverageEnable(false), blendEnable(false),
 		blendOperation(BlendOperation::Add), sourceBlend(AlphaBlendFactor::One), destinationBlend(AlphaBlendFactor::Zero),

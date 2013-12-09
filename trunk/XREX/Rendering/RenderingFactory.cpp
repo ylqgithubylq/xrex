@@ -223,9 +223,9 @@ namespace XREX
 		return MakeSP<TextureBuffer>(textureBuffer, format);
 	}
 
-	FrameBufferSP RenderingFactory::CreateFrameBuffer(FrameBufferLayoutDescription const& description, std::unordered_map<std::string, TextureImageSP>&& colorTextures, FrameBuffer::DepthStencilBinding const& depthStencil)
+	FrameBufferSP RenderingFactory::CreateFrameBuffer(FrameBufferLayoutDescriptionSP description, std::unordered_map<std::string, Texture2DImageSP const>&& colorTextures, FrameBuffer::DepthStencilBinding const& depthStencil)
 	{
-		return MakeSP<FrameBuffer>(description, std::move(colorTextures), depthStencil);
+		return MakeSP<FrameBuffer>(std::move(description), std::move(colorTextures), depthStencil);
 	}
 
 	ViewportSP RenderingFactory::CreateViewport(int32 depthOrder, int32 left, int32 bottom, uint32 width, uint32 height)

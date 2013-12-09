@@ -70,6 +70,8 @@ out vec4 colorOutput;
 out vec4 normalOutput;
 out vec4 depthInColorOutput;
 
+out vec4 XREX_DefaultFrameBufferOutput;
+
 void main()
 {
 	vec3 normalToShow = normalize(/*fsIn.*/wNormal) * 0.5 + 0.5;
@@ -90,6 +92,8 @@ void main()
 	colorOutput = vec4(diffuseColor + specularColor, 1);
 	normalOutput = vec4(/*fsIn.*/vNormal, 1);
 	depthInColorOutput = /*fsIn.*/vec4(vDepth, 0, 0, 1);
+
+	XREX_DefaultFrameBufferOutput = colorOutput;
 }
 
 #endif

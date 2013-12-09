@@ -120,7 +120,7 @@ namespace XREX
 
 
 
-	std::pair<bool, BufferBindingInformation::BufferVariableInformation> BufferBindingInformation::GetBufferVariableInformation(std::string const& name) const
+	std::pair<bool, BufferBindingInformation::BufferVariableInformation const&> BufferBindingInformation::GetBufferVariableInformation(std::string const& name) const
 	{
 		//auto found = bufferVariableInformations_.begin();
 		auto found = std::find_if(bufferVariableInformations_.begin(), bufferVariableInformations_.end(), [&name] (BufferVariableInformation const& bufferVariableInformation)
@@ -129,9 +129,9 @@ namespace XREX
 		});
 		if (found == bufferVariableInformations_.end())
 		{
-			return std::make_pair(false, NullBufferVariableInformation);
+			return std::pair<bool, BufferBindingInformation::BufferVariableInformation const&>(false, NullBufferVariableInformation);
 		}
-		return std::make_pair(true, *found);
+		return std::pair<bool, BufferBindingInformation::BufferVariableInformation const&>(true, *found); // make_pair will cause type become std::pair<bool, BufferBindingInformation::BufferVariableInformation>
 	}
 
 
@@ -243,7 +243,7 @@ namespace XREX
 	void ProgramObject::SetupAllUniforms()
 	{
 
-		for (auto uniformBinder : uniformBinders_)
+		for (auto& uniformBinder : uniformBinders_)
 		{
 			uniformBinder.setter(uniformBinder.uniformInformation);
 		}

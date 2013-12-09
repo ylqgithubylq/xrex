@@ -107,6 +107,11 @@ namespace XREX
 		StencilOperation backStencilPass;
 
 		DepthStencilState();
+
+		bool IsDepthReadEnabled() const;
+		bool IsDepthWriteEnabled() const;
+		bool IsStencilReadEnabled() const;
+		bool IsStencilWriteEnabled() const;
 	};
 
 	struct XREX_API BlendState

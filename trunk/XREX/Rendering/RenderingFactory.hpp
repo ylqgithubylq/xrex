@@ -169,7 +169,7 @@ namespace XREX
 		}
 		TextureBufferSP CreateTextureBuffer(GraphicsBufferSP const& textureBuffer, TexelFormat format);
 
-		FrameBufferSP CreateFrameBuffer(FrameBufferLayoutDescription const& description, std::unordered_map<std::string, TextureImageSP>&& colorTextures, FrameBuffer::DepthStencilBinding const& depthStencil);
+		FrameBufferSP CreateFrameBuffer(FrameBufferLayoutDescriptionSP description, std::unordered_map<std::string, Texture2DImageSP const>&& colorTextures, FrameBuffer::DepthStencilBinding const& depthStencil);
 
 		ViewportSP CreateViewport(int32 depthOrder, int32 left, int32 bottom, uint32 width, uint32 height);
 		ViewportSP CreateViewport(int32 depthOrder, float left, float bottom, float width, float height);

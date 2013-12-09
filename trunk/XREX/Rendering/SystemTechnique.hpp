@@ -30,7 +30,7 @@ namespace XREX
 		virtual ~IComponentTechnique() = 0
 		{
 		}
-		virtual TechniqueBuilderSP const& GetTechniqueToInclude() const = 0;
+		virtual TechniqueBuildingInformationSP const& GetTechniqueToInclude() const = 0;
 	};
 
 	template <typename ComponentType>
@@ -56,7 +56,7 @@ namespace XREX
 	struct XREX_API TransformationTechnique
 		: IComponentTechnique
 	{
-		virtual TechniqueBuilderSP const& GetTechniqueToInclude() const override;
+		virtual TechniqueBuildingInformationSP const& GetTechniqueToInclude() const override;
 	};
 
 	struct XREX_API TransformationSetter
@@ -86,7 +86,7 @@ namespace XREX
 	struct XREX_API CameraTechnique
 		: IComponentTechnique
 	{
-		virtual TechniqueBuilderSP const& GetTechniqueToInclude() const override;
+		virtual TechniqueBuildingInformationSP const& GetTechniqueToInclude() const override;
 	};
 
 	struct XREX_API CameraSetter

@@ -22,7 +22,7 @@ uniform sampler2D depth;
 #ifdef FS
 
 in vec2 textureCoordinate;
-out vec4 xrex_FinalColor;
+out vec4 XREX_DefaultFrameBufferOutput;
 
 //#define ONE_OUTPUT
 
@@ -34,7 +34,7 @@ void main()
 	{
 		if (textureCoordinate.y < 0.5)
 		{
-			outputColor = texture(color, textureCoordinate * 2);
+			outputColor = texture(color, textureCoordinate * 2) + vec4(textureCoordinate * 2, 0, 0);
 		}
 		else
 		{
@@ -55,7 +55,7 @@ void main()
 #else
 	outputColor = texture(normal, textureCoordinate);
 #endif
-	xrex_FinalColor = outputColor;
+	XREX_DefaultFrameBufferOutput = outputColor;
 }
 
 #endif

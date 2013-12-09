@@ -10,72 +10,118 @@ namespace XREX
 	class XREX_API FrameBufferLayoutDescription
 	{
 	public:
-		class XREX_API ColorChannelDescription
+		enum class DepthStencilCombinationState
+		{
+			None,
+			DepthOnly,
+			StencilOnly,
+			Separate,
+			Combined,
+		};
+
+		enum class SizeMode
+		{
+			Fixed,
+			Sceen,
+			HalfSceen,
+		};
+
+		class XREX_API ChannelDescription
 		{
 		public:
-			ColorChannelDescription()
-				: format_(TexelFormat::TexelFormatCount)
+			ChannelDescription(std::string channel, TexelFormat format)
+				: channel_(std::move(channel)), format_(format)
 			{
 			}
-			ColorChannelDescription(std::string const& channel, TexelFormat format)
-				: channel_(channel), format_(format)
-			{
-			}
+
 			std::string const& GetChannel() const
 			{
 				return channel_;
-			}
-			ElementType GetTexelType() const
-			{
-				return XREX::GetTexelType(format_);
 			}
 			TexelFormat GetFormat() const
 			{
 				return format_;
 			}
+
 		private:
 			std::string channel_;
 			TexelFormat format_;
 		};
 
+
 	public:
-		FrameBufferLayoutDescription()
-			: sizes_(0, 0), depthEnabled_(false), stencilEnabled_(false)
-		{
-		}
-		explicit FrameBufferLayoutDescription(Size<uint32, 2> const& sizes, bool depthEnabled, bool stencilEnabled)
-			: sizes_(sizes), depthEnabled_(depthEnabled), stencilEnabled_(stencilEnabled)
+		FrameBufferLayoutDescription(std::string name)
+			: name_(std::move(name)), depth_(TexelFormat::TexelFormatCount), stencil_(TexelFormat::TexelFormatCount),
+			combined_(DepthStencilCombinationState::None), size_(0, 0), sizeMode_(SizeMode::Sceen)
 		{
 		}
 
-		Size<uint32, 2> const& GetSizes() const
+		void AddChannel(ChannelDescription const& channelInformation);
+
+		uint32 GetChannelCount() const
 		{
-			return sizes_;
+			return framebufferChannels_.size();
+		}
+		std::vector<ChannelDescription const> const& GetAllChannels() const
+		{
+			return framebufferChannels_;
 		}
 
-		uint32 GetColorChannelCount() const
-		{
-			return colorChannels_.size();
-		}
-		std::vector<ColorChannelDescription> const& GetAllColorChannels() const
-		{
-			return colorChannels_;
-		}
-		void AddColorChannel(ColorChannelDescription const& description);
+		void SetDepth(TexelFormat format);
+		void SetStencil(TexelFormat format);
+		void SetDepthStencil(TexelFormat format);
 
-		bool GetDepthEnabled() const
+		bool IsDepthEnabled() const
 		{
-			return depthEnabled_;
+			return combined_ != DepthStencilCombinationState::None && combined_ != DepthStencilCombinationState::StencilOnly;
 		}
-		bool GetStencilEnabled() const
+		bool IsStencilEnabled() const
 		{
-			return stencilEnabled_;
+			return combined_ != DepthStencilCombinationState::None && combined_ != DepthStencilCombinationState::DepthOnly;
 		}
+		DepthStencilCombinationState GetDepthStencilCombinationState() const
+		{
+			return combined_;
+		}
+		TexelFormat GetDepthFormat() const
+		{
+			return depth_;
+		}
+		TexelFormat GetStencilFormat() const
+		{
+			return stencil_;
+		}
+		TexelFormat GetDepthStencilFormat() const
+		{
+			assert(combined_ == DepthStencilCombinationState::Combined);
+			return depth_;
+		}
+
+		void SetSizeMode(SizeMode sizeMode)
+		{
+			sizeMode_ = sizeMode;
+		}
+		void SetSize(Size<uint32, 2> const& size)
+		{
+			size_ = size;
+		}
+		SizeMode GetSizeMode() const
+		{
+			return sizeMode_;
+		}
+		Size<uint32, 2> const& GetSize() const
+		{
+			return size_;
+		}
+
 	private:
-		Size<uint32, 2> sizes_;
-		std::vector<ColorChannelDescription> colorChannels_;
-		bool depthEnabled_;
-		bool stencilEnabled_;
+		std::string name_;
+		std::vector<ChannelDescription const> framebufferChannels_;
+		TexelFormat depth_;
+		TexelFormat stencil_;
+		DepthStencilCombinationState combined_;
+		Size<uint32, 2> size_;
+		SizeMode sizeMode_;
 	};
 
 
@@ -84,64 +130,71 @@ namespace XREX
 		: Noncopyable
 	{
 	public:
-		enum class DepthStencilCombinatationState
-		{
-			Saperate,
-			Combinated,
-			None,
-		};
+
 		class XREX_API DepthStencilBinding
 		{
 		public:
 			DepthStencilBinding()
-				: combinated_(DepthStencilCombinatationState::None)
+				: combined_(FrameBufferLayoutDescription::DepthStencilCombinationState::None)
 			{
 			}
-			DepthStencilBinding(TextureImageSP const& depth, TextureImageSP const& stencil_)
-				: depth_(depth), stencil_(stencil_), combinated_(DepthStencilCombinatationState::Saperate)
-			{
-			}
-			explicit DepthStencilBinding(TextureImageSP const& depthStencil_)
-				: depth_(depthStencil_), stencil_(depthStencil_), combinated_(DepthStencilCombinatationState::Combinated)
-			{
-			}
-			TextureImageSP const& GetDepth() const
+			DepthStencilBinding(Texture2DImageSP depth, Texture2DImageSP stencil_);
+			explicit DepthStencilBinding(Texture2DImageSP const& depthStencil_);
+
+			Texture2DImageSP const& GetDepth() const
 			{
 				return depth_;
 			}
-			TextureImageSP const& GetStencil() const
+			Texture2DImageSP const& GetStencil() const
 			{
 				return stencil_;
 			}
-			TextureImageSP const& GetDepthStencil() const
+			Texture2DImageSP const& GetDepthStencil() const
 			{
+				assert(combined_ == FrameBufferLayoutDescription::DepthStencilCombinationState::Combined);
 				return depth_;
 			}
-			DepthStencilCombinatationState GetDepthStencilCombinatationState() const
+			FrameBufferLayoutDescription::DepthStencilCombinationState GetDepthStencilCombinatationState() const
 			{
-				return combinated_;
+				return combined_;
 			}
 		private:
-			TextureImageSP depth_;
-			TextureImageSP stencil_;
-			DepthStencilCombinatationState combinated_;
+			Texture2DImageSP depth_;
+			Texture2DImageSP stencil_;
+			FrameBufferLayoutDescription::DepthStencilCombinationState combined_;
 		};
 	protected:
-		FrameBuffer(FrameBufferLayoutDescription const& description); // for default frame buffer use only.
+		FrameBuffer(FrameBufferLayoutDescriptionSP description); // for default frame buffer use only.
 	public:
-		FrameBuffer(FrameBufferLayoutDescription const& description, 
-			std::unordered_map<std::string, TextureImageSP>&& colorTextures, DepthStencilBinding const& depthStencil);
+		FrameBuffer(FrameBufferLayoutDescriptionSP description, 
+			std::unordered_map<std::string, Texture2DImageSP const>&& channelTextures, DepthStencilBinding const& depthStencil);
 		virtual ~FrameBuffer();
 
-		FrameBufferLayoutDescription const& GetLayoutDescription() const
+		FrameBufferLayoutDescriptionSP const& GetLayoutDescription() const
 		{
 			return description_;
 		}
 
-		TextureImageSP GetColorAttachement(std::string const& channel);
-		TextureImageSP GetDepthAttachement();
-		TextureImageSP GetStencilAttachement();
-		TextureImageSP GetDepthStencilAttachement();
+		/*
+		 *	@return: nullptr if not found.
+		 */
+		Texture2DImageSP GetColorAttachment(std::string const& channel);
+		std::unordered_map<std::string, Texture2DImageSP const> const& GetAllColorAttachment() const
+		{
+			return colorTextures_;
+		}
+		Texture2DImageSP GetDepthAttachment()
+		{
+			return depthStencil_.GetDepth();
+		}
+		Texture2DImageSP GetStencilAttachment()
+		{
+			return depthStencil_.GetStencil();
+		}
+		Texture2DImageSP GetDepthStencilAttachment()
+		{
+			return depthStencil_.GetDepthStencil();
+		}
 
 		virtual void BindWrite();
 		virtual void BindRead();
@@ -161,8 +214,8 @@ namespace XREX
 		void TextureCheck();
 
 	private:
-		FrameBufferLayoutDescription description_;
-		std::unordered_map<std::string, TextureImageSP> colorTextures_;
+		FrameBufferLayoutDescriptionSP description_;
+		std::unordered_map<std::string, Texture2DImageSP const> colorTextures_;
 		DepthStencilBinding depthStencil_;
 
 		uint32 glFrameBufferID_;

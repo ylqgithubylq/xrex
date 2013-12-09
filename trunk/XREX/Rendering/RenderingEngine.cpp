@@ -117,10 +117,35 @@ namespace XREX
 			}
 		};
 
-		FrameBufferLayoutDescription MakeDescription(Size<uint32, 2> const& sizes, TexelFormat colorFormat, TexelFormat depthStencilFormat)
+		FrameBufferLayoutDescriptionSP MakeDescription(Size<uint32, 2> const& size, TexelFormat colorFormat, TexelFormat depthStencilFormat)
 		{
-			FrameBufferLayoutDescription description(sizes, true, true);
-			description.AddColorChannel(FrameBufferLayoutDescription::ColorChannelDescription(GetOutputAttributeString(DefinedOutputAttribute::DefaultFrameBufferOutput), TexelFormat::RGBA8));
+			FrameBufferLayoutDescriptionSP description = MakeSP<FrameBufferLayoutDescription>("XREX_BackBuffer");
+			description->SetSize(size);
+			description->SetSizeMode(FrameBufferLayoutDescription::SizeMode::Sceen);
+			description->AddChannel(FrameBufferLayoutDescription::ChannelDescription(GetOutputAttributeString(DefinedOutputAttribute::DefaultFrameBufferOutput), TexelFormat::RGBA8));
+			switch (depthStencilFormat)
+			{
+			case TexelFormat::Depth16:
+			case TexelFormat::Depth24:
+			case TexelFormat::Depth32:
+				description->SetDepth(depthStencilFormat);
+				break;
+			case TexelFormat::Depth32F:
+				assert(false);
+				break;
+			case TexelFormat::Depth24Stencil8:
+				description->SetDepthStencil(depthStencilFormat);
+				break;
+			case TexelFormat::Stencil8:
+				description->SetStencil(depthStencilFormat);
+				break;
+			case TexelFormat::TexelFormatCount:
+				assert(false);
+				break;
+			default:
+				assert(false);
+				break;
+			}
 			return description;
 		}
 
@@ -128,8 +153,8 @@ namespace XREX
 			: public FrameBuffer
 		{
 		public:
-			DefaultFrameBuffer(Size<uint32, 2> const& sizes, TexelFormat colorFormat, TexelFormat depthStencilFormat)
-				: FrameBuffer(MakeDescription(sizes, colorFormat, depthStencilFormat))
+			DefaultFrameBuffer(Size<uint32, 2> const& size, TexelFormat colorFormat, TexelFormat depthStencilFormat)
+				: FrameBuffer(MakeDescription(size, colorFormat, depthStencilFormat))
 			{
 			}
 			virtual ~DefaultFrameBuffer() override

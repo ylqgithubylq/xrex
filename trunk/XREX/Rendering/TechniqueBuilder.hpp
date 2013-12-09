@@ -10,22 +10,29 @@
 
 namespace XREX
 {
-	class XREX_API TechniqueBuilder
+	class XREX_API TechniqueBuildingInformation
 	{
 	public:
-		TechniqueBuilder(std::string const& name);
-
-		void AddInclude(TechniqueBuilderSP const& technique)
+		TechniqueBuildingInformation(std::string name)
+			: name_(std::move(name)), stageCodes_(static_cast<uint32>(ShaderObject::ShaderType::ShaderTypeCount))
 		{
-			includes_.push_back(technique);
 		}
-		std::vector<TechniqueBuilderSP> const& GetAllIncludes() const
+
+		std::string const& GetName() const
+		{
+			return name_;
+		}
+
+		void AddInclude(TechniqueBuildingInformationSP technique)
+		{
+			includes_.push_back(std::move(technique));
+		}
+		/*
+		 *	Only directly included technique informations are returned.
+		 */
+		std::vector<TechniqueBuildingInformationSP> const& GetAllIncludes() const
 		{
 			return includes_;
-		}
-		void AddMacros(std::pair<std::string, std::string> const& macro)
-		{
-			macros_.push_back(macro);
 		}
 
 		void AddCommonCode(std::shared_ptr<std::string> const& code)
@@ -46,13 +53,25 @@ namespace XREX
 			return stageCodes_[static_cast<uint32>(stage)];
 		}
 
+		RasterizerState const& GetRasterizerState() const
+		{
+			return rasterizerState_;
+		}
 		void SetRasterizerState(RasterizerState const& rasterizerState)
 		{
 			rasterizerState_ = rasterizerState;
 		}
+		DepthStencilState GetDepthStencilState() const
+		{
+			return depthStencilState_;
+		}
 		void SetDepthStencilState(DepthStencilState const& depthStencilState)
 		{
 			depthStencilState_ = depthStencilState;
+		}
+		BlendState GetBlendState() const
+		{
+			return blendState_;
 		}
 		void SetBlendState(BlendState const& blendState)
 		{
@@ -62,6 +81,19 @@ namespace XREX
 		{
 			auto result = samplerStates_.insert(std::make_pair(samplerName, samplerState));
 			assert(result.second); // make sure insert success
+		}
+		std::unordered_map<std::string, SamplerState const> const& GetAllSamplerStates() const
+		{
+			return samplerStates_;
+		}
+
+		FrameBufferLayoutDescriptionSP const& GetFrameBufferDescription() const
+		{
+			return framebuffeDescription_;
+		}
+		void SetFrameBufferDescription(FrameBufferLayoutDescriptionSP framebufferDescription)
+		{
+			framebuffeDescription_ = std::move(framebufferDescription);
 		}
 
 		std::vector<AttributeInputInformation const> const& GetAllAttributeInputInformations() const
@@ -76,10 +108,11 @@ namespace XREX
 		{
 			return fragmentOutputInformations_;
 		}
-		void AddFragmentOutputInformation(FragmentOutputInformation const& information)
-		{
-			fragmentOutputInformations_.push_back(information);
-		}
+		// FragmentOutput is generated from FrameBufferLayoutInformation
+// 		void AddFragmentOutputInformation(FragmentOutputInformation const& information)
+// 		{
+// 			fragmentOutputInformations_.push_back(information);
+// 		}
 		std::vector<BufferInformation const> const& GetAllUniformBufferInformations() const
 		{
 			return uniformBufferInformations_;
@@ -122,36 +155,20 @@ namespace XREX
 		}
 
 
-		RenderingTechniqueSP GetRenderingTechnique();
-
-
-	private:
-		RenderingTechniqueSP Create();
-
-		std::vector<std::string> BuildMacroStrings() const;
-
-		/*
-		 *	Get included techniques. This technique also included.
-		 */
-		std::vector<TechniqueBuilder const*> GetIncludeList() const;
-		/*
-		 *	Get shader codes for compile, include all included technique codes.
-		 */
-		std::vector<std::string const*> CollectFullShaderCode(std::vector<TechniqueBuilder const*> const& includeList, ShaderObject::ShaderType stage) const;
-
 	private:
 		std::string name_;
 
-		std::vector<TechniqueBuilderSP> includes_;
+		std::vector<TechniqueBuildingInformationSP> includes_;
 		std::vector<std::shared_ptr<std::string>> commonCodes_;
 		std::vector<std::shared_ptr<std::string>> stageCodes_;
-		std::vector<std::pair<std::string, std::string>> macros_;
 
 
 		RasterizerState rasterizerState_;
 		DepthStencilState depthStencilState_;
 		BlendState blendState_;
-		std::unordered_map<std::string, SamplerState> samplerStates_; // sampler name : SamplerState
+		std::unordered_map<std::string, SamplerState const> samplerStates_; // sampler name : SamplerState
+
+		FrameBufferLayoutDescriptionSP framebuffeDescription_;
 
 		std::vector<AttributeInputInformation const> attributeInputInformations_;
 		std::vector<FragmentOutputInformation const> fragmentOutputInformations_;
@@ -160,11 +177,76 @@ namespace XREX
 		std::vector<BufferInformation const> atomicCounterBufferInformations_;
 		std::vector<TextureInformation const> textureInformations_;
 		std::vector<ImageInformation const> imageInformations_;
-
-		std::weak_ptr<RenderingTechnique> technique_;
-
+		
 	};
 
+
+
+
+	class XREX_API TechniqueBuilder
+	{
+	public:
+		TechniqueBuilder(TechniqueBuildingInformationSP techniqueInformation)
+			: techniqueInformation_(std::move(techniqueInformation))
+		{
+		}
+
+		void AddMacros(std::pair<std::string, std::string> const& macro)
+		{
+			macros_.push_back(macro);
+		}
+
+		RenderingTechniqueSP GetRenderingTechnique();
+
+	private:
+		RenderingTechniqueSP Create();
+
+		void BuildMacroStrings();
+
+		/*
+		 *	Get included technique informations. This technique information also included.
+		 */
+		std::vector<TechniqueBuildingInformation const*> GetIncludeList() const;
+
+		/*
+		 *	Get shader common codes, include all included technique codes.
+		 */
+		std::vector<std::string const*> CollectFullShaderCommonCode(std::vector<TechniqueBuildingInformation const*> const& includeList) const;
+		
+		/*
+		 *	Get shader stage codes for compile, include all included technique codes.
+		 */
+		std::vector<std::string const*> CollectFullShaderStageCode(std::vector<std::string const*> const& commonCodes, ShaderObject::ShaderType stage) const;
+
+	private:
+		std::vector<std::pair<std::string, std::string>> macros_;
+		std::vector<std::string> mutable lastBuiltMacros_;
+
+		TechniqueBuildingInformationSP techniqueInformation_;
+
+		std::weak_ptr<RenderingTechnique> technique_;
+	};
+
+
+
+	class XREX_API FrameBufferBuilder
+	{
+	public:
+		explicit FrameBufferBuilder(FrameBufferLayoutDescriptionSP description)
+			: description_(std::move(description))
+		{
+		}
+
+		FrameBufferSP GetFrameBuffer();
+
+	private:
+		FrameBufferSP Create();
+
+	private:
+		FrameBufferLayoutDescriptionSP description_;
+
+		std::weak_ptr<FrameBuffer> framebuffer_;
+	};
 
 }
 

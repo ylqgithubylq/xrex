@@ -48,8 +48,12 @@ namespace XREX
 		AttributeInputInformation()
 		{
 		}
-		AttributeInputInformation(VariableInformation const& information)
-			: information_(information)
+		AttributeInputInformation(std::string const& name, ElementType type)
+			: information_(name, type)
+		{
+		}
+		AttributeInputInformation(std::string const& name, ElementType type, uint32 count)
+			: information_(name, type, count)
 		{
 		}
 
@@ -76,26 +80,23 @@ namespace XREX
 		FragmentOutputInformation()
 		{
 		}
-		FragmentOutputInformation(VariableInformation const& information)
-			: information_(information)
+		FragmentOutputInformation(std::string const& name, ElementType texelType)
+			: name_(name), texelType_(texelType)
 		{
 		}
 
 		std::string const& GetChannel() const
 		{
-			return information_.GetName();
+			return name_;
 		}
 		ElementType GetTexelType() const
 		{
-			return information_.GetElementType();
-		}
-		int32 GetElementCount() const
-		{
-			return information_.GetCount();
+			return texelType_;
 		}
 
 	private:
-		VariableInformation information_;
+		std::string name_;
+		ElementType texelType_;
 	};
 
 	class XREX_API TextureInformation
@@ -203,6 +204,5 @@ namespace XREX
 		BufferView::BufferType type_;
 		std::vector<VariableInformation const> bufferVariableInformations_;
 	};
-
 
 }

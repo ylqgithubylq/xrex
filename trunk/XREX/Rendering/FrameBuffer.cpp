@@ -10,30 +10,82 @@
 namespace XREX
 {
 
-	void FrameBufferLayoutDescription::AddColorChannel(ColorChannelDescription const& description)
+	void FrameBufferLayoutDescription::AddChannel(ChannelDescription const& channelDescription)
 	{
 #ifdef XREX_DEBUG
-		auto foundByChannel = std::find_if(colorChannels_.begin(), colorChannels_.end(), [&description] (ColorChannelDescription const& value)
+		auto found = std::find_if(framebufferChannels_.begin(), framebufferChannels_.end(), [&channelDescription] (ChannelDescription const& information)
 		{
-			return description.GetChannel() == value.GetChannel();
+			return information.GetChannel() == channelDescription.GetChannel();
 		});
-		assert(foundByChannel == colorChannels_.end());
+		assert(found == framebufferChannels_.end());
 #endif // XREX_DEBUG
 
-		colorChannels_.push_back(description);
+		framebufferChannels_.push_back(channelDescription);
+	}
+
+	void FrameBufferLayoutDescription::SetDepth(TexelFormat format)
+	{
+		depth_ = format;
+		combined_ = (combined_ == DepthStencilCombinationState::None || combined_ == DepthStencilCombinationState::DepthOnly)
+			? DepthStencilCombinationState::DepthOnly : DepthStencilCombinationState::Separate;
+	}
+
+	void FrameBufferLayoutDescription::SetStencil(TexelFormat format)
+	{
+		stencil_ = format;
+		combined_ = (combined_ == DepthStencilCombinationState::None || combined_ == DepthStencilCombinationState::StencilOnly)
+			? DepthStencilCombinationState::StencilOnly : DepthStencilCombinationState::Separate;
+	}
+
+	void FrameBufferLayoutDescription::SetDepthStencil(TexelFormat format)
+	{
+		depth_ = format;
+		stencil_ = format;
+		combined_ = DepthStencilCombinationState::Combined;
 	}
 
 
-	FrameBuffer::FrameBuffer(FrameBufferLayoutDescription const& description)
-		: description_(description), glFrameBufferID_(0)
+
+	FrameBuffer::DepthStencilBinding::DepthStencilBinding(Texture2DImageSP depth, Texture2DImageSP stencil)
+		: depth_(std::move(depth)), stencil_(std::move(stencil))
+	{
+		if (depth_ != nullptr && stencil_ != nullptr)
+		{
+			combined_ = FrameBufferLayoutDescription::DepthStencilCombinationState::Separate;
+		}
+		else if (depth_ != nullptr)
+		{
+			combined_ = FrameBufferLayoutDescription::DepthStencilCombinationState::DepthOnly;
+		}
+		else if (stencil_ != nullptr)
+		{
+			combined_ = FrameBufferLayoutDescription::DepthStencilCombinationState::StencilOnly;
+		}
+		else
+		{
+			combined_ = FrameBufferLayoutDescription::DepthStencilCombinationState::None;
+		}
+	}
+
+	FrameBuffer::DepthStencilBinding::DepthStencilBinding(Texture2DImageSP const& depthStencil_)
+		: depth_(depthStencil_), stencil_(depthStencil_), combined_(FrameBufferLayoutDescription::DepthStencilCombinationState::Combined)
+	{
+		assert(depthStencil_ != nullptr);
+	}
+
+
+
+	FrameBuffer::FrameBuffer(FrameBufferLayoutDescriptionSP description)
+		: description_(std::move(description)), glFrameBufferID_(0)
 	{
 	}
 
-	FrameBuffer::FrameBuffer(FrameBufferLayoutDescription const& description,
-		std::unordered_map<std::string, TextureImageSP>&& colorTextures, DepthStencilBinding const& depthStencil)
-		: description_(description), colorTextures_(std::move(colorTextures)), depthStencil_(depthStencil)
+	FrameBuffer::FrameBuffer(FrameBufferLayoutDescriptionSP description,
+		std::unordered_map<std::string, Texture2DImageSP const>&& colorTextures, DepthStencilBinding const& depthStencil)
+		: description_(std::move(description)), colorTextures_(std::move(colorTextures)), depthStencil_(depthStencil)
 	{
 #ifdef XREX_DEBUG
+		assert(description_->GetDepthStencilCombinationState() == depthStencil_.GetDepthStencilCombinatationState());
 		TextureCheck();
 #endif // XREX_DEBUG
 
@@ -42,23 +94,24 @@ namespace XREX
 
 		BindWrite();
 
-		if (description_.GetAllColorChannels().empty() && !description_.GetDepthEnabled() && !description_.GetStencilEnabled())
+		if (description_->GetAllChannels().empty() && !description_->IsDepthEnabled() && !description_->IsStencilEnabled())
 		{ // no texture attached
-			gl::FramebufferParameteri(gl::GL_DRAW_FRAMEBUFFER, gl::GL_FRAMEBUFFER_DEFAULT_WIDTH, description_.GetSizes().X());
-			gl::FramebufferParameteri(gl::GL_DRAW_FRAMEBUFFER, gl::GL_FRAMEBUFFER_DEFAULT_HEIGHT, description_.GetSizes().Y());
+			gl::FramebufferParameteri(gl::GL_DRAW_FRAMEBUFFER, gl::GL_FRAMEBUFFER_DEFAULT_WIDTH, description_->GetSize().X());
+			gl::FramebufferParameteri(gl::GL_DRAW_FRAMEBUFFER, gl::GL_FRAMEBUFFER_DEFAULT_HEIGHT, description_->GetSize().Y());
 		}
 
-		std::vector<FrameBufferLayoutDescription::ColorChannelDescription> const& colorChannels = description_.GetAllColorChannels();
-		for (uint32 i = 0; i < colorChannels.size(); ++i)
+		std::vector<FrameBufferLayoutDescription::ChannelDescription const> const& channels = description_->GetAllChannels();
+		for (uint32 i = 0; i < channels.size(); ++i)
 		{
-			FrameBufferLayoutDescription::ColorChannelDescription const& colorChannel = colorChannels[i];
-			auto found = colorTextures_.find(colorChannel.GetChannel());
+			FrameBufferLayoutDescription::ChannelDescription const& channel = channels[i];
+			auto found = colorTextures_.find(channel.GetChannel());
 			assert(found != colorTextures_.end());
-			TextureImageSP textureImage = found->second;
+			Texture2DImageSP textureImage = found->second;
 			gl::FramebufferTexture2D(gl::GL_DRAW_FRAMEBUFFER, gl::GL_COLOR_ATTACHMENT0 + i, gl::GL_TEXTURE_2D,
 				textureImage->GetTexture()->GetID(), textureImage->GetLevel());
 		}
-		if (description_.GetDepthEnabled() && description_.GetStencilEnabled() && depthStencil_.GetDepthStencilCombinatationState() == DepthStencilCombinatationState::Combinated)
+		if (description_->IsDepthEnabled() && description_->IsStencilEnabled()
+			&& depthStencil_.GetDepthStencilCombinatationState() == FrameBufferLayoutDescription::DepthStencilCombinationState::Combined)
 		{
 			gl::FramebufferTexture2D(gl::GL_DRAW_FRAMEBUFFER, gl::GL_DEPTH_STENCIL_ATTACHMENT, gl::GL_TEXTURE_2D,
 				depthStencil_.GetDepthStencil()->GetTexture()->GetID(), depthStencil_.GetDepthStencil()->GetLevel());
@@ -78,8 +131,8 @@ namespace XREX
 		}
 
 		std::vector<uint32> glDrawBuffers;
-		glDrawBuffers.resize(colorChannels.size());
-		for (uint32 i = 0, drawBuffer = gl::GL_COLOR_ATTACHMENT0; i < colorChannels.size(); ++i, ++drawBuffer)
+		glDrawBuffers.resize(channels.size());
+		for (uint32 i = 0, drawBuffer = gl::GL_COLOR_ATTACHMENT0; i < channels.size(); ++i, ++drawBuffer)
 		{
 			glDrawBuffers[i] = drawBuffer;
 		}
@@ -132,6 +185,19 @@ namespace XREX
 		}
 	}
 
+	XREX::Texture2DImageSP FrameBuffer::GetColorAttachment(std::string const& channel)
+	{
+		auto found = colorTextures_.find(channel);
+		if (found == colorTextures_.end())
+		{
+			return nullptr;
+		}
+		else
+		{
+			return found->second;
+		}
+	}
+
 
 	void FrameBuffer::BindWrite()
 	{
@@ -150,8 +216,8 @@ namespace XREX
 		if (static_cast<uint32>(clearMask) & static_cast<uint32>(ClearMask::Color))
 		{
 			gl::ColorMask(true, true, true, true);
-			for (uint32 i = 0; i < description_.GetColorChannelCount(); ++i)
-			{
+			for (uint32 i = 0; i < description_->GetChannelCount(); ++i)
+			{ // TODO different format need to call different ClearBuffer, e.g. gl::ClearBufferiv() gl::ClearBufferuiv()
 				gl::ClearBufferfv(gl::GL_COLOR, i, clearColor.GetArray());
 			}
 		}
@@ -183,60 +249,33 @@ namespace XREX
 
 	void FrameBuffer::TextureCheck()
 	{
-		Size<uint32, 2> frameBufferSize = description_.GetSizes();
-		std::vector<FrameBufferLayoutDescription::ColorChannelDescription> const& colorChannels = description_.GetAllColorChannels();
-		for (uint32 i = 0; i < colorChannels.size(); ++i)
+		Size<uint32, 2> frameBufferSize = description_->GetSize();
+		std::vector<FrameBufferLayoutDescription::ChannelDescription const> const& channels = description_->GetAllChannels();
+		for (uint32 i = 0; i < channels.size(); ++i)
 		{
-			FrameBufferLayoutDescription::ColorChannelDescription const& colorChannel = colorChannels[i];
-			auto found = colorTextures_.find(colorChannel.GetChannel());
+			FrameBufferLayoutDescription::ChannelDescription const& channel = channels[i];
+			auto found = colorTextures_.find(channel.GetChannel());
 			assert(found != colorTextures_.end());
-			TextureImageSP textureImage = found->second;
-			TextureSP texture = textureImage->GetTexture();
-			Texture::TextureType textureType = texture->GetType();
-			switch (textureType)
-			{
-			case Texture::TextureType::Texture1D:
-				assert(false); // not supported
-				break;
-			case Texture::TextureType::Texture2D:
-				{
-					auto texture2D = CheckedSPCast<Texture2D>(texture);
-					Size<uint32, 2> sizes = texture2D->GetDescription().GetSizes();
-					assert(frameBufferSize.X() == sizes.X() && frameBufferSize.Y() == sizes.Y());
-					assert(colorChannel.GetFormat() == textureImage->GetFormat());
-				}
-				break;
-			case Texture::TextureType::Texture3D:
-				assert(false); // not supported
-				break;
-			case Texture::TextureType::TextureCube:
-				assert(false);
-				break;
-			case Texture::TextureType::TextureBuffer:
-				assert(false); // error
-				break;
-			case Texture::TextureType::TextureTypeCount:
-				assert(false);
-				break;
-			default:
-				assert(false);
-				break;
-			}
+			Texture2DImageSP textureImage = found->second;
+			assert(textureImage->GetType() == TextureImage::ImageType::Image2D);
+			Size<uint32, 2> size = textureImage->GetSize();
+			assert(frameBufferSize.X() == size.X() && frameBufferSize.Y() == size.Y());
+			assert(channel.GetFormat() == textureImage->GetFormat());
 		}
 
-		if (description_.GetDepthEnabled())
+		if (description_->IsDepthEnabled())
 		{
 			assert(depthStencil_.GetDepth() != nullptr);
 			auto texture2DDepth = CheckedSPCast<Texture2D>(depthStencil_.GetDepth()->GetTexture());
-			Size<uint32, 2> depthSizes = texture2DDepth->GetDescription().GetSizes();
-			assert(frameBufferSize.X() == depthSizes.X() && frameBufferSize.Y() == depthSizes.Y());
+			Size<uint32, 2> depthSize = texture2DDepth->GetDescription().GetSize();
+			assert(frameBufferSize.X() == depthSize.X() && frameBufferSize.Y() == depthSize.Y());
 		}
-		if (description_.GetStencilEnabled())
+		if (description_->IsStencilEnabled())
 		{
 			assert(depthStencil_.GetStencil() != nullptr);
 			auto texture2DStencil = CheckedSPCast<Texture2D>(depthStencil_.GetStencil()->GetTexture());
-			Size<uint32, 2> stencilSizes = texture2DStencil->GetDescription().GetSizes();
-			assert(frameBufferSize.X() == stencilSizes.X() && frameBufferSize.Y() == stencilSizes.Y());
+			Size<uint32, 2> stencilSize = texture2DStencil->GetDescription().GetSize();
+			assert(frameBufferSize.X() == stencilSize.X() && frameBufferSize.Y() == stencilSize.Y());
 		}
 
 	}

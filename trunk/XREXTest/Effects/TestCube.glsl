@@ -1,10 +1,7 @@
-
-
-uniform vec3 centerPosition;
-uniform mat4 modelMatrix;
-uniform mat4 viewMatrix;
-uniform mat4 projectionMatrix;
-
+uniform Info
+{
+	vec3 centerPosition;
+};
 
 #ifdef VS
 
@@ -15,12 +12,8 @@ out vec3 textureCoordinate;
 void main()
 {
 	textureCoordinate = position;
-	gl_Position = 
-		projectionMatrix *
-		viewMatrix *
-		modelMatrix *
-		vec4(position, 1.0);
-	color = vec4(((modelMatrix * vec4(position, 1)).xyz) / length(centerPosition) / 2, 0.5);
+	gl_Position = XREX_TransformToClip(XREX_ModelTransformation.ClipFromModel, position);
+	color = vec4(((XREX_ModelTransformation.WorldFromModel * vec4(position, 1)).xyz) / length(centerPosition) / 2, 0.5);
 }
 
 #endif
@@ -28,7 +21,7 @@ void main()
 
 #ifdef FS
 
-layout(location = 0) out vec4 xrex_FinalColor;
+layout(location = 0) out vec4 XREX_DefaultFrameBufferOutput;
 
 in vec4 color;
 in vec3 textureCoordinate;
@@ -41,7 +34,7 @@ void main()
 	vec3 texturePosition = fract(textureCoordinate * 8);
 	vec3 useColorA = step(texturePosition, colorASize);
 	vec4 mixedColor = mix(colorA, colorB, useColorA.x * useColorA.y * useColorA.z);
-	xrex_FinalColor = color + mixedColor;
+	XREX_DefaultFrameBufferOutput = color + mixedColor;
 }
 
 #endif

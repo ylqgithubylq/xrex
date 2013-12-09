@@ -34,28 +34,20 @@ struct RenderToTextureProcess
 
 	void InitializeTextureAndFrameBuffer()
 	{
-		Size<uint32, 2> size = XREXContext::GetInstance().GetMainWindow().GetClientRegionSize();
-		Texture::DataDescription<2> depthDescription(TexelFormat::Depth32, size);
-		depth_ = XREXContext::GetInstance().GetRenderingFactory().CreateTexture2D(depthDescription, false);
-		Texture::DataDescription<2> colorDescription(TexelFormat::RGBA8, size);
-		color_ = XREXContext::GetInstance().GetRenderingFactory().CreateTexture2D(colorDescription, false);
-		Texture::DataDescription<2> normalDescription(TexelFormat::RGBA16F, size);
-		normal_ = XREXContext::GetInstance().GetRenderingFactory().CreateTexture2D(normalDescription, false);
-		Texture::DataDescription<2> depthColorDescription(TexelFormat::R32F, size);
-		depthInColor_ = XREXContext::GetInstance().GetRenderingFactory().CreateTexture2D(depthColorDescription, false);
+		FrameBufferLayoutDescriptionSP description = MakeSP<FrameBufferLayoutDescription>("Test GBuffer");
+		
+		description->AddChannel(FrameBufferLayoutDescription::ChannelDescription("colorOutput", TexelFormat::RGBA8));
+		description->AddChannel(FrameBufferLayoutDescription::ChannelDescription("normalOutput", TexelFormat::RGBA16F));
+		description->AddChannel(FrameBufferLayoutDescription::ChannelDescription("depthInColorOutput", TexelFormat::R32F));
+		description->SetDepth(TexelFormat::Depth32);
 
-		FrameBufferLayoutDescription description(size, true, false);
-		description.AddColorChannel(FrameBufferLayoutDescription::ColorChannelDescription("colorOutput", TexelFormat::RGBA8));
-		description.AddColorChannel(FrameBufferLayoutDescription::ColorChannelDescription("normalOutput", TexelFormat::RGBA16F));
-		description.AddColorChannel(FrameBufferLayoutDescription::ColorChannelDescription("depthInColorOutput", TexelFormat::R32F));
 
-		unordered_map<string, TextureImageSP> colorTextures;
-		colorTextures[description.GetAllColorChannels()[0].GetChannel()] = CheckedSPCast<Texture2D>(color_)->GetImage(0);
-		colorTextures[description.GetAllColorChannels()[1].GetChannel()] = CheckedSPCast<Texture2D>(normal_)->GetImage(0);
-		colorTextures[description.GetAllColorChannels()[2].GetChannel()] = CheckedSPCast<Texture2D>(depthInColor_)->GetImage(0);
+		frameBuffer_ = FrameBufferBuilder(description).GetFrameBuffer();
 
-		FrameBuffer::DepthStencilBinding depthStencilBinding(CheckedSPCast<Texture2D>(depth_)->GetImage(0), nullptr);
-		frameBuffer_ = XREXContext::GetInstance().GetRenderingFactory().CreateFrameBuffer(description, std::move(colorTextures), depthStencilBinding);
+		color_ = frameBuffer_->GetColorAttachment("colorOutput")->GetTexture();
+		normal_ = frameBuffer_->GetColorAttachment("normalOutput")->GetTexture();
+		depthInColor_ = frameBuffer_->GetColorAttachment("depthInColorOutput")->GetTexture();
+		depth_ = frameBuffer_->GetDepthAttachment()->GetTexture();
 	}
 
 	void InitializeRenderingTechnique()
@@ -68,36 +60,35 @@ struct RenderToTextureProcess
 			cerr << "file not found. file: " << shaderFile << endl;
 		}
 
-		TechniqueBuilderSP builder = MakeSP<TechniqueBuilder>("render technique");
+		TechniqueBuildingInformationSP techniqueInformation = MakeSP<TechniqueBuildingInformation>("render technique");
 
-		builder->AddInclude(TransformationTechnique().GetTechniqueToInclude());
-		builder->AddInclude(CameraTechnique().GetTechniqueToInclude());
+		techniqueInformation->AddInclude(TransformationTechnique().GetTechniqueToInclude());
+		techniqueInformation->AddInclude(CameraTechnique().GetTechniqueToInclude());
 
-		builder->AddCommonCode(shaderString);
-		builder->SetStageCode(ShaderObject::ShaderType::VertexShader, MakeSP<string>());
-		builder->SetStageCode(ShaderObject::ShaderType::FragmentShader, MakeSP<string>());
+		techniqueInformation->AddCommonCode(shaderString);
+		techniqueInformation->SetStageCode(ShaderObject::ShaderType::VertexShader, MakeSP<string>());
+		techniqueInformation->SetStageCode(ShaderObject::ShaderType::FragmentShader, MakeSP<string>());
 
 
 		vector<VariableInformation const> variables;
-		builder->AddUniformBufferInformation(BufferInformation("Material", BufferView::BufferType::Uniform, move(variables)));
+		techniqueInformation->AddUniformBufferInformation(BufferInformation("Material", BufferView::BufferType::Uniform, move(variables)));
 
 		string defaultSamplerName = "defaultSampler";
-		builder->AddTextureInformation(TextureInformation("diffuseMap", Texture::TextureType::Texture2D, ElementType::FloatV4, defaultSamplerName));
-		builder->AddTextureInformation(TextureInformation("specularMap", Texture::TextureType::Texture2D, ElementType::FloatV4, defaultSamplerName));
-		builder->AddTextureInformation(TextureInformation("normalMap", Texture::TextureType::Texture2D, ElementType::FloatV4, defaultSamplerName));
-		builder->AddTextureInformation(TextureInformation("shininessMap", Texture::TextureType::Texture2D, ElementType::FloatV4, defaultSamplerName));
-		builder->AddTextureInformation(TextureInformation("opacityMap", Texture::TextureType::Texture2D, ElementType::FloatV4, defaultSamplerName));
+		techniqueInformation->AddTextureInformation(TextureInformation("diffuseMap", Texture::TextureType::Texture2D, ElementType::FloatV4, defaultSamplerName));
+		techniqueInformation->AddTextureInformation(TextureInformation("specularMap", Texture::TextureType::Texture2D, ElementType::FloatV4, defaultSamplerName));
+		techniqueInformation->AddTextureInformation(TextureInformation("normalMap", Texture::TextureType::Texture2D, ElementType::FloatV4, defaultSamplerName));
+		techniqueInformation->AddTextureInformation(TextureInformation("shininessMap", Texture::TextureType::Texture2D, ElementType::FloatV4, defaultSamplerName));
+		techniqueInformation->AddTextureInformation(TextureInformation("opacityMap", Texture::TextureType::Texture2D, ElementType::FloatV4, defaultSamplerName));
 
 		SamplerState defaultSampler;
-		builder->AddSamplerState(defaultSamplerName, defaultSampler);
+		techniqueInformation->AddSamplerState(defaultSamplerName, defaultSampler);
 
-		builder->AddAttributeInputInformation(AttributeInputInformation(VariableInformation("position", ElementType::FloatV3, 0)));
-		builder->AddAttributeInputInformation(AttributeInputInformation(VariableInformation("normal", ElementType::FloatV3, 0)));
-		builder->AddAttributeInputInformation(AttributeInputInformation(VariableInformation("textureCoordinate0", ElementType::FloatV3, 0)));
+		techniqueInformation->AddAttributeInputInformation(AttributeInputInformation("position", ElementType::FloatV3));
+		techniqueInformation->AddAttributeInputInformation(AttributeInputInformation("normal", ElementType::FloatV3));
+		techniqueInformation->AddAttributeInputInformation(AttributeInputInformation("textureCoordinate0", ElementType::FloatV3));
 
-		builder->AddFragmentOutputInformation(FragmentOutputInformation(VariableInformation("colorOutput", ElementType::FloatV4, 0)));
-		builder->AddFragmentOutputInformation(FragmentOutputInformation(VariableInformation("normalOutput", ElementType::FloatV4, 0)));
-		builder->AddFragmentOutputInformation(FragmentOutputInformation(VariableInformation("depthInColorOutput", ElementType::Float, 0)));
+		techniqueInformation->SetFrameBufferDescription(frameBuffer_->GetLayoutDescription());
+		//techniqueInformation->SetFrameBufferDescription(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer()->GetLayoutDescription());
 
 		RasterizerState resterizerState;
 		DepthStencilState depthStencilState;
@@ -110,12 +101,13 @@ struct RenderToTextureProcess
 		blendState.destinationBlend = RenderingPipelineState::AlphaBlendFactor::OneMinusSourceAlpha;
 		blendState.destinationBlendAlpha = RenderingPipelineState::AlphaBlendFactor::OneMinusSourceAlpha;
 
-		builder->SetRasterizerState(resterizerState);
-		builder->SetDepthStencilState(depthStencilState);
-		builder->SetBlendState(blendState);
+		techniqueInformation->SetRasterizerState(resterizerState);
+		techniqueInformation->SetDepthStencilState(depthStencilState);
+		techniqueInformation->SetBlendState(blendState);
 
-		technique_ = builder->GetRenderingTechnique();
-		technique_->SetFrameBuffer(frameBuffer_);
+		technique_ = TechniqueBuilder(techniqueInformation).GetRenderingTechnique();
+		technique_->ConnectFrameBuffer(frameBuffer_);
+		//technique_->ConnectFrameBuffer(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer());
 
 		techniqueTransformationSetter_ = MakeSP<TransformationSetter>(technique_);
 		techniqueCameraSetter_ = MakeSP<CameraSetter>(technique_);
@@ -130,37 +122,37 @@ struct RenderToTextureProcess
 			cerr << "file not found. file: " << shaderFile << endl;
 		}
 
-		TechniqueBuilderSP builder = MakeSP<TechniqueBuilder>("texture show technique");
+		TechniqueBuildingInformationSP techniqueInformation = MakeSP<TechniqueBuildingInformation>("texture show technique");
 
-		builder->AddCommonCode(shaderString);
-		builder->SetStageCode(ShaderObject::ShaderType::VertexShader, MakeSP<string>());
-		builder->SetStageCode(ShaderObject::ShaderType::FragmentShader, MakeSP<string>());
+		techniqueInformation->AddCommonCode(shaderString);
+		techniqueInformation->SetStageCode(ShaderObject::ShaderType::VertexShader, MakeSP<string>());
+		techniqueInformation->SetStageCode(ShaderObject::ShaderType::FragmentShader, MakeSP<string>());
 
 
 		string defaultSamplerName = "defaultSampler";
-		builder->AddTextureInformation(TextureInformation("color", Texture::TextureType::Texture2D, ElementType::FloatV4, defaultSamplerName));
-		builder->AddTextureInformation(TextureInformation("normal", Texture::TextureType::Texture2D, ElementType::FloatV4, defaultSamplerName));
-		builder->AddTextureInformation(TextureInformation("depthInColor", Texture::TextureType::Texture2D, ElementType::FloatV4, defaultSamplerName));
-		builder->AddTextureInformation(TextureInformation("depth", Texture::TextureType::Texture2D, ElementType::FloatV4, defaultSamplerName));
+		techniqueInformation->AddTextureInformation(TextureInformation("color", Texture::TextureType::Texture2D, ElementType::FloatV4, defaultSamplerName));
+		techniqueInformation->AddTextureInformation(TextureInformation("normal", Texture::TextureType::Texture2D, ElementType::FloatV4, defaultSamplerName));
+		techniqueInformation->AddTextureInformation(TextureInformation("depthInColor", Texture::TextureType::Texture2D, ElementType::FloatV4, defaultSamplerName));
+		techniqueInformation->AddTextureInformation(TextureInformation("depth", Texture::TextureType::Texture2D, ElementType::FloatV4, defaultSamplerName));
 
 		SamplerState defaultSampler;
-		builder->AddSamplerState(defaultSamplerName, defaultSampler);
+		techniqueInformation->AddSamplerState(defaultSamplerName, defaultSampler);
 
-		builder->AddAttributeInputInformation(AttributeInputInformation(VariableInformation("position", ElementType::FloatV2, 0)));
+		techniqueInformation->AddAttributeInputInformation(AttributeInputInformation("position", ElementType::FloatV2));
 
-		builder->AddFragmentOutputInformation(FragmentOutputInformation(VariableInformation("xrex_FinalColor", ElementType::FloatV4, 0)));
+		techniqueInformation->SetFrameBufferDescription(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer()->GetLayoutDescription());
 
 		RasterizerState resterizerState;
 		DepthStencilState depthStencilState;
 		BlendState blendState;
 
-		builder->SetRasterizerState(resterizerState);
-		builder->SetDepthStencilState(depthStencilState);
-		builder->SetBlendState(blendState);
+		techniqueInformation->SetRasterizerState(resterizerState);
+		techniqueInformation->SetDepthStencilState(depthStencilState);
+		techniqueInformation->SetBlendState(blendState);
 
-		copyTechnique_ = builder->GetRenderingTechnique();
+		copyTechnique_ = TechniqueBuilder(techniqueInformation).GetRenderingTechnique();
 
-		copyTechnique_->SetFrameBuffer(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer());
+		copyTechnique_->ConnectFrameBuffer(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer());
 
 		TechniqueParameterSP color = copyTechnique_->GetParameterByName("color");
 		TechniqueParameterSP normal = copyTechnique_->GetParameterByName("normal");
@@ -240,6 +232,7 @@ struct RenderToTextureProcess
 
 		Color const& backgroundColor = camera->GetBackgroundColor();
 		frameBuffer_->Clear(FrameBuffer::ClearMask::All, backgroundColor, 1, 0);
+		XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer()->Clear(FrameBuffer::ClearMask::All, backgroundColor, 1, 0);
 
 		std::vector<SceneObjectSP> sceneObjects = scene->GetRenderableQueue(nullptr);
 

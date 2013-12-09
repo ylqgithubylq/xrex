@@ -130,32 +130,33 @@ namespace XREX
 	}
 
 
-	void RenderingTechnique::SetFrameBuffer(FrameBufferSP const& framebuffer)
+	void RenderingTechnique::ConnectFrameBuffer(FrameBufferSP framebuffer)
 	{
 #ifdef XREX_DEBUG
+		assert(framebuffer != nullptr);
 		std::vector<FragmentOutputBindingInformation> const& outputLayout = program_->GetAllFragmentOutputInformations();
-		FrameBufferLayoutDescription const& framebufferLayout = framebuffer->GetLayoutDescription();
-		if (outputLayout.size() == framebufferLayout.GetColorChannelCount())
+		FrameBufferLayoutDescriptionSP const& framebufferLayout = framebuffer->GetLayoutDescription();
+		if (outputLayout.size() == framebufferLayout->GetChannelCount())
 		{
 			for (uint32 i = 0; i < outputLayout.size(); ++i)
 			{
-				if (outputLayout[i].GetTexelType() != framebufferLayout.GetAllColorChannels()[i].GetTexelType()
-					|| outputLayout[i].GetChannel() != framebufferLayout.GetAllColorChannels()[i].GetChannel())
+				if (outputLayout[i].GetTexelType() != GetTexelType(framebufferLayout->GetAllChannels()[i].GetFormat())
+					|| outputLayout[i].GetChannel() != framebufferLayout->GetAllChannels()[i].GetChannel())
 				{
-					assert(false);
+					assert(false); // framebuffer layout mismatch
 				}
 			}
 		}
-		if (depthStencilState_->GetState().depthTestEnable)
+		if (depthStencilState_->GetState().IsDepthReadEnabled() || depthStencilState_->GetState().IsDepthWriteEnabled())
 		{
-			assert(framebufferLayout.GetDepthEnabled());
+			assert(framebufferLayout->IsDepthEnabled());
 		}
-		if (depthStencilState_->GetState().stencilTestEnable)
+		if (depthStencilState_->GetState().IsStencilReadEnabled() || depthStencilState_->GetState().IsStencilWriteEnabled())
 		{
-			assert(framebufferLayout.GetStencilEnabled());
+			assert(framebufferLayout->IsStencilEnabled());
 		}
 #endif // XREX_DEBUG
-		framebuffer_ = framebuffer;
+		framebuffer_ = std::move(framebuffer);
 
 	}
 
@@ -186,6 +187,7 @@ namespace XREX
 		depthStencilState_->Bind(pipelineParameters_.frontStencilReference, pipelineParameters_.backStencilReference);
 		blendState_->Bind(pipelineParameters_.blendFactor);
 
+		assert(framebuffer_ != nullptr);
 		framebuffer_->BindWrite();
 
 		for (auto& resourceSetter : parameterSetters_)

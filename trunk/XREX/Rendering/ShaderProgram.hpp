@@ -282,7 +282,7 @@ namespace XREX
 			return dataSize_;
 		}
 
-		std::pair<bool, BufferVariableInformation> GetBufferVariableInformation(std::string const& name) const;
+		std::pair<bool, BufferVariableInformation const&> GetBufferVariableInformation(std::string const& name) const;
 
 		std::vector<BufferVariableInformation> const& GetAllBufferVariableInformations() const
 		{
@@ -383,6 +383,9 @@ namespace XREX
 			{
 			}
 		};
+		/*
+		 *	Informations in pack will be used only in Link and will not be stored.
+		 */
 		bool Link(InformationPack const& pack);
 
 		bool IsValidate() const
