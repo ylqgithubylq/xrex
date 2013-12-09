@@ -242,7 +242,7 @@ namespace XREX
 			pipelineParameters_ = pipelineParameters;
 		}
 
-		void SetFrameBuffer(FrameBufferSP const& framebuffer);
+		void ConnectFrameBuffer(FrameBufferSP framebuffer);
 
 		FrameBufferSP const& GetFrameBuffer() const
 		{

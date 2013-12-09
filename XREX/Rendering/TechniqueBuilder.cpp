@@ -4,6 +4,7 @@
 
 #include "Base/XREXContext.hpp"
 #include "Base/Logger.hpp"
+#include "Base/Window.hpp"
 #include "Rendering/RenderingFactory.hpp"
 #include "Rendering/RenderingTechnique.hpp"
 
@@ -11,10 +12,7 @@
 
 namespace XREX
 {
-	TechniqueBuilder::TechniqueBuilder(std::string const& name)
-		: name_(name), stageCodes_(static_cast<uint32>(ShaderObject::ShaderType::ShaderTypeCount))
-	{
-	}
+
 
 	XREX::RenderingTechniqueSP TechniqueBuilder::GetRenderingTechnique()
 	{
@@ -27,8 +25,8 @@ namespace XREX
 
 	namespace
 	{
-		template <typename Information, std::vector<Information const> const&(TechniqueBuilder::*Getter)() const>
-		std::vector<Information const> CollectInformation(std::vector<TechniqueBuilder const*> const& includes)
+		template <typename Information, std::vector<Information const> const&(TechniqueBuildingInformation::*Getter)() const>
+		std::vector<Information const> CollectInformation(std::vector<TechniqueBuildingInformation const*> const& includes)
 		{
 			std::vector<Information const> informations;
 			for (auto builder : includes)
@@ -40,58 +38,128 @@ namespace XREX
 			}
 			return informations;
 		}
+		/*
+		 *	Check there is nothing in includes.
+		 */
+		template <typename Information, std::vector<Information const> const&(TechniqueBuildingInformation::*Getter)() const>
+		bool CheckNoInclude(TechniqueBuildingInformationSP const& rootInformation, std::vector<TechniqueBuildingInformation const*> const& includes)
+		{
+			for (auto information : includes)
+			{
+				if (information != rootInformation.get())
+				{
+					if (!(information->*Getter)().empty())
+					{
+						return false;
+					}
+				}
+			}
+			return true;
+		}
+
+		std::unordered_map<std::string, SamplerState> CollectSamplerState(std::vector<TechniqueBuildingInformation const*> const& includes)
+		{
+			std::unordered_map<std::string, SamplerState> samplerStates;
+			for (auto information : includes)
+			{
+				for (auto& samplerState : information->GetAllSamplerStates())
+				{
+					samplerStates.insert(std::move(samplerState));
+				}
+			}
+			return samplerStates;
+		}
+
+		std::vector<FragmentOutputInformation const> GenerateFragmentOutputInformations(FrameBufferLayoutDescriptionSP const& framebufferDescription)
+		{
+			std::vector<FragmentOutputInformation const> fragmentOutputs;
+			for (auto& channelDescription : framebufferDescription->GetAllChannels())
+			{
+				fragmentOutputs.push_back(FragmentOutputInformation(channelDescription.GetChannel(), GetTexelType(channelDescription.GetFormat())));
+			}
+			return fragmentOutputs;
+		}
+
+
 	}
 
 	RenderingTechniqueSP TechniqueBuilder::Create()
 	{
 		bool succeed = true;
 
-		std::vector<TechniqueBuilder const*> includes = GetIncludeList();
+		std::vector<TechniqueBuildingInformation const*> includes = GetIncludeList();
+
+		BuildMacroStrings(); // build macro strings before CollectFullShaderCommonCode
+		std::vector<std::string const*> collectedCommonCodes = CollectFullShaderCommonCode(includes);
 
 		ProgramObjectSP program = XREXContext::GetInstance().GetRenderingFactory().CreateProgramObject();
 		for (uint32 stageIndex = 0; stageIndex < static_cast<uint32>(ShaderObject::ShaderType::ShaderTypeCount); ++stageIndex)
 		{
 			ShaderObject::ShaderType stage = static_cast<ShaderObject::ShaderType>(stageIndex);
-			if (GetStageCode(stage) != nullptr)
+			if (techniqueInformation_->GetStageCode(stage) != nullptr)
 			{
-				std::vector<std::string const*> codes = CollectFullShaderCode(includes, stage);
+				std::vector<std::string const*> codes = CollectFullShaderStageCode(collectedCommonCodes, stage);
 				ShaderObjectSP shader = XREXContext::GetInstance().GetRenderingFactory().CreateShaderObject(stage);
 				bool compileResult = shader->Compile(codes);
-				if (!compileResult)
+				if (compileResult)
 				{
-					XREXContext::GetInstance().GetLogger().LogLine("shader compile failed:").LogLine(shader->GetCompileError());
-					succeed = false;
+					program->AttachShader(shader);
 				}
 				else
 				{
-					program->AttachShader(shader);
+					XREXContext::GetInstance().GetLogger().LogLine("Shader compile failed:").LogLine(shader->GetCompileError());
+					succeed = false;
 				}
 			}
 		}
 
-		std::vector<AttributeInputInformation const> attributes = CollectInformation<AttributeInputInformation, &TechniqueBuilder::GetAllAttributeInputInformations>(includes);
-		std::vector<FragmentOutputInformation const> fragmentOutputs = CollectInformation<FragmentOutputInformation, &TechniqueBuilder::GetAllFragmentOutputInformations>(includes);
-		std::vector<BufferInformation const> uniformBuffers = CollectInformation<BufferInformation, &TechniqueBuilder::GetAllUniformBufferInformations>(includes);
-		std::vector<BufferInformation const> shaderStorageBuffers = CollectInformation<BufferInformation, &TechniqueBuilder::GetAllShaderStorageBufferInformations>(includes);
-		std::vector<BufferInformation const> atomicCounterBuffers = CollectInformation<BufferInformation, &TechniqueBuilder::GetAllAtomicCounterBufferInformations>(includes);
-		std::vector<TextureInformation const> textures = CollectInformation<TextureInformation, &TechniqueBuilder::GetAllTextureInformations>(includes);
-		std::vector<ImageInformation const> images = CollectInformation<ImageInformation, &TechniqueBuilder::GetAllImageInformations>(includes);
+		if (techniqueInformation_->GetDepthStencilState().IsDepthReadEnabled() || techniqueInformation_->GetDepthStencilState().IsDepthWriteEnabled())
+		{
+			if (!techniqueInformation_->GetFrameBufferDescription()->IsDepthEnabled())
+			{
+				XREXContext::GetInstance().GetLogger().LogLine("Framebuffer depth component missing.");
+				succeed = false;
+			}
+		}
+		if (techniqueInformation_->GetDepthStencilState().IsStencilReadEnabled() || techniqueInformation_->GetDepthStencilState().IsStencilWriteEnabled())
+		{
+			if (!techniqueInformation_->GetFrameBufferDescription()->IsStencilEnabled())
+			{
+				XREXContext::GetInstance().GetLogger().LogLine("Framebuffer stencil component missing.");
+				succeed = false;
+			}
+		}
+
+		if (!CheckNoInclude<AttributeInputInformation, &TechniqueBuildingInformation::GetAllAttributeInputInformations>(techniqueInformation_, includes))
+		{
+			XREXContext::GetInstance().GetLogger().LogLine("Other techniques have attribute inputs.");
+			succeed = false;
+		}
+
+		std::vector<FragmentOutputInformation const> fragmentOutputs = GenerateFragmentOutputInformations(techniqueInformation_->GetFrameBufferDescription());
+		std::vector<AttributeInputInformation const> const& attributes = techniqueInformation_->GetAllAttributeInputInformations();
+		std::vector<BufferInformation const> uniformBuffers = CollectInformation<BufferInformation, &TechniqueBuildingInformation::GetAllUniformBufferInformations>(includes);
+		std::vector<BufferInformation const> shaderStorageBuffers = CollectInformation<BufferInformation, &TechniqueBuildingInformation::GetAllShaderStorageBufferInformations>(includes);
+		std::vector<BufferInformation const> atomicCounterBuffers = CollectInformation<BufferInformation, &TechniqueBuildingInformation::GetAllAtomicCounterBufferInformations>(includes);
+		std::vector<TextureInformation const> textures = CollectInformation<TextureInformation, &TechniqueBuildingInformation::GetAllTextureInformations>(includes);
+		std::vector<ImageInformation const> images = CollectInformation<ImageInformation, &TechniqueBuildingInformation::GetAllImageInformations>(includes);
 
 		bool linkResult = program->Link(ProgramObject::InformationPack(attributes, fragmentOutputs, uniformBuffers, shaderStorageBuffers, atomicCounterBuffers, textures, images));
 
 		if (!linkResult)
 		{
-			XREXContext::GetInstance().GetLogger().LogLine("shader link failed:").LogLine(program->GetLinkError());
+			XREXContext::GetInstance().GetLogger().LogLine("Shader link failed:").LogLine(program->GetLinkError());
 			succeed = false;
 		}
 
-		RasterizerStateObjectSP rasterizer = XREXContext::GetInstance().GetRenderingFactory().CreateRasterizerStateObject(rasterizerState_);
-		DepthStencilStateObjectSP depthStencil = XREXContext::GetInstance().GetRenderingFactory().CreateDepthStencilStateObject(depthStencilState_);
-		BlendStateObjectSP blend = XREXContext::GetInstance().GetRenderingFactory().CreateBlendStateObject(blendState_);
+		RasterizerStateObjectSP rasterizer = XREXContext::GetInstance().GetRenderingFactory().CreateRasterizerStateObject(techniqueInformation_->GetRasterizerState());
+		DepthStencilStateObjectSP depthStencil = XREXContext::GetInstance().GetRenderingFactory().CreateDepthStencilStateObject(techniqueInformation_->GetDepthStencilState());
+		BlendStateObjectSP blend = XREXContext::GetInstance().GetRenderingFactory().CreateBlendStateObject(techniqueInformation_->GetBlendState());
 
+		std::unordered_map<std::string, SamplerState> samplerStates = CollectSamplerState(includes);
 		std::unordered_map<std::string, SamplerSP> samplers; // sampler channel : Sampler
 		std::unordered_map<std::string, SamplerSP> createdSamplers; // sampler name : Sampler
-		for (auto& samplerState : samplerStates_)
+		for (auto& samplerState : samplerStates)
 		{
 			SamplerSP sampler = XREXContext::GetInstance().GetRenderingFactory().CreateSampler(samplerState.second);
 			createdSamplers[samplerState.first] = sampler;
@@ -107,7 +175,7 @@ namespace XREX
 			}
 			else
 			{
-				XREXContext::GetInstance().GetLogger().BeginLine().Log("sampler channel: ").Log(samplerChannel)
+				XREXContext::GetInstance().GetLogger().BeginLine().Log("Sampler channel: ").Log(samplerChannel)
 					.Log(" mapped sampler name: ").Log(samplerName).Log(" not found.").EndLine();
 				succeed = false;
 			}
@@ -116,71 +184,163 @@ namespace XREX
 		RenderingTechniqueSP renderingTechnique;
 		if (succeed)
 		{
-			renderingTechnique = MakeSP<RenderingTechnique>(name_, program, rasterizer, depthStencil, blend, std::move(samplers));
+			renderingTechnique = MakeSP<RenderingTechnique>(techniqueInformation_->GetName(), program, rasterizer, depthStencil, blend, std::move(samplers));
 			technique_ = renderingTechnique;
+		}
+		else
+		{
+			XREXContext::GetInstance().GetLogger().BeginLine().Log("Technique: ").Log(techniqueInformation_->GetName()).Log(", build failed.").EndLine();
 		}
 		return renderingTechnique;
 	}
 
 
-	std::vector<std::string> TechniqueBuilder::BuildMacroStrings() const
+	void TechniqueBuilder::BuildMacroStrings()
 	{
-		std::vector<std::string> generatedMacros;
 		for (auto& macro : macros_)
 		{
 			std::stringstream ss;
 			ss << "#define " << macro.first << " " << macro.second << std::endl;
-			generatedMacros.push_back(ss.str());
+			lastBuiltMacros_.push_back(ss.str());
 		}
-		return generatedMacros;
 	}
 
-	std::vector<TechniqueBuilder const*> TechniqueBuilder::GetIncludeList() const
+	std::vector<TechniqueBuildingInformation const*> TechniqueBuilder::GetIncludeList() const
 	{
-		std::unordered_set<TechniqueBuilder const*> included;
-		std::vector<TechniqueBuilder const*> includeList;
+		std::unordered_set<TechniqueBuildingInformation const*> included;
+		std::vector<TechniqueBuildingInformation const*> includeList;
 
 		// recursively add included effects in order.
-		std::function<void(TechniqueBuilder const& technique)> makeIncludeLists = [&makeIncludeLists, &includeList, &included] (TechniqueBuilder const& technique)
+		std::function<void(TechniqueBuildingInformationSP const&)> makeIncludeLists = [&makeIncludeLists, &includeList, &included] (TechniqueBuildingInformationSP const& techniqueInformation)
 		{
 			// process includes first
-			for (auto& include : technique.GetAllIncludes())
+			for (auto& include : techniqueInformation->GetAllIncludes())
 			{
-				makeIncludeLists(*include);
+				makeIncludeLists(include);
 			}
 			// then add technique itself
-			if (included.find(&technique) == included.end()) // only technique not included will be added.
+			if (included.find(techniqueInformation.get()) == included.end()) // only technique information not included will be added.
 			{
-				included.insert(&technique);
-				includeList.push_back(&technique);
+				included.insert(techniqueInformation.get());
+				includeList.push_back(techniqueInformation.get());
 			};
 		};
 
-		makeIncludeLists(*this);
+		makeIncludeLists(techniqueInformation_);
 		return includeList;
 	}
 
-	std::vector<std::string const*> TechniqueBuilder::CollectFullShaderCode(std::vector<TechniqueBuilder const*> const& includeList, ShaderObject::ShaderType stage) const
+	std::vector<std::string const*> TechniqueBuilder::CollectFullShaderCommonCode(std::vector<TechniqueBuildingInformation const*> const& includeList) const
 	{
-		if (GetStageCode(stage) == nullptr)
-		{
-			assert(false);
-		}
-
 		std::vector<std::string const*> result;
+		for (std::string const& macro : lastBuiltMacros_)
+		{
+			result.push_back(&macro);
+		}
 		for (auto include : includeList)
 		{
-			for (std::string const& macro : include->BuildMacroStrings())
-			{
-				result.push_back(&macro);
-			}
 			for (std::shared_ptr<std::string> const& code : include->GetAllCommonCodes())
 			{
 				result.push_back(code.get());
 			}
 		}
-		result.push_back(GetStageCode(stage).get());
+		return result;
+	}
 
+	std::vector<std::string const*> TechniqueBuilder::CollectFullShaderStageCode(std::vector<std::string const*> const& commonCodes, ShaderObject::ShaderType stage) const
+	{
+		if (techniqueInformation_->GetStageCode(stage) == nullptr)
+		{
+			assert(false);
+		}
+
+		std::vector<std::string const*> result(commonCodes); // copy common codes
+		result.push_back(techniqueInformation_->GetStageCode(stage).get());
+		return result;
+	}
+
+
+	FrameBufferSP FrameBufferBuilder::GetFrameBuffer()
+	{
+		if (framebuffer_.expired())
+		{
+			return Create();
+		}
+		return framebuffer_.lock();
+	}
+
+	XREX::FrameBufferSP FrameBufferBuilder::Create()
+	{
+		Size<uint32, 2> size = XREXContext::GetInstance().GetMainWindow().GetClientRegionSize();
+		FrameBufferLayoutDescription::SizeMode sizeMode = description_->GetSizeMode();
+		switch (sizeMode)
+		{
+		case FrameBufferLayoutDescription::SizeMode::Fixed:
+			size = description_->GetSize();
+			break;
+		case FrameBufferLayoutDescription::SizeMode::Sceen:
+			description_->SetSize(size);
+			break;
+		case FrameBufferLayoutDescription::SizeMode::HalfSceen:
+			size = Size<uint32, 2>(size.X() / 2, size.Y() / 2);
+			description_->SetSize(size);
+			break;
+		default:
+			assert(false);
+			break;
+		}
+		std::unordered_map<std::string, Texture2DImageSP const> channelTextureImages;
+		for (auto& channel : description_->GetAllChannels())
+		{
+			Texture::DataDescription<2> textureDescription(channel.GetFormat(), size);
+			Texture2DSP texture = XREXContext::GetInstance().GetRenderingFactory().CreateTexture2D(textureDescription, false);
+			channelTextureImages.insert(std::make_pair(channel.GetChannel(), texture->GetImage(0)));
+		}
+
+		FrameBufferLayoutDescription::DepthStencilCombinationState combinationState = description_->GetDepthStencilCombinationState();
+		
+		FrameBuffer::DepthStencilBinding depthStencil;
+		switch (combinationState)
+		{
+		case FrameBufferLayoutDescription::DepthStencilCombinationState::None:
+			break;
+		case FrameBufferLayoutDescription::DepthStencilCombinationState::DepthOnly:
+			{
+				Texture::DataDescription<2> depthDescription(description_->GetDepthFormat(), size);
+				Texture2DSP depthTexture = XREXContext::GetInstance().GetRenderingFactory().CreateTexture2D(depthDescription, false);
+				depthStencil = FrameBuffer::DepthStencilBinding(depthTexture->GetImage(0), nullptr);
+			}
+			break;
+		case FrameBufferLayoutDescription::DepthStencilCombinationState::StencilOnly:
+			{
+				Texture::DataDescription<2> stencilDescription(description_->GetStencilFormat(), size);
+				Texture2DSP stencilTexture = XREXContext::GetInstance().GetRenderingFactory().CreateTexture2D(stencilDescription, false);
+				depthStencil = FrameBuffer::DepthStencilBinding(nullptr, stencilTexture->GetImage(0));
+			}
+			break;
+		case FrameBufferLayoutDescription::DepthStencilCombinationState::Separate:
+			{
+				Texture::DataDescription<2> depthDescription(description_->GetDepthFormat(), size);
+				Texture2DSP depthTexture = XREXContext::GetInstance().GetRenderingFactory().CreateTexture2D(depthDescription, false);
+				Texture::DataDescription<2> stencilDescription(description_->GetStencilFormat(), size);
+				Texture2DSP stencilTexture = XREXContext::GetInstance().GetRenderingFactory().CreateTexture2D(stencilDescription, false);
+				depthStencil = FrameBuffer::DepthStencilBinding(depthTexture->GetImage(0), stencilTexture->GetImage(0));
+			}
+			break;
+		case FrameBufferLayoutDescription::DepthStencilCombinationState::Combined:
+			{
+				Texture::DataDescription<2> depthStencilDescription(description_->GetDepthStencilFormat(), size);
+				Texture2DSP depthStencilTexture = XREXContext::GetInstance().GetRenderingFactory().CreateTexture2D(depthStencilDescription, false);
+				depthStencil = FrameBuffer::DepthStencilBinding(depthStencilTexture->GetImage(0));
+			}
+			break;
+		default:
+			assert(false);
+			break;
+		}
+
+		FrameBufferSP result = XREXContext::GetInstance().GetRenderingFactory().CreateFrameBuffer(description_, std::move(channelTextureImages), depthStencil);
+		framebuffer_ = result;
 		return result;
 	}
 

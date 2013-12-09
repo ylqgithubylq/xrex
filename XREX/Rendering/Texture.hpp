@@ -30,8 +30,8 @@ namespace XREX
 		class DataDescription
 		{
 		public:
-			DataDescription(TexelFormat format, Size<uint32, Dimension> const& sizes)
-				: format_(format), sizes_(sizes)
+			DataDescription(TexelFormat format, Size<uint32, Dimension> const& size)
+				: format_(format), size_(size)
 			{
 			}
 
@@ -43,15 +43,15 @@ namespace XREX
 			{
 				return format_;
 			}
-			Size<uint32, Dimension> const& GetSizes() const
+			Size<uint32, Dimension> const& GetSize() const
 			{
-				return sizes_;
+				return size_;
 			}
 
 		private:
 			static_assert(Dimension <= 3, "Dimension must <= 3");
 			TexelFormat format_;
-			Size<uint32, Dimension> sizes_;
+			Size<uint32, Dimension> size_;
 		};
 
 	protected:
@@ -110,7 +110,6 @@ namespace XREX
 		 *	@generateMipmap: true will generate mipmap, ignore data vector except data at index 0.
 		 */
 		DimensionalTexture(DataDescription<Dimension> const& description, std::vector<void const*> const& data, bool generateMipmap);
-		virtual ~DimensionalTexture() override;
 
 		virtual TexelFormat GetFormat() const override
 		{
@@ -124,11 +123,8 @@ namespace XREX
 
 		Size<uint32, Dimension> const& GetSize() const
 		{
-			return description_.GetSizes();
+			return description_.GetSize();
 		}
-
-		std::shared_ptr<DimensionalTextureImage<Dimension>> GetImage(uint32 level);
-
 
 	private:
 		void DoFillTexture(DataDescription<Dimension> const& description, uint32 mipmapLevel, void const* data);
@@ -147,6 +143,7 @@ namespace XREX
 		 */
 		Texture1D(DataDescription<1> const& description, std::vector<void const*> const& data, bool generateMipmap);
 
+		Texture1DImageSP GetImage(uint32 level);
 	};
 	class XREX_API Texture2D
 		: public DimensionalTexture<2>
@@ -157,6 +154,8 @@ namespace XREX
 		 *	@generateMipmap: true will generate mipmap, ignore data vector except data at index 0.
 		 */
 		Texture2D(DataDescription<2> const& description, std::vector<void const*> const& data, bool generateMipmap);
+
+		Texture2DImageSP GetImage(uint32 level);
 	};
 
 	class XREX_API Texture3D
@@ -168,6 +167,8 @@ namespace XREX
 		 *	@generateMipmap: true will generate mipmap, ignore data vector except data at index 0.
 		 */
 		Texture3D(DataDescription<3> const& description, std::vector<void const*> const& data, bool generateMipmap);
+
+		Texture3DImageSP GetImage(uint32 level);
 
 		Texture2DImageSP GetLayerImage(uint32 layer, uint32 level);
 	};
@@ -198,7 +199,7 @@ namespace XREX
 
 		Size<uint32, 2> const& GetSize() const
 		{
-			return description_[0].GetSizes();
+			return description_[0].GetSize();
 		}
 
 		virtual TexelFormat GetFormat() const override
@@ -227,7 +228,7 @@ namespace XREX
 
 		Size<uint32, 1> GetSize() const;
 
-		std::shared_ptr<TextureBufferImage> GetImage();
+		TextureBufferImageSP GetImage();
 	private:
 		GraphicsBufferSP buffer_;
 		TexelFormat format_;

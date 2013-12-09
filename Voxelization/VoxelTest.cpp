@@ -135,10 +135,10 @@ namespace
 				XREXContext::GetInstance().GetLogger().LogLine("file not found. file: " + shaderFile);
 			}
 
-			TechniqueBuilderSP builder = MakeSP<TechniqueBuilder>("voxelization list technique");
-			builder->AddCommonCode(shaderString);
-			builder->SetStageCode(ShaderObject::ShaderType::VertexShader, MakeSP<string>());
-			builder->SetStageCode(ShaderObject::ShaderType::FragmentShader, MakeSP<string>());
+			TechniqueBuildingInformationSP technique = MakeSP<TechniqueBuildingInformation>("voxelization list technique");
+			technique->AddCommonCode(shaderString);
+			technique->SetStageCode(ShaderObject::ShaderType::VertexShader, MakeSP<string>());
+			technique->SetStageCode(ShaderObject::ShaderType::FragmentShader, MakeSP<string>());
 
 			RasterizerState resterizerState;
 			resterizerState.cullMode = RenderingPipelineState::CullMode::None;
@@ -151,14 +151,14 @@ namespace
 			blendState.greenMask = false;
 			blendState.blueMask = false;
 			blendState.alphaMask = false;
-			builder->SetRasterizerState(resterizerState);
-			builder->SetDepthStencilState(depthStencilState);
-			builder->SetBlendState(blendState);
+			technique->SetRasterizerState(resterizerState);
+			technique->SetDepthStencilState(depthStencilState);
+			technique->SetBlendState(blendState);
 
 
-			return builder->GetRenderingTechnique();
+			return TechniqueBuilder(technique).GetRenderingTechnique();
 		} ();
-		listTechnique->SetFrameBuffer(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer());
+		listTechnique->ConnectFrameBuffer(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer());
 
 		RenderingTechniqueSP sortTechnique = [] ()
 		{
@@ -169,10 +169,10 @@ namespace
 			{
 				XREXContext::GetInstance().GetLogger().LogLine("file not found. file: " + shaderFile);
 			}
-			TechniqueBuilderSP builder = MakeSP<TechniqueBuilder>("list sort technique");
-			builder->AddCommonCode(shaderString);
-			builder->SetStageCode(ShaderObject::ShaderType::VertexShader, MakeSP<string>());
-			builder->SetStageCode(ShaderObject::ShaderType::FragmentShader, MakeSP<string>());
+			TechniqueBuildingInformationSP technique = MakeSP<TechniqueBuildingInformation>("list sort technique");
+			technique->AddCommonCode(shaderString);
+			technique->SetStageCode(ShaderObject::ShaderType::VertexShader, MakeSP<string>());
+			technique->SetStageCode(ShaderObject::ShaderType::FragmentShader, MakeSP<string>());
 
 			RasterizerState resterizerState;
 			resterizerState.cullMode = RenderingPipelineState::CullMode::None;
@@ -185,13 +185,13 @@ namespace
 			blendState.greenMask = false;
 			blendState.blueMask = false;
 			blendState.alphaMask = false;
-			builder->SetRasterizerState(resterizerState);
-			builder->SetDepthStencilState(depthStencilState);
-			builder->SetBlendState(blendState);
+			technique->SetRasterizerState(resterizerState);
+			technique->SetDepthStencilState(depthStencilState);
+			technique->SetBlendState(blendState);
 
-			return builder->GetRenderingTechnique();
+			return TechniqueBuilder(technique).GetRenderingTechnique();
 		} ();
-		sortTechnique->SetFrameBuffer(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer());
+		sortTechnique->ConnectFrameBuffer(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer());
 
 
 		RenderingTechniqueSP generationTechnique = [] ()
@@ -202,10 +202,10 @@ namespace
 			{
 				XREXContext::GetInstance().GetLogger().LogLine("file not found. file: " + shaderFile);
 			}
-			TechniqueBuilderSP builder = MakeSP<TechniqueBuilder>("voxelization generation technique");
-			builder->AddCommonCode(shaderString);
-			builder->SetStageCode(ShaderObject::ShaderType::VertexShader, MakeSP<string>());
-			builder->SetStageCode(ShaderObject::ShaderType::FragmentShader, MakeSP<string>());
+			TechniqueBuildingInformationSP technique = MakeSP<TechniqueBuildingInformation>("voxelization generation technique");
+			technique->AddCommonCode(shaderString);
+			technique->SetStageCode(ShaderObject::ShaderType::VertexShader, MakeSP<string>());
+			technique->SetStageCode(ShaderObject::ShaderType::FragmentShader, MakeSP<string>());
 
 			RasterizerState resterizerState;
 			resterizerState.cullMode = RenderingPipelineState::CullMode::None;
@@ -218,14 +218,14 @@ namespace
 			blendState.greenMask = false;
 			blendState.blueMask = false;
 			blendState.alphaMask = false;
-			builder->SetRasterizerState(resterizerState);
-			builder->SetDepthStencilState(depthStencilState);
-			builder->SetBlendState(blendState);
+			technique->SetRasterizerState(resterizerState);
+			technique->SetDepthStencilState(depthStencilState);
+			technique->SetBlendState(blendState);
 
 
-			return builder->GetRenderingTechnique();
+			return TechniqueBuilder(technique).GetRenderingTechnique();
 		} ();
-		generationTechnique->SetFrameBuffer(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer());
+		generationTechnique->ConnectFrameBuffer(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer());
 
 		RenderingTechniqueSP anisotropicGenerationTechnique = [] ()
 		{
@@ -235,10 +235,10 @@ namespace
 			{
 				XREXContext::GetInstance().GetLogger().LogLine("file not found. file: " + shaderFile);
 			}
-			TechniqueBuilderSP builder = MakeSP<TechniqueBuilder>("voxelization anisotropic generation technique");
-			builder->AddCommonCode(shaderString);
-			builder->SetStageCode(ShaderObject::ShaderType::VertexShader, MakeSP<string>());
-			builder->SetStageCode(ShaderObject::ShaderType::FragmentShader, MakeSP<string>());
+			TechniqueBuildingInformationSP technique = MakeSP<TechniqueBuildingInformation>("voxelization anisotropic generation technique");
+			technique->AddCommonCode(shaderString);
+			technique->SetStageCode(ShaderObject::ShaderType::VertexShader, MakeSP<string>());
+			technique->SetStageCode(ShaderObject::ShaderType::FragmentShader, MakeSP<string>());
 
 			RasterizerState resterizerState;
 			resterizerState.cullMode = RenderingPipelineState::CullMode::None;
@@ -251,14 +251,14 @@ namespace
 			blendState.greenMask = false;
 			blendState.blueMask = false;
 			blendState.alphaMask = false;
-			builder->SetRasterizerState(resterizerState);
-			builder->SetDepthStencilState(depthStencilState);
-			builder->SetBlendState(blendState);
+			technique->SetRasterizerState(resterizerState);
+			technique->SetDepthStencilState(depthStencilState);
+			technique->SetBlendState(blendState);
 
-			return builder->GetRenderingTechnique();
+			return TechniqueBuilder(technique).GetRenderingTechnique();
 
 		} ();
-		anisotropicGenerationTechnique->SetFrameBuffer(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer());
+		anisotropicGenerationTechnique->ConnectFrameBuffer(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer());
 
 
 		RenderingTechniqueSP mergeTechnique = [] ()
@@ -269,10 +269,10 @@ namespace
 			{
 				XREXContext::GetInstance().GetLogger().LogLine("file not found. file: " + shaderFile);
 			}
-			TechniqueBuilderSP builder = MakeSP<TechniqueBuilder>("voxelization merge technique");
-			builder->AddCommonCode(shaderString);
-			builder->SetStageCode(ShaderObject::ShaderType::VertexShader, MakeSP<string>());
-			builder->SetStageCode(ShaderObject::ShaderType::FragmentShader, MakeSP<string>());
+			TechniqueBuildingInformationSP technique = MakeSP<TechniqueBuildingInformation>("voxelization merge technique");
+			technique->AddCommonCode(shaderString);
+			technique->SetStageCode(ShaderObject::ShaderType::VertexShader, MakeSP<string>());
+			technique->SetStageCode(ShaderObject::ShaderType::FragmentShader, MakeSP<string>());
 
 			RasterizerState resterizerState;
 			resterizerState.cullMode = RenderingPipelineState::CullMode::None;
@@ -285,15 +285,15 @@ namespace
 			blendState.greenMask = false;
 			blendState.blueMask = false;
 			blendState.alphaMask = false;
-			builder->SetRasterizerState(resterizerState);
-			builder->SetDepthStencilState(depthStencilState);
-			builder->SetBlendState(blendState);
+			technique->SetRasterizerState(resterizerState);
+			technique->SetDepthStencilState(depthStencilState);
+			technique->SetBlendState(blendState);
 
 
-			return builder->GetRenderingTechnique();
+			return TechniqueBuilder(technique).GetRenderingTechnique();
 
 		} ();
-		mergeTechnique->SetFrameBuffer(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer());
+		mergeTechnique->ConnectFrameBuffer(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer());
 		
 		UsedTechniques effects = {listTechnique, sortTechnique, generationTechnique, anisotropicGenerationTechnique, mergeTechnique};
 		return effects;
@@ -379,10 +379,10 @@ namespace
 		{
 			XREXContext::GetInstance().GetLogger().LogLine("file not found. file: " + shaderFile);
 		}
-		TechniqueBuilderSP builder = MakeSP<TechniqueBuilder>("cone tracing technique");
-		builder->AddCommonCode(shaderString);
-		builder->SetStageCode(ShaderObject::ShaderType::VertexShader, MakeSP<string>());
-		builder->SetStageCode(ShaderObject::ShaderType::FragmentShader, MakeSP<string>());
+		TechniqueBuildingInformationSP technique = MakeSP<TechniqueBuildingInformation>("cone tracing technique");
+		technique->AddCommonCode(shaderString);
+		technique->SetStageCode(ShaderObject::ShaderType::VertexShader, MakeSP<string>());
+		technique->SetStageCode(ShaderObject::ShaderType::FragmentShader, MakeSP<string>());
 
 		RasterizerState resterizerState;
 		resterizerState.cullMode = RenderingPipelineState::CullMode::None;
@@ -395,9 +395,9 @@ namespace
 		blendState.sourceBlendAlpha = RenderingPipelineState::AlphaBlendFactor::SourceAlpha;
 		blendState.destinationBlend = RenderingPipelineState::AlphaBlendFactor::OneMinusSourceAlpha;
 		blendState.destinationBlendAlpha = RenderingPipelineState::AlphaBlendFactor::OneMinusSourceAlpha;
-		builder->SetRasterizerState(resterizerState);
-		builder->SetDepthStencilState(depthStencilState);
-		builder->SetBlendState(blendState);
+		technique->SetRasterizerState(resterizerState);
+		technique->SetDepthStencilState(depthStencilState);
+		technique->SetBlendState(blendState);
 		SamplerState samplerState;
 		samplerState.borderColor = Color(0, 0, 0, 0);
 		samplerState.addressingModeR = SamplerState::TextureAddressingMode::ClampToBorder;
@@ -405,10 +405,10 @@ namespace
 		samplerState.addressingModeT = SamplerState::TextureAddressingMode::ClampToBorder;
 		samplerState.magFilterOperation = SamplerState::TextureFilterOperation::Linear;
 		samplerState.minFilterOperation = SamplerState::TextureFilterOperation::LinearMipmapLinear;
-		builder->AddSamplerState("cone tracing sampler", samplerState);
+		technique->AddSamplerState("cone tracing sampler", samplerState);
 
 
-		return builder->GetRenderingTechnique();
+		return TechniqueBuilder(technique).GetRenderingTechnique();
 	}
 
 	SceneObjectSP MakeConeTracingProxyCube(PerspectiveCameraSP const& camera, floatV3 const& cubePosition, float cubeHalfSize)
@@ -418,7 +418,7 @@ namespace
 		MeshSP cube = MakeCube(cubeHalfSize);
 
 		RenderingTechniqueSP coneTracingTechnique = MakeConeTracingTechnique();
-		coneTracingTechnique->SetFrameBuffer(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer());
+		coneTracingTechnique->ConnectFrameBuffer(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer());
 		MaterialSP material = MakeSP<Material>("tracing technique parameters");
 		material->SetParameter("voxelVolumeCenter", cubePosition);
 		material->SetParameter("voxelVolumeHalfSize", cubeHalfSize);
@@ -616,12 +616,12 @@ namespace
 			{
 				{ // clear headPointer texture
 					uint32 glClearPointer = clearPointer->GetID();
-					std::shared_ptr<Texture2D> headPointerAs2D = CheckedSPCast<Texture2D>(headPointers[i]);
+					Texture2DSP headPointerAs2D = CheckedSPCast<Texture2D>(headPointers[i]);
 					headPointerAs2D->Bind(0);
 					GLTextureFormat glFormat = GLTextureFormatFromTexelFormat(headPointerAs2D->GetDescription().GetFormat());
 
 					gl::BindBuffer(gl::GL_PIXEL_UNPACK_BUFFER, glClearPointer);
-					gl::TexSubImage2D(gl::GL_TEXTURE_2D, 0, 0, 0, headPointerAs2D->GetDescription().GetSizes()[0], headPointerAs2D->GetDescription().GetSizes()[1],
+					gl::TexSubImage2D(gl::GL_TEXTURE_2D, 0, 0, 0, headPointerAs2D->GetDescription().GetSize()[0], headPointerAs2D->GetDescription().GetSize()[1],
 						glFormat.glSourceFormat, glFormat.glTextureElementType, nullptr);
 					gl::BindBuffer(gl::GL_PIXEL_UNPACK_BUFFER, 0);
 				}
@@ -729,12 +729,12 @@ namespace
 
 			{ // clear voxelVolume texture
 				uint32 glClearVoxelVolume = clearVoxelVolume->GetID();
-				std::shared_ptr<Texture3D> voxelVolumeAs3D = CheckedSPCast<Texture3D>(voxelVolume);
+				Texture3DSP voxelVolumeAs3D = CheckedSPCast<Texture3D>(voxelVolume);
 				voxelVolumeAs3D->Bind(0);
 				GLTextureFormat glFormat = GLTextureFormatFromTexelFormat(voxelVolumeAs3D->GetDescription().GetFormat());
 
 				gl::BindBuffer(gl::GL_PIXEL_UNPACK_BUFFER, glClearVoxelVolume);
-				gl::TexSubImage3D(gl::GL_TEXTURE_3D, 0, 0, 0, 0, voxelVolumeAs3D->GetDescription().GetSizes()[0], voxelVolumeAs3D->GetDescription().GetSizes()[1], voxelVolumeAs3D->GetDescription().GetSizes()[2],
+				gl::TexSubImage3D(gl::GL_TEXTURE_3D, 0, 0, 0, 0, voxelVolumeAs3D->GetDescription().GetSize()[0], voxelVolumeAs3D->GetDescription().GetSize()[1], voxelVolumeAs3D->GetDescription().GetSize()[2],
 					glFormat.glSourceFormat, glFormat.glTextureElementType, nullptr);
 				gl::BindBuffer(gl::GL_PIXEL_UNPACK_BUFFER, 0);
 			}
@@ -790,12 +790,12 @@ namespace
 
 			{ // clear voxelVolume texture
 				uint32 glClearVoxelVolume = clearVoxelVolume->GetID();
-				std::shared_ptr<Texture3D> voxelVolumeAs3D = CheckedSPCast<Texture3D>(voxelVolume);
+				Texture3DSP voxelVolumeAs3D = CheckedSPCast<Texture3D>(voxelVolume);
 				voxelVolumeAs3D->Bind(0);
 				GLTextureFormat glFormat = GLTextureFormatFromTexelFormat(voxelVolumeAs3D->GetDescription().GetFormat());
 
 				gl::BindBuffer(gl::GL_PIXEL_UNPACK_BUFFER, glClearVoxelVolume);
-				gl::TexSubImage3D(gl::GL_TEXTURE_3D, 0, 0, 0, 0, voxelVolumeAs3D->GetDescription().GetSizes()[0], voxelVolumeAs3D->GetDescription().GetSizes()[1], voxelVolumeAs3D->GetDescription().GetSizes()[2],
+				gl::TexSubImage3D(gl::GL_TEXTURE_3D, 0, 0, 0, 0, voxelVolumeAs3D->GetDescription().GetSize()[0], voxelVolumeAs3D->GetDescription().GetSize()[1], voxelVolumeAs3D->GetDescription().GetSize()[2],
 					glFormat.glSourceFormat, glFormat.glTextureElementType, nullptr);
 				gl::BindBuffer(gl::GL_PIXEL_UNPACK_BUFFER, 0);
 			}
@@ -843,12 +843,12 @@ namespace
 
 			{ // clear voxelVolume texture
 				uint32 glClearVoxelVolume = clearVoxelVolume->GetID();
-				std::shared_ptr<Texture3D> voxelVolumeAs3D = CheckedSPCast<Texture3D>(voxelVolume);
+				Texture3DSP voxelVolumeAs3D = CheckedSPCast<Texture3D>(voxelVolume);
 				voxelVolumeAs3D->Bind(0);
 				GLTextureFormat glFormat = GLTextureFormatFromTexelFormat(voxelVolumeAs3D->GetDescription().GetFormat());
 
 				gl::BindBuffer(gl::GL_PIXEL_UNPACK_BUFFER, glClearVoxelVolume);
-				gl::TexSubImage3D(gl::GL_TEXTURE_3D, 0, 0, 0, 0, voxelVolumeAs3D->GetDescription().GetSizes()[0], voxelVolumeAs3D->GetDescription().GetSizes()[1], voxelVolumeAs3D->GetDescription().GetSizes()[2],
+				gl::TexSubImage3D(gl::GL_TEXTURE_3D, 0, 0, 0, 0, voxelVolumeAs3D->GetDescription().GetSize()[0], voxelVolumeAs3D->GetDescription().GetSize()[1], voxelVolumeAs3D->GetDescription().GetSize()[2],
 					glFormat.glSourceFormat, glFormat.glTextureElementType, nullptr);
 				gl::BindBuffer(gl::GL_PIXEL_UNPACK_BUFFER, 0);
 			}

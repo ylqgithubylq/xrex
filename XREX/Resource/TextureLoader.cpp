@@ -238,48 +238,48 @@ namespace XREX
 		};
 
 		template <>
-		void TextureHandler<Texture1D>::BuildResult(uint32 width, uint32 height, uint32 size, TexelFormat format, uint8 const* data)
+		void TextureHandler<Texture1D>::BuildResult(uint32 width, uint32 height, uint32 dataSize, TexelFormat format, uint8 const* data)
 		{
-			Size<uint32, 1> sizes(width);
-			Texture::DataDescription<1> description(format, sizes);
+			Size<uint32, 1> size(width);
+			Texture::DataDescription<1> description(format, size);
 			std::vector<std::vector<uint8>> dataContainer;
-			std::vector<uint8> topLevelData(size);
-			memcpy_s(&topLevelData[0], topLevelData.size(), data, size);
+			std::vector<uint8> topLevelData(dataSize);
+			memcpy_s(&topLevelData[0], topLevelData.size(), data, dataSize);
 			dataContainer.emplace_back(std::move(topLevelData));
 			result = MakeSP<TextureLoadingResultDetail<1>>(description, std::move(dataContainer), generateMipmap);
 		}
 		template <>
-		void TextureHandler<Texture2D>::BuildResult(uint32 width, uint32 height, uint32 size, TexelFormat format, uint8 const* data)
+		void TextureHandler<Texture2D>::BuildResult(uint32 width, uint32 height, uint32 dataSize, TexelFormat format, uint8 const* data)
 		{
-			Size<uint32, 2> sizes(width, height);
-			Texture::DataDescription<2> description(format, sizes);
+			Size<uint32, 2> size(width, height);
+			Texture::DataDescription<2> description(format, size);
 			std::vector<std::vector<uint8>> dataContainer;
-			std::vector<uint8> topLevelData(size);
-			memcpy_s(&topLevelData[0], topLevelData.size(), data, size);
+			std::vector<uint8> topLevelData(dataSize);
+			memcpy_s(&topLevelData[0], topLevelData.size(), data, dataSize);
 			dataContainer.emplace_back(std::move(topLevelData));
 			result = MakeSP<TextureLoadingResultDetail<2>>(description, std::move(dataContainer), generateMipmap);
 		}
 		template <>
-		void TextureHandler<Texture3D>::BuildResult(uint32 width, uint32 height, uint32 size, TexelFormat format, uint8 const* data)
+		void TextureHandler<Texture3D>::BuildResult(uint32 width, uint32 height, uint32 dataSize, TexelFormat format, uint8 const* data)
 		{
 			assert(false); // TODO not finished, how to load 3D texture?
-			Size<uint32, 3> sizes(width, width, height / width);
-			Texture::DataDescription<3> description(format, sizes);
+			Size<uint32, 3> size(width, width, height / width);
+			Texture::DataDescription<3> description(format, size);
 			std::vector<std::vector<uint8>> dataContainer;
-			std::vector<uint8> topLevelData(size);
-			memcpy_s(&topLevelData[0], topLevelData.size(), data, size);
+			std::vector<uint8> topLevelData(dataSize);
+			memcpy_s(&topLevelData[0], topLevelData.size(), data, dataSize);
 			dataContainer.emplace_back(std::move(topLevelData));
 			result = MakeSP<TextureLoadingResultDetail<3>>(description, std::move(dataContainer), generateMipmap);
 		}
 		template <>
-		void TextureHandler<TextureCube>::BuildResult(uint32 width, uint32 height, uint32 size, TexelFormat format, uint8 const* data)
+		void TextureHandler<TextureCube>::BuildResult(uint32 width, uint32 height, uint32 dataSize, TexelFormat format, uint8 const* data)
 		{
 			assert(false); // TODO not finished, how to load cube texture?
-			Size<uint32, 2> sizes(width, height / width);
-			Texture::DataDescription<2> description(format, sizes);
+			Size<uint32, 2> size(width, height / width);
+			Texture::DataDescription<2> description(format, size);
 			std::vector<std::vector<uint8>> dataContainer;
-			std::vector<uint8> topLevelData(size);
-			memcpy_s(&topLevelData[0], topLevelData.size(), data, size);
+			std::vector<uint8> topLevelData(dataSize);
+			memcpy_s(&topLevelData[0], topLevelData.size(), data, dataSize);
 			dataContainer.emplace_back(std::move(topLevelData));
 			// TODO fill faces
 			std::array<decltype(dataContainer), 6> faces;

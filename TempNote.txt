@@ -3,11 +3,8 @@ using regular expressions(Ctrl+Shift+F):
 
 temp note:
 
-
-util -> util & graphics type
-
-rework type checking mechanisms for TechniqueParameter in Material & Technique
-
+add a no channel framebuffer, for compute shader or something with out fragment shader
+texture parameter should not allow nullptr
 shader interface struct:
 	variable(common base for attribute, uniform buffer, shader rsource buffer)
 	attribute

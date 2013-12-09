@@ -12,9 +12,9 @@
 namespace XREX
 {
 
-	TechniqueBuilderSP const& TransformationTechnique::GetTechniqueToInclude() const
+	TechniqueBuildingInformationSP const& TransformationTechnique::GetTechniqueToInclude() const
 	{
-		static TechniqueBuilderSP const Builder = [] ()
+		static TechniqueBuildingInformationSP const Builder = [] ()
 		{
 			std::string code =
 				"\n"
@@ -43,17 +43,17 @@ namespace XREX
 				"}\n"
 				"\n"
 				;
-			TechniqueBuilderSP builder = MakeSP<TechniqueBuilder>("XREX_Uniform_ModelTransformation");
-			builder->AddCommonCode(MakeSP<std::string>(std::move(code)));
+			TechniqueBuildingInformationSP techniqueInformation = MakeSP<TechniqueBuildingInformation>("XREX_Uniform_ModelTransformation");
+			techniqueInformation->AddCommonCode(MakeSP<std::string>(std::move(code)));
 
 			std::vector<VariableInformation const> modelVariables;
 			modelVariables.push_back(VariableInformation("WorldFromModel", ElementType::FloatM44, 0));
 			modelVariables.push_back(VariableInformation("WorldFromModelNormal", ElementType::FloatM44, 0));
 			modelVariables.push_back(VariableInformation("ViewFromModel", ElementType::FloatM44, 0));
 			modelVariables.push_back(VariableInformation("ClipFromModel", ElementType::FloatM44, 0));
-			builder->AddUniformBufferInformation(BufferInformation("XREX_Uniform_ModelTransformation", BufferView::BufferType::Uniform, std::move(modelVariables)));
+			techniqueInformation->AddUniformBufferInformation(BufferInformation("XREX_Uniform_ModelTransformation", BufferView::BufferType::Uniform, std::move(modelVariables)));
 
-			return builder;
+			return techniqueInformation;
 		} ();
 		return Builder;
 	}
@@ -116,9 +116,9 @@ namespace XREX
 
 
 
-	TechniqueBuilderSP const& CameraTechnique::GetTechniqueToInclude() const
+	TechniqueBuildingInformationSP const& CameraTechnique::GetTechniqueToInclude() const
 	{
-		static TechniqueBuilderSP const Builder = [] ()
+		static TechniqueBuildingInformationSP const Builder = [] ()
 		{
 			std::string code =
 				"\n"
@@ -133,17 +133,17 @@ namespace XREX
 				"} XREX_CameraTransformation;\n"
 				"\n"
 				;
-			TechniqueBuilderSP builder = MakeSP<TechniqueBuilder>("XREX_Uniform_CameraTransformation");
-			builder->AddCommonCode(MakeSP<std::string>(std::move(code)));
+			TechniqueBuildingInformationSP techniqueInformation = MakeSP<TechniqueBuildingInformation>("XREX_Uniform_CameraTransformation");
+			techniqueInformation->AddCommonCode(MakeSP<std::string>(std::move(code)));
 
 			std::vector<VariableInformation const> cameraVariables;
 			cameraVariables.push_back(VariableInformation("ViewFromWorld", ElementType::FloatM44, 0));
 			cameraVariables.push_back(VariableInformation("ClipFromView", ElementType::FloatM44, 0));
 			cameraVariables.push_back(VariableInformation("ClipFromWorld", ElementType::FloatM44, 0));
 			cameraVariables.push_back(VariableInformation("CameraPositionInWorld", ElementType::FloatV3, 0));
-			builder->AddUniformBufferInformation(BufferInformation("XREX_Uniform_CameraTransformation", BufferView::BufferType::Uniform, std::move(cameraVariables)));
+			techniqueInformation->AddUniformBufferInformation(BufferInformation("XREX_Uniform_CameraTransformation", BufferView::BufferType::Uniform, std::move(cameraVariables)));
 
-			return builder;
+			return techniqueInformation;
 		} ();
 		return Builder;
 	}

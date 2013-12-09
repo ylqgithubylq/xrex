@@ -79,8 +79,14 @@ namespace XREX
 	typedef std::shared_ptr<TechniqueParameter> TechniqueParameterSP;
 	class RenderingTechnique;
 	typedef std::shared_ptr<RenderingTechnique> RenderingTechniqueSP;
+	class TechniqueBuildingInformation;
+	typedef std::shared_ptr<TechniqueBuildingInformation> TechniqueBuildingInformationSP;
 	class TechniqueBuilder;
 	typedef std::shared_ptr<TechniqueBuilder> TechniqueBuilderSP;
+	class FrameBufferLayoutDescription;
+	typedef std::shared_ptr<FrameBufferLayoutDescription> FrameBufferLayoutDescriptionSP;
+	class FrameBufferBuilder;
+	typedef std::shared_ptr<FrameBufferBuilder> FrameBufferBuilderSP;
 	struct IWorkLauncher;
 	typedef std::shared_ptr<IWorkLauncher> IWorkLauncherSP;
 	class IndexedDrawer;

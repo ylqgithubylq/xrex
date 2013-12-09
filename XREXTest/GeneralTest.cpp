@@ -115,11 +115,11 @@ struct TempScene
 			cerr << "file not found. file: " << shaderFile << endl;
 		}
 
-		TechniqueBuilderSP testBuilder = MakeSP<TechniqueBuilder>("test technique");
+		TechniqueBuildingInformationSP testTechnique = MakeSP<TechniqueBuildingInformation>("test technique");
 
-		testBuilder->AddCommonCode(shaderString);
-		testBuilder->SetStageCode(ShaderObject::ShaderType::VertexShader, MakeSP<string>());
-		testBuilder->SetStageCode(ShaderObject::ShaderType::FragmentShader, MakeSP<string>());
+		testTechnique->AddCommonCode(shaderString);
+		testTechnique->SetStageCode(ShaderObject::ShaderType::VertexShader, MakeSP<string>());
+		testTechnique->SetStageCode(ShaderObject::ShaderType::FragmentShader, MakeSP<string>());
 
 
 		shaderFile = "../../XREXTest/Effects/TestCube.glsl";
@@ -129,10 +129,43 @@ struct TempScene
 			cerr << "file not found. file: " << shaderFile << endl;
 		}
 
-		TechniqueBuilderSP testCubeBuilder = MakeSP<TechniqueBuilder>("test cube technique");
-		testCubeBuilder->AddCommonCode(shaderString);
-		testCubeBuilder->SetStageCode(ShaderObject::ShaderType::VertexShader, MakeSP<string>());
-		testCubeBuilder->SetStageCode(ShaderObject::ShaderType::FragmentShader, MakeSP<string>());
+		TechniqueBuildingInformationSP testCubeTechnique = MakeSP<TechniqueBuildingInformation>("test cube technique");
+		testCubeTechnique->AddCommonCode(shaderString);
+		testCubeTechnique->SetStageCode(ShaderObject::ShaderType::VertexShader, MakeSP<string>());
+		testCubeTechnique->SetStageCode(ShaderObject::ShaderType::FragmentShader, MakeSP<string>());
+
+
+		testTechnique->AddInclude(TransformationTechnique().GetTechniqueToInclude());
+		testTechnique->AddInclude(CameraTechnique().GetTechniqueToInclude());
+
+		testCubeTechnique->AddInclude(TransformationTechnique().GetTechniqueToInclude());
+		testCubeTechnique->AddInclude(CameraTechnique().GetTechniqueToInclude());
+
+		vector<VariableInformation const> variables;
+		testTechnique->AddUniformBufferInformation(BufferInformation("Material", BufferView::BufferType::Uniform, move(variables)));
+		testTechnique->AddUniformBufferInformation(BufferInformation("Info", BufferView::BufferType::Uniform, move(variables)));
+
+		testCubeTechnique->AddUniformBufferInformation(BufferInformation("Info", BufferView::BufferType::Uniform, move(variables)));
+
+		string defaultSamplerName = "defaultSampler";
+		SamplerState defaultSampler;
+		testTechnique->AddSamplerState(defaultSamplerName, defaultSampler);
+
+		testTechnique->AddTextureInformation(TextureInformation("diffuseMap", Texture::TextureType::Texture2D, ElementType::FloatV4, defaultSamplerName));
+		testTechnique->AddTextureInformation(TextureInformation("specularMap", Texture::TextureType::Texture2D, ElementType::FloatV4, defaultSamplerName));
+		testTechnique->AddTextureInformation(TextureInformation("normalMap", Texture::TextureType::Texture2D, ElementType::FloatV4, defaultSamplerName));
+		testTechnique->AddTextureInformation(TextureInformation("shininessMap", Texture::TextureType::Texture2D, ElementType::FloatV4, defaultSamplerName));
+		testTechnique->AddTextureInformation(TextureInformation("opacityMap", Texture::TextureType::Texture2D, ElementType::FloatV4, defaultSamplerName));
+
+		testTechnique->AddAttributeInputInformation(AttributeInputInformation("position", ElementType::FloatV3));
+		testTechnique->AddAttributeInputInformation(AttributeInputInformation("normal", ElementType::FloatV3));
+		testTechnique->AddAttributeInputInformation(AttributeInputInformation("textureCoordinate0", ElementType::FloatV3));
+
+		testCubeTechnique->AddAttributeInputInformation(AttributeInputInformation("position", ElementType::FloatV3));
+
+		testTechnique->SetFrameBufferDescription(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer()->GetLayoutDescription());
+
+		testCubeTechnique->SetFrameBufferDescription(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer()->GetLayoutDescription());
 
 
 		RasterizerState resterizerState;
@@ -146,22 +179,22 @@ struct TempScene
 		blendState.destinationBlend = RenderingPipelineState::AlphaBlendFactor::OneMinusSourceAlpha;
 		blendState.destinationBlendAlpha = RenderingPipelineState::AlphaBlendFactor::OneMinusSourceAlpha;
 
-		SamplerState defaultSampler;
-		testBuilder->AddSamplerState("defaultSampler", defaultSampler);
 
-		testBuilder->SetRasterizerState(resterizerState);
-		testBuilder->SetDepthStencilState(depthStencilState);
-		testBuilder->SetBlendState(blendState);
+		testTechnique->SetRasterizerState(resterizerState);
+		testTechnique->SetDepthStencilState(depthStencilState);
+		testTechnique->SetBlendState(blendState);
 
-		testCubeBuilder->SetRasterizerState(resterizerState);
-		testCubeBuilder->SetDepthStencilState(depthStencilState);
-		testCubeBuilder->SetBlendState(blendState);
+		testCubeTechnique->SetRasterizerState(resterizerState);
+		testCubeTechnique->SetDepthStencilState(depthStencilState);
+		testCubeTechnique->SetBlendState(blendState);
 
 
-		RenderingTechniqueSP effect = testBuilder->GetRenderingTechnique();
-		RenderingTechniqueSP cubeEffect = testCubeBuilder->GetRenderingTechnique();
-		effect->SetFrameBuffer(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer());
-		cubeEffect->SetFrameBuffer(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer());
+		RenderingTechniqueSP effect = TechniqueBuilder(testTechnique).GetRenderingTechnique();
+		RenderingTechniqueSP cubeEffect = TechniqueBuilder(testCubeTechnique).GetRenderingTechnique();
+		effect->ConnectFrameBuffer(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer());
+		cubeEffect->ConnectFrameBuffer(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer());
+
+
 
 		VertexBufferSP vertices = XREXContext::GetInstance().GetRenderingFactory().CreateVertexBuffer(GraphicsBuffer::Usage::StaticDraw, vertexData, "position");
 		IndexBufferSP indices = XREXContext::GetInstance().GetRenderingFactory().CreateIndexBuffer(GraphicsBuffer::Usage::StaticDraw, indexData, IndexBuffer::TopologicalType::Triangles);
@@ -173,11 +206,6 @@ struct TempScene
 		SubMeshSP const& subMesh = cubeMesh->CreateSubMesh("cube sub mesh", layout, nullptr, cubeEffect);
 		centerPosition_ = floatV3(0, 0, 0000);
 
-		TechniqueParameterSP const& lightColor = effect->GetParameterByName("lightColor");
-		if (lightColor)
-		{
-			lightColor->As<floatV3>().SetValue(floatV3(50000, 50000, 60000));
-		}
 		TechniqueParameterSP const& centerPosition = effect->GetParameterByName("centerPosition");
 		if (centerPosition)
 		{
