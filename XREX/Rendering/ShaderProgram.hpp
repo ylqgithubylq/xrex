@@ -57,10 +57,10 @@ namespace XREX
 	{
 	public:
 		FragmentOutputBindingInformation()
-			: texelType_(ElementType::ElementTypeCount), location_(-1), index_(0)
+			: texelType_(Texture::TexelType::TexelTypeCount), location_(-1), index_(0)
 		{
 		}
-		FragmentOutputBindingInformation(std::string const& channel, ElementType texelType, int32 location, int32 index)
+		FragmentOutputBindingInformation(std::string const& channel, Texture::TexelType texelType, int32 location, int32 index)
 			: channel_(channel), texelType_(texelType), location_(location), index_(index)
 		{
 		}
@@ -69,7 +69,7 @@ namespace XREX
 		{
 			return channel_;
 		}
-		ElementType GetTexelType() const
+		Texture::TexelType GetTexelType() const
 		{
 			return texelType_;
 		}
@@ -83,7 +83,7 @@ namespace XREX
 		}
 	private:
 		std::string channel_;
-		ElementType texelType_;
+		Texture::TexelType texelType_;
 		int32 location_;
 		int32 index_;
 	};
@@ -129,10 +129,10 @@ namespace XREX
 	{
 	public:
 		TextureBindingInformation()
-			: textureType_(Texture::TextureType::TextureTypeCount), texelType_(ElementType::ElementTypeCount), bindingIndex_(-1)
+			: textureType_(Texture::TextureType::TextureTypeCount), texelType_(Texture::TexelType::TexelTypeCount), bindingIndex_(-1)
 		{
 		}
-		TextureBindingInformation(std::string const& channel, Texture::TextureType textureType, ElementType texelType, int32 bindingIndex)
+		TextureBindingInformation(std::string const& channel, Texture::TextureType textureType, Texture::TexelType texelType, int32 bindingIndex)
 			: channel_(channel), textureType_(textureType), texelType_(texelType), bindingIndex_(bindingIndex)
 		{
 		}
@@ -145,7 +145,7 @@ namespace XREX
 		{
 			return textureType_;
 		}
-		ElementType GetTexelType() const
+		Texture::TexelType GetTexelType() const
 		{
 			return texelType_;
 		}
@@ -156,7 +156,7 @@ namespace XREX
 	private:
 		std::string channel_;
 		Texture::TextureType textureType_;
-		ElementType texelType_;
+		Texture::TexelType texelType_;
 		int32 bindingIndex_;
 	};
 
@@ -305,10 +305,10 @@ namespace XREX
 		enum class ShaderType
 		{
 			VertexShader,
-			FragmentShader,
-			GeometryShader,
 			TessellationControlShader,
 			TessellationEvaluationShader,
+			GeometryShader,
+			FragmentShader,
 			ComputeShader,
 
 			ShaderTypeCount

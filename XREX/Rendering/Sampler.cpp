@@ -12,7 +12,7 @@ namespace XREX
 	SamplerState::SamplerState()
 		: borderColor(0, 0, 0, 1),
 		addressingModeS(TextureAddressingMode::Repeat), addressingModeT(TextureAddressingMode::Repeat), addressingModeR(TextureAddressingMode::Repeat),
-		minFilterOperation(TextureFilterOperation::Nearest), magFilterOperation(TextureFilterOperation::Nearest), maxAnisotropy(16),
+		minFilterMode(TextureFilterMode::Nearest), magFilterMode(TextureFilterMode::Nearest), maxAnisotropy(16),
 		minLOD(0), maxLOD(std::numeric_limits<float>::max()), mipmapLODBias(0.f), compareFunction(CompareFunction::AlwaysFail)
 	{
 	}
@@ -26,21 +26,21 @@ namespace XREX
 		glAddressingModeR_(GLTextureAddressingModeFromAddressingMode(state_.addressingModeR)),
 		glCompareFunction_(GLCompareFunctionFromCompareFunction(state_.compareFunction))
 	{
-		assert(state_.magFilterOperation == SamplerState::TextureFilterOperation::Nearest
-			|| state_.magFilterOperation == SamplerState::TextureFilterOperation::Linear
-			|| state_.magFilterOperation == SamplerState::TextureFilterOperation::Anisotropic);
+		assert(state_.magFilterMode == SamplerState::TextureFilterMode::Nearest
+			|| state_.magFilterMode == SamplerState::TextureFilterMode::Linear
+			|| state_.magFilterMode == SamplerState::TextureFilterMode::Anisotropic);
 
-		if (state_.minFilterOperation == SamplerState::TextureFilterOperation::Anisotropic || state_.magFilterOperation == SamplerState::TextureFilterOperation::Anisotropic)
+		if (state_.minFilterMode == SamplerState::TextureFilterMode::Anisotropic || state_.magFilterMode == SamplerState::TextureFilterMode::Anisotropic)
 		{
-			state_.minFilterOperation = SamplerState::TextureFilterOperation::Anisotropic;
-			state_.magFilterOperation = SamplerState::TextureFilterOperation::Anisotropic;
-			glMinFilter_ = GLFilterOperationFromTextureFilterOperation(SamplerState::TextureFilterOperation::LinearMipmapLinear);
-			glMagFilter_ = GLFilterOperationFromTextureFilterOperation(SamplerState::TextureFilterOperation::Linear);
+			state_.minFilterMode = SamplerState::TextureFilterMode::Anisotropic;
+			state_.magFilterMode = SamplerState::TextureFilterMode::Anisotropic;
+			glMinFilter_ = GLFilterOperationFromTextureFilterOperation(SamplerState::TextureFilterMode::LinearMipmapLinear);
+			glMagFilter_ = GLFilterOperationFromTextureFilterOperation(SamplerState::TextureFilterMode::Linear);
 		}
 		else
 		{
-			glMinFilter_ = GLFilterOperationFromTextureFilterOperation(state_.minFilterOperation);
-			glMagFilter_ = GLFilterOperationFromTextureFilterOperation(state_.magFilterOperation);
+			glMinFilter_ = GLFilterOperationFromTextureFilterOperation(state_.minFilterMode);
+			glMagFilter_ = GLFilterOperationFromTextureFilterOperation(state_.magFilterMode);
 		}
 		
 		gl::GenSamplers(1, &glSamplerID_);
@@ -53,7 +53,7 @@ namespace XREX
 
 		gl::SamplerParameteri(glSamplerID_, gl::GL_TEXTURE_MIN_FILTER, glMinFilter_);
 		gl::SamplerParameteri(glSamplerID_, gl::GL_TEXTURE_MAG_FILTER, glMagFilter_);
-		if (state_.minFilterOperation == SamplerState::TextureFilterOperation::Anisotropic)
+		if (state_.minFilterMode == SamplerState::TextureFilterMode::Anisotropic)
 		{
 			gl::SamplerParameteri(glSamplerID_, gl::GL_TEXTURE_MAX_ANISOTROPY_EXT, state.maxAnisotropy);
 		}

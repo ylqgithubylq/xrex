@@ -10,6 +10,7 @@
 #include "Rendering/Sampler.hpp"
 #include "Rendering/TextureImage.hpp"
 #include "Rendering/FrameBuffer.hpp"
+#include "Rendering/TechniqueBuilder.hpp"
 
 #include <algorithm>
 #include <sstream>
@@ -116,17 +117,21 @@ namespace XREX
 	}
 
 
-	RenderingTechnique::RenderingTechnique(std::string const& name, ProgramObjectSP const& program,
-		RasterizerStateObjectSP const& rasterizerState, DepthStencilStateObjectSP const& depthStencilState, BlendStateObjectSP const& blendState,
-		std::unordered_map<std::string, SamplerSP>&& samplers)
-		: name_(name), program_(program), rasterizerState_(rasterizerState), depthStencilState_(depthStencilState), blendState_(blendState),
-		samplers_(std::move(samplers))
+	RenderingTechnique::RenderingTechnique(ConstructerParameterPack&& pack)
+		: buildingInformation_(std::move(pack.buildingInformation)), program_(std::move(pack.program)),
+		rasterizerState_(std::move(pack.rasterizerState)), depthStencilState_(std::move(pack.depthStencilState)), blendState_(std::move(pack.blendState)),
+		samplers_(std::move(pack.samplers))
 	{
 		InitializeParameterInformations();
 	}
 
 	RenderingTechnique::~RenderingTechnique()
 	{
+	}
+
+	std::string const& RenderingTechnique::GetName() const
+	{
+		return buildingInformation_->GetName();
 	}
 
 
@@ -140,7 +145,7 @@ namespace XREX
 		{
 			for (uint32 i = 0; i < outputLayout.size(); ++i)
 			{
-				if (outputLayout[i].GetTexelType() != GetTexelType(framebufferLayout->GetAllChannels()[i].GetFormat())
+				if (outputLayout[i].GetTexelType() != Texture::TexelTypeFromTexelFormat(framebufferLayout->GetAllChannels()[i].GetFormat())
 					|| outputLayout[i].GetChannel() != framebufferLayout->GetAllChannels()[i].GetChannel())
 				{
 					assert(false); // framebuffer layout mismatch

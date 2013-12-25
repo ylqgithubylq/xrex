@@ -3,7 +3,6 @@
 #include "Declare.hpp"
 
 #include "Rendering/GraphicsType.hpp"
-#include "Rendering/TextureImage.hpp"
 
 #include <vector>
 #include <array>
@@ -25,6 +24,27 @@ namespace XREX
 
 			TextureTypeCount
 		};
+
+		enum class TexelType
+		{
+			IntV1,
+			IntV2,
+			IntV3,
+			IntV4,
+			UintV1,
+			UintV2,
+			UintV3,
+			UintV4,
+			FloatV1,
+			FloatV2,
+			FloatV3,
+			FloatV4,
+			Shadow,
+
+			TexelTypeCount
+		};
+
+		static TexelType TexelTypeFromTexelFormat(TexelFormat format);
 
 		template <uint32 Dimension>
 		class DataDescription
@@ -71,9 +91,9 @@ namespace XREX
 
 		virtual TexelFormat GetFormat() const = 0;
 
-		ElementType GetTexelElementType() const
+		TexelType GetTexelType() const
 		{
-			return GetCorrespondingElementType(GetFormat());
+			return TexelTypeFromTexelFormat(GetFormat());
 		}
 
 		uint32 GetMipmapCount() const

@@ -25,11 +25,15 @@ namespace XREX
 
 	// TODO how to make a template counter? Counter<class T> {uint32 Value;}; Counter<A>::Value == 0; Counter<B>::Value == 1; ...
 
-	struct XREX_API IComponentTechnique
+	struct XREX_API ISystemTechniqueFactory
 	{
-		virtual ~IComponentTechnique() = 0
+		virtual ~ISystemTechniqueFactory() = 0
 		{
 		}
+		virtual std::string const& GetIndexName() const = 0;
+		/*
+		 *	Notice: Every call should return the same instance.
+		 */
 		virtual TechniqueBuildingInformationSP const& GetTechniqueToInclude() const = 0;
 	};
 
@@ -53,9 +57,14 @@ namespace XREX
 
 
 
-	struct XREX_API TransformationTechnique
-		: IComponentTechnique
+	struct XREX_API TransformationTechniqueFactory
+		: ISystemTechniqueFactory
 	{
+		virtual std::string const& GetIndexName() const override
+		{
+			static std::string const IndexName = "Transformation";
+			return IndexName;
+		}
 		virtual TechniqueBuildingInformationSP const& GetTechniqueToInclude() const override;
 	};
 
@@ -83,9 +92,14 @@ namespace XREX
 
 
 
-	struct XREX_API CameraTechnique
-		: IComponentTechnique
+	struct XREX_API CameraTechniqueFactory
+		: ISystemTechniqueFactory
 	{
+		virtual std::string const& GetIndexName() const override
+		{
+			static std::string const IndexName = "Camera";
+			return IndexName;
+		}
 		virtual TechniqueBuildingInformationSP const& GetTechniqueToInclude() const override;
 	};
 

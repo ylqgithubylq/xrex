@@ -12,9 +12,9 @@
 namespace XREX
 {
 
-	TechniqueBuildingInformationSP const& TransformationTechnique::GetTechniqueToInclude() const
+	TechniqueBuildingInformationSP const& TransformationTechniqueFactory::GetTechniqueToInclude() const
 	{
-		static TechniqueBuildingInformationSP const Builder = [] ()
+		static TechniqueBuildingInformationSP const Builder = []
 		{
 			std::string code =
 				"\n"
@@ -51,7 +51,8 @@ namespace XREX
 			modelVariables.push_back(VariableInformation("WorldFromModelNormal", ElementType::FloatM44, 0));
 			modelVariables.push_back(VariableInformation("ViewFromModel", ElementType::FloatM44, 0));
 			modelVariables.push_back(VariableInformation("ClipFromModel", ElementType::FloatM44, 0));
-			techniqueInformation->AddUniformBufferInformation(BufferInformation("XREX_Uniform_ModelTransformation", BufferView::BufferType::Uniform, std::move(modelVariables)));
+			techniqueInformation->AddUniformBufferInformation(BufferInformation(
+				"XREX_Uniform_ModelTransformation", "XREX_ModelTransformation", BufferView::BufferType::Uniform, std::move(modelVariables)));
 
 			return techniqueInformation;
 		} ();
@@ -116,9 +117,9 @@ namespace XREX
 
 
 
-	TechniqueBuildingInformationSP const& CameraTechnique::GetTechniqueToInclude() const
+	TechniqueBuildingInformationSP const& CameraTechniqueFactory::GetTechniqueToInclude() const
 	{
-		static TechniqueBuildingInformationSP const Builder = [] ()
+		static TechniqueBuildingInformationSP const Builder = []
 		{
 			std::string code =
 				"\n"
@@ -141,7 +142,8 @@ namespace XREX
 			cameraVariables.push_back(VariableInformation("ClipFromView", ElementType::FloatM44, 0));
 			cameraVariables.push_back(VariableInformation("ClipFromWorld", ElementType::FloatM44, 0));
 			cameraVariables.push_back(VariableInformation("CameraPositionInWorld", ElementType::FloatV3, 0));
-			techniqueInformation->AddUniformBufferInformation(BufferInformation("XREX_Uniform_CameraTransformation", BufferView::BufferType::Uniform, std::move(cameraVariables)));
+			techniqueInformation->AddUniformBufferInformation(BufferInformation(
+				"XREX_Uniform_CameraTransformation", "XREX_CameraTransformation", BufferView::BufferType::Uniform, std::move(cameraVariables)));
 
 			return techniqueInformation;
 		} ();

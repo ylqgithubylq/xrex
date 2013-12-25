@@ -14,7 +14,7 @@ namespace XREX
 	{
 	public:
 		TechniqueBuildingInformation(std::string name)
-			: name_(std::move(name)), stageCodes_(static_cast<uint32>(ShaderObject::ShaderType::ShaderTypeCount))
+			: name_(std::move(name))
 		{
 		}
 
@@ -35,20 +35,20 @@ namespace XREX
 			return includes_;
 		}
 
-		void AddCommonCode(std::shared_ptr<std::string> const& code)
+		void AddCommonCode(std::shared_ptr<std::string> code)
 		{
-			commonCodes_.push_back(code);
+			commonCodes_.push_back(std::move(code));
 		}
-		void SetStageCode(ShaderObject::ShaderType stage, std::shared_ptr<std::string> const& code)
+		void AddStageCode(ShaderObject::ShaderType stage, std::shared_ptr<std::string> code)
 		{
-			stageCodes_[static_cast<uint32>(stage)] = code;
+			stageCodes_[static_cast<uint32>(stage)].push_back(std::move(code));
 		}
 
 		std::vector<std::shared_ptr<std::string>> const& GetAllCommonCodes() const
 		{
 			return commonCodes_;
 		}
-		std::shared_ptr<std::string> const& GetStageCode(ShaderObject::ShaderType stage) const
+		std::vector<std::shared_ptr<std::string>> const& GetStageCodes(ShaderObject::ShaderType stage) const
 		{
 			return stageCodes_[static_cast<uint32>(stage)];
 		}
@@ -160,8 +160,7 @@ namespace XREX
 
 		std::vector<TechniqueBuildingInformationSP> includes_;
 		std::vector<std::shared_ptr<std::string>> commonCodes_;
-		std::vector<std::shared_ptr<std::string>> stageCodes_;
-
+		std::array<std::vector<std::shared_ptr<std::string>>, static_cast<uint32>(ShaderObject::ShaderType::ShaderTypeCount)> stageCodes_;
 
 		RasterizerState rasterizerState_;
 		DepthStencilState depthStencilState_;

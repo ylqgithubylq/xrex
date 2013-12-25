@@ -80,7 +80,7 @@ namespace XREX
 		FragmentOutputInformation()
 		{
 		}
-		FragmentOutputInformation(std::string const& name, ElementType texelType)
+		FragmentOutputInformation(std::string const& name, Texture::TexelType texelType)
 			: name_(name), texelType_(texelType)
 		{
 		}
@@ -89,27 +89,24 @@ namespace XREX
 		{
 			return name_;
 		}
-		ElementType GetTexelType() const
+		Texture::TexelType GetTexelType() const
 		{
 			return texelType_;
 		}
 
 	private:
 		std::string name_;
-		ElementType texelType_;
+		Texture::TexelType texelType_;
 	};
 
 	class XREX_API TextureInformation
 	{
 	public:
 		TextureInformation()
-			: textureType_(Texture::TextureType::TextureTypeCount), texelType_(ElementType::ElementTypeCount)
+			: textureType_(Texture::TextureType::TextureTypeCount), texelType_(Texture::TexelType::TexelTypeCount)
 		{
 		}
-		TextureInformation(std::string const& channel, Texture::TextureType textureType, ElementType texelType, std::string const& samplerName)
-			: channel_(channel), textureType_(textureType), texelType_(texelType), samplerName_(samplerName)
-		{
-		}
+		TextureInformation(std::string const& channel, Texture::TextureType textureType, Texture::TexelType texelType, std::string const& samplerName);
 
 		std::string const& GetChannel() const
 		{
@@ -119,7 +116,7 @@ namespace XREX
 		{
 			return textureType_;
 		}
-		ElementType GetTexelType() const
+		Texture::TexelType GetTexelType() const
 		{
 			return texelType_;
 		}
@@ -130,7 +127,7 @@ namespace XREX
 	private:
 		std::string channel_;
 		Texture::TextureType textureType_;
-		ElementType texelType_;
+		Texture::TexelType texelType_;
 		std::string samplerName_;
 	};
 
@@ -154,9 +151,9 @@ namespace XREX
 		{
 			return imageType_;
 		}
-		ElementType GetTexelType() const
+		Texture::TexelType GetTexelType() const
 		{
-			return XREX::GetTexelType(format_);
+			return Texture::TexelTypeFromTexelFormat(format_);
 		}
 		TexelFormat GetTexelFormat() const
 		{
@@ -180,8 +177,8 @@ namespace XREX
 			: type_(BufferView::BufferType::TypeCount)
 		{
 		}
-		BufferInformation(std::string const& channel, BufferView::BufferType type, std::vector<VariableInformation const>&& bufferVariableInformations)
-			: channel_(channel), type_(type), bufferVariableInformations_(std::move(bufferVariableInformations))
+		BufferInformation(std::string channel, std::string shaderInstanceName, BufferView::BufferType type, std::vector<VariableInformation const>&& bufferVariableInformations)
+			: channel_(std::move(channel)), shaderInstanceName_(std::move(shaderInstanceName)), type_(type), bufferVariableInformations_(std::move(bufferVariableInformations))
 		{
 		}
 
@@ -201,6 +198,7 @@ namespace XREX
 
 	private:
 		std::string channel_;
+		std::string shaderInstanceName_;
 		BufferView::BufferType type_;
 		std::vector<VariableInformation const> bufferVariableInformations_;
 	};

@@ -210,22 +210,47 @@ namespace XREX
 	public:
 		struct ConstructerParameterPack
 		{
+			TechniqueBuildingInformationSP buildingInformation;
 			ProgramObjectSP program;
 			RasterizerStateObjectSP rasterizerState;
 			DepthStencilStateObjectSP depthStencilState;
 			BlendStateObjectSP blendState;
 			std::unordered_map<std::string, SamplerSP> samplers;
+
+			ConstructerParameterPack(TechniqueBuildingInformationSP buildingInformation, ProgramObjectSP program,
+				RasterizerStateObjectSP rasterizerState, DepthStencilStateObjectSP depthStencilState, BlendStateObjectSP blendState,
+				std::unordered_map<std::string, SamplerSP>&& samplers)
+				: buildingInformation(std::move(buildingInformation)), program(std::move(program)),
+				rasterizerState(std::move(rasterizerState)), depthStencilState(std::move(depthStencilState)), blendState(std::move(blendState)),
+				samplers(std::move(samplers))
+			{
+			}
+			ConstructerParameterPack(ConstructerParameterPack&& right)
+				: buildingInformation(std::move(right.buildingInformation)), program(std::move(right.program)),
+				rasterizerState(std::move(right.rasterizerState)), depthStencilState(std::move(right.depthStencilState)), blendState(std::move(right.blendState)),
+				samplers(std::move(right.samplers))
+			{
+			}
+			ConstructerParameterPack& operator =(ConstructerParameterPack&& right)
+			{
+				buildingInformation = std::move(right.buildingInformation);
+				program = std::move(right.program);
+				rasterizerState = std::move(right.rasterizerState);
+				depthStencilState = std::move(right.depthStencilState);
+				blendState = std::move(right.blendState);
+				samplers = std::move(right.samplers);
+			}
 		};
 	public:
-		explicit RenderingTechnique(std::string const& name, ProgramObjectSP const& program,
-			RasterizerStateObjectSP const& rasterizerState, DepthStencilStateObjectSP const& depthStencilState, BlendStateObjectSP const& blendState,
-			std::unordered_map<std::string, SamplerSP>&& samplers); // TODO ConstructerParameterPack
+		explicit RenderingTechnique(ConstructerParameterPack&& pack);
 		~RenderingTechnique();
 
 
-		std::string const& GetName() const
+		std::string const& GetName() const;
+
+		TechniqueBuildingInformationSP const& GetBuildingInformation() const
 		{
-			return name_;
+			return buildingInformation_;
 		}
 
 		ProgramObjectSP const& GetProgram() const
@@ -269,8 +294,8 @@ namespace XREX
 		void AddParameter(TechniqueParameterSP const& parameter);
 
 	private:
-		std::string name_;
-		
+		TechniqueBuildingInformationSP buildingInformation_;
+
 		std::vector<TechniqueParameterSP> parameters_;
 
 		std::vector<std::function<void()>> parameterSetters_;

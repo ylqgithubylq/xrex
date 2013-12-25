@@ -224,6 +224,9 @@
     <ClInclude Include="Rendering\GraphicsType.hpp">
       <Filter>Rendering</Filter>
     </ClInclude>
+    <ClInclude Include="Resource\TechniqueLoader.hpp">
+      <Filter>Resource</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Base\Math.cpp">
@@ -381,6 +384,9 @@
     </ClCompile>
     <ClCompile Include="Rendering\GraphicsType.cpp">
       <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Resource\TechniqueLoader.cpp">
+      <Filter>Resource</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

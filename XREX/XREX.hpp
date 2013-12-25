@@ -10,7 +10,7 @@
 #define XREX_API
 #endif
 
-#pragma warning(disable: 4251) // have member do not dllexport-ed
+#pragma warning(disable: 4251) // have members do not dllexport-ed
 
 #if defined(DEBUG) || defined(_DEBUG)
 #define XREX_DEBUG

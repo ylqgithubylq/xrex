@@ -235,23 +235,23 @@ namespace XREX
 		}
 	}
 
-	uint32 GLFilterOperationFromTextureFilterOperation(SamplerState::TextureFilterOperation filterOperation)
+	uint32 GLFilterOperationFromTextureFilterOperation(SamplerState::TextureFilterMode filterOperation)
 	{
 		switch (filterOperation)
 		{
-		case SamplerState::TextureFilterOperation::Nearest:
+		case SamplerState::TextureFilterMode::Nearest:
 			return gl::GL_NEAREST;
-		case SamplerState::TextureFilterOperation::Linear:
+		case SamplerState::TextureFilterMode::Linear:
 			return gl::GL_LINEAR;
-		case SamplerState::TextureFilterOperation::NearestMipmapNearest:
+		case SamplerState::TextureFilterMode::NearestMipmapNearest:
 			return gl::GL_NEAREST_MIPMAP_NEAREST;
-		case SamplerState::TextureFilterOperation::LinearMipmapNearest:
+		case SamplerState::TextureFilterMode::LinearMipmapNearest:
 			return gl::GL_LINEAR_MIPMAP_NEAREST;
-		case SamplerState::TextureFilterOperation::NearestMipmapLinear:
+		case SamplerState::TextureFilterMode::NearestMipmapLinear:
 			return gl::GL_NEAREST_MIPMAP_LINEAR;
-		case SamplerState::TextureFilterOperation::LinearMipmapLinear:
+		case SamplerState::TextureFilterMode::LinearMipmapLinear:
 			return gl::GL_LINEAR_MIPMAP_LINEAR;
-		case SamplerState::TextureFilterOperation::Anisotropic:
+		case SamplerState::TextureFilterMode::Anisotropic:
 			assert(false);
 			return 0;
 		default:

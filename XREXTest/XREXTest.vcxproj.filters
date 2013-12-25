@@ -46,16 +46,22 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Effects\TestRenderToTexture.glsl">
-      <Filter>Effect Files</Filter>
-    </None>
     <None Include="Effects\Test.glsl">
       <Filter>Effect Files</Filter>
     </None>
     <None Include="Effects\TestCube.glsl">
       <Filter>Effect Files</Filter>
     </None>
-    <None Include="Effects\TestCopyTextures.glsl">
+    <None Include="Effects\TestCopyTextures.technique">
+      <Filter>Effect Files</Filter>
+    </None>
+    <None Include="Effects\TestRenderToTexture.technique">
+      <Filter>Effect Files</Filter>
+    </None>
+    <None Include="Effects\ToInclude.glsl">
+      <Filter>Effect Files</Filter>
+    </None>
+    <None Include="Effects\TestGBuffer.framebuffer">
       <Filter>Effect Files</Filter>
     </None>
   </ItemGroup>

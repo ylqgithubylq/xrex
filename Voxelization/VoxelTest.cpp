@@ -126,7 +126,7 @@ namespace
 	UsedTechniques MakeVoxelizationTechnique()
 	{
 
-		RenderingTechniqueSP listTechnique = [] ()
+		RenderingTechniqueSP listTechnique = []
 		{
 			string shaderFile = "../../Voxelization/Shaders/ListGeneration.glsl";
 			shared_ptr<string> shaderString = XREXContext::GetInstance().GetResourceLoader().LoadString(shaderFile);
@@ -137,8 +137,8 @@ namespace
 
 			TechniqueBuildingInformationSP technique = MakeSP<TechniqueBuildingInformation>("voxelization list technique");
 			technique->AddCommonCode(shaderString);
-			technique->SetStageCode(ShaderObject::ShaderType::VertexShader, MakeSP<string>());
-			technique->SetStageCode(ShaderObject::ShaderType::FragmentShader, MakeSP<string>());
+			technique->AddStageCode(ShaderObject::ShaderType::VertexShader, MakeSP<string>());
+			technique->AddStageCode(ShaderObject::ShaderType::FragmentShader, MakeSP<string>());
 
 			RasterizerState resterizerState;
 			resterizerState.cullMode = RenderingPipelineState::CullMode::None;
@@ -160,7 +160,7 @@ namespace
 		} ();
 		listTechnique->ConnectFrameBuffer(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer());
 
-		RenderingTechniqueSP sortTechnique = [] ()
+		RenderingTechniqueSP sortTechnique = []
 		{
 
 			string shaderFile = "../../Voxelization/Shaders/ListSort.glsl";
@@ -171,8 +171,8 @@ namespace
 			}
 			TechniqueBuildingInformationSP technique = MakeSP<TechniqueBuildingInformation>("list sort technique");
 			technique->AddCommonCode(shaderString);
-			technique->SetStageCode(ShaderObject::ShaderType::VertexShader, MakeSP<string>());
-			technique->SetStageCode(ShaderObject::ShaderType::FragmentShader, MakeSP<string>());
+			technique->AddStageCode(ShaderObject::ShaderType::VertexShader, MakeSP<string>());
+			technique->AddStageCode(ShaderObject::ShaderType::FragmentShader, MakeSP<string>());
 
 			RasterizerState resterizerState;
 			resterizerState.cullMode = RenderingPipelineState::CullMode::None;
@@ -194,7 +194,7 @@ namespace
 		sortTechnique->ConnectFrameBuffer(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer());
 
 
-		RenderingTechniqueSP generationTechnique = [] ()
+		RenderingTechniqueSP generationTechnique = []
 		{
 			string shaderFile = "../../Voxelization/Shaders/VoxelGeneration.glsl";
 			shared_ptr<string> shaderString = XREXContext::GetInstance().GetResourceLoader().LoadString(shaderFile);
@@ -204,8 +204,8 @@ namespace
 			}
 			TechniqueBuildingInformationSP technique = MakeSP<TechniqueBuildingInformation>("voxelization generation technique");
 			technique->AddCommonCode(shaderString);
-			technique->SetStageCode(ShaderObject::ShaderType::VertexShader, MakeSP<string>());
-			technique->SetStageCode(ShaderObject::ShaderType::FragmentShader, MakeSP<string>());
+			technique->AddStageCode(ShaderObject::ShaderType::VertexShader, MakeSP<string>());
+			technique->AddStageCode(ShaderObject::ShaderType::FragmentShader, MakeSP<string>());
 
 			RasterizerState resterizerState;
 			resterizerState.cullMode = RenderingPipelineState::CullMode::None;
@@ -227,7 +227,7 @@ namespace
 		} ();
 		generationTechnique->ConnectFrameBuffer(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer());
 
-		RenderingTechniqueSP anisotropicGenerationTechnique = [] ()
+		RenderingTechniqueSP anisotropicGenerationTechnique = []
 		{
 			string shaderFile = "../../Voxelization/Shaders/AnisotropicVoxelGeneration.glsl";
 			shared_ptr<string> shaderString = XREXContext::GetInstance().GetResourceLoader().LoadString(shaderFile);
@@ -237,8 +237,8 @@ namespace
 			}
 			TechniqueBuildingInformationSP technique = MakeSP<TechniqueBuildingInformation>("voxelization anisotropic generation technique");
 			technique->AddCommonCode(shaderString);
-			technique->SetStageCode(ShaderObject::ShaderType::VertexShader, MakeSP<string>());
-			technique->SetStageCode(ShaderObject::ShaderType::FragmentShader, MakeSP<string>());
+			technique->AddStageCode(ShaderObject::ShaderType::VertexShader, MakeSP<string>());
+			technique->AddStageCode(ShaderObject::ShaderType::FragmentShader, MakeSP<string>());
 
 			RasterizerState resterizerState;
 			resterizerState.cullMode = RenderingPipelineState::CullMode::None;
@@ -261,7 +261,7 @@ namespace
 		anisotropicGenerationTechnique->ConnectFrameBuffer(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer());
 
 
-		RenderingTechniqueSP mergeTechnique = [] ()
+		RenderingTechniqueSP mergeTechnique = []
 		{
 			string shaderFile = "../../Voxelization/Shaders/VoxelMerge.glsl";
 			shared_ptr<string> shaderString = XREXContext::GetInstance().GetResourceLoader().LoadString(shaderFile);
@@ -271,8 +271,8 @@ namespace
 			}
 			TechniqueBuildingInformationSP technique = MakeSP<TechniqueBuildingInformation>("voxelization merge technique");
 			technique->AddCommonCode(shaderString);
-			technique->SetStageCode(ShaderObject::ShaderType::VertexShader, MakeSP<string>());
-			technique->SetStageCode(ShaderObject::ShaderType::FragmentShader, MakeSP<string>());
+			technique->AddStageCode(ShaderObject::ShaderType::VertexShader, MakeSP<string>());
+			technique->AddStageCode(ShaderObject::ShaderType::FragmentShader, MakeSP<string>());
 
 			RasterizerState resterizerState;
 			resterizerState.cullMode = RenderingPipelineState::CullMode::None;
@@ -381,8 +381,8 @@ namespace
 		}
 		TechniqueBuildingInformationSP technique = MakeSP<TechniqueBuildingInformation>("cone tracing technique");
 		technique->AddCommonCode(shaderString);
-		technique->SetStageCode(ShaderObject::ShaderType::VertexShader, MakeSP<string>());
-		technique->SetStageCode(ShaderObject::ShaderType::FragmentShader, MakeSP<string>());
+		technique->AddStageCode(ShaderObject::ShaderType::VertexShader, MakeSP<string>());
+		technique->AddStageCode(ShaderObject::ShaderType::FragmentShader, MakeSP<string>());
 
 		RasterizerState resterizerState;
 		resterizerState.cullMode = RenderingPipelineState::CullMode::None;
@@ -403,8 +403,8 @@ namespace
 		samplerState.addressingModeR = SamplerState::TextureAddressingMode::ClampToBorder;
 		samplerState.addressingModeS = SamplerState::TextureAddressingMode::ClampToBorder;
 		samplerState.addressingModeT = SamplerState::TextureAddressingMode::ClampToBorder;
-		samplerState.magFilterOperation = SamplerState::TextureFilterOperation::Linear;
-		samplerState.minFilterOperation = SamplerState::TextureFilterOperation::LinearMipmapLinear;
+		samplerState.magFilterMode = SamplerState::TextureFilterMode::Linear;
+		samplerState.minFilterMode = SamplerState::TextureFilterMode::LinearMipmapLinear;
 		technique->AddSamplerState("cone tracing sampler", samplerState);
 
 

@@ -7,7 +7,6 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
-#include <type_traits>
 
 namespace XREX
 {

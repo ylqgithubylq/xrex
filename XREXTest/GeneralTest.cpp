@@ -118,8 +118,8 @@ struct TempScene
 		TechniqueBuildingInformationSP testTechnique = MakeSP<TechniqueBuildingInformation>("test technique");
 
 		testTechnique->AddCommonCode(shaderString);
-		testTechnique->SetStageCode(ShaderObject::ShaderType::VertexShader, MakeSP<string>());
-		testTechnique->SetStageCode(ShaderObject::ShaderType::FragmentShader, MakeSP<string>());
+		testTechnique->AddStageCode(ShaderObject::ShaderType::VertexShader, MakeSP<string>());
+		testTechnique->AddStageCode(ShaderObject::ShaderType::FragmentShader, MakeSP<string>());
 
 
 		shaderFile = "../../XREXTest/Effects/TestCube.glsl";
@@ -131,31 +131,31 @@ struct TempScene
 
 		TechniqueBuildingInformationSP testCubeTechnique = MakeSP<TechniqueBuildingInformation>("test cube technique");
 		testCubeTechnique->AddCommonCode(shaderString);
-		testCubeTechnique->SetStageCode(ShaderObject::ShaderType::VertexShader, MakeSP<string>());
-		testCubeTechnique->SetStageCode(ShaderObject::ShaderType::FragmentShader, MakeSP<string>());
+		testCubeTechnique->AddStageCode(ShaderObject::ShaderType::VertexShader, MakeSP<string>());
+		testCubeTechnique->AddStageCode(ShaderObject::ShaderType::FragmentShader, MakeSP<string>());
 
 
-		testTechnique->AddInclude(TransformationTechnique().GetTechniqueToInclude());
-		testTechnique->AddInclude(CameraTechnique().GetTechniqueToInclude());
+		testTechnique->AddInclude(TransformationTechniqueFactory().GetTechniqueToInclude());
+		testTechnique->AddInclude(CameraTechniqueFactory().GetTechniqueToInclude());
 
-		testCubeTechnique->AddInclude(TransformationTechnique().GetTechniqueToInclude());
-		testCubeTechnique->AddInclude(CameraTechnique().GetTechniqueToInclude());
+		testCubeTechnique->AddInclude(TransformationTechniqueFactory().GetTechniqueToInclude());
+		testCubeTechnique->AddInclude(CameraTechniqueFactory().GetTechniqueToInclude());
 
 		vector<VariableInformation const> variables;
-		testTechnique->AddUniformBufferInformation(BufferInformation("Material", BufferView::BufferType::Uniform, move(variables)));
-		testTechnique->AddUniformBufferInformation(BufferInformation("Info", BufferView::BufferType::Uniform, move(variables)));
+		testTechnique->AddUniformBufferInformation(BufferInformation("Material", "", BufferView::BufferType::Uniform, move(variables)));
+		testTechnique->AddUniformBufferInformation(BufferInformation("Info", "", BufferView::BufferType::Uniform, move(variables)));
 
-		testCubeTechnique->AddUniformBufferInformation(BufferInformation("Info", BufferView::BufferType::Uniform, move(variables)));
+		testCubeTechnique->AddUniformBufferInformation(BufferInformation("Info", "", BufferView::BufferType::Uniform, move(variables)));
 
 		string defaultSamplerName = "defaultSampler";
 		SamplerState defaultSampler;
 		testTechnique->AddSamplerState(defaultSamplerName, defaultSampler);
 
-		testTechnique->AddTextureInformation(TextureInformation("diffuseMap", Texture::TextureType::Texture2D, ElementType::FloatV4, defaultSamplerName));
-		testTechnique->AddTextureInformation(TextureInformation("specularMap", Texture::TextureType::Texture2D, ElementType::FloatV4, defaultSamplerName));
-		testTechnique->AddTextureInformation(TextureInformation("normalMap", Texture::TextureType::Texture2D, ElementType::FloatV4, defaultSamplerName));
-		testTechnique->AddTextureInformation(TextureInformation("shininessMap", Texture::TextureType::Texture2D, ElementType::FloatV4, defaultSamplerName));
-		testTechnique->AddTextureInformation(TextureInformation("opacityMap", Texture::TextureType::Texture2D, ElementType::FloatV4, defaultSamplerName));
+		testTechnique->AddTextureInformation(TextureInformation("diffuseMap", Texture::TextureType::Texture2D, Texture::TexelType::FloatV4, defaultSamplerName));
+		testTechnique->AddTextureInformation(TextureInformation("specularMap", Texture::TextureType::Texture2D, Texture::TexelType::FloatV4, defaultSamplerName));
+		testTechnique->AddTextureInformation(TextureInformation("normalMap", Texture::TextureType::Texture2D, Texture::TexelType::FloatV4, defaultSamplerName));
+		testTechnique->AddTextureInformation(TextureInformation("shininessMap", Texture::TextureType::Texture2D, Texture::TexelType::FloatV4, defaultSamplerName));
+		testTechnique->AddTextureInformation(TextureInformation("opacityMap", Texture::TextureType::Texture2D, Texture::TexelType::FloatV4, defaultSamplerName));
 
 		testTechnique->AddAttributeInputInformation(AttributeInputInformation("position", ElementType::FloatV3));
 		testTechnique->AddAttributeInputInformation(AttributeInputInformation("normal", ElementType::FloatV3));

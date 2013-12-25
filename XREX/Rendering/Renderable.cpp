@@ -1,6 +1,7 @@
 #include "XREX.hpp"
 
 #include "Renderable.hpp"
+#include "Rendering/RenderingTechnique.hpp"
 
 namespace XREX
 {

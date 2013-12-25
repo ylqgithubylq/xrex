@@ -34,15 +34,21 @@ struct RenderToTextureProcess
 
 	void InitializeTextureAndFrameBuffer()
 	{
+		string framebufferFile = "XREXTest/Effects/TestGBuffer.framebuffer";
+		FrameBufferLoadingResultSP loadResult = XREXContext::GetInstance().GetResourceManager().LoadFrameBuffer(framebufferFile);
+
+		FrameBufferSP framebuffer = loadResult->Create();
+		frameBuffer_ = framebuffer;
+
 		FrameBufferLayoutDescriptionSP description = MakeSP<FrameBufferLayoutDescription>("Test GBuffer");
 		
-		description->AddChannel(FrameBufferLayoutDescription::ChannelDescription("colorOutput", TexelFormat::RGBA8));
-		description->AddChannel(FrameBufferLayoutDescription::ChannelDescription("normalOutput", TexelFormat::RGBA16F));
-		description->AddChannel(FrameBufferLayoutDescription::ChannelDescription("depthInColorOutput", TexelFormat::R32F));
-		description->SetDepth(TexelFormat::Depth32);
-
-
-		frameBuffer_ = FrameBufferBuilder(description).GetFrameBuffer();
+// 		description->AddChannel(FrameBufferLayoutDescription::ChannelDescription("colorOutput", TexelFormat::RGBA8));
+// 		description->AddChannel(FrameBufferLayoutDescription::ChannelDescription("normalOutput", TexelFormat::RGBA16F));
+// 		description->AddChannel(FrameBufferLayoutDescription::ChannelDescription("depthInColorOutput", TexelFormat::R32F));
+// 		description->SetDepth(TexelFormat::Depth32);
+// 
+// 
+// 		frameBuffer_ = FrameBufferBuilder(description).GetFrameBuffer();
 
 		color_ = frameBuffer_->GetColorAttachment("colorOutput")->GetTexture();
 		normal_ = frameBuffer_->GetColorAttachment("normalOutput")->GetTexture();
@@ -52,62 +58,13 @@ struct RenderToTextureProcess
 
 	void InitializeRenderingTechnique()
 	{
-		string shaderFile = "../../XREXTest/Effects/TestRenderToTexture.glsl";
-		//string shaderFile = "../../XREXTest/Effects/TestRenderToTexture.glsl";
-		shared_ptr<string> shaderString = XREXContext::GetInstance().GetResourceLoader().LoadString(shaderFile);
-		if (!shaderString)
-		{
-			cerr << "file not found. file: " << shaderFile << endl;
-		}
+		string techniqueFile = "XREXTest/Effects/TestRenderToTexture.technique";
+		TechniqueLoadingResultSP loadResult = XREXContext::GetInstance().GetResourceManager().LoadTechnique(techniqueFile, vector<pair<string, string>>());
 
-		TechniqueBuildingInformationSP techniqueInformation = MakeSP<TechniqueBuildingInformation>("render technique");
+		RenderingTechniqueSP technique = loadResult->Create();
+		technique_ = technique;
 
-		techniqueInformation->AddInclude(TransformationTechnique().GetTechniqueToInclude());
-		techniqueInformation->AddInclude(CameraTechnique().GetTechniqueToInclude());
-
-		techniqueInformation->AddCommonCode(shaderString);
-		techniqueInformation->SetStageCode(ShaderObject::ShaderType::VertexShader, MakeSP<string>());
-		techniqueInformation->SetStageCode(ShaderObject::ShaderType::FragmentShader, MakeSP<string>());
-
-
-		vector<VariableInformation const> variables;
-		techniqueInformation->AddUniformBufferInformation(BufferInformation("Material", BufferView::BufferType::Uniform, move(variables)));
-
-		string defaultSamplerName = "defaultSampler";
-		techniqueInformation->AddTextureInformation(TextureInformation("diffuseMap", Texture::TextureType::Texture2D, ElementType::FloatV4, defaultSamplerName));
-		techniqueInformation->AddTextureInformation(TextureInformation("specularMap", Texture::TextureType::Texture2D, ElementType::FloatV4, defaultSamplerName));
-		techniqueInformation->AddTextureInformation(TextureInformation("normalMap", Texture::TextureType::Texture2D, ElementType::FloatV4, defaultSamplerName));
-		techniqueInformation->AddTextureInformation(TextureInformation("shininessMap", Texture::TextureType::Texture2D, ElementType::FloatV4, defaultSamplerName));
-		techniqueInformation->AddTextureInformation(TextureInformation("opacityMap", Texture::TextureType::Texture2D, ElementType::FloatV4, defaultSamplerName));
-
-		SamplerState defaultSampler;
-		techniqueInformation->AddSamplerState(defaultSamplerName, defaultSampler);
-
-		techniqueInformation->AddAttributeInputInformation(AttributeInputInformation("position", ElementType::FloatV3));
-		techniqueInformation->AddAttributeInputInformation(AttributeInputInformation("normal", ElementType::FloatV3));
-		techniqueInformation->AddAttributeInputInformation(AttributeInputInformation("textureCoordinate0", ElementType::FloatV3));
-
-		techniqueInformation->SetFrameBufferDescription(frameBuffer_->GetLayoutDescription());
-		//techniqueInformation->SetFrameBufferDescription(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer()->GetLayoutDescription());
-
-		RasterizerState resterizerState;
-		DepthStencilState depthStencilState;
-		BlendState blendState;
-		blendState.blendEnable = true;
-		blendState.blendOperation = RenderingPipelineState::BlendOperation::Add;
-		blendState.blendOperationAlpha = RenderingPipelineState::BlendOperation::Add;
-		blendState.sourceBlend = RenderingPipelineState::AlphaBlendFactor::SourceAlpha;
-		blendState.sourceBlendAlpha = RenderingPipelineState::AlphaBlendFactor::SourceAlpha;
-		blendState.destinationBlend = RenderingPipelineState::AlphaBlendFactor::OneMinusSourceAlpha;
-		blendState.destinationBlendAlpha = RenderingPipelineState::AlphaBlendFactor::OneMinusSourceAlpha;
-
-		techniqueInformation->SetRasterizerState(resterizerState);
-		techniqueInformation->SetDepthStencilState(depthStencilState);
-		techniqueInformation->SetBlendState(blendState);
-
-		technique_ = TechniqueBuilder(techniqueInformation).GetRenderingTechnique();
 		technique_->ConnectFrameBuffer(frameBuffer_);
-		//technique_->ConnectFrameBuffer(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer());
 
 		techniqueTransformationSetter_ = MakeSP<TransformationSetter>(technique_);
 		techniqueCameraSetter_ = MakeSP<CameraSetter>(technique_);
@@ -115,42 +72,11 @@ struct RenderToTextureProcess
 
 	void InitializeTextureShowTechnique()
 	{
-		string shaderFile = "../../XREXTest/Effects/TestCopyTextures.glsl";
-		shared_ptr<string> shaderString = XREXContext::GetInstance().GetResourceLoader().LoadString(shaderFile);
-		if (!shaderString)
-		{
-			cerr << "file not found. file: " << shaderFile << endl;
-		}
+		string techniqueFile = "XREXTest/Effects/TestCopyTextures.technique";
+		TechniqueLoadingResultSP loadResult = XREXContext::GetInstance().GetResourceManager().LoadTechnique(techniqueFile, vector<pair<string, string>>());
 
-		TechniqueBuildingInformationSP techniqueInformation = MakeSP<TechniqueBuildingInformation>("texture show technique");
-
-		techniqueInformation->AddCommonCode(shaderString);
-		techniqueInformation->SetStageCode(ShaderObject::ShaderType::VertexShader, MakeSP<string>());
-		techniqueInformation->SetStageCode(ShaderObject::ShaderType::FragmentShader, MakeSP<string>());
-
-
-		string defaultSamplerName = "defaultSampler";
-		techniqueInformation->AddTextureInformation(TextureInformation("color", Texture::TextureType::Texture2D, ElementType::FloatV4, defaultSamplerName));
-		techniqueInformation->AddTextureInformation(TextureInformation("normal", Texture::TextureType::Texture2D, ElementType::FloatV4, defaultSamplerName));
-		techniqueInformation->AddTextureInformation(TextureInformation("depthInColor", Texture::TextureType::Texture2D, ElementType::FloatV4, defaultSamplerName));
-		techniqueInformation->AddTextureInformation(TextureInformation("depth", Texture::TextureType::Texture2D, ElementType::FloatV4, defaultSamplerName));
-
-		SamplerState defaultSampler;
-		techniqueInformation->AddSamplerState(defaultSamplerName, defaultSampler);
-
-		techniqueInformation->AddAttributeInputInformation(AttributeInputInformation("position", ElementType::FloatV2));
-
-		techniqueInformation->SetFrameBufferDescription(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer()->GetLayoutDescription());
-
-		RasterizerState resterizerState;
-		DepthStencilState depthStencilState;
-		BlendState blendState;
-
-		techniqueInformation->SetRasterizerState(resterizerState);
-		techniqueInformation->SetDepthStencilState(depthStencilState);
-		techniqueInformation->SetBlendState(blendState);
-
-		copyTechnique_ = TechniqueBuilder(techniqueInformation).GetRenderingTechnique();
+		RenderingTechniqueSP technique = loadResult->Create();
+		copyTechnique_ = technique;
 
 		copyTechnique_->ConnectFrameBuffer(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer());
 

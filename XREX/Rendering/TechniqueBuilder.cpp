@@ -31,7 +31,7 @@ namespace XREX
 			std::vector<Information const> informations;
 			for (auto builder : includes)
 			{
-				for (Information const& information : (builder->*Getter)())
+				for (Information const& information : XREX_POINTER_CALL_MEMBER_FUNCTION(builder, Getter)())
 				{
 					informations.push_back(information);
 				}
@@ -48,7 +48,7 @@ namespace XREX
 			{
 				if (information != rootInformation.get())
 				{
-					if (!(information->*Getter)().empty())
+					if (!XREX_POINTER_CALL_MEMBER_FUNCTION(information, Getter)().empty())
 					{
 						return false;
 					}
@@ -70,12 +70,26 @@ namespace XREX
 			return samplerStates;
 		}
 
+		std::vector<FrameBufferLayoutDescriptionSP> CollectFrameBufferDescription(std::vector<TechniqueBuildingInformation const*> const& includes)
+		{
+			std::vector<FrameBufferLayoutDescriptionSP> descriptions;
+			for (auto builder : includes)
+			{
+				FrameBufferLayoutDescriptionSP const& description = builder->GetFrameBufferDescription();
+				if (description != nullptr)
+				{
+					descriptions.push_back(description);
+				}
+			}
+			return descriptions;
+		}
+
 		std::vector<FragmentOutputInformation const> GenerateFragmentOutputInformations(FrameBufferLayoutDescriptionSP const& framebufferDescription)
 		{
 			std::vector<FragmentOutputInformation const> fragmentOutputs;
 			for (auto& channelDescription : framebufferDescription->GetAllChannels())
 			{
-				fragmentOutputs.push_back(FragmentOutputInformation(channelDescription.GetChannel(), GetTexelType(channelDescription.GetFormat())));
+				fragmentOutputs.push_back(FragmentOutputInformation(channelDescription.GetChannel(), Texture::TexelTypeFromTexelFormat(channelDescription.GetFormat())));
 			}
 			return fragmentOutputs;
 		}
@@ -96,7 +110,7 @@ namespace XREX
 		for (uint32 stageIndex = 0; stageIndex < static_cast<uint32>(ShaderObject::ShaderType::ShaderTypeCount); ++stageIndex)
 		{
 			ShaderObject::ShaderType stage = static_cast<ShaderObject::ShaderType>(stageIndex);
-			if (techniqueInformation_->GetStageCode(stage) != nullptr)
+			if (!techniqueInformation_->GetStageCodes(stage).empty())
 			{
 				std::vector<std::string const*> codes = CollectFullShaderStageCode(collectedCommonCodes, stage);
 				ShaderObjectSP shader = XREXContext::GetInstance().GetRenderingFactory().CreateShaderObject(stage);
@@ -136,7 +150,26 @@ namespace XREX
 			succeed = false;
 		}
 
-		std::vector<FragmentOutputInformation const> fragmentOutputs = GenerateFragmentOutputInformations(techniqueInformation_->GetFrameBufferDescription());
+		std::vector<FragmentOutputInformation const> fragmentOutputs;
+		std::vector<FrameBufferLayoutDescriptionSP> framebufferDescriptions = CollectFrameBufferDescription(includes);
+		if (framebufferDescriptions.size() > 1)
+		{
+			XREXContext::GetInstance().GetLogger().LogLine("Too many framebuffer descriptions exist, should only have one in all include techniques.");
+			succeed = false;
+		}
+		else if (framebufferDescriptions.empty())
+		{
+			XREXContext::GetInstance().GetLogger().LogLine("No framebuffer description exist.");
+			succeed = false;
+		}
+		else if (framebufferDescriptions.size() == 1)
+		{
+			fragmentOutputs = GenerateFragmentOutputInformations(framebufferDescriptions.back());
+		}
+		else
+		{
+			assert(false); // impossible
+		}
 		std::vector<AttributeInputInformation const> const& attributes = techniqueInformation_->GetAllAttributeInputInformations();
 		std::vector<BufferInformation const> uniformBuffers = CollectInformation<BufferInformation, &TechniqueBuildingInformation::GetAllUniformBufferInformations>(includes);
 		std::vector<BufferInformation const> shaderStorageBuffers = CollectInformation<BufferInformation, &TechniqueBuildingInformation::GetAllShaderStorageBufferInformations>(includes);
@@ -184,7 +217,8 @@ namespace XREX
 		RenderingTechniqueSP renderingTechnique;
 		if (succeed)
 		{
-			renderingTechnique = MakeSP<RenderingTechnique>(techniqueInformation_->GetName(), program, rasterizer, depthStencil, blend, std::move(samplers));
+			RenderingTechnique::ConstructerParameterPack pack(techniqueInformation_, program, rasterizer, depthStencil, blend, std::move(samplers));
+			renderingTechnique = MakeSP<RenderingTechnique>(std::move(pack));
 			technique_ = renderingTechnique;
 		}
 		else
@@ -249,13 +283,21 @@ namespace XREX
 
 	std::vector<std::string const*> TechniqueBuilder::CollectFullShaderStageCode(std::vector<std::string const*> const& commonCodes, ShaderObject::ShaderType stage) const
 	{
-		if (techniqueInformation_->GetStageCode(stage) == nullptr)
+		if (techniqueInformation_->GetStageCodes(stage).empty())
 		{
 			assert(false);
 		}
 
-		std::vector<std::string const*> result(commonCodes); // copy common codes
-		result.push_back(techniqueInformation_->GetStageCode(stage).get());
+		std::vector<std::string const*> result;
+		result.reserve(result.size() + techniqueInformation_->GetStageCodes(stage).size());
+		for (auto& code : commonCodes)
+		{
+			result.push_back(code);
+		}
+		for (auto& code : techniqueInformation_->GetStageCodes(stage))
+		{
+			result.push_back(code.get());
+		}
 		return result;
 	}
 
