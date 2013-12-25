@@ -4,6 +4,7 @@
 
 #include "Rendering/TextureImage.hpp"
 #include "Rendering/GraphicsBuffer.hpp"
+#include "Rendering/TextureImage.hpp"
 
 #include "Rendering/GL/GLUtil.hpp"
 
@@ -16,6 +17,115 @@ using std::vector;
 
 namespace XREX
 {
+	Texture::TexelType Texture::TexelTypeFromTexelFormat(TexelFormat format)
+	{
+		switch (format)
+		{
+		case TexelFormat::R8:
+			return TexelType::FloatV1;
+		case TexelFormat::RG8:
+			return TexelType::FloatV2;
+		case TexelFormat::RGB8:
+			return TexelType::FloatV3;
+		case TexelFormat::RGBA8:
+			return TexelType::FloatV4;
+		case TexelFormat::R8I:
+			return TexelType::IntV1;
+		case TexelFormat::RG8I:
+			return TexelType::IntV2;
+		case TexelFormat::RGB8I:
+			return TexelType::IntV3;
+		case TexelFormat::RGBA8I:
+			return TexelType::IntV4;
+		case TexelFormat::R8UI:
+			return TexelType::UintV1;
+		case TexelFormat::RG8UI:
+			return TexelType::UintV2;
+		case TexelFormat::RGB8UI:
+			return TexelType::UintV3;
+		case TexelFormat::RGBA8UI:
+			return TexelType::UintV4;
+		case TexelFormat::R16I:
+			return TexelType::IntV1;
+		case TexelFormat::RG16I:
+			return TexelType::IntV2;
+		case TexelFormat::RGB16I:
+			return TexelType::IntV3;
+		case TexelFormat::RGBA16I:
+			return TexelType::IntV4;
+		case TexelFormat::R16UI:
+			return TexelType::UintV1;
+		case TexelFormat::RG16UI:
+			return TexelType::UintV2;
+		case TexelFormat::RGB16UI:
+			return TexelType::UintV3;
+		case TexelFormat::RGBA16UI:
+			return TexelType::UintV4;
+		case TexelFormat::R16F:
+			return TexelType::FloatV1;
+		case TexelFormat::RG16F:
+			return TexelType::FloatV2;
+		case TexelFormat::RGB16F:
+			return TexelType::FloatV3;
+		case TexelFormat::RGBA16F:
+			return TexelType::FloatV4;
+		case TexelFormat::R32I:
+			return TexelType::IntV1;
+		case TexelFormat::RG32I:
+			return TexelType::IntV2;
+		case TexelFormat::RGB32I:
+			return TexelType::IntV3;
+		case TexelFormat::RGBA32I:
+			return TexelType::IntV4;
+		case TexelFormat::R32UI:
+			return TexelType::UintV1;
+		case TexelFormat::RG32UI:
+			return TexelType::UintV2;
+		case TexelFormat::RGB32UI:
+			return TexelType::UintV3;
+		case TexelFormat::RGBA32UI:
+			return TexelType::UintV4;
+		case TexelFormat::R32F:
+			return TexelType::FloatV1;
+		case TexelFormat::RG32F:
+			return TexelType::FloatV2;
+		case TexelFormat::RGB32F:
+			return TexelType::FloatV3;
+		case TexelFormat::RGBA32F:
+			return TexelType::FloatV4;
+		case TexelFormat::BGR8:
+			return TexelType::FloatV3;
+		case TexelFormat::BGRA8:
+			return TexelType::FloatV4;
+		case TexelFormat::BGR16F:
+			return TexelType::FloatV3;
+		case TexelFormat::BGRA16F:
+			return TexelType::FloatV4;
+		case TexelFormat::BGR32F:
+			return TexelType::FloatV3;
+		case TexelFormat::BGRA32F:
+			return TexelType::FloatV4;
+		case TexelFormat::Depth16:
+			return TexelType::Shadow;
+		case TexelFormat::Depth24:
+			return TexelType::Shadow;
+		case TexelFormat::Depth32:
+			return TexelType::Shadow;
+		case TexelFormat::Depth32F:
+			return TexelType::Shadow;
+		case TexelFormat::Depth24Stencil8:
+			return TexelType::Shadow;
+		case TexelFormat::Stencil8:
+			assert(false);
+			return TexelType::TexelTypeCount;
+		case TexelFormat::TexelFormatCount:
+			assert(false);
+			return TexelType::TexelTypeCount;
+		default:
+			assert(false);
+			return TexelType::TexelTypeCount;
+		}
+	}
 
 	Texture::Texture(TextureType type)
 		: type_(type), glTextureID_(0), mipmapCount_(0), lastBindingIndex_(0)
@@ -52,6 +162,8 @@ namespace XREX
 		Bind(lastBindingIndex_);
 		gl::GenerateMipmap(glBindingTarget_);
 	}
+
+
 
 
 

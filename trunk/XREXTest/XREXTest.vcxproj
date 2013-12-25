@@ -192,9 +192,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Effects\Test.glsl" />
-    <None Include="Effects\TestCopyTextures.glsl" />
+    <None Include="Effects\TestCopyTextures.technique" />
     <None Include="Effects\TestCube.glsl" />
-    <None Include="Effects\TestRenderToTexture.glsl" />
+    <None Include="Effects\TestGBuffer.framebuffer" />
+    <None Include="Effects\TestRenderToTexture.technique" />
+    <None Include="Effects\ToInclude.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

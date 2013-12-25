@@ -6,6 +6,7 @@
 #include "Resource/LocalResourceLoader.hpp"
 #include "Rendering/Texture.hpp"
 #include "Rendering/Mesh.hpp"
+#include "Rendering/RenderingTechnique.hpp"
 
 
 #include <filesystem>
@@ -237,5 +238,22 @@ namespace XREX
 			return XREXContext::GetInstance().GetResourceLoader().LoadMesh(fullPath);
 		});
 	}
-	
+
+	XREX::TechniqueLoadingResultSP ResourceManager::LoadTechnique(std::string const& fileName, std::vector<std::pair<std::string, std::string>> macros)
+	{
+		return DoLoad<RenderingTechnique>(hideFileSystemHeader_->paths, techniques_, techniquesToLoad_, fileName, [&macros] (std::string const& fullPath)
+		{
+			return XREXContext::GetInstance().GetResourceLoader().LoadTechnique(fullPath, std::move(macros)); // TODO macros not participate cache, need to be considered same as path.
+		});
+	}
+
+	XREX::FrameBufferLoadingResultSP ResourceManager::LoadFrameBuffer(std::string const& fileName)
+	{
+		return DoLoad<FrameBuffer>(hideFileSystemHeader_->paths, framebuffers_, framebuffersToLoad_, fileName, [] (std::string const& fullPath)
+		{
+			return XREXContext::GetInstance().GetResourceLoader().LoadFrameBuffer(fullPath);
+		});
+	}
+
+
 }

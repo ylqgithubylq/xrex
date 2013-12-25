@@ -9,6 +9,7 @@
 #include "GeneralTest.h"
 #include "RenderToTextureTest.h"
 
+#include <iostream>
 using namespace std;
 
 
@@ -46,7 +47,6 @@ int main()
 #define _CRTDBG_MAP_ALLOC
 #include <stdlib.h>
 #include <crtdbg.h>
-#include <iostream>
 
 struct DML
 {

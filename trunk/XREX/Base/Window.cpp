@@ -375,7 +375,7 @@ namespace XREX
 
 	InputCenter::InputSemantic Window::InputSemanticFromWindowsVK(uint32 winKey)
 	{
-		static std::vector<InputCenter::InputSemantic> mapping = [] ()
+		static std::vector<InputCenter::InputSemantic> mapping = []
 		{
 			uint32 const WindowsVKCount = 256;
 			vector<InputCenter::InputSemantic> mapping(WindowsVKCount, InputCenter::InputSemantic::InputSemanticInvalid);

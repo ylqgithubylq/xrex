@@ -1,8 +1,7 @@
 #pragma once
 
 #include "Declare.hpp"
-#include "Rendering/ShaderProgram.hpp"
-#include "LoadingResult.hpp"
+#include "Resource/LoadingResult.hpp"
 
 #include <string>
 
@@ -23,10 +22,14 @@ namespace XREX
 		TextureLoadingResultSP LoadTexture2D(std::string const& fileName, bool generateMipmap);
 		TextureLoadingResultSP LoadTexture3D(std::string const& fileName, bool generateMipmap);
 		TextureLoadingResultSP LoadTextureCube(std::string const& fileName, bool generateMipmap);
+		TechniqueLoadingResultSP LoadTechnique(std::string const& fileName, std::vector<std::pair<std::string, std::string>> macros);
+		FrameBufferLoadingResultSP LoadFrameBuffer(std::string const& fileName);
+
 
 	private:
 		std::unique_ptr<MeshLoader> meshLoader_;
 		std::unique_ptr<TextureLoader> textureLoader_;
+		std::unique_ptr<TechniqueLoader> techniqueLoader_;
 	};
 
 }

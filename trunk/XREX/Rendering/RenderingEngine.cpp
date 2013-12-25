@@ -12,6 +12,7 @@
 #include "Rendering/RenderingProcess.hpp"
 #include "Rendering/FrameBuffer.hpp"
 #include "Rendering/DefinedShaderName.hpp"
+#include "Rendering/SystemTechnique.hpp"
 
 #include <CoreGL.hpp>
 
@@ -193,6 +194,9 @@ namespace XREX
 		defaultRasterizerState_ = XREXContext::GetInstance().GetRenderingFactory().CreateRasterizerStateObject(RasterizerState());
 		defaultDepthStencilState_ = XREXContext::GetInstance().GetRenderingFactory().CreateDepthStencilStateObject(DepthStencilState());
 		defaultBlendState_ = XREXContext::GetInstance().GetRenderingFactory().CreateBlendStateObject(BlendState());
+
+		RegisterSystemTechniqueFactory(MakeUP<TransformationTechniqueFactory>());
+		RegisterSystemTechniqueFactory(MakeUP<CameraTechniqueFactory>());
 	}
 
 
@@ -206,6 +210,28 @@ namespace XREX
 	{
 		return gl::GetError();
 	}
+
+	bool RenderingEngine::RegisterSystemTechniqueFactory(std::unique_ptr<ISystemTechniqueFactory>&& factory)
+	{
+		auto found = systemTechniqueFactories_.find(factory->GetIndexName());
+		if (found == systemTechniqueFactories_.end())
+		{
+			systemTechniqueFactories_[factory->GetIndexName()] = std::move(factory);
+			return true;
+		}
+		return false;
+	}
+
+	ISystemTechniqueFactory* RenderingEngine::GetSystemTechniqueFactory(std::string const& name)
+	{
+		auto found = systemTechniqueFactories_.find(name);
+		if (found != systemTechniqueFactories_.end())
+		{
+			return found->second.get();
+		}
+		return nullptr;
+	}
+
 
 	void RenderingEngine::SwapBuffers()
 	{

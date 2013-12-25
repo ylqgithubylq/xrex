@@ -141,7 +141,7 @@ namespace XREX
 
 namespace std
 {
-	template<>
+	template <>
 	inline void swap<XREX::Renderable::RenderablePack>(XREX::Renderable::RenderablePack& left, XREX::Renderable::RenderablePack& right)
 	{
 		XREX::Renderable::RenderablePack temp = std::move(left);
@@ -149,7 +149,7 @@ namespace std
 		right = std::move(temp);
 	}
 
-	template<>
+	template <>
 	inline void swap<XREX::Renderable::SmallRenderablePack>(XREX::Renderable::SmallRenderablePack& left, XREX::Renderable::SmallRenderablePack& right)
 	{
 		XREX::Renderable::SmallRenderablePack temp = std::move(left);

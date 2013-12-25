@@ -28,7 +28,7 @@ namespace XREX
 	{
 		std::string const& ShaderDefineMacroFromShaderType(ShaderObject::ShaderType type)
 		{
-			static std::array<std::string, static_cast<uint32>(ShaderObject::ShaderType::ShaderTypeCount)> const mapping = [] ()
+			static std::array<std::string, static_cast<uint32>(ShaderObject::ShaderType::ShaderTypeCount)> const mapping = []
 			{
 				std::remove_const<decltype(mapping)>::type macros;
 				macros[static_cast<uint32>(ShaderObject::ShaderType::VertexShader)] = "#define VS\n";

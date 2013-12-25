@@ -26,6 +26,7 @@ namespace XREX
 	class LocalResourceLoader;
 	class MeshLoader;
 	class TextureLoader;
+	class TechniqueLoader;
 	class ResourceManager;
 	class RenderingFactory;
 	class RenderingEngine;
@@ -87,6 +88,8 @@ namespace XREX
 	typedef std::shared_ptr<FrameBufferLayoutDescription> FrameBufferLayoutDescriptionSP;
 	class FrameBufferBuilder;
 	typedef std::shared_ptr<FrameBufferBuilder> FrameBufferBuilderSP;
+	struct ISystemTechniqueFactory;
+	typedef std::shared_ptr<ISystemTechniqueFactory> ISystemTechniqueFactorySP;
 	struct IWorkLauncher;
 	typedef std::shared_ptr<IWorkLauncher> IWorkLauncherSP;
 	class IndexedDrawer;
@@ -135,6 +138,8 @@ namespace XREX
 	typedef std::shared_ptr<TextureBufferImage> TextureBufferImageSP;
 	class FrameBuffer;
 	typedef std::shared_ptr<FrameBuffer> FrameBufferSP;
+	class Viewport;
+	typedef std::shared_ptr<Viewport> ViewportSP;
 
 	class Camera;
 	typedef std::shared_ptr<Camera> CameraSP;
@@ -142,9 +147,6 @@ namespace XREX
 	typedef std::shared_ptr<PerspectiveCamera> PerspectiveCameraSP;
 	class OrthogonalCamera;
 	typedef std::shared_ptr<OrthogonalCamera> OrthogonalCameraSP;
-
-	class Viewport;
-	typedef std::shared_ptr<Viewport> ViewportSP;
 
 }
 

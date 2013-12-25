@@ -3,7 +3,6 @@
 
 #include "Timer.hpp"
 
-
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
 #endif
@@ -41,12 +40,12 @@ namespace XREX
 
 	void Timer::Restart()
 	{
-		startTime_ = this->CurrentTime();
+		startTime_ = CurrentTime();
 	}
 
 	double Timer::Elapsed() const
 	{
-		return this->CurrentTime() - startTime_;
+		return CurrentTime() - startTime_;
 	}
 
 	double Timer::MaxElapseTime() const

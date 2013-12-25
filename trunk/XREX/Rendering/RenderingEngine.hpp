@@ -16,7 +16,7 @@ namespace XREX
 		RenderingEngine(Window& window, Settings const& settings);
 		~RenderingEngine();
 
-		uint32 GetGLError();
+		uint32 GetGLError(); // temp
 
 		GraphicsContext& GetGraphicsContext() const
 		{
@@ -35,6 +35,15 @@ namespace XREX
 		RenderingProcessSP const& GetRenderingProcess() const
 		{
 			return process_;
+		}
+
+		bool RegisterSystemTechniqueFactory(std::unique_ptr<ISystemTechniqueFactory>&& factory);
+		
+		ISystemTechniqueFactory* GetSystemTechniqueFactory(std::string const& name);
+
+		std::unordered_map<std::string, std::unique_ptr<ISystemTechniqueFactory>> const& GetAllSystemTechniqueFactoies() const
+		{
+			return systemTechniqueFactories_;
 		}
 
 		void Start()
@@ -71,6 +80,8 @@ namespace XREX
 		BlendStateObjectSP defaultBlendState_;
 		Color defaultBlendColor_;
 		FrameBufferSP defaultFrameBuffer_;
+
+		std::unordered_map<std::string, std::unique_ptr<ISystemTechniqueFactory>> systemTechniqueFactories_;
 	};
 
 }

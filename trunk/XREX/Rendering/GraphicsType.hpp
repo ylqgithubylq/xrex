@@ -257,8 +257,6 @@ namespace XREX
 
 	XREX_API ElementType GetCorrespondingElementType(TexelFormat format);
 
-	XREX_API ElementType GetTexelType(TexelFormat format);
-
 	XREX_API uint32 GetTexelSizeInBytes(TexelFormat format);
 
 	XREX_API TexelFormat GetCorrespondingTexelFormat(ElementType type);

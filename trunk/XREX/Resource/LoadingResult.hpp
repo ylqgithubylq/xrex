@@ -38,4 +38,11 @@ namespace XREX
 
 	typedef LoadingResult<Mesh> MeshLoadingResult;
 	typedef std::shared_ptr<MeshLoadingResult> MeshLoadingResultSP;
+
+	typedef LoadingResult<RenderingTechnique> TechniqueLoadingResult;
+	typedef std::shared_ptr<TechniqueLoadingResult> TechniqueLoadingResultSP;
+
+	typedef LoadingResult<FrameBuffer> FrameBufferLoadingResult;
+	typedef std::shared_ptr<FrameBufferLoadingResult> FrameBufferLoadingResultSP;
+
 }

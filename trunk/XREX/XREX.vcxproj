@@ -73,6 +73,7 @@
     <ClInclude Include="Resource\LocalResourceLoader.hpp" />
     <ClInclude Include="Resource\MeshLoader.hpp" />
     <ClInclude Include="Resource\ResourceManager.hpp" />
+    <ClInclude Include="Resource\TechniqueLoader.hpp" />
     <ClInclude Include="Resource\TextureLoader.hpp" />
     <ClInclude Include="Scene\Component.hpp" />
     <ClInclude Include="Scene\Scene.hpp" />
@@ -128,6 +129,7 @@
     <ClCompile Include="Resource\LocalResourceLoader.cpp" />
     <ClCompile Include="Resource\MeshLoader.cpp" />
     <ClCompile Include="Resource\ResourceManager.cpp" />
+    <ClCompile Include="Resource\TechniqueLoader.cpp" />
     <ClCompile Include="Resource\TextureLoader.cpp" />
     <ClCompile Include="Scene\Component.cpp" />
     <ClCompile Include="Scene\Scene.cpp" />

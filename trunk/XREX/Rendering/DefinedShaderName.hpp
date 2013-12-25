@@ -40,7 +40,7 @@ namespace XREX
 
 	XREX_API inline std::string const& GetUniformString(DefinedUniform definedUniform)
 	{
-		static std::array<std::string, static_cast<uint32>(DefinedUniform::DefinedUniformCount)> const mapping = [] ()
+		static std::array<std::string, static_cast<uint32>(DefinedUniform::DefinedUniformCount)> const mapping = []
 		{
 			std::array<std::string, static_cast<uint32>(DefinedUniform::DefinedUniformCount)> temp;
 			temp[static_cast<uint32>(DefinedUniform::ModelMatrix)] = "modelMatrix";
@@ -104,7 +104,7 @@ namespace XREX
 
 	XREX_API inline std::string const& GetInputAttributeString(DefinedInputAttribute definedAttribute)
 	{
-		static std::array<std::string, static_cast<uint32>(DefinedInputAttribute::DefinedAttributeCount)> const mapping = [] ()
+		static std::array<std::string, static_cast<uint32>(DefinedInputAttribute::DefinedAttributeCount)> const mapping = []
 		{
 			std::array<std::string, static_cast<uint32>(DefinedInputAttribute::DefinedAttributeCount)> temp;
 			temp[static_cast<uint32>(DefinedInputAttribute::Position)] = "position";
@@ -142,7 +142,7 @@ namespace XREX
 
 	XREX_API inline std::string const& GetOutputAttributeString(DefinedOutputAttribute definedAttribute)
 	{
-		static std::array<std::string, static_cast<uint32>(DefinedOutputAttribute::DefinedAttributeCount)> const mapping = [] ()
+		static std::array<std::string, static_cast<uint32>(DefinedOutputAttribute::DefinedAttributeCount)> const mapping = []
 		{
 			std::array<std::string, static_cast<uint32>(DefinedOutputAttribute::DefinedAttributeCount)> temp;
 			temp[static_cast<uint32>(DefinedOutputAttribute::DefaultFrameBufferOutput)] = "XREX_DefaultFrameBufferOutput";

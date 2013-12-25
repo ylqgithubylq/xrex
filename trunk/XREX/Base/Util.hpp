@@ -2,12 +2,14 @@
 
 #include "Base/BasicType.hpp"
 
+#include <type_traits>
 #include <utility>
 #include <memory>
 #include <vector>
 
 namespace XREX
 {
+
 	template <typename T, uint32 Dimension>
 	struct Size
 	{
@@ -84,7 +86,7 @@ namespace XREX
 	{
 		assert(toBeRemove != vector.end());
 		auto last = --vector.end();
-		*toBeRemove = *last;
+		*toBeRemove = std::move(*last);
 		vector.pop_back();
 	}
 
@@ -97,6 +99,40 @@ namespace XREX
 		Noncopyable(Noncopyable const&);
 		Noncopyable& operator =(Noncopyable const&);
 	};
+
+#define XREX_OBJECT_CALL_MEMBER_FUNCTION(object, memberFunctionPointer) ((object).*(memberFunctionPointer))
+#define XREX_POINTER_CALL_MEMBER_FUNCTION(objectPointer, memberFunctionPointer) ((objectPointer)->*(memberFunctionPointer))
+
+#define XREX_MACRO_CATENATE(x, y) x##y
+#define _XREX_SCOPE_GUARD_NAME(name, line) XREX_MACRO_CATENATE(name, line)
+
+/*
+ *	Call callback on scope exit.
+ *	Usage: XREX_ON_SCOPE_EXIT([&obj] { obj.DoSomethingCleanUp(); });
+ *	Notice, this macro generate two statements.
+ */
+#define XREX_ON_SCOPE_EXIT(callback) auto& _XREX_SCOPE_GUARD_NAME(_XREX_CallBackObject, __LINE__) = (callback);\
+	::XREX::ScopeGuard<decltype(_XREX_SCOPE_GUARD_NAME(_XREX_CallBackObject, __LINE__))> _XREX_SCOPE_GUARD_NAME(_XREX_OnScopeExitObject, __LINE__)(_XREX_SCOPE_GUARD_NAME(_XREX_CallBackObject, __LINE__))
+
+	/*
+	 *	Use XREX_ON_SCOPE_EXIT(callback).
+	 */
+	template <class CallBack>
+	class XREX_API ScopeGuard
+	{
+	public:
+		explicit ScopeGuard(CallBack& callback)
+			: callback_(callback)
+		{
+		}
+		~ScopeGuard()
+		{
+			callback_();
+		}
+
+		CallBack& callback_;
+	};
+
 
 	template <typename First, typename Second>
 	struct STLPairHasher // std::pair do not have a hash specialization...
@@ -235,7 +271,7 @@ namespace XREX
 	}
 
 
-	template<typename T>
+	template <typename T>
 	struct ExtractTemplateType
 	{
 		typedef T FullType;
@@ -243,7 +279,7 @@ namespace XREX
 		typedef void Type1;
 		typedef void Type2;
 	};
-	template<template<typename> class X, typename T0>
+	template <template <typename> class X, typename T0>
 	struct ExtractTemplateType<X<T0>>
 	{
 		typedef X<T0> FullType;
@@ -251,7 +287,7 @@ namespace XREX
 		typedef void Type1;
 		typedef void Type2;
 	};
-	template<template<typename, typename> class X, typename T0, typename T1>
+	template <template <typename, typename> class X, typename T0, typename T1>
 	struct ExtractTemplateType<X<T0, T1>>
 	{
 		typedef X<T0, T1> FullType;
@@ -259,7 +295,7 @@ namespace XREX
 		typedef T1 Type1;
 		typedef void Type2;
 	};
-	template<template<typename, typename, typename> class X, typename T0, typename T1, typename T2>
+	template <template <typename, typename, typename> class X, typename T0, typename T1, typename T2>
 	struct ExtractTemplateType<X<T0, T1, T2>>
 	{
 		typedef X<T0, T1, T2> FullType;

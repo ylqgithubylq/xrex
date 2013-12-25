@@ -2,33 +2,15 @@ using regular expressions(Ctrl+Shift+F):
 ^:b*[^:b*#/{}]+.*$
 
 temp note:
+rendering subsystem need a GetCurrentFrameTime, and a GetDelta
+
+technique loading with macro
+
+pipeline scrpit
+
 
 add a no channel framebuffer, for compute shader or something with out fragment shader
 texture parameter should not allow nullptr
-shader interface struct:
-	variable(common base for attribute, uniform buffer, shader rsource buffer)
-	attribute
-	texture uniform
-	image uniform
-	uniform buffer
-	shader resource buffer
-	atomic buffer
-	output
-framebuffer desc contain a output
-shader interface information structs contain corresponding information struct
-
-XML format:
-	include
-	Pipeline state
-	attribute
-	uniform(texture, image)
-	uniform buffer
-	shader resource buffer
-	atomic buffer
-	output
-	common code(no tag)
-	stage code(with tag)
-
 
 
 bufferTexture do not use sampler
@@ -39,9 +21,6 @@ framebuffer / how to set channels from shader?
 TODO:
 
 create new texture constructor without 2 dimension data parameter, remove constructor parameter generateMipmap of the one with 2 dimension data parameter
-effect file / format
-effect loading with macro
-effect interal intermediate texture variable
 light base class, light shader and it's interface, material shader and it's interface
 the shading process that use light shader and material shader
 

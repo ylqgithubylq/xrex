@@ -18,7 +18,7 @@ namespace XREX
 			ClampToBorder,
 		};
 
-		enum class TextureFilterOperation
+		enum class TextureFilterMode
 		{
 			Nearest,
 			Linear,
@@ -33,8 +33,8 @@ namespace XREX
 		TextureAddressingMode addressingModeS;
 		TextureAddressingMode addressingModeT;
 		TextureAddressingMode addressingModeR;
-		TextureFilterOperation minFilterOperation;
-		TextureFilterOperation magFilterOperation;
+		TextureFilterMode minFilterMode;
+		TextureFilterMode magFilterMode;
 		uint8 maxAnisotropy;
 		float minLOD;
 		float maxLOD;

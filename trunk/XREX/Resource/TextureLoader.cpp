@@ -121,7 +121,7 @@ namespace XREX
 			TexelFormat texelFormat;
 			if (imageType == FREE_IMAGE_TYPE::FIT_BITMAP)
 			{
-				static std::unordered_map<std::pair<FREE_IMAGE_COLOR_TYPE, bool>, TexelFormat, STLPairHasher<FREE_IMAGE_COLOR_TYPE, bool>> const colorTypeMapping = [] ()
+				static std::unordered_map<std::pair<FREE_IMAGE_COLOR_TYPE, bool>, TexelFormat, STLPairHasher<FREE_IMAGE_COLOR_TYPE, bool>> const colorTypeMapping = []
 				{
 					std::remove_const<decltype(colorTypeMapping)>::type temp;
 					temp[std::make_pair(FREE_IMAGE_COLOR_TYPE::FIC_MINISBLACK, false)] = TexelFormat::R8;
@@ -138,7 +138,7 @@ namespace XREX
 			}
 			else
 			{
-				static std::unordered_map<FREE_IMAGE_TYPE, TexelFormat> const imageTypeMapping = [] ()
+				static std::unordered_map<FREE_IMAGE_TYPE, TexelFormat> const imageTypeMapping = []
 				{
 					std::remove_const<decltype(imageTypeMapping)>::type temp;
 					temp[FREE_IMAGE_TYPE::FIT_BITMAP] = TexelFormat::TexelFormatCount;
@@ -211,7 +211,7 @@ namespace XREX
 				{
 					return false;
 				} // after this, make sure to call FreeImage_Unload(FIBITMAP*)
-
+				XREX_ON_SCOPE_EXIT([bitmap] { FreeImage_Unload(bitmap); }); //Free FreeImage's copy of the data
 
 				//retrieve the image data
 				uint8* bits = FreeImage_GetBits(bitmap);
@@ -228,8 +228,6 @@ namespace XREX
 				uint32 bpp = FreeImage_GetBPP(bitmap);
 				BuildResult(width, height, bpp / 8 * height * width, TexelFormatFromFreeImageFormat(imageFormat, bitmap), bits);
 
-				//Free FreeImage's copy of the data
-				FreeImage_Unload(bitmap);
 
 				return true;
 			}

@@ -3,9 +3,9 @@
 #include "LocalResourceLoader.hpp"
 #include "Resource/MeshLoader.hpp"
 #include "Resource/TextureLoader.hpp"
+#include "Resource/TechniqueLoader.hpp"
 #include "Resource/ResourceManager.hpp"
 #include "Base/XREXContext.hpp"
-#include "Rendering/RenderingFactory.hpp"
 
 #include <fstream>
 #include <vector>
@@ -22,7 +22,7 @@ namespace XREX
 {
 
 	LocalResourceLoader::LocalResourceLoader()
-		: meshLoader_(MakeUP<MeshLoader>()), textureLoader_(MakeUP<TextureLoader>())
+		: meshLoader_(MakeUP<MeshLoader>()), textureLoader_(MakeUP<TextureLoader>()), techniqueLoader_(MakeUP<TechniqueLoader>())
 	{
 	}
 
@@ -89,6 +89,16 @@ namespace XREX
 	TextureLoadingResultSP LocalResourceLoader::LoadTextureCube(std::string const& fileName, bool generateMipmap)
 	{
 		return textureLoader_->LoadTextureCube(fileName, generateMipmap);
+	}
+
+	XREX::TechniqueLoadingResultSP LocalResourceLoader::LoadTechnique(std::string const& fileName, std::vector<std::pair<std::string, std::string>> macros)
+	{
+		return techniqueLoader_->LoadTechnique(fileName, std::move(macros));
+	}
+
+	XREX::FrameBufferLoadingResultSP LocalResourceLoader::LoadFrameBuffer(std::string const& fileName)
+	{
+		return techniqueLoader_->LoadFrameBuffer(fileName);
 	}
 
 
