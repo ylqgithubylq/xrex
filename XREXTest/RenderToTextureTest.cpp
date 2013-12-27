@@ -40,16 +40,6 @@ struct RenderToTextureProcess
 		FrameBufferSP framebuffer = loadResult->Create();
 		frameBuffer_ = framebuffer;
 
-		FrameBufferLayoutDescriptionSP description = MakeSP<FrameBufferLayoutDescription>("Test GBuffer");
-		
-// 		description->AddChannel(FrameBufferLayoutDescription::ChannelDescription("colorOutput", TexelFormat::RGBA8));
-// 		description->AddChannel(FrameBufferLayoutDescription::ChannelDescription("normalOutput", TexelFormat::RGBA16F));
-// 		description->AddChannel(FrameBufferLayoutDescription::ChannelDescription("depthInColorOutput", TexelFormat::R32F));
-// 		description->SetDepth(TexelFormat::Depth32);
-// 
-// 
-// 		frameBuffer_ = FrameBufferBuilder(description).GetFrameBuffer();
-
 		color_ = frameBuffer_->GetColorAttachment("colorOutput")->GetTexture();
 		normal_ = frameBuffer_->GetColorAttachment("normalOutput")->GetTexture();
 		depthInColor_ = frameBuffer_->GetColorAttachment("depthInColorOutput")->GetTexture();

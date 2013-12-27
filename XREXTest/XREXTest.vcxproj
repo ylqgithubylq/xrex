@@ -194,7 +194,9 @@
     <None Include="Effects\Test.glsl" />
     <None Include="Effects\TestCopyTextures.technique" />
     <None Include="Effects\TestCube.glsl" />
-    <None Include="Effects\TestGBuffer.framebuffer" />
+    <None Include="Effects\TestGBuffer.framebuffer">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Effects\TestRenderToTexture.technique" />
     <None Include="Effects\ToInclude.glsl" />
   </ItemGroup>

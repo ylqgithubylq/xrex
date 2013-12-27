@@ -25,6 +25,7 @@ namespace XREX
 
 	void FrameBufferLayoutDescription::SetDepth(TexelFormat format)
 	{
+		assert(combined_ != DepthStencilCombinationState::Combined);
 		depth_ = format;
 		combined_ = (combined_ == DepthStencilCombinationState::None || combined_ == DepthStencilCombinationState::DepthOnly)
 			? DepthStencilCombinationState::DepthOnly : DepthStencilCombinationState::Separate;
@@ -32,6 +33,7 @@ namespace XREX
 
 	void FrameBufferLayoutDescription::SetStencil(TexelFormat format)
 	{
+		assert(combined_ != DepthStencilCombinationState::Combined);
 		stencil_ = format;
 		combined_ = (combined_ == DepthStencilCombinationState::None || combined_ == DepthStencilCombinationState::StencilOnly)
 			? DepthStencilCombinationState::StencilOnly : DepthStencilCombinationState::Separate;
@@ -39,6 +41,7 @@ namespace XREX
 
 	void FrameBufferLayoutDescription::SetDepthStencil(TexelFormat format)
 	{
+		assert(combined_ != DepthStencilCombinationState::DepthOnly && combined_ != DepthStencilCombinationState::StencilOnly);
 		depth_ = format;
 		stencil_ = format;
 		combined_ = DepthStencilCombinationState::Combined;

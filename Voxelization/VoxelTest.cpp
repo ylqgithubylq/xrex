@@ -83,21 +83,6 @@ namespace
 		return quad;
 	}
 
-	TextureSP MakeIntermediateVoxelVolume(uint32 size)
-	{
-		Size<uint32, 3> dim(size, size, size);
-		Texture2D::DataDescription<3> desc(TexelFormat::R32UI, dim);
-
-		TextureSP voxelVolume = XREXContext::GetInstance().GetRenderingFactory().CreateTexture3D(desc, false);
-		return voxelVolume;
-	}
-	GraphicsBufferSP MakeIntermediateClearVoxelVolume(uint32 size)
-	{
-		GraphicsBufferSP voxelVolume = XREXContext::GetInstance().GetRenderingFactory().CreateGraphicsBuffer(GraphicsBuffer::Usage::StaticDraw, size * size * size * sizeof(uint32));
-		voxelVolume->Clear(0u);
-		return voxelVolume;
-	}
-
 	TextureSP MakeVoxelVolume(uint32 size)
 	{
 		Size<uint32, 3> dim(size, size, size);
@@ -117,10 +102,7 @@ namespace
 	struct UsedTechniques
 	{
 		RenderingTechniqueSP listBuild;
-		RenderingTechniqueSP listSort;
 		RenderingTechniqueSP volumeBuild;
-		RenderingTechniqueSP anisotropicVolumeBuild;
-		RenderingTechniqueSP volumeMerge;
 	};
 
 	UsedTechniques MakeVoxelizationTechnique()
@@ -139,6 +121,22 @@ namespace
 			technique->AddCommonCode(shaderString);
 			technique->AddStageCode(ShaderObject::ShaderType::VertexShader, MakeSP<string>());
 			technique->AddStageCode(ShaderObject::ShaderType::FragmentShader, MakeSP<string>());
+
+			technique->AddInclude(XREXContext::GetInstance().GetRenderingEngine().GetSystemTechniqueFactory("Transformation")->GetTechniqueInformationToInclude());
+			technique->AddInclude(XREXContext::GetInstance().GetRenderingEngine().GetSystemTechniqueFactory("Camera")->GetTechniqueInformationToInclude());
+
+			technique->AddUniformBufferInformation(BufferInformation("PerObject", "", BufferView::BufferType::Uniform, std::vector<VariableInformation const>()));
+			technique->AddUniformBufferInformation(BufferInformation("PerAxis", "", BufferView::BufferType::Uniform, std::vector<VariableInformation const>()));
+			technique->AddUniformBufferInformation(BufferInformation("NeverChanged", "", BufferView::BufferType::Uniform, std::vector<VariableInformation const>()));
+
+			technique->AddImageInformation(ImageInformation("heads", TextureImage::ImageType::Image2D, TexelFormat::R32UI, AccessType::ReadWrite));
+			technique->AddImageInformation(ImageInformation("nodePool", TextureImage::ImageType::ImageBuffer, TexelFormat::RGBA32UI, AccessType::WriteOnly));
+
+			technique->AddAtomicCounterBufferInformation(BufferInformation("AtomicBuffer0", "", BufferView::BufferType::AtomicCounter, std::vector<VariableInformation const>()));
+
+			technique->AddAttributeInputInformation(AttributeInputInformation("position", ElementType::FloatV3));
+
+			technique->SetFrameBufferDescription(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer()->GetLayoutDescription());
 
 			RasterizerState resterizerState;
 			resterizerState.cullMode = RenderingPipelineState::CullMode::None;
@@ -160,39 +158,6 @@ namespace
 		} ();
 		listTechnique->ConnectFrameBuffer(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer());
 
-		RenderingTechniqueSP sortTechnique = []
-		{
-
-			string shaderFile = "../../Voxelization/Shaders/ListSort.glsl";
-			shared_ptr<string> shaderString = XREXContext::GetInstance().GetResourceLoader().LoadString(shaderFile);
-			if (!shaderString)
-			{
-				XREXContext::GetInstance().GetLogger().LogLine("file not found. file: " + shaderFile);
-			}
-			TechniqueBuildingInformationSP technique = MakeSP<TechniqueBuildingInformation>("list sort technique");
-			technique->AddCommonCode(shaderString);
-			technique->AddStageCode(ShaderObject::ShaderType::VertexShader, MakeSP<string>());
-			technique->AddStageCode(ShaderObject::ShaderType::FragmentShader, MakeSP<string>());
-
-			RasterizerState resterizerState;
-			resterizerState.cullMode = RenderingPipelineState::CullMode::None;
-			DepthStencilState depthStencilState;
-			depthStencilState.depthTestEnable = false;
-			depthStencilState.depthWriteMask = false;
-			BlendState blendState;
-			blendState.blendEnable = false;
-			blendState.redMask = false;
-			blendState.greenMask = false;
-			blendState.blueMask = false;
-			blendState.alphaMask = false;
-			technique->SetRasterizerState(resterizerState);
-			technique->SetDepthStencilState(depthStencilState);
-			technique->SetBlendState(blendState);
-
-			return TechniqueBuilder(technique).GetRenderingTechnique();
-		} ();
-		sortTechnique->ConnectFrameBuffer(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer());
-
 
 		RenderingTechniqueSP generationTechnique = []
 		{
@@ -206,6 +171,16 @@ namespace
 			technique->AddCommonCode(shaderString);
 			technique->AddStageCode(ShaderObject::ShaderType::VertexShader, MakeSP<string>());
 			technique->AddStageCode(ShaderObject::ShaderType::FragmentShader, MakeSP<string>());
+
+			technique->AddUniformBufferInformation(BufferInformation("PerAxis", "", BufferView::BufferType::Uniform, std::vector<VariableInformation const>()));
+
+			technique->AddImageInformation(ImageInformation("heads", TextureImage::ImageType::Image2D, TexelFormat::R32UI, AccessType::ReadOnly));
+			technique->AddImageInformation(ImageInformation("nodePool", TextureImage::ImageType::ImageBuffer, TexelFormat::RGBA32UI, AccessType::ReadOnly));
+			technique->AddImageInformation(ImageInformation("volume", TextureImage::ImageType::Image3D, TexelFormat::RGBA8, AccessType::WriteOnly));
+
+			technique->AddAttributeInputInformation(AttributeInputInformation("position", ElementType::FloatV2));
+
+			technique->SetFrameBufferDescription(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer()->GetLayoutDescription());
 
 			RasterizerState resterizerState;
 			resterizerState.cullMode = RenderingPipelineState::CullMode::None;
@@ -227,75 +202,8 @@ namespace
 		} ();
 		generationTechnique->ConnectFrameBuffer(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer());
 
-		RenderingTechniqueSP anisotropicGenerationTechnique = []
-		{
-			string shaderFile = "../../Voxelization/Shaders/AnisotropicVoxelGeneration.glsl";
-			shared_ptr<string> shaderString = XREXContext::GetInstance().GetResourceLoader().LoadString(shaderFile);
-			if (!shaderString)
-			{
-				XREXContext::GetInstance().GetLogger().LogLine("file not found. file: " + shaderFile);
-			}
-			TechniqueBuildingInformationSP technique = MakeSP<TechniqueBuildingInformation>("voxelization anisotropic generation technique");
-			technique->AddCommonCode(shaderString);
-			technique->AddStageCode(ShaderObject::ShaderType::VertexShader, MakeSP<string>());
-			technique->AddStageCode(ShaderObject::ShaderType::FragmentShader, MakeSP<string>());
 
-			RasterizerState resterizerState;
-			resterizerState.cullMode = RenderingPipelineState::CullMode::None;
-			DepthStencilState depthStencilState;
-			depthStencilState.depthTestEnable = false;
-			depthStencilState.depthWriteMask = false;
-			BlendState blendState;
-			blendState.blendEnable = false;
-			blendState.redMask = false;
-			blendState.greenMask = false;
-			blendState.blueMask = false;
-			blendState.alphaMask = false;
-			technique->SetRasterizerState(resterizerState);
-			technique->SetDepthStencilState(depthStencilState);
-			technique->SetBlendState(blendState);
-
-			return TechniqueBuilder(technique).GetRenderingTechnique();
-
-		} ();
-		anisotropicGenerationTechnique->ConnectFrameBuffer(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer());
-
-
-		RenderingTechniqueSP mergeTechnique = []
-		{
-			string shaderFile = "../../Voxelization/Shaders/VoxelMerge.glsl";
-			shared_ptr<string> shaderString = XREXContext::GetInstance().GetResourceLoader().LoadString(shaderFile);
-			if (!shaderString)
-			{
-				XREXContext::GetInstance().GetLogger().LogLine("file not found. file: " + shaderFile);
-			}
-			TechniqueBuildingInformationSP technique = MakeSP<TechniqueBuildingInformation>("voxelization merge technique");
-			technique->AddCommonCode(shaderString);
-			technique->AddStageCode(ShaderObject::ShaderType::VertexShader, MakeSP<string>());
-			technique->AddStageCode(ShaderObject::ShaderType::FragmentShader, MakeSP<string>());
-
-			RasterizerState resterizerState;
-			resterizerState.cullMode = RenderingPipelineState::CullMode::None;
-			DepthStencilState depthStencilState;
-			depthStencilState.depthTestEnable = false;
-			depthStencilState.depthWriteMask = false;
-			BlendState blendState;
-			blendState.blendEnable = false;
-			blendState.redMask = false;
-			blendState.greenMask = false;
-			blendState.blueMask = false;
-			blendState.alphaMask = false;
-			technique->SetRasterizerState(resterizerState);
-			technique->SetDepthStencilState(depthStencilState);
-			technique->SetBlendState(blendState);
-
-
-			return TechniqueBuilder(technique).GetRenderingTechnique();
-
-		} ();
-		mergeTechnique->ConnectFrameBuffer(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer());
-		
-		UsedTechniques effects = {listTechnique, sortTechnique, generationTechnique, anisotropicGenerationTechnique, mergeTechnique};
+		UsedTechniques effects = {listTechnique, generationTechnique, };
 		return effects;
 	}
 
@@ -384,6 +292,27 @@ namespace
 		technique->AddStageCode(ShaderObject::ShaderType::VertexShader, MakeSP<string>());
 		technique->AddStageCode(ShaderObject::ShaderType::FragmentShader, MakeSP<string>());
 
+		technique->AddInclude(XREXContext::GetInstance().GetRenderingEngine().GetSystemTechniqueFactory("Transformation")->GetTechniqueInformationToInclude());
+		technique->AddInclude(XREXContext::GetInstance().GetRenderingEngine().GetSystemTechniqueFactory("Camera")->GetTechniqueInformationToInclude());
+
+		technique->AddUniformBufferInformation(BufferInformation("NeverChanged", "", BufferView::BufferType::Uniform, std::vector<VariableInformation const>()));
+		technique->AddUniformBufferInformation(BufferInformation("TracingParameter", "", BufferView::BufferType::Uniform, std::vector<VariableInformation const>()));
+
+		SamplerState samplerState;
+		samplerState.borderColor = Color(0, 0, 0, 0);
+		samplerState.addressingModeR = SamplerState::TextureAddressingMode::ClampToBorder;
+		samplerState.addressingModeS = SamplerState::TextureAddressingMode::ClampToBorder;
+		samplerState.addressingModeT = SamplerState::TextureAddressingMode::ClampToBorder;
+		samplerState.magFilterMode = SamplerState::TextureFilterMode::Linear;
+		samplerState.minFilterMode = SamplerState::TextureFilterMode::LinearMipmapLinear;
+		technique->AddSamplerState("cone tracing sampler", samplerState);
+
+		technique->AddTextureInformation(TextureInformation("voxels", Texture::TextureType::Texture3D, Texture::TexelType::FloatV4, "cone tracing sampler"));
+
+		technique->AddAttributeInputInformation(AttributeInputInformation("position", ElementType::FloatV3));
+
+		technique->SetFrameBufferDescription(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer()->GetLayoutDescription());
+
 		RasterizerState resterizerState;
 		resterizerState.cullMode = RenderingPipelineState::CullMode::None;
 		DepthStencilState depthStencilState;
@@ -398,44 +327,10 @@ namespace
 		technique->SetRasterizerState(resterizerState);
 		technique->SetDepthStencilState(depthStencilState);
 		technique->SetBlendState(blendState);
-		SamplerState samplerState;
-		samplerState.borderColor = Color(0, 0, 0, 0);
-		samplerState.addressingModeR = SamplerState::TextureAddressingMode::ClampToBorder;
-		samplerState.addressingModeS = SamplerState::TextureAddressingMode::ClampToBorder;
-		samplerState.addressingModeT = SamplerState::TextureAddressingMode::ClampToBorder;
-		samplerState.magFilterMode = SamplerState::TextureFilterMode::Linear;
-		samplerState.minFilterMode = SamplerState::TextureFilterMode::LinearMipmapLinear;
-		technique->AddSamplerState("cone tracing sampler", samplerState);
+
 
 
 		return TechniqueBuilder(technique).GetRenderingTechnique();
-	}
-
-	SceneObjectSP MakeConeTracingProxyCube(PerspectiveCameraSP const& camera, floatV3 const& cubePosition, float cubeHalfSize)
-	{
-
-		SceneObjectSP cubeObject = MakeSP<SceneObject>("cube object");
-		MeshSP cube = MakeCube(cubeHalfSize);
-
-		RenderingTechniqueSP coneTracingTechnique = MakeConeTracingTechnique();
-		coneTracingTechnique->ConnectFrameBuffer(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer());
-		MaterialSP material = MakeSP<Material>("tracing technique parameters");
-		material->SetParameter("voxelVolumeCenter", cubePosition);
-		material->SetParameter("voxelVolumeHalfSize", cubeHalfSize);
-		material->SetParameter("aperture", camera->GetFieldOfView() / XREXContext::GetInstance().GetMainWindow().GetClientRegionSize().Y());
-
-
-
-		for (auto& sub : cube->GetAllSubMeshes())
-		{
-			sub->SetTechnique(coneTracingTechnique);
-			sub->SetMaterial(material);
-		}
-		cubeObject->SetComponent(cube);
-		TransformationSP trans = cubeObject->GetComponent<Transformation>();
-		trans->SetPosition(cubePosition);
-
-		return cubeObject;
 	}
 
 	SceneObjectSP MakeCamera(float cameraSpeedScaler)
@@ -458,9 +353,15 @@ namespace
 	{
 
 		UsedTechniques voxelizationTechnique;
+
+		std::shared_ptr<TransformationSetter> voxelizationTechniqueTransformationSetter;
+		std::shared_ptr<CameraSetter> voxelizationTechniqueCameraSetter;
+
+		std::shared_ptr<TransformationSetter> coneTracingTechniqueTransformationSetter;
+		std::shared_ptr<CameraSetter> coneTracingTechniqueCameraSetter;
+
 		MaterialSP voxelizationMaterial;
 		ViewportSP listBuildingViewport;
-		ViewportSP voxelMergeViewport;
 
 		std::array<SceneObjectSP, 3> voxelizationCameras;
 
@@ -473,9 +374,7 @@ namespace
 		float sceneHalfSize;
 
 		uint32 voxelVolumeResolution;
-		uint32 intermediateVoxelVolumeResolution;
 
-		TextureSP intermediateVoxelVolume;
 		TextureSP voxelVolume;
 		//GraphicsBufferSP intermediateClearVoxelVolume;
 		GraphicsBufferSP clearVoxelVolume;
@@ -494,14 +393,13 @@ namespace
 		bool anisotropic;
 		
 
-		RenderToTextureProcess(floatV3 const& sceneCenter, float sceneHalfSize, uint32 voxelVolumeResolution, bool anisotropic, float cameraSpeedScaler)
-			: frame(0), anisotropic(anisotropic)
+		RenderToTextureProcess(floatV3 const& sceneCenter, float sceneHalfSize, uint32 voxelVolumeResolution, float cameraSpeedScaler)
+			: frame(0)
 		{
 			this->sceneCenter = sceneCenter;
 			this->sceneHalfSize = sceneHalfSize;
 
 			this->voxelVolumeResolution = voxelVolumeResolution;
-			this->intermediateVoxelVolumeResolution = voxelVolumeResolution * (anisotropic ? 2 : 1);
 
 			CreateVoxelizationObjects();
 
@@ -515,9 +413,24 @@ namespace
 
 		void CreateVoxelizationObjects()
 		{
-			listBuildingViewport = XREXContext::GetInstance().GetRenderingFactory().CreateViewport(0, 0, 0, intermediateVoxelVolumeResolution, intermediateVoxelVolumeResolution);
-			voxelMergeViewport = XREXContext::GetInstance().GetRenderingFactory().CreateViewport(0, 0, 0, voxelVolumeResolution, voxelVolumeResolution);
+			listBuildingViewport = XREXContext::GetInstance().GetRenderingFactory().CreateViewport(0, 0, 0, voxelVolumeResolution, voxelVolumeResolution);
 			voxelizationTechnique = MakeVoxelizationTechnique();
+
+			RenderingTechniqueSP listTechnique = voxelizationTechnique.listBuild;
+			TechniqueParameterSP neverChanged = listTechnique->GetParameterByName("NeverChanged");
+			ShaderResourceBufferSP neverChangedBuffer = neverChanged->As<ShaderResourceBufferSP>().GetValue();
+			ShaderResourceBuffer::BufferMapper mapper = neverChangedBuffer->GetMapper();
+			auto voxelVolumeHalfSizeSetter = neverChangedBuffer->GetSetter("voxelVolumeHalfSize");
+			assert(voxelVolumeHalfSizeSetter.first);
+			voxelVolumeHalfSizeSetter.second.SetValue(mapper, sceneHalfSize);
+			auto voxelVolumeCenterSetter = neverChangedBuffer->GetSetter("voxelVolumeCenter");
+			assert(voxelVolumeCenterSetter.first);
+			voxelVolumeCenterSetter.second.SetValue(mapper, sceneCenter);
+			mapper.Finish();
+
+			voxelizationTechniqueTransformationSetter = MakeSP<TransformationSetter>(voxelizationTechnique.listBuild);
+			voxelizationTechniqueCameraSetter = MakeSP<CameraSetter>(voxelizationTechnique.listBuild);
+
 			voxelizationMaterial = MakeSP<Material>("voxelization material");
 
 			for (uint32 i = 0; i < 3; ++i)
@@ -543,21 +456,21 @@ namespace
 			cameraTransformation2->FaceToDirection(floatV3(0, 0, -1), floatV3(0, 1, 0));
 			
 			{
-				GraphicsBufferSP headPointer = XREXContext::GetInstance().GetRenderingFactory().CreateGraphicsBuffer(GraphicsBuffer::Usage::StaticDraw, intermediateVoxelVolumeResolution * intermediateVoxelVolumeResolution * sizeof(uint32));
+				GraphicsBufferSP headPointer = XREXContext::GetInstance().GetRenderingFactory().CreateGraphicsBuffer(GraphicsBuffer::Usage::StaticDraw, voxelVolumeResolution * voxelVolumeResolution * sizeof(uint32));
 				headPointer->Clear(0u);
 				clearPointer = headPointer;
 			}
 
 			for (uint32 i = 0; i < 3; ++i)
 			{
-				Size<uint32, 2> dim(intermediateVoxelVolumeResolution, intermediateVoxelVolumeResolution);
+				Size<uint32, 2> dim(voxelVolumeResolution, voxelVolumeResolution);
 				Texture::DataDescription<2> desc(TexelFormat::R32UI, dim);
 
 				TextureSP headPointer = XREXContext::GetInstance().GetRenderingFactory().CreateTexture2D(desc, false);
 				headPointers[i] = headPointer;
 
 				TexelFormat linkedListNodeFormat = TexelFormat::RGBA32UI;
-				uint32 poolSize = intermediateVoxelVolumeResolution * intermediateVoxelVolumeResolution * GetTexelSizeInBytes(linkedListNodeFormat) * 8;
+				uint32 poolSize = voxelVolumeResolution * voxelVolumeResolution * GetTexelSizeInBytes(linkedListNodeFormat) * 8;
 				GraphicsBufferSP buffer = XREXContext::GetInstance().GetRenderingFactory().CreateGraphicsBuffer(GraphicsBuffer::Usage::StreamCopy, poolSize, BufferView::BufferType::Texture);
 				TextureSP linkedListNodePool = XREXContext::GetInstance().GetRenderingFactory().CreateTextureBuffer(buffer, linkedListNodeFormat);
 				nodePools[i] = linkedListNodePool;
@@ -565,19 +478,58 @@ namespace
 				atomicCounterBuffers[i] = atomicBuffer;
 			}
 
-			intermediateVoxelVolume = MakeIntermediateVoxelVolume(voxelVolumeResolution);
+			//voxelVolume = MakeTest3DTexture();
 			voxelVolume = MakeVoxelVolume(voxelVolumeResolution);
 
-			//intermediateClearVoxelVolume = MakeIntermediateClearVoxelVolume(voxelVolumeResolution);
 			clearVoxelVolume = MakeClearVoxelVolume(voxelVolumeResolution);
 
 		}
 
+		SceneObjectSP MakeConeTracingProxyCube(PerspectiveCameraSP const& camera, floatV3 const& cubePosition, float cubeHalfSize)
+		{
+
+			SceneObjectSP cubeObject = MakeSP<SceneObject>("cube object");
+			MeshSP cube = MakeCube(cubeHalfSize);
+
+			RenderingTechniqueSP coneTracingTechnique = MakeConeTracingTechnique();
+			coneTracingTechnique->ConnectFrameBuffer(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer());
+
+			TechniqueParameterSP neverChanged = coneTracingTechnique->GetParameterByName("NeverChanged");
+			ShaderResourceBufferSP neverChangedBuffer = neverChanged->As<ShaderResourceBufferSP>().GetValue();
+			ShaderResourceBuffer::BufferMapper mapper = neverChangedBuffer->GetMapper();
+			auto voxelVolumeHalfSizeSetter = neverChangedBuffer->GetSetter("voxelVolumeHalfSize");
+			assert(voxelVolumeHalfSizeSetter.first);
+			voxelVolumeHalfSizeSetter.second.SetValue(mapper, sceneHalfSize);
+			auto voxelVolumeCenterSetter = neverChangedBuffer->GetSetter("voxelVolumeCenter");
+			assert(voxelVolumeCenterSetter.first);
+			voxelVolumeCenterSetter.second.SetValue(mapper, sceneCenter);
+			mapper.Finish();
+
+			coneTracingTechniqueTransformationSetter = MakeSP<TransformationSetter>(coneTracingTechnique);
+			coneTracingTechniqueCameraSetter = MakeSP<CameraSetter>(coneTracingTechnique);
+
+			MaterialSP material = MakeSP<Material>("tracing technique parameters");
+			material->SetParameter("voxelVolumeCenter", cubePosition);
+			material->SetParameter("voxelVolumeHalfSize", cubeHalfSize);
+			material->SetParameter("aperture", camera->GetFieldOfView() / XREXContext::GetInstance().GetMainWindow().GetClientRegionSize().Y());
+
+
+
+			for (auto& sub : cube->GetAllSubMeshes())
+			{
+				sub->SetTechnique(coneTracingTechnique);
+				sub->SetMaterial(material);
+			}
+			cubeObject->SetComponent(cube);
+			TransformationSP trans = cubeObject->GetComponent<Transformation>();
+			trans->SetPosition(cubePosition);
+
+			return cubeObject;
+		}
+
 		virtual void RenderScene(SceneSP const& scene) override
 		{
-			//XREXContext::GetInstance().GetLogger().LogLine("frame: " + std::to_string(frame++));
 			std::vector<SceneObjectSP> sceneObjects = scene->GetRenderableQueue(nullptr);
-
 
 			RenderablePackCollector collector;
 			for (SceneObjectSP sceneObject : sceneObjects)
@@ -592,17 +544,8 @@ namespace
 			std::vector<Renderable::SmallRenderablePack> allRenderableNeedToRender = collector.ExtractSmallRenderablePack();
 
 			BuildFragmentLists(allRenderableNeedToRender);
-// 			for (uint32 i = 0; i < 3; ++i)
-// 			{
-// 				GraphicsBuffer::BufferMapper mapper = atomicCounterBuffers[i]->GetMapper(AccessType::ReadOnly);
-// 				uint32 count = mapper.GetPointer<uint32>()[0];
-// 				XREXContext::GetInstance().GetLogger().LogLine("count: " + std::to_string(count));
-// 			}
-
-			//SortFragmentLists();
-
-			BuildVoxelVolume();
-			//MergeVoxelVolume();
+ 
+ 			BuildVoxelVolume();
 
 			ConeTracing();
 		}
@@ -629,18 +572,15 @@ namespace
 
 				CameraSP const& camera = voxelizationCameras[i]->GetComponent<Camera>();
 				camera->GetViewport()->Bind(0, 0);
-				floatM44 viewMatrix = camera->GetViewMatrix();
-				floatM44 projectionMatrix = camera->GetProjectionMatrix();
-				TechniqueParameterSP const& view = listTechnique->GetParameterByName(GetUniformString(DefinedUniform::ViewMatrix));
-				view->As<floatM44>().SetValue(viewMatrix);
-				TechniqueParameterSP const& projection = listTechnique->GetParameterByName(GetUniformString(DefinedUniform::ProjectionMatrix));
-				projection->As<floatM44>().SetValue(projectionMatrix);
+
+				voxelizationTechniqueCameraSetter->SetParameter(camera);
+				voxelizationTechniqueTransformationSetter->Connect(camera);
 
 				TechniqueParameterSP const& linkedListNodePool = listTechnique->GetParameterByName("nodePool");
 				linkedListNodePool->As<TextureImageSP>().SetValue(CheckedSPCast<TextureBuffer>(nodePools[i])->GetImage());
 				TechniqueParameterSP const& headPointer = listTechnique->GetParameterByName("heads");
 				headPointer->As<TextureImageSP>().SetValue(CheckedSPCast<Texture2D>(headPointers[i])->GetImage(0));
-				TechniqueParameterSP const& atomicCounter = listTechnique->GetParameterByName("0");
+				TechniqueParameterSP const& atomicCounter = listTechnique->GetParameterByName("AtomicBuffer0");
 				ShaderResourceBufferSP atomicBuffer = atomicCounter->As<ShaderResourceBufferSP>().GetValue();
 				atomicBuffer->SetBuffer(atomicCounterBuffers[i]);
 				atomicCounterBuffers[i]->Clear(1u);
@@ -650,10 +590,15 @@ namespace
 // 					assert(nodeCounterSetter.first);
 // 					nodeCounterSetter.second.SetValue(setter, 1u);
 // 				}
-				TechniqueParameterSP const& halfSize = listTechnique->GetParameterByName("voxelVolumeHalfSize");
-				halfSize->As<float>().SetValue(sceneHalfSize);
-				TechniqueParameterSP const& voxelVolumeCenter = listTechnique->GetParameterByName("voxelVolumeCenter");
-				voxelVolumeCenter->As<floatV3>().SetValue(sceneCenter);
+
+				ShaderResourceBufferSP perAxisBuffer = listTechnique->GetParameterByName("PerAxis")->As<ShaderResourceBufferSP>().GetValue();
+				ShaderResourceBuffer::BufferMapper mapper = perAxisBuffer->GetMapper();
+				auto axisSetter = perAxisBuffer->GetSetter("axis");
+				assert(axisSetter.first);
+				axisSetter.second.SetValue(mapper, static_cast<int32>(i));
+				mapper.Finish();
+
+
 				TechniqueParameterSP const& axis = listTechnique->GetParameterByName("axis");
 				if (axis)
 				{
@@ -669,61 +614,31 @@ namespace
 					Renderable& ownerRenderable = *renderablePack.renderable;
 					RenderingLayoutSP const& layout = renderablePack.layout;
 
-					floatM44 const& modelMatrix = ownerRenderable.GetOwnerSceneObject()->GetComponent<Transformation>()->GetWorldMatrix();
-					TechniqueParameterSP const& model = listTechnique->GetParameterByName(GetUniformString(DefinedUniform::ModelMatrix));
-					model->As<floatM44>().SetValue(modelMatrix);
-					TechniqueParameterSP const& object = listTechnique->GetParameterByName("objectID");
-					object->As<int32>().SetValue(objectID);
+					voxelizationTechniqueTransformationSetter->SetParameter(ownerRenderable.GetOwnerSceneObject()->GetComponent<Transformation>());
+
+					ShaderResourceBufferSP perObjectBuffer = listTechnique->GetParameterByName("PerObject")->As<ShaderResourceBufferSP>().GetValue();
+					ShaderResourceBuffer::BufferMapper mapper = perObjectBuffer->GetMapper();
+					auto objectSetter = perObjectBuffer->GetSetter("objectID");
+					assert(objectSetter.first);
+					objectSetter.second.SetValue(mapper, objectID);
+					mapper.Finish();
+
+
 
 					listTechnique->SetupAllResources();
 					LayoutAndProgramConnectorSP connector = XREXContext::GetInstance().GetRenderingFactory().GetConnector(layout, listTechnique);
-					connector->Bind();
 					drawer.SetRenderingLayout(layout);
-					drawer.CoreLaunch();
+					connector->Bind();
+					drawer.CoreLaunch(); // core launch
 					connector->Unbind();
-
 				}
 			}
 
-		}
-
-		void SortFragmentLists()
-		{
-			listBuildingViewport->Bind(0, 0);
-
-			RenderingTechniqueSP sortTechnique = voxelizationTechnique.listSort;
-
-			gl::MemoryBarrier(gl::GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-
-			IndexedDrawer drawer;
-			for (uint32 i = 0; i < 3; ++i)
-			{
-				TechniqueParameterSP const& linkedListNodePool = sortTechnique->GetParameterByName("nodePool");
-				if (linkedListNodePool)
-				{
-					linkedListNodePool->As<TextureImageSP>().SetValue(CheckedSPCast<TextureBuffer>(nodePools[i])->GetImage());
-				}
-				TechniqueParameterSP const& headPointer = sortTechnique->GetParameterByName("heads");
-				if (headPointer)
-				{
-					headPointer->As<TextureImageSP>().SetValue(CheckedSPCast<Texture2D>(headPointers[i])->GetImage(0));
-				}
-
-				RenderingLayoutSP const& layout = screenQuad;
-
-				LayoutAndProgramConnectorSP connector = XREXContext::GetInstance().GetRenderingFactory().GetConnector(layout, sortTechnique);
-				drawer.SetTechnique(sortTechnique);
-				drawer.SetLayoutAndProgramConnector(connector);
-				drawer.SetRenderingLayout(layout);
-				drawer.Launch();
-			}
 		}
 
 		void BuildVoxelVolume()
 		{
-			//listBuildingViewport->Bind(0, 0);
-			voxelMergeViewport->Bind(0, 0);
-
+			listBuildingViewport->Bind(0, 0);
 
 			RenderingTechniqueSP voxelizeTechnique = voxelizationTechnique.volumeBuild;
 
@@ -762,12 +677,13 @@ namespace
 				TechniqueParameterSP const& headPointer = voxelizeTechnique->GetParameterByName("heads");
 				headPointer->As<TextureImageSP>().SetValue(CheckedSPCast<Texture2D>(headPointers[i])->GetImage(0));
 				TechniqueParameterSP const& volume = voxelizeTechnique->GetParameterByName("volume");
-				if (voxelVolume)
-				{
-					volume->As<TextureImageSP>().SetValue(CheckedSPCast<Texture3D>(voxelVolume)->GetImage(0));
-				}
-				TechniqueParameterSP const& axis = voxelizeTechnique->GetParameterByName("axis");
-				axis->As<int32>().SetValue(i);
+				volume->As<TextureImageSP>().SetValue(CheckedSPCast<Texture3D>(voxelVolume)->GetImage(0));
+				ShaderResourceBufferSP perAxisBuffer = voxelizeTechnique->GetParameterByName("PerAxis")->As<ShaderResourceBufferSP>().GetValue();
+				ShaderResourceBuffer::BufferMapper mapper = perAxisBuffer->GetMapper();
+				auto axisSetter = perAxisBuffer->GetSetter("axis");
+				assert(axisSetter.first);
+				axisSetter.second.SetValue(mapper, static_cast<int32>(i));
+				mapper.Finish();
 
 
 				RenderingLayoutSP const& layout = screenQuad;
@@ -778,103 +694,10 @@ namespace
 				drawer.SetRenderingLayout(layout);
 				drawer.Launch();
 			}
-		}
-
-		void BuildAnisotropicVoxelVolume()
-		{
-			//listBuildingViewport->Bind(0, 0);
-			voxelMergeViewport->Bind(0, 0);
-
-
-			RenderingTechniqueSP voxelizeTechnique = voxelizationTechnique.anisotropicVolumeBuild;
-
-			{ // clear voxelVolume texture
-				uint32 glClearVoxelVolume = clearVoxelVolume->GetID();
-				Texture3DSP voxelVolumeAs3D = CheckedSPCast<Texture3D>(voxelVolume);
-				voxelVolumeAs3D->Bind(0);
-				GLTextureFormat glFormat = GLTextureFormatFromTexelFormat(voxelVolumeAs3D->GetDescription().GetFormat());
-
-				gl::BindBuffer(gl::GL_PIXEL_UNPACK_BUFFER, glClearVoxelVolume);
-				gl::TexSubImage3D(gl::GL_TEXTURE_3D, 0, 0, 0, 0, voxelVolumeAs3D->GetDescription().GetSize()[0], voxelVolumeAs3D->GetDescription().GetSize()[1], voxelVolumeAs3D->GetDescription().GetSize()[2],
-					glFormat.glSourceFormat, glFormat.glTextureElementType, nullptr);
-				gl::BindBuffer(gl::GL_PIXEL_UNPACK_BUFFER, 0);
-			}
-
-			gl::MemoryBarrier(gl::GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-
-			IndexedDrawer drawer;
-			for (uint32 i = 0; i < 3; ++i)
-			{
-				{
-					BlendState blendState;
-					DepthStencilState depthStencilState;
-					BlendStateObjectSP bso = XREXContext::GetInstance().GetRenderingFactory().CreateBlendStateObject(blendState);
-					DepthStencilStateObjectSP dsso = XREXContext::GetInstance().GetRenderingFactory().CreateDepthStencilStateObject(depthStencilState);
-					bso->Bind(Color(0, 0, 0, 1));
-					dsso->Bind(0, 0);
-				}
-
-				TechniqueParameterSP const& linkedListNodePool = voxelizeTechnique->GetParameterByName("nodePool");
-				linkedListNodePool->As<TextureImageSP>().SetValue(CheckedSPCast<TextureBuffer>(nodePools[i])->GetImage());
-				TechniqueParameterSP const& headPointer = voxelizeTechnique->GetParameterByName("heads");
-				headPointer->As<TextureImageSP>().SetValue(CheckedSPCast<Texture2D>(headPointers[i])->GetImage(0));
-
-				TechniqueParameterSP const& volume = voxelizeTechnique->GetParameterByName("volume");
-				if (voxelVolume)
-				{
-					volume->As<TextureImageSP>().SetValue(CheckedSPCast<Texture3D>(voxelVolume)->GetImage(0));
-				}
-				TechniqueParameterSP const& axis = voxelizeTechnique->GetParameterByName("axis");
-				axis->As<int32>().SetValue(i);
-
-				RenderingLayoutSP const& layout = screenQuad;
-
-				LayoutAndProgramConnectorSP connector = XREXContext::GetInstance().GetRenderingFactory().GetConnector(layout, voxelizeTechnique);
-				drawer.SetTechnique(voxelizeTechnique);
-				drawer.SetLayoutAndProgramConnector(connector);
-				drawer.SetRenderingLayout(layout);
-				drawer.Launch();
-			}
-		}
-
-		void MergeVoxelVolume()
-		{
-			voxelMergeViewport->Bind(0, 0);
-
-			{ // clear voxelVolume texture
-				uint32 glClearVoxelVolume = clearVoxelVolume->GetID();
-				Texture3DSP voxelVolumeAs3D = CheckedSPCast<Texture3D>(voxelVolume);
-				voxelVolumeAs3D->Bind(0);
-				GLTextureFormat glFormat = GLTextureFormatFromTexelFormat(voxelVolumeAs3D->GetDescription().GetFormat());
-
-				gl::BindBuffer(gl::GL_PIXEL_UNPACK_BUFFER, glClearVoxelVolume);
-				gl::TexSubImage3D(gl::GL_TEXTURE_3D, 0, 0, 0, 0, voxelVolumeAs3D->GetDescription().GetSize()[0], voxelVolumeAs3D->GetDescription().GetSize()[1], voxelVolumeAs3D->GetDescription().GetSize()[2],
-					glFormat.glSourceFormat, glFormat.glTextureElementType, nullptr);
-				gl::BindBuffer(gl::GL_PIXEL_UNPACK_BUFFER, 0);
-			}
-			RenderingTechniqueSP voxelMergeTechnique = voxelizationTechnique.volumeMerge;
-
-			gl::MemoryBarrier(gl::GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-
-			TechniqueParameterSP const& intermediateVolume = voxelMergeTechnique->GetParameterByName("intermediateVolume");
-			intermediateVolume->As<TextureImageSP>().SetValue(CheckedSPCast<Texture3D>(intermediateVoxelVolume)->GetImage(0));
-			TechniqueParameterSP const& volume = voxelMergeTechnique->GetParameterByName("volume");
-			volume->As<TextureImageSP>().SetValue(CheckedSPCast<Texture3D>(voxelVolume)->GetImage(0));
-
-			RenderingLayoutSP const& layout = screenQuad;
-
-			voxelMergeTechnique->Use();
-			//layout->BindToProgram(pass->GetProgram());
-			//layout->Draw();
-			gl::DispatchCompute(voxelVolumeResolution, voxelVolumeResolution, 1);
-			//layout->Unbind();
-
-			//voxelVolume->RecreateMipmap();
 		}
 
 		void ConeTracing()
 		{
-			//voxelVolumeToTrace.first = texture3DToTest;
 			voxelVolumeToTrace = voxelVolume;
 			
 
@@ -891,13 +714,10 @@ namespace
 			dsso->Bind(0, 0);
 
 			Color const& backgroundColor = camera->GetBackgroundColor();
-			gl::ClearColor(backgroundColor.R(), backgroundColor.G(), backgroundColor.B(), backgroundColor.A());
-			gl::Clear(gl::GL_COLOR_BUFFER_BIT | gl::GL_DEPTH_BUFFER_BIT | gl::GL_STENCIL_BUFFER_BIT);
+			XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer()->Clear(FrameBuffer::ClearMask::All, backgroundColor, 1, 0);
 
-			floatM44 viewMatrix = camera->GetViewMatrix();
-			floatM44 projectionMatrix = camera->GetProjectionMatrix();
-
-			TransformationSP transformation = coneTracingProxyCube->GetComponent<Transformation>();
+			coneTracingTechniqueCameraSetter->SetParameter(camera);
+			coneTracingTechniqueTransformationSetter->Connect(camera);
 
 			RenderablePackCollector collector;
 			coneTracingProxyCube->GetComponent<Renderable>()->GetRenderablePack(collector, nullptr);
@@ -913,15 +733,7 @@ namespace
 				RenderingLayoutSP const& layout = renderable.layout;
 				MaterialSP const& material = renderable.material;
 
-				TechniqueParameterSP const& cameraPosition = technique->GetParameterByName(GetUniformString(DefinedUniform::CameraPosition));
-				cameraPosition->As<floatV3>().SetValue(viewCameraObject->GetComponent<Transformation>()->GetWorldPosition());
-				TechniqueParameterSP const& view = technique->GetParameterByName(GetUniformString(DefinedUniform::ViewMatrix));
-				view->As<floatM44>().SetValue(viewMatrix);
-				TechniqueParameterSP const& projection = technique->GetParameterByName(GetUniformString(DefinedUniform::ProjectionMatrix));
-				projection->As<floatM44>().SetValue(projectionMatrix);
-				floatM44 const& modelMatrix = transformation->GetWorldMatrix();
-				TechniqueParameterSP const& model = technique->GetParameterByName(GetUniformString(DefinedUniform::ModelMatrix));
-				model->As<floatM44>().SetValue(modelMatrix);
+				coneTracingTechniqueTransformationSetter->SetParameter(ownerRenderable.GetOwnerSceneObject()->GetComponent<Transformation>());
 
 				material->SetParameter("voxels", voxelVolumeToTrace);
 				material->BindToTechnique(technique);
@@ -973,11 +785,8 @@ namespace
 			Sponza,
 			CrytekSponza,
 			Conference,
-			Dragon, // cannot work
-			Buddha, // cannot work
-			LostEmpire, // cannot work
 			SponzaWithTeapots,
-		} target = Scene::Sponza;
+		} target = Scene::Teapot;
 
 		floatV3 center;
 		float halfSize;
@@ -1005,21 +814,6 @@ namespace
 			halfSize = 1536;
 			filePath = "Data/conference/conference.obj";
 			break;
-		case Scene::Dragon:
-			center = floatV3(0, 0, 0);
-			halfSize = 128;
-			filePath = "Data/dragon/dragon.obj";
-			break;
-		case Scene::Buddha:
-			center = floatV3(0, 0, 0);
-			halfSize = 128;
-			filePath = "Data/buddha/buddha.obj";
-			break;
-		case Scene::LostEmpire:
-			center = floatV3(0, 0, 0);
-			halfSize = 1024;
-			filePath = "Data/lost_empire/lost_empire.obj";
-			break;
 		case Scene::SponzaWithTeapots:
 			center = floatV3(0, 32.f, 0);
 			halfSize = 128;
@@ -1029,7 +823,7 @@ namespace
 			break;
 		}
 
-		std::shared_ptr<RenderToTextureProcess> renderingProcess = MakeSP<RenderToTextureProcess>(center, halfSize, 512, false, halfSize / 50);
+		std::shared_ptr<RenderToTextureProcess> renderingProcess = MakeSP<RenderToTextureProcess>(center, halfSize, 256, halfSize / 50);
 		XREXContext::GetInstance().GetRenderingEngine().SetRenderingProcess(renderingProcess);
 		function<bool(double current, double delta)> l = [renderingProcess] (double current, double delta)
 		{
@@ -1042,21 +836,21 @@ namespace
 
 		if (target == Scene::SponzaWithTeapots)
 		{
-			//filePath = "Data/dabrovic-sponza/sponza.obj";
-			filePath = "Data/teapot/teapot.obj";
+			filePath = "Data/dabrovic-sponza/sponza.obj";
+			//filePath = "Data/teapot/teapot.obj";
 			
 			sceneObject = LoadModel(filePath);
-			sceneObject->GetComponent<Transformation>()->SetScaling(2);
+			sceneObject->GetComponent<Transformation>()->SetScaling(16);
 			assert(sceneObject);
 			XREXContext::GetInstance().GetScene()->AddObject(sceneObject);
 
 			filePath = "Data/teapot/teapot.obj";
-			//SceneObjectSP innerSceneObject = LoadModel(filePath);
-			SceneObjectSP innerSceneObject = MakeSP<SceneObject>("teapot");
-			innerSceneObject->SetComponent(sceneObject->GetComponent<Renderable>()->ShallowClone());
+			SceneObjectSP innerSceneObject = LoadModel(filePath);
+			//SceneObjectSP innerSceneObject = MakeSP<SceneObject>("teapot");
+			//innerSceneObject->SetComponent(sceneObject->GetComponent<Renderable>()->ShallowClone());
 
 			MeshSP mesh = CheckedSPCast<Mesh>(innerSceneObject->GetComponent<Renderable>());
-			for (int32 i = 0; i < 2; ++i)
+			for (int32 i = 0; i < 8; ++i)
 			{
 				MeshSP cloned = mesh->GetShallowClone();
 				SceneObjectSP clonedSceneObject = MakeSP<SceneObject>("so " + to_string(i));

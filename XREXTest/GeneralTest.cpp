@@ -135,11 +135,11 @@ struct TempScene
 		testCubeTechnique->AddStageCode(ShaderObject::ShaderType::FragmentShader, MakeSP<string>());
 
 
-		testTechnique->AddInclude(TransformationTechniqueFactory().GetTechniqueToInclude());
-		testTechnique->AddInclude(CameraTechniqueFactory().GetTechniqueToInclude());
+		testTechnique->AddInclude(TransformationTechniqueFactory().GetTechniqueInformationToInclude());
+		testTechnique->AddInclude(CameraTechniqueFactory().GetTechniqueInformationToInclude());
 
-		testCubeTechnique->AddInclude(TransformationTechniqueFactory().GetTechniqueToInclude());
-		testCubeTechnique->AddInclude(CameraTechniqueFactory().GetTechniqueToInclude());
+		testCubeTechnique->AddInclude(TransformationTechniqueFactory().GetTechniqueInformationToInclude());
+		testCubeTechnique->AddInclude(CameraTechniqueFactory().GetTechniqueInformationToInclude());
 
 		vector<VariableInformation const> variables;
 		testTechnique->AddUniformBufferInformation(BufferInformation("Material", "", BufferView::BufferType::Uniform, move(variables)));

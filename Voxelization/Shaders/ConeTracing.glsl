@@ -80,17 +80,19 @@ vec4 ConeTrace(sampler3D vexelVolume, vec3 volumeCenter, float volumeHalfSize, v
 	return finalColor;
 }
 
-uniform mat4 modelMatrix;
-uniform mat4 normalMatrix;
-uniform mat4 viewMatrix;
-uniform mat4 projectionMatrix;
-uniform vec3 cameraPosition;
 
 uniform sampler3D voxels;
-uniform vec3 voxelVolumeCenter;
-uniform float voxelVolumeHalfSize;
 
-uniform float aperture;
+uniform NeverChanged
+{
+	vec3 voxelVolumeCenter;
+	float voxelVolumeHalfSize;
+};
+
+uniform TracingParameter
+{
+	uniform float aperture;
+};
 
 #ifdef VS
 
@@ -99,8 +101,8 @@ out vec3 wPosition;
 
 void main()
 {
-	wPosition = (modelMatrix * vec4(position, 1.0)).xyz;
-	gl_Position = projectionMatrix * viewMatrix * vec4(wPosition, 1);
+	wPosition = XREX_Transform(XREX_ModelTransformation.WorldFromModel, position);
+	gl_Position = XREX_TransformToClip(XREX_ModelTransformation.ClipFromModel, position);
 }
 
 #endif
@@ -111,13 +113,13 @@ const float alphaThreshold = 0.99;
 
 in vec3 wPosition;
 
-layout(location = 0) out vec4 finalColor;
+out vec4 XREX_DefaultFrameBufferOutput;
 
 void main()
 {
-	vec3 direction = normalize(wPosition - cameraPosition);
-	vec4 color = ConeTrace(voxels, voxelVolumeCenter, voxelVolumeHalfSize, cameraPosition, direction, aperture, alphaThreshold);
-	finalColor = color;
+	vec3 direction = normalize(wPosition - XREX_CameraTransformation.CameraPositionInWorld);
+	vec4 color = ConeTrace(voxels, voxelVolumeCenter, voxelVolumeHalfSize, XREX_CameraTransformation.CameraPositionInWorld, direction, aperture, alphaThreshold);
+	XREX_DefaultFrameBufferOutput = color;
 }
 
 #endif
