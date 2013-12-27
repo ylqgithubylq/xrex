@@ -12,7 +12,7 @@
 namespace XREX
 {
 
-	TechniqueBuildingInformationSP const& TransformationTechniqueFactory::GetTechniqueToInclude() const
+	TechniqueBuildingInformationSP const& TransformationTechniqueFactory::GetTechniqueInformationToInclude() const
 	{
 		static TechniqueBuildingInformationSP const Builder = []
 		{
@@ -60,11 +60,10 @@ namespace XREX
 	}
 
 
-	TransformationSetter::TransformationSetter(RenderingTechniqueSP const& technique)
-		: technique_(technique)
+	TransformationSetter::TransformationSetter(RenderingTechniqueSP technique)
+		: ComponentParameterSetter(std::move(technique))
 	{
-		assert(technique != nullptr);
-		modelParameter_ = technique->GetParameterByName("XREX_Uniform_ModelTransformation");
+		modelParameter_ = GetTechnique()->GetParameterByName("XREX_Uniform_ModelTransformation");
 		if (modelParameter_ != nullptr)
 		{
 			parameterBuffer_ = modelParameter_->As<ShaderResourceBufferSP>().GetValue();
@@ -117,7 +116,7 @@ namespace XREX
 
 
 
-	TechniqueBuildingInformationSP const& CameraTechniqueFactory::GetTechniqueToInclude() const
+	TechniqueBuildingInformationSP const& CameraTechniqueFactory::GetTechniqueInformationToInclude() const
 	{
 		static TechniqueBuildingInformationSP const Builder = []
 		{
@@ -151,11 +150,10 @@ namespace XREX
 	}
 
 
-	CameraSetter::CameraSetter(RenderingTechniqueSP const& technique)
-		: technique_(technique)
+	CameraSetter::CameraSetter(RenderingTechniqueSP technique)
+		: ComponentParameterSetter(std::move(technique))
 	{
-		assert(technique_ != nullptr);
-		cameraParameter_ = technique->GetParameterByName("XREX_Uniform_CameraTransformation");
+		cameraParameter_ = GetTechnique()->GetParameterByName("XREX_Uniform_CameraTransformation");
 		if (cameraParameter_ != nullptr)
 		{
 			parameterBuffer_ = cameraParameter_->As<ShaderResourceBufferSP>().GetValue();

@@ -796,7 +796,7 @@ namespace XREX
 						}
 						else
 						{
-							includedInformation = factory->GetTechniqueToInclude();
+							includedInformation = factory->GetTechniqueInformationToInclude();
 						}
 						fileOrSystemCount += 1;
 					}

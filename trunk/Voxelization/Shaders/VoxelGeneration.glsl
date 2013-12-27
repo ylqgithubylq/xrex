@@ -1,9 +1,12 @@
 
-layout (r32ui) uniform readonly uimage2D heads; // edge size twice larges than intermediateVolume
+layout (r32ui) uniform readonly uimage2D heads;
 layout (rgba32ui) uniform readonly uimageBuffer nodePool;
 layout (rgba8) uniform writeonly image3D volume;
 
-uniform int axis;
+uniform PerAxis
+{
+	int axis;
+};
 
 const int AxisX = 0;
 const int AxisY = 1;

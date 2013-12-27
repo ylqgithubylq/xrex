@@ -761,6 +761,9 @@ namespace XREX
 				}
 			}
 		}
+		{
+			// TODO shader resource buffer
+		}
 		{ // atomic counter
 			int32 atomicBufferCount = 0;
 			gl::GetProgramiv(glProgramID_, gl::GL_ACTIVE_ATOMIC_COUNTER_BUFFERS, &atomicBufferCount);

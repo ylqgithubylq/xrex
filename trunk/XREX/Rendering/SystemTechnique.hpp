@@ -25,6 +25,41 @@ namespace XREX
 
 	// TODO how to make a template counter? Counter<class T> {uint32 Value;}; Counter<A>::Value == 0; Counter<B>::Value == 1; ...
 
+
+	struct XREX_API IComponentParameterSetter
+	{
+		virtual ~IComponentParameterSetter() = 0
+		{
+		};
+	};
+
+	struct XREX_API ComponentParameterSetterBase
+		: IComponentParameterSetter
+	{
+		ComponentParameterSetterBase(RenderingTechniqueSP technique)
+			: technique_(std::move(technique))
+		{
+			assert(technique_ != nullptr);
+		}
+		RenderingTechniqueSP const& GetTechnique() const
+		{
+			return technique_;
+		}
+	private:
+		RenderingTechniqueSP technique_;
+	};
+
+	template <typename ComponentType>
+	struct ComponentParameterSetter
+		: ComponentParameterSetterBase
+	{
+		ComponentParameterSetter(RenderingTechniqueSP technique)
+			: ComponentParameterSetterBase(std::move(technique))
+		{
+		}
+		virtual void SetParameter(std::shared_ptr<ComponentType> const& component) = 0;
+	};
+
 	struct XREX_API ISystemTechniqueFactory
 	{
 		virtual ~ISystemTechniqueFactory() = 0
@@ -34,17 +69,11 @@ namespace XREX
 		/*
 		 *	Notice: Every call should return the same instance.
 		 */
-		virtual TechniqueBuildingInformationSP const& GetTechniqueToInclude() const = 0;
+		virtual TechniqueBuildingInformationSP const& GetTechniqueInformationToInclude() const = 0;
 	};
 
-	template <typename ComponentType>
-	struct IComponentParameterSetter
-	{
-		virtual ~IComponentParameterSetter() = 0
-		{
-		}
-		virtual void SetParameter(std::shared_ptr<ComponentType> const& component) = 0;
-	};
+
+
 
 	template <typename RequiredComponentType>
 	struct IParameterSetterDepend
@@ -65,13 +94,13 @@ namespace XREX
 			static std::string const IndexName = "Transformation";
 			return IndexName;
 		}
-		virtual TechniqueBuildingInformationSP const& GetTechniqueToInclude() const override;
+		virtual TechniqueBuildingInformationSP const& GetTechniqueInformationToInclude() const override;
 	};
 
 	struct XREX_API TransformationSetter
-		: IComponentParameterSetter<Transformation>, IParameterSetterDepend<Camera>, NUpdatePerObject
+		: ComponentParameterSetter<Transformation>, IParameterSetterDepend<Camera>, NUpdatePerObject
 	{
-		explicit TransformationSetter(RenderingTechniqueSP const& technique);
+		explicit TransformationSetter(RenderingTechniqueSP technique);
 
 		virtual void Connect(CameraSP const& component) override;
 
@@ -79,7 +108,6 @@ namespace XREX
 
 	private:
 		CameraSP camera_;
-		RenderingTechniqueSP technique_;
 		TechniqueParameterSP modelParameter_;
 		ShaderResourceBufferSP parameterBuffer_;
 
@@ -100,18 +128,17 @@ namespace XREX
 			static std::string const IndexName = "Camera";
 			return IndexName;
 		}
-		virtual TechniqueBuildingInformationSP const& GetTechniqueToInclude() const override;
+		virtual TechniqueBuildingInformationSP const& GetTechniqueInformationToInclude() const override;
 	};
 
 	struct XREX_API CameraSetter
-		: IComponentParameterSetter<Camera>, NUpdatePerFrame
+		: ComponentParameterSetter<Camera>, NUpdatePerFrame
 	{
-		explicit CameraSetter(RenderingTechniqueSP const& technique);
+		explicit CameraSetter(RenderingTechniqueSP technique);
 
 		virtual void SetParameter(CameraSP const& component) override;
 
 	private:
-		RenderingTechniqueSP technique_;
 		TechniqueParameterSP cameraParameter_;
 		ShaderResourceBufferSP parameterBuffer_;
 

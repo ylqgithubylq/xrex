@@ -26,13 +26,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\GLActivity.nvact" />
-    <None Include="Shaders\AnisotropicVoxelGeneration.glsl" />
     <None Include="Shaders\ConeTracing.glsl" />
     <None Include="Shaders\ListGeneration.glsl" />
     <None Include="Shaders\ListSort.glsl" />
-    <None Include="Shaders\SimpleVoxelGeneration.glsl" />
     <None Include="Shaders\VoxelGeneration.glsl" />
-    <None Include="Shaders\VoxelMerge.glsl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{D8AC2A74-F164-4C49-A533-C0E75220BF52}</ProjectGuid>

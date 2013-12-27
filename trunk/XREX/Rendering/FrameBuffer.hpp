@@ -50,6 +50,9 @@ namespace XREX
 
 
 	public:
+		/*
+		 *	Default SizeMode is SizeMode::Sceen.
+		 */
 		FrameBufferLayoutDescription(std::string name)
 			: name_(std::move(name)), depth_(TexelFormat::TexelFormatCount), stencil_(TexelFormat::TexelFormatCount),
 			combined_(DepthStencilCombinationState::None), size_(0, 0), sizeMode_(SizeMode::Sceen)
@@ -67,8 +70,17 @@ namespace XREX
 			return framebufferChannels_;
 		}
 
+		/*
+		 *	Set framebuffer depth stencil state to depth only or to separate if it is already stencil only.
+		 */
 		void SetDepth(TexelFormat format);
+		/*
+		 *	Set framebuffer depth stencil state to stencil only or to separate if it is already depth only.
+		 */
 		void SetStencil(TexelFormat format);
+		/*
+		 *	Set framebuffer depth stencil state to combined.
+		 */
 		void SetDepthStencil(TexelFormat format);
 
 		bool IsDepthEnabled() const
