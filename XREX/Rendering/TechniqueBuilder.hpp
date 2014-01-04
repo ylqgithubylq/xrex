@@ -91,6 +91,9 @@ namespace XREX
 		{
 			return framebuffeDescription_;
 		}
+		/*
+		 *	FragmentOutput is generated from FrameBufferLayoutInformation
+		 */
 		void SetFrameBufferDescription(FrameBufferLayoutDescriptionSP framebufferDescription)
 		{
 			framebuffeDescription_ = std::move(framebufferDescription);
@@ -108,11 +111,7 @@ namespace XREX
 		{
 			return fragmentOutputInformations_;
 		}
-		// FragmentOutput is generated from FrameBufferLayoutInformation
-// 		void AddFragmentOutputInformation(FragmentOutputInformation const& information)
-// 		{
-// 			fragmentOutputInformations_.push_back(information);
-// 		}
+
 		std::vector<BufferInformation const> const& GetAllUniformBufferInformations() const
 		{
 			return uniformBufferInformations_;

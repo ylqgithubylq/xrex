@@ -26,9 +26,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\GLActivity.nvact" />
-    <None Include="Shaders\ConeTracing.glsl" />
     <None Include="Shaders\ListGeneration.glsl" />
     <None Include="Shaders\ListSort.glsl" />
+    <None Include="Shaders\ConeTracing.technique">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Shaders\VoxelGeneration.glsl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
