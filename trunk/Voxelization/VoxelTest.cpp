@@ -281,56 +281,10 @@ namespace
 
 	RenderingTechniqueSP MakeConeTracingTechnique()
 	{
-		string shaderFile = "../../Voxelization/Shaders/ConeTracing.glsl";
-		shared_ptr<string> shaderString = XREXContext::GetInstance().GetResourceLoader().LoadString(shaderFile);
-		if (!shaderString)
-		{
-			XREXContext::GetInstance().GetLogger().LogLine("file not found. file: " + shaderFile);
-		}
-		TechniqueBuildingInformationSP technique = MakeSP<TechniqueBuildingInformation>("cone tracing technique");
-		technique->AddCommonCode(shaderString);
-		technique->AddStageCode(ShaderObject::ShaderType::VertexShader, MakeSP<string>());
-		technique->AddStageCode(ShaderObject::ShaderType::FragmentShader, MakeSP<string>());
+		string techniqueFile = "Voxelization/Shaders/ConeTracing.technique";
+		TechniqueLoadingResultSP loadResult = XREXContext::GetInstance().GetResourceManager().LoadTechnique(techniqueFile, vector<pair<string, string>>());
 
-		technique->AddInclude(XREXContext::GetInstance().GetRenderingEngine().GetSystemTechniqueFactory("Transformation")->GetTechniqueInformationToInclude());
-		technique->AddInclude(XREXContext::GetInstance().GetRenderingEngine().GetSystemTechniqueFactory("Camera")->GetTechniqueInformationToInclude());
-
-		technique->AddUniformBufferInformation(BufferInformation("NeverChanged", "", BufferView::BufferType::Uniform, std::vector<VariableInformation const>()));
-		technique->AddUniformBufferInformation(BufferInformation("TracingParameter", "", BufferView::BufferType::Uniform, std::vector<VariableInformation const>()));
-
-		SamplerState samplerState;
-		samplerState.borderColor = Color(0, 0, 0, 0);
-		samplerState.addressingModeR = SamplerState::TextureAddressingMode::ClampToBorder;
-		samplerState.addressingModeS = SamplerState::TextureAddressingMode::ClampToBorder;
-		samplerState.addressingModeT = SamplerState::TextureAddressingMode::ClampToBorder;
-		samplerState.magFilterMode = SamplerState::TextureFilterMode::Linear;
-		samplerState.minFilterMode = SamplerState::TextureFilterMode::LinearMipmapLinear;
-		technique->AddSamplerState("cone tracing sampler", samplerState);
-
-		technique->AddTextureInformation(TextureInformation("voxels", Texture::TextureType::Texture3D, Texture::TexelType::FloatV4, "cone tracing sampler"));
-
-		technique->AddAttributeInputInformation(AttributeInputInformation("position", ElementType::FloatV3));
-
-		technique->SetFrameBufferDescription(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer()->GetLayoutDescription());
-
-		RasterizerState resterizerState;
-		resterizerState.cullMode = RenderingPipelineState::CullMode::None;
-		DepthStencilState depthStencilState;
-		BlendState blendState;
-		blendState.blendEnable = true;
-		blendState.blendOperation = RenderingPipelineState::BlendOperation::Add;
-		blendState.blendOperationAlpha = RenderingPipelineState::BlendOperation::Add;
-		blendState.sourceBlend = RenderingPipelineState::AlphaBlendFactor::One;
-		blendState.sourceBlendAlpha = RenderingPipelineState::AlphaBlendFactor::SourceAlpha;
-		blendState.destinationBlend = RenderingPipelineState::AlphaBlendFactor::OneMinusSourceAlpha;
-		blendState.destinationBlendAlpha = RenderingPipelineState::AlphaBlendFactor::OneMinusSourceAlpha;
-		technique->SetRasterizerState(resterizerState);
-		technique->SetDepthStencilState(depthStencilState);
-		technique->SetBlendState(blendState);
-
-
-
-		return TechniqueBuilder(technique).GetRenderingTechnique();
+		return loadResult->Create();
 	}
 
 	SceneObjectSP MakeCamera(float cameraSpeedScaler)

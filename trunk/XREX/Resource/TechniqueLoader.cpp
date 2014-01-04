@@ -11,6 +11,7 @@
 
 #include <rapidxml/rapidxml.hpp>
 
+#include <sstream>
 #include <filesystem>
 
 #pragma warning(push)
@@ -702,7 +703,10 @@ namespace XREX
 					temp["Include"] = &TechniqueInformationGenerator::HandleInclude;
 					temp["Sampler"] = &TechniqueInformationGenerator::HandleSampler;
 					temp["Texture"] = &TechniqueInformationGenerator::HandleTexture;
+					temp["Image"] = &TechniqueInformationGenerator::HandleImage;
 					temp["UniformBuffer"] = &TechniqueInformationGenerator::HandleUniformBuffer;
+					temp["AtomicCounterBuffer"] = &TechniqueInformationGenerator::HandleAtomicCounterBuffer;
+					temp["ShaderStorageBuffer"] = &TechniqueInformationGenerator::HandleShaderStorageBuffer;
 					temp["FrameBuffer"] = &TechniqueInformationGenerator::HandleFrameBuffer;
 					temp["AttributeInput"] = &TechniqueInformationGenerator::HandleAttributeInput;
 					temp["Code"] = &TechniqueInformationGenerator::HandleCode;
@@ -851,6 +855,7 @@ namespace XREX
 						static std::unordered_map<std::string, void (SamplerStateSetter::*)(rapidxml::xml_attribute<>* attribute)> const Setters = []
 						{
 							std::remove_const<decltype(Setters)>::type temp;
+							temp["BorderColor"] = &SamplerStateSetter::HandleBorderColor;
 							temp["AddressingModeS"] = &SamplerStateSetter::HandleAddressingModeS;
 							temp["AddressingModeT"] = &SamplerStateSetter::HandleAddressingModeT;
 							temp["AddressingModeR"] = &SamplerStateSetter::HandleAddressingModeR;
@@ -872,6 +877,17 @@ namespace XREX
 						{
 							XREX_POINTER_CALL_MEMBER_FUNCTION(this, found->second)(attribute);
 						}
+					}
+
+					void HandleBorderColor(rapidxml::xml_attribute<>* attribute)
+					{
+						std::string noUse(attribute->value());
+						std::stringstream ss(noUse);
+						std::array<float, 4> value;
+						value.assign(0);
+						ss >> value[0] >> noUse >> value[1] >> noUse >> value[2] >> noUse >> value[3];
+						// XREXContext::GetInstance().GetLogger().BeginLine().Log("Color format error: \'").Log(colorString).Log("\", should be \"x,x,x,x\".").EndLine();
+						state.borderColor = Color(value[0], value[1], value[2], value[3]);
 					}
 
 					std::pair<SamplerState::TextureAddressingMode, bool> GetTextureAddressingMode(std::string const value)
@@ -1158,10 +1174,110 @@ namespace XREX
 				}
 			}
 
-			void HandleUniformBuffer(rapidxml::xml_node<>* node)
+			void HandleImage(rapidxml::xml_node<>* node)
 			{
-				static std::string const UniformBufferString = "UniformBuffer";
+				std::string channel;
+				TextureImage::ImageType imageType = TextureImage::ImageType::ImageTypeCount;
+				TexelFormat texelFormat = TexelFormat::TexelFormatCount;
+				AccessType accessType = AccessType::ReadWrite;
 
+				static std::string const ImageString = "Image";
+
+				static std::string const Name = "Name";
+				static std::string const ImageType = "ImageType";
+				static std::string const TexelFormatString = "TexelFormat";
+				static std::string const AccessTypeString = "AccessType";
+
+				for (rapidxml::xml_attribute<>* attribute = node->first_attribute(); attribute != nullptr; attribute = attribute->next_attribute())
+				{
+					if (attribute->name() == Name)
+					{
+						channel = attribute->value();
+					}
+					else if (attribute->name() == ImageType)
+					{
+						static std::unordered_map<std::string, TextureImage::ImageType> const ImageTypes = []
+						{
+							std::remove_const<decltype(ImageTypes)>::type temp;
+							temp["Image1D"] = TextureImage::ImageType::Image1D;
+							temp["Image2D"] = TextureImage::ImageType::Image2D;
+							temp["Image3D"] = TextureImage::ImageType::Image3D;
+							temp["ImageCube"] = TextureImage::ImageType::ImageCube;
+							temp["ImageBuffer"] = TextureImage::ImageType::ImageBuffer;
+							return temp;
+						} ();
+						auto found = ImageTypes.find(attribute->value());
+						if (found != ImageTypes.end())
+						{
+							imageType = found->second;
+						}
+						else
+						{
+							LogUnknownAttributeValue(ImageString, attribute);
+						}
+					}
+					else if (attribute->name() == TexelFormatString)
+					{
+						try
+						{
+							texelFormat = TexelFormatFromString(attribute->value());
+						}
+						catch (EnumReflectionException const&)
+						{
+							LogUnknownAttributeValue(TexelFormatString, attribute);
+						}
+					}
+					else if (attribute->name() == AccessTypeString)
+					{
+						static std::unordered_map<std::string, AccessType> const AccessTypes = []
+						{
+							std::remove_const<decltype(AccessTypes)>::type temp;
+							temp["ReadOnly"] = AccessType::ReadOnly;
+							temp["WriteOnly"] = AccessType::WriteOnly;
+							temp["ReadWrite"] = AccessType::ReadWrite;
+							return temp;
+						} ();
+						auto found = AccessTypes.find(attribute->value());
+						if (found != AccessTypes.end())
+						{
+							accessType = found->second;
+						}
+						else
+						{
+							LogUnknownAttributeValue(AccessTypeString, attribute);
+						}
+
+					}
+					else
+					{
+						LogUnknownAttribute(ImageString, attribute);
+					}
+				}
+
+				bool valid = true;
+				if (channel.empty())
+				{
+					XREXContext::GetInstance().GetLogger().LogLine("Image attribute Name missing.");
+					valid = false;
+				}
+				if (imageType == TextureImage::ImageType::ImageTypeCount)
+				{
+					XREXContext::GetInstance().GetLogger().LogLine("Image attribute ImageType missing.");
+					valid = false;
+				}
+				if (texelFormat == TexelFormat::TexelFormatCount)
+				{
+					XREXContext::GetInstance().GetLogger().LogLine("Image attribute TexelFormat missing.");
+					valid = false;
+				}
+				if (valid)
+				{
+					information->AddImageInformation(ImageInformation(channel, imageType, texelFormat, accessType));
+				}
+			}
+
+			void HandleShaderResourceBuffer(rapidxml::xml_node<>* node, BufferView::BufferType bufferType, std::string const& BufferTypeName, void (TechniqueBuildingInformation::*addBufferInformationFunction)(BufferInformation const& information))
+			{
 				static std::string const Name = "Name";
 				static std::string const ShaderInstanceName = "ShaderInstanceName";
 
@@ -1180,14 +1296,14 @@ namespace XREX
 					}
 					else
 					{
-						LogUnknownAttribute(UniformBufferString, attribute);
+						LogUnknownAttribute(BufferTypeName, attribute);
 					}
 				}
 
 				bool bufferValid = true;
 				if (bufferName.empty())
 				{
-					XREXContext::GetInstance().GetLogger().LogLine("UniformBuffer attribute Name missing.");
+					XREXContext::GetInstance().GetLogger().BeginLine().Log(BufferTypeName).Log(" attribute Name missing.").EndLine();
 					bufferValid = false;
 				}
 
@@ -1202,7 +1318,7 @@ namespace XREX
 
 					if (subNode->name() != VariableString)
 					{
-						LogUnknownElement(UniformBufferString, subNode);
+						LogUnknownElement(BufferTypeName, subNode);
 						continue;
 					}
 
@@ -1218,7 +1334,7 @@ namespace XREX
 							auto found = nameDeclared.find(variableName);
 							if (found != nameDeclared.end())
 							{
-								XREXContext::GetInstance().GetLogger().BeginLine().Log("Variable with Name: ").Log(variableName).Log(" already defined in UniformBuffer: ").Log(bufferName).Log(", ignored.").EndLine();
+								XREXContext::GetInstance().GetLogger().BeginLine().Log("Variable with Name: ").Log(variableName).Log(" already defined in ").Log(BufferTypeName).Log(": ").Log(bufferName).Log(", ignored.").EndLine();
 								attributeValid = false;
 							}
 							nameDeclared.insert(variableName);
@@ -1243,12 +1359,12 @@ namespace XREX
 
 					if (variableName.empty())
 					{
-						XREXContext::GetInstance().GetLogger().LogLine("UniformBuffer Variable attribute Name missing.");
+						XREXContext::GetInstance().GetLogger().BeginLine().Log(BufferTypeName).Log(" Variable attribute Name missing.").EndLine();
 						attributeValid = false;
 					}
 					if (type == ElementType::ElementTypeCount)
 					{
-						XREXContext::GetInstance().GetLogger().LogLine("UniformBuffer Variable attribute Type missing.");
+						XREXContext::GetInstance().GetLogger().BeginLine().Log(BufferTypeName).Log(" Variable attribute Type missing.").EndLine();
 						attributeValid = false;
 					}
 					if (attributeValid)
@@ -1259,8 +1375,26 @@ namespace XREX
 
 				if (bufferValid)
 				{
-					information->AddUniformBufferInformation(BufferInformation(bufferName, shaderInstanceName, BufferView::BufferType::Uniform, std::move(variableInformations)));
+					XREX_OBJECT_CALL_MEMBER_FUNCTION(*information, addBufferInformationFunction)(BufferInformation(bufferName, shaderInstanceName, bufferType, std::move(variableInformations)));
 				}
+			}
+
+			void HandleUniformBuffer(rapidxml::xml_node<>* node)
+			{
+				static std::string const BufferTypeString = "UniformBuffer";
+				HandleShaderResourceBuffer(node, BufferView::BufferType::Uniform, BufferTypeString, &TechniqueBuildingInformation::AddUniformBufferInformation);
+			}
+
+			void HandleAtomicCounterBuffer(rapidxml::xml_node<>* node)
+			{
+				static std::string const BufferTypeString = "AtomicCounterBuffer";
+				HandleShaderResourceBuffer(node, BufferView::BufferType::AtomicCounter, BufferTypeString, &TechniqueBuildingInformation::AddAtomicCounterBufferInformation);
+			}
+
+			void HandleShaderStorageBuffer(rapidxml::xml_node<>* node)
+			{
+				static std::string const BufferTypeString = "ShaderStorageBuffer";
+				HandleShaderResourceBuffer(node, BufferView::BufferType::ShaderStorage, BufferTypeString, &TechniqueBuildingInformation::AddShaderStorageBufferInformation);
 			}
 
 			void HandleFrameBuffer(rapidxml::xml_node<>* node)
@@ -1441,20 +1575,18 @@ namespace XREX
 				information->AddCommonCode(GenerateCode(node));
 			}
 
-			template <char const* const Name, ShaderObject::ShaderType Stage>
-			void HandleStageShader(rapidxml::xml_node<>* node)
+			void HandleStageShader(rapidxml::xml_node<>* node, ShaderObject::ShaderType stage, std::string const& stageString)
 			{
-				static std::string const StageString = Name;
 				for (rapidxml::xml_attribute<>* attribute = node->first_attribute(); attribute != nullptr; attribute = attribute->next_attribute())
 				{
-					LogUnknownAttribute(StageString, attribute);
+					LogUnknownAttribute(stageString, attribute);
 				}
 				for (rapidxml::xml_node<>* subNode = node->first_node(); subNode != nullptr; subNode = subNode->next_sibling())
 				{
 					static std::string const CodeString = "Code";
 					if (subNode->name() == CodeString)
 					{
-						information->AddStageCode(Stage, GenerateCode(subNode));
+						information->AddStageCode(stage, GenerateCode(subNode));
 					}
 					else
 					{
@@ -1463,40 +1595,40 @@ namespace XREX
 				}
 			}
 
-			static char const VertexShaderString[];
 			void HandleVertexShader(rapidxml::xml_node<>* node)
 			{
-				HandleStageShader<VertexShaderString, ShaderObject::ShaderType::VertexShader>(node);
+				static std::string const StageShaderString = "VertexShader";
+				HandleStageShader(node, ShaderObject::ShaderType::VertexShader, StageShaderString);
 			}
 
-			static char const TessellationControlShaderString[];
 			void HandleTessellationControlShader(rapidxml::xml_node<>* node)
 			{
-				HandleStageShader<TessellationControlShaderString, ShaderObject::ShaderType::TessellationControlShader>(node);
+				static std::string const StageShaderString = "TessellationControlShader";
+				HandleStageShader(node, ShaderObject::ShaderType::TessellationControlShader, StageShaderString);
 			}
 
-			static char const TessellationEvaluationShaderString[];
 			void HandleTessellationEvaluationShader(rapidxml::xml_node<>* node)
 			{
-				HandleStageShader<TessellationEvaluationShaderString, ShaderObject::ShaderType::TessellationEvaluationShader>(node);
+				static std::string const StageShaderString = "TessellationEvaluationShader";
+				HandleStageShader(node, ShaderObject::ShaderType::TessellationEvaluationShader, StageShaderString);
 			}
 
-			static char const GeometryShaderString[];
 			void HandleGeometryShader(rapidxml::xml_node<>* node)
 			{
-				HandleStageShader<GeometryShaderString, ShaderObject::ShaderType::GeometryShader>(node);
+				static std::string const StageShaderString = "GeometryShader";
+				HandleStageShader(node, ShaderObject::ShaderType::GeometryShader, StageShaderString);
 			}
 
-			static char const FragmentShaderString[];
 			void HandleFragmentShader(rapidxml::xml_node<>* node)
 			{
-				HandleStageShader<FragmentShaderString, ShaderObject::ShaderType::FragmentShader>(node);
+				static std::string const StageShaderString = "FragmentShader";
+				HandleStageShader(node, ShaderObject::ShaderType::FragmentShader, StageShaderString);
 			}
 
-			static char const ComputeShaderString[];
 			void HandleComputeShader(rapidxml::xml_node<>* node)
 			{
-				HandleStageShader<ComputeShaderString, ShaderObject::ShaderType::ComputeShader>(node);
+				static std::string const StageShaderString = "ComputeShader";
+				HandleStageShader(node, ShaderObject::ShaderType::ComputeShader, StageShaderString);
 			}
 
 			void HandleRasterizerState(rapidxml::xml_node<>* node)
@@ -2206,12 +2338,6 @@ namespace XREX
 			}
 		};
 
-		char const TechniqueInformationGenerator::VertexShaderString[] = "VertexShader";
-		char const TechniqueInformationGenerator::TessellationControlShaderString[] = "TessellationControlShader";
-		char const TechniqueInformationGenerator::TessellationEvaluationShaderString[] = "TessellationEvaluationShader";
-		char const TechniqueInformationGenerator::GeometryShaderString[] = "GeometryShader";
-		char const TechniqueInformationGenerator::FragmentShaderString[] = "FragmentShader";
-		char const TechniqueInformationGenerator::ComputeShaderString[] = "ComputeShader";
 	}
 
 
