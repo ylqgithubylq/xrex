@@ -111,25 +111,25 @@ namespace XREX
 			assert(found != colorTextures_.end());
 			Texture2DImageSP textureImage = found->second;
 			gl::FramebufferTexture2D(gl::GL_DRAW_FRAMEBUFFER, gl::GL_COLOR_ATTACHMENT0 + i, gl::GL_TEXTURE_2D,
-				textureImage->GetTexture()->GetID(), textureImage->GetLevel());
+				textureImage->GetBaseTexture()->GetID(), textureImage->GetLevel());
 		}
 		if (description_->IsDepthEnabled() && description_->IsStencilEnabled()
 			&& depthStencil_.GetDepthStencilCombinatationState() == FrameBufferLayoutDescription::DepthStencilCombinationState::Combined)
 		{
 			gl::FramebufferTexture2D(gl::GL_DRAW_FRAMEBUFFER, gl::GL_DEPTH_STENCIL_ATTACHMENT, gl::GL_TEXTURE_2D,
-				depthStencil_.GetDepthStencil()->GetTexture()->GetID(), depthStencil_.GetDepthStencil()->GetLevel());
+				depthStencil_.GetDepthStencil()->GetBaseTexture()->GetID(), depthStencil_.GetDepthStencil()->GetLevel());
 		}
 		else
 		{
 			if (depthStencil_.GetDepth() != nullptr)
 			{
 				gl::FramebufferTexture2D(gl::GL_DRAW_FRAMEBUFFER, gl::GL_DEPTH_ATTACHMENT, gl::GL_TEXTURE_2D,
-					depthStencil_.GetDepth()->GetTexture()->GetID(), depthStencil_.GetDepth()->GetLevel());
+					depthStencil_.GetDepth()->GetBaseTexture()->GetID(), depthStencil_.GetDepth()->GetLevel());
 			}
 			if (depthStencil_.GetStencil() != nullptr)
 			{
 				gl::FramebufferTexture2D(gl::GL_DRAW_FRAMEBUFFER, gl::GL_STENCIL_ATTACHMENT, gl::GL_TEXTURE_2D,
-					depthStencil_.GetStencil()->GetTexture()->GetID(), depthStencil_.GetStencil()->GetLevel());
+					depthStencil_.GetStencil()->GetBaseTexture()->GetID(), depthStencil_.GetStencil()->GetLevel());
 			}
 		}
 
@@ -269,14 +269,14 @@ namespace XREX
 		if (description_->IsDepthEnabled())
 		{
 			assert(depthStencil_.GetDepth() != nullptr);
-			auto texture2DDepth = CheckedSPCast<Texture2D>(depthStencil_.GetDepth()->GetTexture());
+			auto texture2DDepth = CheckedSPCast<Texture2D>(depthStencil_.GetDepth()->GetBaseTexture());
 			Size<uint32, 2> depthSize = texture2DDepth->GetDescription().GetSize();
 			assert(frameBufferSize.X() == depthSize.X() && frameBufferSize.Y() == depthSize.Y());
 		}
 		if (description_->IsStencilEnabled())
 		{
 			assert(depthStencil_.GetStencil() != nullptr);
-			auto texture2DStencil = CheckedSPCast<Texture2D>(depthStencil_.GetStencil()->GetTexture());
+			auto texture2DStencil = CheckedSPCast<Texture2D>(depthStencil_.GetStencil()->GetBaseTexture());
 			Size<uint32, 2> stencilSize = texture2DStencil->GetDescription().GetSize();
 			assert(frameBufferSize.X() == stencilSize.X() && frameBufferSize.Y() == stencilSize.Y());
 		}

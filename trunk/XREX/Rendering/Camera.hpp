@@ -56,9 +56,9 @@ namespace XREX
 			return backgroundColor_;
 		}
 
-		void AttachToViewport(ViewportSP const& viewport)
+		void AttachToViewport(ViewportSP viewport)
 		{
-			viewport_ = viewport;
+			viewport_ = std::move(viewport);
 		}
 
 		ViewportSP const& GetViewport() const

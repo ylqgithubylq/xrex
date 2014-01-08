@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Technique>
+
+	<Include System="Transformation"/>
+	<Include System="Camera"/>
+	
+	<FrameBuffer XMLFile="ShadowMapBuffer.framebuffer"/>
+
+
+	<AttributeInput Name="position" Type="FloatV3"/>
+
+	<RasterizerState>
+		<State CullMode="Front"/>
+	</RasterizerState>
+
+	<DepthStencilState>
+	</DepthStencilState>
+
+	<BlendState>
+	</BlendState>
+	
+	<VertexShader>
+		<Code>
+			<![CDATA[
+in vec3 position;
+
+out	float vDepth;
+
+void main()
+{
+	vec4 vPosition4 = XREX_TransformToClip(XREX_ModelTransformation.ClipFromModel, position);
+	gl_Position = vPosition4;
+	vec3 vPosition = XREX_Transform(XREX_ModelTransformation.ViewFromModel, position);
+	/*vsOut.*/vDepth = vPosition.z / 1000;
+
+}
+			]]>
+		</Code>
+	</VertexShader>
+	
+	<FragmentShader>
+		<Code>
+			<![CDATA[
+
+in	float vDepth;
+
+out vec4 colorOutput;
+
+void main()
+{
+	colorOutput = vec4(vDepth, vDepth, vDepth, 1);
+}
+			]]>
+		</Code>
+	</FragmentShader>
+
+
+
+</Technique>

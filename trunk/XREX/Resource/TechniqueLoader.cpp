@@ -272,7 +272,7 @@ namespace XREX
 			{
 				auto found = std::find_if(createdFrameBuffers.begin(), createdFrameBuffers.end(), [&fullPath] (FrameBufferAndModificationTime const& framebufferCache)
 				{
-					return framebufferCache.fullPath != fullPath;
+					return framebufferCache.fullPath == fullPath;
 				});
 				if (found == createdFrameBuffers.end())
 				{
@@ -508,13 +508,83 @@ namespace XREX
 				static std::string const FrameBufferString = "FrameBuffer";
 				static std::string const Name = "Name";
 
+				FrameBufferLayoutDescription::SizeMode sizeMode = FrameBufferLayoutDescription::SizeMode::Sceen;
+				Size<uint32, 2> size = Size<uint32, 2>(0, 0);
+				floatV2 scaling = floatV2(0, 0);
+				static std::string const SizeModeString = "SizeMode";
+				static std::string const ScalingString = "Scaling";
+				static std::string const SizeString = "Size";
+
+				static std::string const ScreenString = "Screen";
+				static std::string const ProportionScreenString = "ProportionScreen";
+				static std::string const FixedString = "Fixed";
 				for (rapidxml::xml_attribute<>* attribute = root->first_attribute(); attribute != nullptr; attribute = attribute->next_attribute())
 				{
-					LogUnknownAttribute(FrameBufferString, attribute);
+					if (attribute->name() == SizeModeString)
+					{
+
+						if (attribute->value() == ScreenString)
+						{
+							sizeMode = FrameBufferLayoutDescription::SizeMode::Sceen;
+						}
+						else if (attribute->value() == ProportionScreenString)
+						{
+							sizeMode = FrameBufferLayoutDescription::SizeMode::ProportionSceen;
+						}
+						else if (attribute->value() == FixedString)
+						{
+							sizeMode = FrameBufferLayoutDescription::SizeMode::Fixed;
+						}
+					}
+					else if (attribute->name() == ScalingString)
+					{
+						std::string noUse(attribute->value());
+						std::stringstream ss(noUse);
+						std::array<float, 2> value;
+						ss >> value[0] >> noUse >> value[1];
+						scaling = floatV2(value[0], value[1]);
+					}
+					else if (attribute->name() == SizeString)
+					{
+						std::string noUse(attribute->value());
+						std::stringstream ss(noUse);
+						std::array<uint32, 2> value;
+						ss >> value[0] >> noUse >> value[1];
+						size = Size<uint32, 2>(value[0], value[1]);
+					}
+					else
+					{
+						LogUnknownAttribute(FrameBufferString, attribute);
+					}
 				}
 
-
 				description = MakeSP<FrameBufferLayoutDescription>(fullPath);
+
+				if (sizeMode == FrameBufferLayoutDescription::SizeMode::ProportionSceen)
+				{
+					if (scaling == floatV2(0, 0))
+					{
+						XREXContext::GetInstance().GetLogger().BeginLine().Log("SizeMode: ").Log(ProportionScreenString).Log(" need attribute: ").Log(ScalingString).Log(", format: \"x, y\"").EndLine();
+					}
+					else
+					{
+						description->SetSizeMode(sizeMode);
+						description->SetSizeScalingToScreen(scaling);
+					}
+				}
+				else if (sizeMode == FrameBufferLayoutDescription::SizeMode::Fixed)
+				{
+					if (size.X() == 0 || size.Y() == 0)
+					{
+						XREXContext::GetInstance().GetLogger().BeginLine().Log("SizeMode: ").Log(FixedString).Log(" need attribute: ").Log(SizeString).Log(", format: \"x, y\"").EndLine();
+					}
+					else
+					{
+						description->SetSizeMode(sizeMode);
+						description->SetSize(size);
+					}
+				}
+
 
 				bool allChannelValid = true;
 				std::unordered_set<std::string> nameDeclared;
@@ -865,6 +935,7 @@ namespace XREX
 							temp["MinLOD"] = &SamplerStateSetter::HandleMinLOD;
 							temp["MaxLOD"] = &SamplerStateSetter::HandleMaxLOD;
 							temp["MipmapLODBias"] = &SamplerStateSetter::HandleMipmapLODBias;
+							temp["CompareEnable"] = &SamplerStateSetter::HandleCompareEnable;
 							temp["CompareFunction"] = &SamplerStateSetter::HandleCompareFunction;
 							return temp;
 						} ();
@@ -1007,6 +1078,18 @@ namespace XREX
 					void HandleMipmapLODBias(rapidxml::xml_attribute<>* attribute)
 					{
 						state.mipmapLODBias = static_cast<float>(std::atof(attribute->value()));
+					}
+
+					void HandleCompareEnable(rapidxml::xml_attribute<>* attribute)
+					{
+						try
+						{
+							state.compareEnable = BoolFromString(attribute->value());
+						}
+						catch (EnumReflectionException const&)
+						{
+							LogUnknownAttributeValue(StateString, attribute);
+						}
 					}
 
 					std::pair<SamplerState::CompareFunction, bool> GetCompareFunction(std::string const value)

@@ -22,8 +22,14 @@ namespace XREX
 		enum class SizeMode
 		{
 			Fixed,
+			/*
+			 *	Same as ProportionSceen when size scaling is (1, 1).
+			 */
 			Sceen,
-			HalfSceen,
+			/*
+			 *	Scaling related to screen size.
+			 */
+			ProportionSceen,
 		};
 
 		class XREX_API ChannelDescription
@@ -55,7 +61,7 @@ namespace XREX
 		 */
 		FrameBufferLayoutDescription(std::string name)
 			: name_(std::move(name)), depth_(TexelFormat::TexelFormatCount), stencil_(TexelFormat::TexelFormatCount),
-			combined_(DepthStencilCombinationState::None), size_(0, 0), sizeMode_(SizeMode::Sceen)
+			combined_(DepthStencilCombinationState::None), size_(0, 0), sizeMode_(SizeMode::Sceen), sizeScalingToScreen_(1, 1)
 		{
 		}
 
@@ -109,10 +115,24 @@ namespace XREX
 			return depth_;
 		}
 
+		/*
+		 *	When SizeMode is ProportionSceen, SetSizeScalingToScreen() is needed.
+		 *	When SizeMode is Fixed, SetSize() is needed.
+		 */
 		void SetSizeMode(SizeMode sizeMode)
 		{
 			sizeMode_ = sizeMode;
 		}
+		/*
+		 *	When SizeMode is ProportionSceen, this is used to scale the size of the framebuffer.
+		 */
+		void SetSizeScalingToScreen(floatV2 const& scaling)
+		{
+			sizeScalingToScreen_ = scaling;
+		}
+		/*
+		 *	When SizeMode is Fixed, this is used as the size of the framebuffer.
+		 */
 		void SetSize(Size<uint32, 2> const& size)
 		{
 			size_ = size;
@@ -125,6 +145,10 @@ namespace XREX
 		{
 			return size_;
 		}
+		floatV2 const& GetSizeScalingToScreen() const
+		{
+			return sizeScalingToScreen_;
+		}
 
 	private:
 		std::string name_;
@@ -134,6 +158,7 @@ namespace XREX
 		DepthStencilCombinationState combined_;
 		Size<uint32, 2> size_;
 		SizeMode sizeMode_;
+		floatV2 sizeScalingToScreen_;
 	};
 
 

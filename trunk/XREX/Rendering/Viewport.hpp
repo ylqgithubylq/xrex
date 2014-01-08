@@ -47,9 +47,9 @@ namespace XREX
 			return Rectangle<float>(data_.relative.left, data_.relative.bottom, data_.relative.width, data_.relative.height);
 		}
 		/*
-		 *	If viewport is absolute mode, all parameters are ignored.
+		 *	If viewport is absolute mode, parameter is ignored.
 		 */
-		void Bind(uint32 windowWidth, uint32 windowHeight);
+		void Bind(Size<uint32, 2> const& windowSize);
 
 	private:
 

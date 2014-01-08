@@ -63,7 +63,7 @@ namespace XREX
 	{
 		CameraSP camera = cameraObject->GetComponent<Camera>();
 		Size<uint32, 2> windowSize = XREXContext::GetInstance().GetMainWindow().GetClientRegionSize();
-		camera->GetViewport()->Bind(windowSize.X(), windowSize.Y());
+		camera->GetViewport()->Bind(windowSize);
 
 		Color const& backgroundColor = camera->GetBackgroundColor();
 		XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer()->Clear(FrameBuffer::ClearMask::All, backgroundColor,1, 0);

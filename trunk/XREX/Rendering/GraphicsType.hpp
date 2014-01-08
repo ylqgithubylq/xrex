@@ -60,6 +60,9 @@ namespace XREX
 		IntSamplerBuffer,
 		UintSamplerBuffer,
 
+		ShadowSampler1D,
+		ShadowSampler2D,
+
 		Image, // for TechniqueParameter use
 
 		Image1D,

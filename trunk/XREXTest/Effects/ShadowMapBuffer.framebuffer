@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameBuffer SizeMode="Fixed" Size="512, 512">
+	<Channel Name="colorOutput" Format="R32F"/>
+	<Depth Format="Depth32"/>
+</FrameBuffer>
+

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameBuffer>
+	<Channel Name="lightingOutput" Format="RGBA16F"/>
+	<Channel Name="lightingOutput2" Format="RGBA16F"/>
+	<Depth Format="Depth32"/>
+</FrameBuffer>
+

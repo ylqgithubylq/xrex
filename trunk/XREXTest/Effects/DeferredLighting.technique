@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Technique>
+	<Include System="Transformation"/>
+	<Include System="Camera"/>
+
+	<!--<FrameBuffer System="Default"/>-->
+	<FrameBuffer XMLFile="TempBuffer.framebuffer"/>
+	
+	<Sampler Name="PointSampler">
+		<State BorderColor="0, 0, 0, 0"/>
+		<State AddressingModeS="ClampToBorder"/>
+		<State AddressingModeT="ClampToBorder"/>
+	</Sampler>
+
+	<Sampler Name="ShadowSampler">
+		<State BorderColor="0, 0, 0, 0"/>
+		<State AddressingModeS="ClampToBorder"/>
+		<State AddressingModeT="ClampToBorder"/>
+		<State MinFilterMode="Linear"/>
+		<State MagFilterMode="Linear"/>
+		<State CompareEnable="true"/>
+		<State CompareFunction="Less"/>
+	</Sampler>
+
+	<Texture Name="shadowMap" TextureType="Texture2D" TexelType="Shadow" Sampler="ShadowSampler"/>
+	<Texture Name="depthInColor" TextureType="Texture2D" TexelType="Shadow" Sampler="ShadowSampler"/>
+
+	<Texture Name="diffuse" TextureType="Texture2D" TexelType="FloatV4" Sampler="PointSampler"/>
+	<Texture Name="normal" TextureType="Texture2D" TexelType="FloatV4" Sampler="PointSampler"/>
+	<Texture Name="depth" TextureType="Texture2D" TexelType="FloatV4" Sampler="PointSampler"/>
+
+	<UniformBuffer Name="CameraVolume" ShaderInstanceName="">
+		<Variable Name="ProjectionA" Type="Float"/>
+		<Variable Name="PorjectionB" Type="Float"/>
+	</UniformBuffer>
+
+	<UniformBuffer Name="LightTransformation">
+		<Variable Name="LightTextureClipFromView" Type="FloatM44"/>
+	</UniformBuffer>
+
+	<AttributeInput Name="position" Type="FloatV2"/>
+
+	<RasterizerState>
+		<State CullMode="Front"/>
+	</RasterizerState>
+
+	<DepthStencilState>
+		<State DepthTestEnable="false"/>
+	</DepthStencilState>
+
+	<BlendState>
+		<State BlendEnable="true"/>
+		<State BlendOperation="Add"/>
+		<State BlendOperationAlpha="Add"/>
+		<State SourceBlend="One"/>
+		<State SourceBlendAlpha="One"/>
+		<State DestinationBlend="One"/>
+		<State DestinationBlendAlpha="One"/>
+	</BlendState>
+	
+	<Code>
+		<![CDATA[
+// TODO fill these two buffers
+
+uniform CameraVolume
+{
+	float ProjectionA; // = FarClipDistance / (FarClipDistance - NearClipDistance);
+	float ProjectionB; // = (-FarClipDistance * NearClipDistance) / (FarClipDistance - NearClipDistance);
+};
+
+uniform LightTransformation
+{
+	mat4 LightTextureClipFromView;
+};
+
+uniform sampler2DShadow shadowMap;
+uniform sampler2D depthInColor;
+uniform sampler2D diffuse;
+uniform sampler2D normal;
+uniform sampler2D depth;
+		]]>
+	</Code>
+
+
+	<VertexShader>
+		<Code>
+			<![CDATA[
+
+in vec3 position; // light volume
+noperspective out vec2 textureCoordinate;
+noperspective out vec3 vViewRay;
+
+void main()
+{
+	vec3 vPosition = XREX_Transform(XREX_ModelTransformation.ViewFromModel, position);
+	gl_Position = XREX_TransformToClip(XREX_CameraTransformation.ClipFromView, vPosition);
+	
+	textureCoordinate = (gl_Position.xy / gl_Position.w + vec2(1, 1)) / 2; // get x,y in NDC and scale to [0, 1]
+	
+	vViewRay = vec3(vPosition.xy / vPosition.z, 1.0f); // scale to plane z = 1. as it already scaled to a plane, perspective correct interpolation is not need.
+}
+
+			]]>
+		</Code>
+	</VertexShader>
+
+	<FragmentShader>
+		<Code>
+			<![CDATA[
+
+noperspective in vec3 vViewRay;
+noperspective in vec2 textureCoordinate;
+
+//out vec4 XREX_DefaultFrameBufferOutput;
+out vec4 lightingOutput;
+out vec4 lightingOutput2;
+
+float Shadow(sampler2DShadow shadow, vec4 ltcPosition)
+{
+	return textureProj(shadow, ltcPosition);
+}
+
+void main()
+{
+	float hardwareDepth = texture(depth, textureCoordinate).x;
+	
+	float vDepth = ProjectionB / (hardwareDepth - ProjectionA); // view space z
+	vec3 vScenePosition = vViewRay * vDepth;
+	
+	// transform reconstructed point to light clip space and do shadow map fetch
+	vec4 ltcScenePosition = XREX_TransformToClip(LightTextureClipFromView, vScenePosition);
+	float shadow = Shadow(shadowMap, ltcScenePosition);
+	
+	lightingOutput = vec4(texture(diffuse, textureCoordinate).xyz * shadow, 1);
+	lightingOutput2 = vec4(texture(diffuse, textureCoordinate).xyz, 1);
+	//XREX_DefaultFrameBufferOutput = vec4(vScenePosition / 1000, 1);
+	//XREX_DefaultFrameBufferOutput = texture(diffuse, textureCoordinate);
+}
+			]]>
+		</Code>
+	</FragmentShader>
+
+</Technique>

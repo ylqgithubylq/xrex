@@ -124,7 +124,7 @@ namespace XREX
 
 	Size<uint32, 1> TextureBufferImage::GetSize() const
 	{
-		return CheckedSPCast<TextureBuffer>(GetTexture())->GetSize();
+		return GetTexture()->GetSize();
 	}
 
 

@@ -3,6 +3,7 @@
 	<Channel Name="colorOutput" Format="RGBA8"/>
 	<Channel Name="normalOutput" Format="RGBA16F"/>
 	<Channel Name="depthInColorOutput" Format="R32F"/>
+	<Channel Name="viewPositionOutput" Format="RGBA16F"/>
 	<Depth Format="Depth32"/>
 </FrameBuffer>
 

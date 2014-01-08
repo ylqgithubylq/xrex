@@ -55,13 +55,25 @@
     <None Include="Effects\TestCopyTextures.technique">
       <Filter>Effect Files</Filter>
     </None>
-    <None Include="Effects\TestRenderToTexture.technique">
-      <Filter>Effect Files</Filter>
-    </None>
     <None Include="Effects\ToInclude.glsl">
       <Filter>Effect Files</Filter>
     </None>
-    <None Include="Effects\TestGBuffer.framebuffer">
+    <None Include="Effects\ShadowMapGenerate.technique">
+      <Filter>Effect Files</Filter>
+    </None>
+    <None Include="Effects\ShadowMapBuffer.framebuffer">
+      <Filter>Effect Files</Filter>
+    </None>
+    <None Include="Effects\GBufferGenerate.technique">
+      <Filter>Effect Files</Filter>
+    </None>
+    <None Include="Effects\GBuffer.framebuffer">
+      <Filter>Effect Files</Filter>
+    </None>
+    <None Include="Effects\DeferredLighting.technique">
+      <Filter>Effect Files</Filter>
+    </None>
+    <None Include="Effects\TempBuffer.framebuffer">
       <Filter>Effect Files</Filter>
     </None>
   </ItemGroup>
