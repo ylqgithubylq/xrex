@@ -191,13 +191,25 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Effects\Test.glsl" />
-    <None Include="Effects\TestCopyTextures.technique" />
-    <None Include="Effects\TestCube.glsl" />
-    <None Include="Effects\TestGBuffer.framebuffer">
+    <None Include="Effects\DeferredLighting.technique" />
+    <None Include="Effects\ShadowMapBuffer.framebuffer">
       <SubType>Designer</SubType>
     </None>
-    <None Include="Effects\TestRenderToTexture.technique" />
+    <None Include="Effects\ShadowMapGenerate.technique">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Effects\TempBuffer.framebuffer" />
+    <None Include="Effects\Test.glsl" />
+    <None Include="Effects\TestCopyTextures.technique">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Effects\TestCube.glsl" />
+    <None Include="Effects\GBuffer.framebuffer">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Effects\GBufferGenerate.technique">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Effects\ToInclude.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -100,6 +100,7 @@ namespace XREX
 			return;
 		}
 		boundTechnique_ = technique;
+		cacheDirty_ = true;
 	}
 
 

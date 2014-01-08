@@ -30,7 +30,7 @@ namespace XREX
 			return type_;
 		}
 
-		TextureSP const& GetTexture() const
+		TextureSP const& GetBaseTexture() const
 		{
 			return texture_;
 		}
@@ -73,6 +73,11 @@ namespace XREX
 	{
 	public:
 		Texture1DImage(Texture1DSP const& texture, uint32 level);
+
+		Texture1DSP GetTexture() const
+		{
+			return CheckedSPCast<Texture1D>(GetBaseTexture());
+		}
 	};
 
 	class XREX_API Texture2DImage
@@ -82,6 +87,11 @@ namespace XREX
 		Texture2DImage(TextureSP const& texture, uint32 level); // for Texture3DLayerImage and TextureCubeImage
 	public:
 		Texture2DImage(Texture2DSP const& texture, uint32 level);
+
+		Texture2DSP GetTexture() const
+		{
+			return CheckedSPCast<Texture2D>(GetBaseTexture());
+		}
 	};
 
 	class XREX_API Texture3DImage
@@ -97,6 +107,10 @@ namespace XREX
 	public:
 		Texture3DLayerImage(Texture3DSP const& texture, uint32 layer, uint32 level);
 
+		Texture3DSP GetTexture() const
+		{
+			return CheckedSPCast<Texture3D>(GetBaseTexture());
+		}
 		uint32 GetLayer() const
 		{
 			return layer_;
@@ -114,6 +128,10 @@ namespace XREX
 	public:
 		TextureCubeFaceImage(TextureCubeSP const& texture, CubeFace face, uint32 level);
 
+		TextureCubeSP GetTexture() const
+		{
+			return CheckedSPCast<TextureCube>(GetBaseTexture());
+		}
 		CubeFace GetFace() const
 		{
 			return face_;
@@ -130,6 +148,10 @@ namespace XREX
 	public:
 		TextureBufferImage(TextureSP const& texture);
 
+		TextureBufferSP GetTexture() const
+		{
+			return CheckedSPCast<TextureBuffer>(GetBaseTexture());
+		}
 		Size<uint32, 1> GetSize() const;
 	};
 }

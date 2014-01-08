@@ -9,15 +9,35 @@
 	<Texture Name="color" TextureType="Texture2D" TexelType="FloatV4" Sampler="DefaultSampler"/>
 	<Texture Name="normal" TextureType="Texture2D" TexelType="FloatV4" Sampler="DefaultSampler"/>
 	<Texture Name="depthInColor" TextureType="Texture2D" TexelType="FloatV4" Sampler="DefaultSampler"/>
+	<Texture Name="viewPosition" TextureType="Texture2D" TexelType="FloatV4" Sampler="DefaultSampler"/>
+	<Texture Name="lightingOutput" TextureType="Texture2D" TexelType="FloatV4" Sampler="DefaultSampler"/>
+	<Texture Name="lightingOutput2" TextureType="Texture2D" TexelType="FloatV4" Sampler="DefaultSampler"/>
+	<Texture Name="shadowMap" TextureType="Texture2D" TexelType="FloatV4" Sampler="DefaultSampler"/>
+	<Texture Name="shadowMapViewInColor" TextureType="Texture2D" TexelType="FloatV4" Sampler="DefaultSampler"/>
 	<Texture Name="depth" TextureType="Texture2D" TexelType="FloatV4" Sampler="DefaultSampler"/>
 
 	<AttributeInput Name="position" Type="FloatV2"/>
+
+	<RasterizerState>
+	</RasterizerState>
+
+	<DepthStencilState>
+		<State DepthTestEnable="false"/>
+	</DepthStencilState>
+
+	<BlendState>
+	</BlendState>
 
 	<Code>
 		<![CDATA[
 uniform sampler2D color;
 uniform sampler2D normal;
 uniform sampler2D depthInColor;
+uniform sampler2D viewPosition;
+uniform sampler2D lightingOutput;
+uniform sampler2D lightingOutput2;
+uniform sampler2D shadowMap;
+uniform sampler2D shadowMapViewInColor;
 uniform sampler2D depth;
 		]]>
 	</Code>
@@ -56,23 +76,23 @@ void main()
 	if (textureCoordinate.x < 0.5)
 	{
 		if (textureCoordinate.y < 0.5)
-		{
-			outputColor = texture(color, textureCoordinate * 2) + vec4(textureCoordinate * 2, 0, 0);
+		{ // bottom left
+			outputColor = texture(color, textureCoordinate * 2);
 		}
 		else
-		{
-			outputColor.xyz = texture(normal, (textureCoordinate - vec2(0, 0.5)) * 2).xyz;
+		{ // top left
+			outputColor.xyz = texture(lightingOutput2, (textureCoordinate - vec2(0, 0.5)) * 2).xyz;
 		}
 	}
 	else
 	{
 		if (textureCoordinate.y < 0.5)
-		{
-			outputColor.xyz = (texture(depthInColor, (textureCoordinate - vec2(0.5, 0)) * 2).xxx) * gl_FragCoord.w;
+		{ // bottom right
+			outputColor.xyz = (texture(lightingOutput, (textureCoordinate - vec2(0.5, 0)) * 2).xyz);
 		}
 		else
-		{
-			outputColor.xyz = (vec3(1, 1, 1) - texture(depth, (textureCoordinate - vec2(0.5, 0.5)) * 2).xxx) * gl_FragCoord.w * 20;
+		{ // top right
+			outputColor.xyz = (texture(shadowMapViewInColor, (textureCoordinate - vec2(0.5, 0.5)) * 2).xxx);
 		}
 	}
 #else
@@ -83,15 +103,6 @@ void main()
 			]]>
 		</Code>
 	</FragmentShader>
-
-	<RasterizerState>
-	</RasterizerState>
-
-	<DepthStencilState>
-	</DepthStencilState>
-
-	<BlendState>
-	</BlendState>
 
 
 </Technique>

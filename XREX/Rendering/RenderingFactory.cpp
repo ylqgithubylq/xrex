@@ -27,7 +27,7 @@ namespace XREX
 		glslVersionString_ += version + "\n\n";
 
 		auto depthOrder = std::numeric_limits<decltype(std::declval<Viewport>().GetDepthOrder())>::max();
-		defaultViewport_ = CreateViewport(depthOrder, 0, 0, window.GetClientRegionSize().X(), window.GetClientRegionSize().Y());
+		defaultViewport_ = CreateViewport(depthOrder, 0.f, 0.f, 1.f, 1.f); // float parameters to use relative mode
 
 		Size<uint32, 1> size1(1);
 		Texture::DataDescription<1> description1(TexelFormat::RGBA8, size1);

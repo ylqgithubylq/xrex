@@ -525,7 +525,7 @@ namespace
 
 
 				CameraSP const& camera = voxelizationCameras[i]->GetComponent<Camera>();
-				camera->GetViewport()->Bind(0, 0);
+				camera->GetViewport()->Bind(Size<uint32, 2>(0, 0));
 
 				voxelizationTechniqueCameraSetter->SetParameter(camera);
 				voxelizationTechniqueTransformationSetter->Connect(camera);
@@ -592,7 +592,7 @@ namespace
 
 		void BuildVoxelVolume()
 		{
-			listBuildingViewport->Bind(0, 0);
+			listBuildingViewport->Bind(Size<uint32, 2>(0, 0));
 
 			RenderingTechniqueSP voxelizeTechnique = voxelizationTechnique.volumeBuild;
 
@@ -657,7 +657,7 @@ namespace
 
 			CameraSP camera = viewCameraObject->GetComponent<Camera>();
 			Size<uint32, 2> windowSize = XREXContext::GetInstance().GetMainWindow().GetClientRegionSize();
-			camera->GetViewport()->Bind(windowSize.X(), windowSize.Y());
+			camera->GetViewport()->Bind(windowSize);
 
 			// reset all masks, TODO ClearState
 			BlendState blendState;

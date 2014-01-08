@@ -39,6 +39,7 @@ namespace XREX
 		float minLOD;
 		float maxLOD;
 		float mipmapLODBias;
+		bool compareEnable;
 		CompareFunction compareFunction;
 
 		SamplerState();

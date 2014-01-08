@@ -26,6 +26,8 @@ namespace XREX
 		case ElementType::SamplerBuffer:
 		case ElementType::IntSamplerBuffer:
 		case ElementType::UintSamplerBuffer:
+		case ElementType::ShadowSampler1D:
+		case ElementType::ShadowSampler2D:
 			return true;
 		case ElementType::Sampler: // special case
 			return true;

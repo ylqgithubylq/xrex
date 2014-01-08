@@ -13,7 +13,7 @@ namespace XREX
 		: borderColor(0, 0, 0, 1),
 		addressingModeS(TextureAddressingMode::Repeat), addressingModeT(TextureAddressingMode::Repeat), addressingModeR(TextureAddressingMode::Repeat),
 		minFilterMode(TextureFilterMode::Nearest), magFilterMode(TextureFilterMode::Nearest), maxAnisotropy(16),
-		minLOD(0), maxLOD(std::numeric_limits<float>::max()), mipmapLODBias(0.f), compareFunction(CompareFunction::AlwaysFail)
+		minLOD(0), maxLOD(std::numeric_limits<float>::max()), mipmapLODBias(0.f), compareEnable(false), compareFunction(CompareFunction::AlwaysFail)
 	{
 	}
 
@@ -67,15 +67,15 @@ namespace XREX
 
 		gl::SamplerParameterf(glSamplerID_, gl::GL_TEXTURE_LOD_BIAS, state.mipmapLODBias);
 
-		if (state_.compareFunction != RenderingPipelineState::CompareFunction::AlwaysFail) // TODO how does depth texture compare function work?
+		if (state_.compareEnable)
 		{
 			gl::SamplerParameteri(glSamplerID_, gl::GL_TEXTURE_COMPARE_MODE, gl::GL_COMPARE_REF_TO_TEXTURE);
+			gl::SamplerParameteri(glSamplerID_, gl::GL_TEXTURE_COMPARE_FUNC, glCompareFunction_);
 		}
 		else
 		{
 			gl::SamplerParameteri(glSamplerID_, gl::GL_TEXTURE_COMPARE_MODE, gl::GL_NONE);
 		}
-		gl::SamplerParameteri(glSamplerID_, gl::GL_TEXTURE_COMPARE_FUNC, glCompareFunction_);
 
 	}
 

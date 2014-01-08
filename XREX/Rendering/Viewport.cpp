@@ -23,7 +23,7 @@ namespace XREX
 	{
 	}
 
-	void Viewport::Bind(uint32 windowWidth, uint32 windowHeight)
+	void Viewport::Bind(Size<uint32, 2> const& windowSize)
 	{
 		if (absolute_)
 		{
@@ -34,10 +34,10 @@ namespace XREX
 		else
 		{
 			DataUnion::Relative& relative = data_.relative;
-			gl::Viewport(static_cast<int32>(relative.left * windowWidth), static_cast<int32>(relative.bottom * windowHeight),
-				static_cast<uint32>(relative.width * windowWidth), static_cast<uint32>(relative.height * windowHeight));
-			gl::Scissor(static_cast<int32>(relative.left * windowWidth), static_cast<int32>(relative.bottom * windowHeight),
-				static_cast<uint32>(relative.width * windowWidth), static_cast<uint32>(relative.height * windowHeight));
+			gl::Viewport(static_cast<int32>(relative.left * windowSize.X()), static_cast<int32>(relative.bottom * windowSize.Y()),
+				static_cast<uint32>(relative.width * windowSize.X()), static_cast<uint32>(relative.height * windowSize.Y()));
+			gl::Scissor(static_cast<int32>(relative.left * windowSize.X()), static_cast<int32>(relative.bottom * windowSize.Y()),
+				static_cast<uint32>(relative.width * windowSize.X()), static_cast<uint32>(relative.height * windowSize.Y()));
 		}
 	}
 

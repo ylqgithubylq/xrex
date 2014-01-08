@@ -171,8 +171,8 @@ namespace XREX
 			std::string fileName;
 			TextureLoadingResultSP result;
 
-			TextureHandler(std::string const &theFileName, bool ifGenerateMipmap = true)
-				: fileName(theFileName), generateMipmap(ifGenerateMipmap), result(MakeSP<NullTextureLoadingResult>())
+			TextureHandler(std::string fileName, bool generateMipmap = true)
+				: fileName(std::move(fileName)), generateMipmap(generateMipmap), result(MakeSP<NullTextureLoadingResult>())
 			{
 			}
 

@@ -323,9 +323,13 @@ namespace XREX
 		case FrameBufferLayoutDescription::SizeMode::Sceen:
 			description_->SetSize(size);
 			break;
-		case FrameBufferLayoutDescription::SizeMode::HalfSceen:
-			size = Size<uint32, 2>(size.X() / 2, size.Y() / 2);
-			description_->SetSize(size);
+		case FrameBufferLayoutDescription::SizeMode::ProportionSceen:
+			{
+				floatV2 scaling = description_->GetSizeScalingToScreen();
+				assert(scaling.X() > 0 && scaling.Y() > 0);
+				size = Size<uint32, 2>(static_cast<uint32>(size.X() * scaling.X()), static_cast<uint32>(size.Y() * scaling.Y()));
+				description_->SetSize(size);
+			}
 			break;
 		default:
 			assert(false);

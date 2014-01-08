@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Technique>
+
+	<Include System="Transformation"/>
+	<Include System="Camera"/>
+	
+	<FrameBuffer XMLFile="GBuffer.framebuffer"/>
+
+	<Sampler Name="DefaultSampler">
+		<State MinFilterMode="Anisotropic"/>
+		<State MagFilterMode="Anisotropic"/>
+	</Sampler>
+
+	<Texture Name="diffuseMap" TextureType="Texture2D" TexelType="FloatV4" Sampler="DefaultSampler"/>
+	<Texture Name="specularMap" TextureType="Texture2D" TexelType="FloatV4" Sampler="DefaultSampler"/>
+	<Texture Name="normalMap" TextureType="Texture2D" TexelType="FloatV4" Sampler="DefaultSampler"/>
+	<Texture Name="shininessMap" TextureType="Texture2D" TexelType="FloatV4" Sampler="DefaultSampler"/>
+	<Texture Name="opacityMap" TextureType="Texture2D" TexelType="FloatV4" Sampler="DefaultSampler"/>
+
+	<UniformBuffer Name="Material" ShaderInstanceName="aMaterial">
+		<Variable Name="v0" Type="FloatV3"/>
+		<Variable Name="v1" Type="FloatV3"/>
+	</UniformBuffer>
+
+
+	<AttributeInput Name="position" Type="FloatV3"/>
+	<AttributeInput Name="normal" Type="FloatV3"/>
+	<AttributeInput Name="textureCoordinate0" Type="FloatV3"/>
+
+	<RasterizerState>
+	</RasterizerState>
+
+	<DepthStencilState>
+	</DepthStencilState>
+
+	<BlendState>
+		<State BlendEnable="true"/>
+		<State BlendOperation="Add"/>
+		<State BlendOperationAlpha="Add"/>
+		<State SourceBlend="SourceAlpha"/>
+		<State SourceBlendAlpha="SourceAlpha"/>
+		<State DestinationBlend="OneMinusSourceAlpha"/>
+		<State DestinationBlendAlpha="OneMinusSourceAlpha"/>
+	</BlendState>
+	
+	<Code>
+		<![CDATA[
+
+
+uniform Material
+{
+	float opacity;
+	float specularLevel;
+	float shininess;
+} material;
+
+// specularLevel * pow(LdotHV, shininess)
+
+uniform sampler2D diffuseMap;
+uniform sampler2D specularMap;
+// uniform sampler2D normalMap;
+uniform sampler2D shininessMap;
+uniform sampler2D opacityMap;
+
+
+		]]>
+	</Code>
+	
+	<VertexShader>
+		<Code>
+			<![CDATA[
+in vec3 position;
+in vec3 normal;
+in vec3 textureCoordinate0;
+
+out	vec3 vNormal;
+out	vec2 pixelTextureCoordinate;
+out	float vDepth;
+out	vec3 vPosition;
+void main()
+{
+	/*vsOut.*/vNormal = XREX_TransformNormal(XREX_ModelTransformation.ViewFromModel, /*vsOut.*/normal);
+
+	vec4 vPosition4 = XREX_TransformToClip(XREX_ModelTransformation.ClipFromModel, position);
+	gl_Position = vPosition4;
+	vPosition = XREX_Transform(XREX_ModelTransformation.ViewFromModel, position);
+	/*vsOut.*/vDepth = vPosition.z / 1000;
+
+	/*vsOut.*/pixelTextureCoordinate = textureCoordinate0.st;
+}
+
+			]]>
+		</Code>
+	</VertexShader>
+
+	<FragmentShader>
+		<Code>
+			<![CDATA[
+
+in	vec3 vNormal;
+in	vec2 pixelTextureCoordinate;
+in	float vDepth;
+in	vec3 vPosition;
+
+out vec4 colorOutput;
+out vec4 normalOutput;
+out vec4 viewPositionOutput;
+out vec4 depthInColorOutput; // for test
+
+//out vec4 XREX_DefaultFrameBufferOutput;
+
+void main()
+{
+	// view position -> light view position -> light view depth
+	// view frustum corner -> view ray * linear depth -> view position
+	colorOutput = vec4(texture(diffuseMap, /*fsIn.*/pixelTextureCoordinate).rgb, 1);
+	// do the normal map
+	normalOutput = vec4(/*fsIn.*/vNormal, 1);
+	viewPositionOutput = vec4(vPosition / 1000, 1);
+	depthInColorOutput = /*fsIn.*/vec4(vDepth, 0, 0, 1);
+//	XREX_DefaultFrameBufferOutput = colorOutput;
+}
+			]]>
+		</Code>
+	</FragmentShader>
+
+
+
+
+</Technique>

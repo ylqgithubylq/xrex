@@ -740,6 +740,10 @@ namespace XREX
 			return ElementType::IntSamplerBuffer;
 		case gl::GL_UNSIGNED_INT_SAMPLER_BUFFER:
 			return ElementType::UintSamplerBuffer;
+		case gl::GL_SAMPLER_1D_SHADOW:
+			return ElementType::ShadowSampler1D;
+		case gl::GL_SAMPLER_2D_SHADOW:
+			return ElementType::ShadowSampler2D;
 		case gl::GL_IMAGE_1D:
 			return ElementType::Image1D;
 		case gl::GL_INT_IMAGE_1D:
