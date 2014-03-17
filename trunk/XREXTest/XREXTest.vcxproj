@@ -191,7 +191,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Effects\DeferredLighting.technique" />
+    <None Include="Effects\DeferredLighting.technique">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Effects\ShadowMapBuffer.framebuffer">
       <SubType>Designer</SubType>
     </None>

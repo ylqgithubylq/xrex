@@ -9,6 +9,9 @@
 	<Sampler Name="DefaultSampler">
 		<State MinFilterMode="Anisotropic"/>
 		<State MagFilterMode="Anisotropic"/>
+		<State AddressingModeR="MirroredRepeat"/>
+		<State AddressingModeS="MirroredRepeat"/>
+		<State AddressingModeT="MirroredRepeat"/>
 	</Sampler>
 
 	<Texture Name="diffuseMap" TextureType="Texture2D" TexelType="FloatV4" Sampler="DefaultSampler"/>
@@ -58,7 +61,7 @@ uniform Material
 
 uniform sampler2D diffuseMap;
 uniform sampler2D specularMap;
-// uniform sampler2D normalMap;
+uniform sampler2D normalMap;
 uniform sampler2D shininessMap;
 uniform sampler2D opacityMap;
 

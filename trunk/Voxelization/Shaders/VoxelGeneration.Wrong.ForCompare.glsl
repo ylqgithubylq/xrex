@@ -176,112 +176,59 @@ void StoreFinal(layout (rgba8) writeonly image3D volume, ivec3 coordinate, vec4 
 	imageStore(volume, coordinate, unpackedValue);
 }
 
-const int ObjectUnpairedMaxCount = 32;
 
-struct Unpaired
-{
-	uint objectIDAndFrontFacing;
-	float depth;
-	uint packedValue;
-};
-
-
-/*
- *	@return: depth -1 indicates unpaired.
- */
-Unpaired Pairing(inout Unpaired objectUnpairedBuffer[ObjectUnpairedMaxCount], inout int size, uint objectIDAndFrontFacing, float depth, uint packedValue)
-{
-	Unpaired paired = Unpaired(0, -1, 0);
-
-	int objectID = GetObjectID(objectIDAndFrontFacing);
-	bool frontFacing = GetFrontFacing(objectIDAndFrontFacing);
-	// find
-	int pairedIndex = -1;
-	if (frontFacing == false) // only back facing fragment need to find pair
-	{
-		for (int i = size - 1; i >= 0; --i)
-		{
-			//if (GetFrontFacing(objectUnpairedBuffer[i].objectIDAndFrontFacing) != frontFacing && GetObjectID(objectUnpairedBuffer[i].objectIDAndFrontFacing) == objectID)
-			if (GetFrontFacing(objectUnpairedBuffer[i].objectIDAndFrontFacing) != frontFacing)
-			//if (GetObjectID(objectUnpairedBuffer[i].objectIDAndFrontFacing) == objectID)
-			{ // found
-				pairedIndex = i;
-				break;
-			}
-		}
-	}
-
-	if (pairedIndex != -1)
-	{ // found, remove paired one if frontFacing is not equal
-		paired = objectUnpairedBuffer[pairedIndex];
-		for (int i = pairedIndex; i < size - 1; ++i)
-		{
-			objectUnpairedBuffer[i] = objectUnpairedBuffer[i + 1];
-		}
-		size -= 1;
-	}
-	else if (size < ObjectUnpairedMaxCount)
-	{ // insert
-		objectUnpairedBuffer[size] = Unpaired(objectIDAndFrontFacing, depth, packedValue);
-		size += 1;
-	} // else simply discarded
-
-	return paired;
-}
-
-
-//#define SOLID
+#define SOLID
 
 void main()
 {
 	ivec2 coordinate = ivec2(gl_FragCoord.xy);
-	Iterator i = First(heads, coordinate);
 	
-	Unpaired objectUnpairedBuffer[ObjectUnpairedMaxCount];
-	int unpairedCount = 0;
-
 	uvec4 nodeCache[InsertionSortThresholdCount];
 	uint totalCount = InsertionSortPass(heads, nodePool, coordinate, nodeCache);
 
-
-	for (int i = 0; i < min(totalCount, InsertionSortThresholdCount); ++i)
+	const int countToCalculate = int(min(totalCount, InsertionSortThresholdCount));
+	// insert voxels for each pair
+	for (int i = 0; i < countToCalculate - 1; ++i, ++i)
 	{
 		Iterator current = Iterator(nodeCache[i]);
-		float depth = GetDepth(current);
-		uint objectIDAndFrontFacing = GetObjectIDAndFrontFacing(current);
-		bool frontFacing = GetFrontFacing(current);
-		int objectID = GetObjectID(current);
-		uint packedValue = GetPackedValue(current);
-		vec4 unpackedValue = unpackSnorm4x8(packedValue);
-		int currentLocation = DepthToCoordinate(heads, depth);
-		ivec3 originalCoordinate = ivec3(coordinate, currentLocation);
-#ifdef SOLID
-		Unpaired pairingResult = Pairing(objectUnpairedBuffer, unpairedCount, objectIDAndFrontFacing, depth, packedValue);
-		if (pairingResult.depth != -1)
+		float currentDepth = GetDepth(current);
+		uint currentPackedValue = GetPackedValue(current);
+		vec4 currentUnpackedValue = unpackSnorm4x8(currentPackedValue);
+		int currentLocation = DepthToCoordinate(heads, currentDepth);
+
+		Iterator next = Iterator(nodeCache[i + 1]);
+		float nextDepth = GetDepth(next);
+		uint nextPackedValue = GetPackedValue(next);
+		vec4 nextUnpackedValue = unpackSnorm4x8(nextPackedValue);
+		int nextLocation = DepthToCoordinate(heads, nextDepth);
+
+		// note: nextLocation < currentLocation
+		for (int j = nextLocation; j <= currentLocation; ++j)
 		{
-			int pairedGrid = DepthToCoordinate(heads, pairingResult.depth);
-			vec4 pairedUnpackedValue = unpackSnorm4x8(pairingResult.packedValue);
-			for (int j = currentLocation; j <= pairedGrid; ++j)
-			{
-				// linear interpolate from paired grid to current grid
-				vec4 finalValue = mix(pairedUnpackedValue, unpackedValue, float(j - currentLocation) / (pairedGrid - currentLocation));
-				StoreFinal(volume, TransformToVolumeCoordinate(ivec3(coordinate, j), axis), finalValue);
-			}
+			// linear interpolate from current grid to next grid
+			vec4 mixedValue = mix(currentUnpackedValue, nextUnpackedValue, float(j - nextLocation) / (currentLocation - nextLocation));
+			StoreFinal(volume, TransformToVolumeCoordinate(ivec3(coordinate, j), axis), mixedValue);
 		}
-#else
-		StoreFinal(volume, TransformToVolumeCoordinate(ivec3(coordinate, currentLocation), axis), unpackedValue);
-#endif
 	}
 
-#ifndef SOLID
-	// surface voxelize all unpaired fragments
-	for (int i = 0; i < unpairedCount; ++i)
+	// last unpaired one if exist
+	if (countToCalculate % 2 != 0)
 	{
-		int location = DepthToCoordinate(heads, objectUnpairedBuffer[i].depth);
-		vec4 unpacked = unpackSnorm4x8(objectUnpairedBuffer[i].packedValue);
-		StoreFinal(volume, TransformToVolumeCoordinate(ivec3(coordinate, location), axis), unpacked);
+		ivec2 volumeSize = imageSize(heads);
+
+		Iterator last = Iterator(nodeCache[countToCalculate - 1]);
+		float lastDepth = GetDepth(last);
+		uint lastPackedValue = GetPackedValue(last);
+		vec4 lastUnpackedValue = unpackSnorm4x8(lastPackedValue);
+		int lastLocation = DepthToCoordinate(heads, lastDepth);
+
+		for (int i = lastLocation; i < volumeSize.x; ++i)
+		{
+			StoreFinal(volume, TransformToVolumeCoordinate(ivec3(coordinate, i), axis), lastUnpackedValue);
+		}
 	}
-#endif
+
+
 
 }
 

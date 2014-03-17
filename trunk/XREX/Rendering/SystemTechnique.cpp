@@ -106,7 +106,7 @@ namespace XREX
 			floatM44 projectionMatrix = camera_->GetProjectionMatrix();
 
 			ShaderResourceBuffer::BufferMapper mapper = parameterBuffer_->GetMapper();
-			floatM44 modelMatrix = component->GetModelMatrix();
+			floatM44 modelMatrix = component->GetWorldMatrix();
 			floatM44 viewFromModelMatrix = viewMatrix * modelMatrix;
 			floatM44 clipFromModelMatrix = projectionMatrix * viewFromModelMatrix;
 

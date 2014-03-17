@@ -132,9 +132,20 @@ namespace
 			technique->AddImageInformation(ImageInformation("heads", TextureImage::ImageType::Image2D, TexelFormat::R32UI, AccessType::ReadWrite));
 			technique->AddImageInformation(ImageInformation("nodePool", TextureImage::ImageType::ImageBuffer, TexelFormat::RGBA32UI, AccessType::WriteOnly));
 
+			technique->AddTextureInformation(TextureInformation("diffuseMap", Texture::TextureType::Texture2D, Texture::TexelType::FloatV4, "DefaultSampler"));
+
+			SamplerState ss;
+			ss.addressingModeR = SamplerState::TextureAddressingMode::MirroredRepeat;
+			ss.addressingModeS = SamplerState::TextureAddressingMode::MirroredRepeat;
+			ss.addressingModeT = SamplerState::TextureAddressingMode::MirroredRepeat;
+			ss.minFilterMode = SamplerState::TextureFilterMode::Anisotropic;
+			ss.magFilterMode = SamplerState::TextureFilterMode::Anisotropic;
+			technique->AddSamplerState("DefaultSampler", ss);
+
 			technique->AddAtomicCounterBufferInformation(BufferInformation("AtomicBuffer0", "", BufferView::BufferType::AtomicCounter, std::vector<VariableInformation const>()));
 
 			technique->AddAttributeInputInformation(AttributeInputInformation("position", ElementType::FloatV3));
+			technique->AddAttributeInputInformation(AttributeInputInformation("textureCoordinate0", ElementType::FloatV3));
 
 			technique->SetFrameBufferDescription(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer()->GetLayoutDescription());
 
@@ -161,6 +172,7 @@ namespace
 
 		RenderingTechniqueSP generationTechnique = []
 		{
+			//string shaderFile = "../../Voxelization/Shaders/VoxelGeneration.Wrong.ForCompare.glsl";
 			string shaderFile = "../../Voxelization/Shaders/VoxelGeneration.glsl";
 			shared_ptr<string> shaderString = XREXContext::GetInstance().GetResourceLoader().LoadString(shaderFile);
 			if (!shaderString)
@@ -208,19 +220,19 @@ namespace
 	}
 
 
-	MeshSP MakeCube(float cubeSize)
+	MeshSP MakeCube(float cubeHalfSize)
 	{
 		vector<floatV3> vertexData;
 		vector<uint16> indexData;
 
-		vertexData.push_back(floatV3(cubeSize, cubeSize, cubeSize));
-		vertexData.push_back(floatV3(cubeSize, -cubeSize, cubeSize));
-		vertexData.push_back(floatV3(-cubeSize, -cubeSize, cubeSize));
-		vertexData.push_back(floatV3(-cubeSize, cubeSize, cubeSize));
-		vertexData.push_back(floatV3(cubeSize, cubeSize, -cubeSize));
-		vertexData.push_back(floatV3(cubeSize, -cubeSize, -cubeSize));
-		vertexData.push_back(floatV3(-cubeSize, -cubeSize, -cubeSize));
-		vertexData.push_back(floatV3(-cubeSize, cubeSize, -cubeSize));
+		vertexData.push_back(floatV3(cubeHalfSize, cubeHalfSize, cubeHalfSize));
+		vertexData.push_back(floatV3(cubeHalfSize, -cubeHalfSize, cubeHalfSize));
+		vertexData.push_back(floatV3(-cubeHalfSize, -cubeHalfSize, cubeHalfSize));
+		vertexData.push_back(floatV3(-cubeHalfSize, cubeHalfSize, cubeHalfSize));
+		vertexData.push_back(floatV3(cubeHalfSize, cubeHalfSize, -cubeHalfSize));
+		vertexData.push_back(floatV3(cubeHalfSize, -cubeHalfSize, -cubeHalfSize));
+		vertexData.push_back(floatV3(-cubeHalfSize, -cubeHalfSize, -cubeHalfSize));
+		vertexData.push_back(floatV3(-cubeHalfSize, cubeHalfSize, -cubeHalfSize));
 
 		indexData.push_back(0);
 		indexData.push_back(3);
@@ -358,7 +370,7 @@ namespace
 			CreateVoxelizationObjects();
 
 			viewCameraObject = MakeCamera(cameraSpeedScaler);
-			coneTracingProxyCube = MakeConeTracingProxyCube(CheckedSPCast<PerspectiveCamera>(viewCameraObject->GetComponent<Camera>()), sceneCenter, sceneHalfSize);
+			coneTracingProxyCube = MakeConeTracingProxyCube(CheckedSPCast<PerspectiveCamera>(viewCameraObject->GetComponent<Camera>()));
 
 			// texture3DToTest = MakeTest3DTexture();
 
@@ -439,11 +451,11 @@ namespace
 
 		}
 
-		SceneObjectSP MakeConeTracingProxyCube(PerspectiveCameraSP const& camera, floatV3 const& cubePosition, float cubeHalfSize)
+		SceneObjectSP MakeConeTracingProxyCube(PerspectiveCameraSP const& camera)
 		{
 
 			SceneObjectSP cubeObject = MakeSP<SceneObject>("cube object");
-			MeshSP cube = MakeCube(cubeHalfSize);
+			MeshSP cube = MakeCube(sceneHalfSize);
 
 			RenderingTechniqueSP coneTracingTechnique = MakeConeTracingTechnique();
 			coneTracingTechnique->ConnectFrameBuffer(XREXContext::GetInstance().GetRenderingEngine().GetDefaultFrameBuffer());
@@ -463,8 +475,8 @@ namespace
 			coneTracingTechniqueCameraSetter = MakeSP<CameraSetter>(coneTracingTechnique);
 
 			MaterialSP material = MakeSP<Material>("tracing technique parameters");
-			material->SetParameter("voxelVolumeCenter", cubePosition);
-			material->SetParameter("voxelVolumeHalfSize", cubeHalfSize);
+			material->SetParameter("voxelVolumeCenter", sceneHalfSize);
+			material->SetParameter("voxelVolumeHalfSize", sceneHalfSize);
 			material->SetParameter("aperture", camera->GetFieldOfView() / XREXContext::GetInstance().GetMainWindow().GetClientRegionSize().Y());
 
 
@@ -476,7 +488,7 @@ namespace
 			}
 			cubeObject->SetComponent(cube);
 			TransformationSP trans = cubeObject->GetComponent<Transformation>();
-			trans->SetPosition(cubePosition);
+			trans->SetPosition(sceneCenter);
 
 			return cubeObject;
 		}
@@ -567,6 +579,14 @@ namespace
 				{
 					Renderable& ownerRenderable = *renderablePack.renderable;
 					RenderingLayoutSP const& layout = renderablePack.layout;
+					MaterialSP const& material = renderablePack.material;
+
+					if (material)
+					{
+						material->BindToTechnique(listTechnique);
+						material->SetAllTechniqueParameterValues();
+					}
+
 
 					voxelizationTechniqueTransformationSetter->SetParameter(ownerRenderable.GetOwnerSceneObject()->GetComponent<Transformation>());
 
@@ -613,7 +633,7 @@ namespace
 			IndexedDrawer drawer;
 			for (uint32 i = 0; i < 3; ++i)
 			{
-// 				if (i == 1)
+// 				if (i == 1) // for single direction filling
 // 				{
 // 					continue;
 // 				}
@@ -739,8 +759,11 @@ namespace
 			Sponza,
 			CrytekSponza,
 			Conference,
+			TwoSpheres,
 			SponzaWithTeapots,
-		} target = Scene::Teapot;
+		} target = Scene::CrytekSponza;
+
+		int const voxelResolution = 512;
 
 		floatV3 center;
 		float halfSize;
@@ -768,6 +791,11 @@ namespace
 			halfSize = 1536;
 			filePath = "Data/conference/conference.obj";
 			break;
+		case Scene::TwoSpheres:
+			center = floatV3(0, 0, 0);
+			halfSize = 128;
+			filePath = "Data/sphere.obj";
+			break;
 		case Scene::SponzaWithTeapots:
 			center = floatV3(0, 32.f, 0);
 			halfSize = 128;
@@ -777,7 +805,7 @@ namespace
 			break;
 		}
 
-		std::shared_ptr<RenderToTextureProcess> renderingProcess = MakeSP<RenderToTextureProcess>(center, halfSize, 256, halfSize / 50);
+		std::shared_ptr<RenderToTextureProcess> renderingProcess = MakeSP<RenderToTextureProcess>(center, halfSize, voxelResolution, halfSize / 50);
 		XREXContext::GetInstance().GetRenderingEngine().SetRenderingProcess(renderingProcess);
 		function<bool(double current, double delta)> l = [renderingProcess] (double current, double delta)
 		{
@@ -788,13 +816,38 @@ namespace
 
 		SceneObjectSP sceneObject;
 
-		if (target == Scene::SponzaWithTeapots)
+		if (target == Scene::TwoSpheres)
+		{
+			sceneObject = LoadModel(filePath);
+			XREXContext::GetInstance().GetScene()->AddObject(sceneObject);
+
+			assert(sceneObject);
+			MeshSP mesh1 = CheckedSPCast<Mesh>(sceneObject->GetComponent<Renderable>())->GetShallowClone();
+			SceneObjectSP clonedSceneObject1 = MakeSP<SceneObject>("sphere 1");
+			clonedSceneObject1->SetComponent(mesh1);
+			MeshSP mesh2 = CheckedSPCast<Mesh>(sceneObject->GetComponent<Renderable>())->GetShallowClone();
+			SceneObjectSP clonedSceneObject2 = MakeSP<SceneObject>("sphere 2");
+			clonedSceneObject2->SetComponent(mesh2);
+
+			sceneObject->RemoveComponent<Renderable>();
+
+			clonedSceneObject1->GetComponent<Transformation>()->SetParent(sceneObject->GetComponent<Transformation>());
+			clonedSceneObject1->GetComponent<Transformation>()->Translate(10, 0, 0);
+			clonedSceneObject1->GetComponent<Transformation>()->Scale(32, 32, 32);
+			XREXContext::GetInstance().GetScene()->AddObject(clonedSceneObject1);
+
+			clonedSceneObject2->GetComponent<Transformation>()->SetParent(sceneObject->GetComponent<Transformation>());
+			clonedSceneObject2->GetComponent<Transformation>()->Translate(-10, 0, 0);
+			clonedSceneObject2->GetComponent<Transformation>()->Scale(32, 32, 32);
+			XREXContext::GetInstance().GetScene()->AddObject(clonedSceneObject2);
+		}
+		else if (target == Scene::SponzaWithTeapots)
 		{
 			filePath = "Data/dabrovic-sponza/sponza.obj";
 			//filePath = "Data/teapot/teapot.obj";
 			
 			sceneObject = LoadModel(filePath);
-			sceneObject->GetComponent<Transformation>()->SetScaling(16);
+			sceneObject->GetComponent<Transformation>()->SetScaling(8);
 			assert(sceneObject);
 			XREXContext::GetInstance().GetScene()->AddObject(sceneObject);
 

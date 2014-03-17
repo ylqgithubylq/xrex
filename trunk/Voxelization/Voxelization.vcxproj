@@ -32,6 +32,7 @@
       <SubType>Designer</SubType>
     </None>
     <None Include="Shaders\VoxelGeneration.glsl" />
+    <None Include="Shaders\VoxelGeneration.Wrong.ForCompare.glsl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{D8AC2A74-F164-4C49-A533-C0E75220BF52}</ProjectGuid>
