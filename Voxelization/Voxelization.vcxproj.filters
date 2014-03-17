@@ -50,5 +50,8 @@
     <None Include="Shaders\ConeTracing.technique">
       <Filter>Effect Files</Filter>
     </None>
+    <None Include="Shaders\VoxelGeneration.Wrong.ForCompare.glsl">
+      <Filter>Effect Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
