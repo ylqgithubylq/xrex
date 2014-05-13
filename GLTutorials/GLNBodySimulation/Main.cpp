@@ -487,6 +487,7 @@ struct GLComputeShader
 		}
 
 		gl::Disable(gl::GL_DEPTH_TEST);
+		gl::Enable(gl::GL_PROGRAM_POINT_SIZE);
 
 		// use additive blending
 		gl::Enable(gl::GL_BLEND);
