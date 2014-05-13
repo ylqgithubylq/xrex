@@ -228,8 +228,10 @@ struct GLBufferResource
 			string nameBuffer;
 			nameBuffer.resize(uniformVariableMetadata[0] + 1);
 			gl::GetProgramResourceName(program, gl::GL_UNIFORM, uniformVariableIndices[index], nameBuffer.size(), nullptr, &nameBuffer[0]);
-			uniformBufferVariables.insert(make_pair(string(nameBuffer.begin(), nameBuffer.end() - 1),
-				BufferVariableMetadata(string(nameBuffer.begin(), nameBuffer.end() - 1), uniformVariableMetadata[1], uniformVariableMetadata[2])));
+			// bug in NVidia GetProgramResourceiv that it's return value of GL_NAME_LENGTH is 1 smaller
+			string name(nameBuffer.begin(), *(nameBuffer.end() - 2) == '\0' ? nameBuffer.end() - 2 : nameBuffer.end() - 1);
+			uniformBufferVariables.insert(make_pair(name,
+				BufferVariableMetadata(name, uniformVariableMetadata[1], uniformVariableMetadata[2])));
 		}
 		
 		// the shader storage buffer is defined as:
@@ -271,8 +273,10 @@ struct GLBufferResource
 			string nameBuffer;
 			nameBuffer.resize(shaderStorageVariableMetadata[0] + 1);
 			gl::GetProgramResourceName(program, gl::GL_BUFFER_VARIABLE, shaderStorageVariableIndices[index], nameBuffer.size(), nullptr, &nameBuffer[0]);
-			shaderStorageBufferVariables.insert(make_pair(string(nameBuffer.begin(), nameBuffer.end() - 1),
-				BufferVariableMetadata(string(nameBuffer.begin(), nameBuffer.end() - 1), shaderStorageVariableMetadata[1], shaderStorageVariableMetadata[2], shaderStorageVariableMetadata[3], shaderStorageVariableMetadata[4])));
+			 // bug in NVidia GetProgramResourceiv that it's return value of GL_NAME_LENGTH is 1 smaller
+			string name(nameBuffer.begin(), *(nameBuffer.end() - 2) == '\0' ? nameBuffer.end() - 2 : nameBuffer.end() - 1);
+			shaderStorageBufferVariables.insert(make_pair(name,
+				BufferVariableMetadata(name, shaderStorageVariableMetadata[1], shaderStorageVariableMetadata[2], shaderStorageVariableMetadata[3], shaderStorageVariableMetadata[4])));
 		}
 		// notice: the array size of MyShaderStorageBuffer.someFloatArray (the unsized array) will be 1 and its array stride will be 0
 
