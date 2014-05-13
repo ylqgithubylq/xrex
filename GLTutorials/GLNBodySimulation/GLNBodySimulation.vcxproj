@@ -78,6 +78,11 @@
     <None Include="NBodySimulation.glsl" />
     <None Include="NSightProfiling.nvact" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\XREX\XREX.vcxproj">
+      <Project>{a6418138-949c-4e1a-ad48-36b5bac8ccae}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
