@@ -94,14 +94,14 @@ vec4 AdjustResult(vec4 value, float r)
 }
 
 
-// #define STORE_OPTICAL_DEPTH // define this to store optical depth instead of alpha
+//#define STORE_OPTICAL_DEPTH // define this to store optical depth instead of alpha
 
-const float OpticalDepthMax = 6; // alpha = 1 - e^(-optical depth)
+const float OpticalDepthMax = 5; // alpha = 1 - e^(-optical depth)
 
 /*
  *	Alpha to optical depth, mapped from [0, OpticalDepthMax] to [0, 1]
  */
-float AlphaToPackedOpticalDepth(float alpha) // used in voxel generation step, listed here as a reference
+float AlphaToPackedOpticalDepthF(float alpha) // used in voxel generation step, listed here as a reference
 {
 	return -log(1 - alpha) / OpticalDepthMax;
 }
@@ -109,29 +109,44 @@ float AlphaToPackedOpticalDepth(float alpha) // used in voxel generation step, l
 /*
  *	mapped optical depth to alpha, optical depth mapped from [0, OpticalDepthMax] to [0, 1]
  */
-float PackedOpticalDepthToAlpha(float packedOpticalDepth)
+float PackedOpticalDepthToAlphaF(float packedOpticalDepth)
 {
 	return 1 - exp(-packedOpticalDepth * OpticalDepthMax);
 }
 
 /*
- *	@vexelVolume: voxels range from [-1, 1].
- *	all parameters should be normalized by dividing half volume size.
+ *	Alpha to optical depth, mapped from [0, OpticalDepthMax] to [0, 1]
+ */
+vec4 AlphaToPackedOpticalDepth(vec4 alpha) // used in voxel generation step, listed here as a reference
+{
+	return -log(vec4(1) - alpha) / OpticalDepthMax;
+}
+
+/*
+ *	mapped optical depth to alpha, optical depth mapped from [0, OpticalDepthMax] to [0, 1]
+ */
+vec4 PackedOpticalDepthToAlpha(vec4 packedOpticalDepth)
+{
+	return vec4(1) - exp(-packedOpticalDepth * OpticalDepthMax);
+}
+
+/*
+ *	@vexelVolume: voxels range from [0, 1].
  */
 vec4 Sample(sampler3D vexelVolume, float normalizedVoxelSize, vec3 normalizedSamplePoint, float normalizedSampleRadius)
 {
-	vec3 textureCoordinate = normalizedSamplePoint + vec3(1, 1, 1) / 2; // map from [-1, 1] to [0, 1]
 	float normalizedSampleSize = normalizedSampleRadius * 2; // normalizedSampleSize is diameter
 	float sampleLevel = log(normalizedSampleSize / normalizedVoxelSize) / log(2);
-	vec4 result = textureLod(vexelVolume, textureCoordinate, max(0, sampleLevel));
-	
+	vec4 result = textureLod(vexelVolume, normalizedSamplePoint, max(0, sampleLevel));
 #ifdef STORE_OPTICAL_DEPTH
-	result.a = PackedOpticalDepthToAlpha(result.a);
+	result = PackedOpticalDepthToAlpha(result);
+	//result.a = PackedOpticalDepthToAlphaF(result.a);
 #else
 	result = result;
 #endif
 	
-	// result = AdjustResult(result, normalizedSampleSize / normalizedVoxelSize); // adjust result based on size difference
+	
+	//result = AdjustResult(result, normalizedSampleSize / normalizedVoxelSize); // adjust result based on size difference
 	return result;
 }
 
@@ -146,14 +161,15 @@ vec4 AccumulateColor(vec4 currentColor, vec4 newColor)
 
 /*
  *	@vexelVolume: color should alpha pre-multiplied.
+ *	@normalizedStartPoint: [0, 1], value outside this range is outside the volume.
  *	@return: alpha pre-multiplied color.
  */
-vec4 ConeTrace(sampler3D vexelVolume, vec3 volumeCenter, float volumeHalfSize, vec3 startPoint, vec3 viewDirection, float coneAperture, float alphaThreshold)
-{
-	const ivec3 gridCounts = textureSize(vexelVolume, 0); // x,y,z should be the same.
+vec4 ConeTrace(sampler3D vexelVolume, vec3 normalizedStartPoint, vec3 viewDirection, float coneAperture, float alphaThreshold)
+{ // every values in this function are in texture coordinate, [0, 1]
+	const ivec3 gridCounts = textureSize(vexelVolume, 0); // x,y,z should be same.
 	const int gridCount = gridCounts.x;
-	const float maxTracingDistance = volumeHalfSize * 4; // TODO change to proper value
-	const float voxelSize = 2 * volumeHalfSize / gridCount;
+	const float maxTracingDistance = 2; // TODO change to proper value
+	const float voxelSize = float(1) / gridCount;
 	const float sinHalfAperture = sin(coneAperture / 2);
 
 	vec4 finalColor = vec4(0, 0, 0, 0); // alpha pre-multiplied color
@@ -161,11 +177,10 @@ vec4 ConeTrace(sampler3D vexelVolume, vec3 volumeCenter, float volumeHalfSize, v
 	// the volume of first sample point should include the startPoint
 	float currentSampleDistance = voxelSize / 2;
 	float currentSampleRadius = voxelSize / 2;
-
 	while (currentSampleDistance + currentSampleRadius < maxTracingDistance)
 	{
-		vec3 currentSamplePoint = startPoint - volumeCenter + viewDirection * currentSampleDistance;
-		vec4 color = Sample(vexelVolume, voxelSize / volumeHalfSize, currentSamplePoint / volumeHalfSize, currentSampleRadius / volumeHalfSize);
+		vec3 currentSamplePoint = normalizedStartPoint + viewDirection * currentSampleDistance;
+		vec4 color = Sample(vexelVolume, voxelSize, currentSamplePoint, currentSampleRadius);
 		finalColor = AccumulateColor(finalColor, color);
 		if (finalColor.a > alphaThreshold)
 		{
@@ -178,17 +193,18 @@ vec4 ConeTrace(sampler3D vexelVolume, vec3 volumeCenter, float volumeHalfSize, v
 		{
 			nextSampleRadius = voxelSize / 2;
 		}
-		currentSampleDistance += (currentSampleRadius + nextSampleRadius) * 0.5; // why 0.5 can make the step continuous?
+		currentSampleDistance += (currentSampleRadius + nextSampleRadius);
 		currentSampleRadius = nextSampleRadius;
 	}
 	return finalColor;
 }
 
+
 			]]>
 		</Code>
 		<Code>
 			<![CDATA[
-const float alphaThreshold = 0.99;
+const float AlphaThreshold = 0.99;
 
 in vec3 wPosition;
 
@@ -198,7 +214,8 @@ void main()
 {
 	vec3 direction = normalize(wPosition - XREX_CameraTransformation.CameraPositionInWorld);
 	// TODO why voxelVolumeHalfSize * 2, not voxelVolumeHalfSize works as what I supposed?
-	vec4 color = ConeTrace(voxels, voxelVolumeCenter, voxelVolumeHalfSize * 2, XREX_CameraTransformation.CameraPositionInWorld, direction, aperture, alphaThreshold);
+	vec3 normalizedStartPosition = ((XREX_CameraTransformation.CameraPositionInWorld - voxelVolumeCenter) / voxelVolumeHalfSize + vec3(1, 1, 1)) / 2;
+	vec4 color = ConeTrace(voxels, normalizedStartPosition, direction, aperture, AlphaThreshold);
 	XREX_DefaultFrameBufferOutput = color;
 } // TODO ConeTrace start from near plane when used as direct rendering, not the viewing original.
 			]]>

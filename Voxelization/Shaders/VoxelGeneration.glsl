@@ -1,7 +1,7 @@
-
+#define VOLUME_FORMAT rgba8
 layout (r32ui) uniform readonly uimage2D heads;
 layout (rgba32ui) uniform readonly uimageBuffer nodePool;
-layout (rgba8) uniform writeonly image3D volume;
+layout (VOLUME_FORMAT) uniform writeonly image3D volume;
 
 uniform PerAxis
 {
@@ -171,7 +171,7 @@ ivec3 TransformToVolumeCoordinate(ivec3 originalCoordinate, int axis)
 }
 
 
-void StoreFinal(layout (rgba8) writeonly image3D volume, ivec3 coordinate, vec4 unpackedValue)
+void StoreFinal(layout (VOLUME_FORMAT) writeonly image3D volume, ivec3 coordinate, vec4 unpackedValue)
 {
 	imageStore(volume, coordinate, unpackedValue);
 }
@@ -236,9 +236,10 @@ void main()
 {
 	ivec2 coordinate = ivec2(gl_FragCoord.xy);
 	Iterator i = First(heads, coordinate);
-	
+#ifdef SOLID
 	Unpaired objectUnpairedBuffer[ObjectUnpairedMaxCount];
 	int unpairedCount = 0;
+#endif
 
 	uvec4 nodeCache[InsertionSortThresholdCount];
 	uint totalCount = InsertionSortPass(heads, nodePool, coordinate, nodeCache);
@@ -273,7 +274,7 @@ void main()
 #endif
 	}
 
-#ifndef SOLID
+#ifdef SOLID
 	// surface voxelize all unpaired fragments
 	for (int i = 0; i < unpairedCount; ++i)
 	{

@@ -16,6 +16,9 @@ namespace XREX
 		ResourceManager(std::string const& rootPath);
 		~ResourceManager();
 
+		/*
+		 *	Root path will be concatenate in front of the path if it is a relative path.
+		 */
 		bool AddResourceLocation(std::string const& path);
 		bool LocatePath(std::string const& relativePath, std::string* resultPath);
 

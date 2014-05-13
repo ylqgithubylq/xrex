@@ -28,9 +28,9 @@ namespace XREX
 			return defaultFrameBuffer_;
 		}
 
-		void SetRenderingProcess(RenderingProcessSP const& process)
+		void SetRenderingProcess(RenderingProcessSP process)
 		{
-			process_ = process;
+			process_ = std::move(process);
 		}
 		RenderingProcessSP const& GetRenderingProcess() const
 		{
