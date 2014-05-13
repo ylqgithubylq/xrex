@@ -297,7 +297,7 @@ struct GLBufferResource
 
 		// shader storage buffer
 		GLuint const ElementCountForLastArrayElement = 16;
-		GLuint const MAGIC = 4; // don't ask why, it works for this example
+		GLuint const MAGIC = 4; // don't ask why, it works for this example on NVidia, not work on AMD
 		GLuint const ShaderStorageBufferSize = shaderStorageBufferSizeInBytes + ElementCountForLastArrayElement * sizeof(float) - MAGIC;
 		GLuint shaderStorageBuffer;
 		gl::GenBuffers(1, &shaderStorageBuffer);
@@ -329,13 +329,9 @@ struct GLBufferResource
 		array<int, 2> someIntArray = reinterpret_cast<array<int, 2>&>(retrievedData[someIntArrayMetadata.offset]);
 		assert(someIntArray[0] = ElementCountForLastArrayElement);
 
-		vector<unsigned int> someMyStructArray(ElementCountForLastArrayElement);
 		unsigned int* start = &reinterpret_cast<unsigned int&>(retrievedData[someMyStructArrayMetadata.offset]);
-		copy(start, start + ElementCountForLastArrayElement, someMyStructArray.begin());
-		for (unsigned int i = 0; i < ElementCountForLastArrayElement; ++i)
-		{
-			assert(static_cast<unsigned int>(FilledData) + i == someMyStructArray[i]);
-		}
+
+		assert(static_cast<unsigned int>(FilledData) == *start);
 
 		// don't forget to delete resources
 		gl::DeleteBuffers(1, &uniformBuffer);

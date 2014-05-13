@@ -216,12 +216,19 @@ struct GLShader
 
 		// work done, check whether the compute shader fills the outputData
 		array<float, 4> result;
-		gl::BindTexture(gl::GL_TEXTURE_2D, outputTexture);
-		gl::GetTexImage(gl::GL_TEXTURE_2D, 0, gl::GL_RED, gl::GL_FLOAT, &result);
+		gl::BindTexture(gl::GL_TEXTURE_2D, inputTexture);
+		gl::GetTexImage(gl::GL_TEXTURE_2D, 0, gl::GL_RED, gl::GL_FLOAT, &result[0]);
 		if (result != input)
 		{
 			assert(false); // something wrong
 		}
+		gl::BindTexture(gl::GL_TEXTURE_2D, outputTexture);
+		gl::GetTexImage(gl::GL_TEXTURE_2D, 0, gl::GL_RED, gl::GL_FLOAT, &result[0]);
+		if (result != input) // AMD card fails here
+		{
+			assert(false); // something wrong
+		}
+
 
 		// don't forget to delete resources
 		gl::DeleteTextures(1, &inputTexture);
