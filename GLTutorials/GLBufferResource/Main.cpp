@@ -273,7 +273,7 @@ struct GLBufferResource
 			string nameBuffer;
 			nameBuffer.resize(shaderStorageVariableMetadata[0] + 1);
 			gl::GetProgramResourceName(program, gl::GL_BUFFER_VARIABLE, shaderStorageVariableIndices[index], nameBuffer.size(), nullptr, &nameBuffer[0]);
-			 // bug in NVidia GetProgramResourceiv that it's return value of GL_NAME_LENGTH is 1 smaller
+			// bug in NVidia GetProgramResourceiv that it's return value of GL_NAME_LENGTH is 1 smaller
 			string name(nameBuffer.begin(), *(nameBuffer.end() - 2) == '\0' ? nameBuffer.end() - 2 : nameBuffer.end() - 1);
 			shaderStorageBufferVariables.insert(make_pair(name,
 				BufferVariableMetadata(name, shaderStorageVariableMetadata[1], shaderStorageVariableMetadata[2], shaderStorageVariableMetadata[3], shaderStorageVariableMetadata[4])));
