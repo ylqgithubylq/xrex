@@ -75,7 +75,7 @@
   <ItemGroup>
     <None Include="NBodyDisplay.fs.glsl" />
     <None Include="NBodyDisplay.vs.glsl" />
-    <None Include="NBodySimulation.glsl" />
+    <None Include="NBodySimulation.cs.glsl" />
     <None Include="NSightProfiling.nvact" />
   </ItemGroup>
   <ItemGroup>

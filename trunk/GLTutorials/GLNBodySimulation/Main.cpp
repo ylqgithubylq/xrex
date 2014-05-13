@@ -12,7 +12,7 @@
 
 using namespace std;
 
-namespace
+namespace // helper functions
 {
 	shared_ptr<string> LoadStringFromFile(string fileName)
 	{
@@ -164,7 +164,7 @@ struct GLComputeShader
 
 	virtual void Initialize() override
 	{
-		shared_ptr<string> simulationCode = LoadStringFromFile("NBodySimulation.glsl");
+		shared_ptr<string> simulationCode = LoadStringFromFile("NBodySimulation.cs.glsl");
 		simulationProgramID = CreateComputeShaderProgram(*simulationCode);
 		simulationProgramMetadata = GetSimulationProgramResourceMetadata(simulationProgramID);
 		simulationProgramResource = CreateSimulationProgramResource(simulationProgramMetadata);
@@ -180,89 +180,6 @@ struct GLComputeShader
 		displayProgramID = CreateProgramObject(shaders);
 		displayProgramMetadata = GetDisplayProgramResourceMetadata(displayProgramID);
 		displayProgramResource = CreateDisplayProgramResource(simulationProgramMetadata, displayProgramMetadata, simulationProgramResource);
-	}
-
-	virtual bool Update(double current, double delta) override
-	{
-		this->delta = float(delta);
-		return true;
-	}
-
-	virtual void Render() override
-	{
-
-		SimulationStep();
-		DisplayStep();
-
-		// ping-pong
-		swap(simulationProgramResource.positionBuffer, simulationProgramResource.newPositionBuffer);
-		swap(simulationProgramResource.velocityBuffer, simulationProgramResource.newVelocityBuffer);
-
-		swap(displayProgramResource.vertexAttributeBinding0, displayProgramResource.vertexAttributeBinding1);
-	}
-
-	void SimulationStep()
-	{
-		gl::UseProgram(simulationProgramID);
-
-		// update delta in TimeBuffer
-		gl::BindBuffer(gl::GL_COPY_WRITE_BUFFER, simulationProgramResource.timeBuffer);
-		float* mappedMemory = static_cast<float*>(gl::MapBuffer(gl::GL_COPY_WRITE_BUFFER, gl::GL_WRITE_ONLY));
-		*mappedMemory = delta;
-		GLboolean succeed = gl::UnmapBuffer(gl::GL_COPY_WRITE_BUFFER);
-		assert(succeed == gl::GL_TRUE);
-
-		// bind all resources the program need to the pipeline
-		gl::BindBufferBase(gl::GL_UNIFORM_BUFFER, TimeBufferChannelIndex, simulationProgramResource.timeBuffer);
-		gl::BindBufferBase(gl::GL_SHADER_STORAGE_BUFFER, PositionBufferChannelIndex, simulationProgramResource.positionBuffer);
-		gl::BindBufferBase(gl::GL_SHADER_STORAGE_BUFFER, VelocityBufferChannelIndex, simulationProgramResource.velocityBuffer);
-		gl::BindBufferBase(gl::GL_SHADER_STORAGE_BUFFER, NewPositionBufferChannelIndex, simulationProgramResource.newPositionBuffer);
-		gl::BindBufferBase(gl::GL_SHADER_STORAGE_BUFFER, NewVelocityBufferChannelIndex, simulationProgramResource.newVelocityBuffer);
-
-		gl::DispatchCompute(SimulationProgramMetadata::ObjectCount, 1, 1);
-
-		gl::MemoryBarrier(gl::GL_SHADER_STORAGE_BARRIER_BIT);
-	}
-
-	void DisplayStep()
-	{
-
-		gl::ColorMask(true, true, true, true);
-		array<float, 4> const ClearColor = {0.01f, 0.01f, 0.01f, 1.f};
-		gl::ClearBufferfv(gl::GL_COLOR, 0, ClearColor.data());
-
-		gl::UseProgram(displayProgramID);
-
-		gl::ValidateProgram(displayProgramID);
-
-		GLint validated;
-		gl::GetProgramiv(displayProgramID, gl::GL_VALIDATE_STATUS, &validated);
-		if (validated == gl::GL_FALSE)
-		{
-			GLint length = 0;
-			gl::GetProgramiv(displayProgramID, gl::GL_INFO_LOG_LENGTH, &length);
-			if (length > 0)
-			{
-				string errorString;
-				errorString.resize(length, 0);
-				gl::GetProgramInfoLog(displayProgramID, length, &length, &errorString[0]);
-				cout << errorString << endl;
-			}
-		}
-
-		gl::Disable(gl::GL_DEPTH_TEST);
-
-		// use additive blending
-		gl::Enable(gl::GL_BLEND);
-		gl::BlendEquation(gl::GL_FUNC_ADD);
-		gl::BlendFunc(gl::GL_ONE, gl::GL_ONE);
-
-		// bind input attribute
-		gl::BindVertexArray(displayProgramResource.vertexAttributeBinding0);
-
-		gl::DrawArrays(gl::GL_POINTS, 0, SimulationProgramMetadata::ObjectCount);
-
-		gl::BindVertexArray(0);
 	}
 
 	SimulationProgramMetadata GetSimulationProgramResourceMetadata(GLuint program)
@@ -499,6 +416,89 @@ struct GLComputeShader
 		gl::BindVertexArray(0);
 
 		return resource;
+	}
+
+	virtual bool Update(double current, double delta) override
+	{
+		this->delta = float(delta);
+		return true;
+	}
+
+	virtual void Render() override
+	{
+
+		SimulationStep();
+		DisplayStep();
+
+		// ping-pong
+		swap(simulationProgramResource.positionBuffer, simulationProgramResource.newPositionBuffer);
+		swap(simulationProgramResource.velocityBuffer, simulationProgramResource.newVelocityBuffer);
+
+		swap(displayProgramResource.vertexAttributeBinding0, displayProgramResource.vertexAttributeBinding1);
+	}
+
+	void SimulationStep()
+	{
+		gl::UseProgram(simulationProgramID);
+
+		// update delta in TimeBuffer
+		gl::BindBuffer(gl::GL_COPY_WRITE_BUFFER, simulationProgramResource.timeBuffer);
+		float* mappedMemory = static_cast<float*>(gl::MapBuffer(gl::GL_COPY_WRITE_BUFFER, gl::GL_WRITE_ONLY));
+		*mappedMemory = delta;
+		GLboolean succeed = gl::UnmapBuffer(gl::GL_COPY_WRITE_BUFFER);
+		assert(succeed == gl::GL_TRUE);
+
+		// bind all resources the program need to the pipeline
+		gl::BindBufferBase(gl::GL_UNIFORM_BUFFER, TimeBufferChannelIndex, simulationProgramResource.timeBuffer);
+		gl::BindBufferBase(gl::GL_SHADER_STORAGE_BUFFER, PositionBufferChannelIndex, simulationProgramResource.positionBuffer);
+		gl::BindBufferBase(gl::GL_SHADER_STORAGE_BUFFER, VelocityBufferChannelIndex, simulationProgramResource.velocityBuffer);
+		gl::BindBufferBase(gl::GL_SHADER_STORAGE_BUFFER, NewPositionBufferChannelIndex, simulationProgramResource.newPositionBuffer);
+		gl::BindBufferBase(gl::GL_SHADER_STORAGE_BUFFER, NewVelocityBufferChannelIndex, simulationProgramResource.newVelocityBuffer);
+
+		gl::DispatchCompute(SimulationProgramMetadata::ObjectCount, 1, 1);
+
+		gl::MemoryBarrier(gl::GL_SHADER_STORAGE_BARRIER_BIT);
+	}
+
+	void DisplayStep()
+	{
+
+		gl::ColorMask(true, true, true, true);
+		array<float, 4> const ClearColor = {0.01f, 0.01f, 0.01f, 1.f};
+		gl::ClearBufferfv(gl::GL_COLOR, 0, ClearColor.data());
+
+		gl::UseProgram(displayProgramID);
+
+		gl::ValidateProgram(displayProgramID);
+
+		GLint validated;
+		gl::GetProgramiv(displayProgramID, gl::GL_VALIDATE_STATUS, &validated);
+		if (validated == gl::GL_FALSE)
+		{
+			GLint length = 0;
+			gl::GetProgramiv(displayProgramID, gl::GL_INFO_LOG_LENGTH, &length);
+			if (length > 0)
+			{
+				string errorString;
+				errorString.resize(length, 0);
+				gl::GetProgramInfoLog(displayProgramID, length, &length, &errorString[0]);
+				cout << errorString << endl;
+			}
+		}
+
+		gl::Disable(gl::GL_DEPTH_TEST);
+
+		// use additive blending
+		gl::Enable(gl::GL_BLEND);
+		gl::BlendEquation(gl::GL_FUNC_ADD);
+		gl::BlendFunc(gl::GL_ONE, gl::GL_ONE);
+
+		// bind input attribute
+		gl::BindVertexArray(displayProgramResource.vertexAttributeBinding0);
+
+		gl::DrawArrays(gl::GL_POINTS, 0, SimulationProgramMetadata::ObjectCount);
+
+		gl::BindVertexArray(0);
 	}
 
 	GLuint simulationProgramID;
