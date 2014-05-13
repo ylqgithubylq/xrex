@@ -26,7 +26,7 @@ const int AxisX = 0;
 const int AxisY = 1;
 const int AxisZ = 2;
 
-const float VoxelAlpha = 1;
+const float VoxelAlpha = 0.99;
 
 
 #ifdef VS
@@ -47,9 +47,9 @@ void main()
 
 #endif
 
-const float OpticalDepthMax = 6; // alpha = 1 - e^(-optical depth)
+const float OpticalDepthMax = 5; // alpha = 1 - e^(-optical depth)
 
-// #define STORE_OPTICAL_DEPTH // define this to store optical depth instead of alpha
+//#define STORE_OPTICAL_DEPTH // define this to store optical depth instead of alpha
 
 
 
@@ -58,17 +58,17 @@ const float OpticalDepthMax = 6; // alpha = 1 - e^(-optical depth)
 /*
  *	Alpha to optical depth, mapped from [0, OpticalDepthMax] to [0, 1]
  */
-float AlphaToPackedOpticalDepth(float alpha)
+vec4 AlphaToPackedOpticalDepth(vec4 alpha)
 {
-	return -log(1 - alpha) / OpticalDepthMax;
+	return -log(vec4(1) - alpha) / OpticalDepthMax;
 }
 
 /*
  *	mapped optical depth to alpha, optical depth mapped from [0, OpticalDepthMax] to [0, 1]
  */
-float PackedOpticalDepthToAlpha(float packedOpticalDepth) // used in ConeTracing, listed here as a reference
+vec4 PackedOpticalDepthToAlpha(vec4 packedOpticalDepth) // used in ConeTracing, listed here as a reference
 {
-	return 1 - exp(-packedOpticalDepth * OpticalDepthMax);
+	return vec4(1) - exp(-packedOpticalDepth * OpticalDepthMax);
 }
 
 vec4 InsertToLinkedList(layout (r32ui) uimage2D heads, layout (rgba32ui) writeonly uimageBuffer nodePool, atomic_uint nodeCounter, ivec2 coordinate, float depth, int objectID, bool frontFacing, vec3 value)
@@ -76,11 +76,13 @@ vec4 InsertToLinkedList(layout (r32ui) uimage2D heads, layout (rgba32ui) writeon
 	uint newHead = atomicCounterIncrement(nodeCounter);
 	uint oldHead = imageAtomicExchange(heads, coordinate, newHead);
 	uint third = objectID | (frontFacing ? (1 << 31) : 0); // frontFacing at highest bit
+
 #ifdef STORE_OPTICAL_DEPTH
-	vec4 valueToStore = vec4(value * VoxelAlpha, AlphaToPackedOpticalDepth(VoxelAlpha));
+	vec4 valueToStore = AlphaToPackedOpticalDepth(vec4(value, 1) * VoxelAlpha);
 #else
 	vec4 valueToStore = vec4(value, 1) * VoxelAlpha;
 #endif
+
 	imageStore(nodePool, int(newHead), uvec4(oldHead, floatBitsToUint(depth), third, packSnorm4x8(valueToStore)));
 	return vec4(value, 1)/* + vec4(1, 0, 1, 0)*/;
 }

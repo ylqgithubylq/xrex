@@ -67,7 +67,7 @@ void main()
 in vec2 textureCoordinate;
 out vec4 XREX_DefaultFrameBufferOutput;
 
-//#define ONE_OUTPUT
+#define ONE_OUTPUT
 
 void main()
 {
@@ -96,7 +96,7 @@ void main()
 		}
 	}
 #else
-	outputColor = texture(normal, textureCoordinate);
+	outputColor = texture(color, textureCoordinate);
 #endif
 	XREX_DefaultFrameBufferOutput = outputColor;
 }

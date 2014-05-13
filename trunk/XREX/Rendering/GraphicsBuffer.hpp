@@ -15,6 +15,11 @@ namespace XREX
 	{
 	public:
 
+		/*
+		 *	Draw: write by CPU and read by GPU.
+		 *	Read: write by GPU and read by CPU.
+		 *	Copy: write by GPU and read by GPU.
+		 */
 		enum class Usage
 		{
 			StaticDraw,
@@ -26,6 +31,7 @@ namespace XREX
 			StaticCopy,
 			DynamicCopy,
 			StreamCopy,
+
 			UsageCount
 		};
 
@@ -104,7 +110,13 @@ namespace XREX
 		}
 		void Clear(ElementType dataType, void const* data);
 
+		/*
+		 *	Bind buffer for write from CPU.
+		 */
 		void BindWrite();
+		/*
+		 *	Bind buffer for read from CPU.
+		 */
 		void BindRead();
 
 		void Bind(BufferView::BufferType type);

@@ -47,7 +47,15 @@ namespace XREX
 			return XREXContext::GetInstance().GetRenderingFactory().GetGLSLVersionString();
 		}
 
-
+		std::string const& DebugMacro()
+		{
+#ifdef XREX_DEBUG
+			static std::string const DebugMacro = "#pragma debug(on)\n";
+#else
+			static std::string const DebugMacro = "#pragma debug(off)\n";
+#endif
+			return DebugMacro;
+		}
 	}
 
 
@@ -78,6 +86,7 @@ namespace XREX
 
 		std::vector<char const*> cstrings;
 		cstrings.push_back(VersionMacro().c_str());
+		cstrings.push_back(DebugMacro().c_str());
 		cstrings.push_back(macroToDefine.c_str());
 		for (auto source : sources)
 		{
@@ -553,7 +562,7 @@ namespace XREX
 				elementCount = 1;
 			}
 			for (uint32 offset = 0; offset < elementCount; ++offset) // TODO array attribute location can be bound like this?
-			{
+			{ // attribute location do not need to bind actually, link program will bind them.
 				gl::BindAttribLocation(glProgramID_, location, attributeInput.GetChannel().c_str());
 				location += matrixElement ? 4 : 1;
 			}
@@ -580,7 +589,7 @@ namespace XREX
 			for (uint32 i = 0; i < pack.uniformBuffers.size(); ++i)
 			{
 				BufferInformation const& uniformBuffer = pack.uniformBuffers[i];
-				uint32 glIndex = gl::GetUniformBlockIndex(glProgramID_, uniformBuffer.GetChannel().c_str());
+				uint32 glIndex = gl::GetProgramResourceIndex(glProgramID_, gl::GL_UNIFORM_BLOCK, uniformBuffer.GetChannel().c_str());
 				if (glIndex != gl::GL_INVALID_INDEX)
 				{
 					// unspecified binding buffer will be all 0
@@ -597,7 +606,7 @@ namespace XREX
 			for (uint32 i = 0; i < pack.shaderStorageBuffers.size(); ++i)
 			{
 				BufferInformation const& shaderStorageBuffer = pack.shaderStorageBuffers[i];
-				uint32 glIndex = gl::GetProgramResourceLocationIndex(glProgramID_, gl::GL_SHADER_STORAGE_BLOCK, shaderStorageBuffer.GetChannel().c_str());
+				uint32 glIndex = gl::GetProgramResourceIndex(glProgramID_, gl::GL_SHADER_STORAGE_BLOCK, shaderStorageBuffer.GetChannel().c_str());
 				if (glIndex != gl::GL_INVALID_INDEX)
 				{
 					// unspecified binding buffer will be all 0

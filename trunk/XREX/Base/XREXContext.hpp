@@ -61,9 +61,9 @@ namespace XREX
 		/*
 		 *	@scene: set to nullptr to make no scene to render.
 		 */
-		void SetScene(SceneSP const& scene)
+		void SetScene(SceneSP scene)
 		{
-			scene_ = scene;
+			scene_ = std::move(scene);
 		}
 		SceneSP const& GetScene() const
 		{
@@ -71,11 +71,11 @@ namespace XREX
 		}
 
 		/*
-		 *	@ loginFunction: return value is false will stop running and Start function will exit.
+		 *	@ loginFunction: return value is false will stop the engine and Start function will exit.
 		 */
-		void SetLogicFunction(std::function<bool(double currentTime, double deltaTime)> const& logicFunction)
+		void SetLogicFunction(std::function<bool(double currentTime, double deltaTime)> logicFunction)
 		{
-			logicFunction_ = logicFunction;
+			logicFunction_ = std::move(logicFunction);
 		}
 
 		void Initialize(Settings const& settings);

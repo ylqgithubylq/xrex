@@ -83,10 +83,12 @@ namespace
 		return quad;
 	}
 
+	static const TexelFormat VolumeFormat = TexelFormat::RGBA8;
+
 	TextureSP MakeVoxelVolume(uint32 size)
 	{
 		Size<uint32, 3> dim(size, size, size);
-		Texture2D::DataDescription<3> desc(TexelFormat::RGBA8, dim);
+		Texture2D::DataDescription<3> desc(VolumeFormat, dim);
 
 		TextureSP voxelVolume = XREXContext::GetInstance().GetRenderingFactory().CreateTexture3D(desc, true);
 		return voxelVolume;
@@ -94,7 +96,7 @@ namespace
 
 	GraphicsBufferSP MakeClearVoxelVolume(uint32 size)
 	{
-		GraphicsBufferSP voxelVolume = XREXContext::GetInstance().GetRenderingFactory().CreateGraphicsBuffer(GraphicsBuffer::Usage::StaticDraw, size * size * size * GetTexelSizeInBytes(TexelFormat::RGBA8));
+		GraphicsBufferSP voxelVolume = XREXContext::GetInstance().GetRenderingFactory().CreateGraphicsBuffer(GraphicsBuffer::Usage::StaticDraw, size * size * size * GetTexelSizeInBytes(VolumeFormat));
 		voxelVolume->Clear(0u);
 		return voxelVolume;
 	}
